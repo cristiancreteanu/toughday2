@@ -17,4 +17,5 @@ public class OtherTest extends AbstractTest {
         }
         System.out.println("Other test...");
     }
+
 }
