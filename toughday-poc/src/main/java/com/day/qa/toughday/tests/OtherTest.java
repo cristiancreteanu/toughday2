@@ -1,10 +1,11 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.tests;
 
 /**
  * Created by tuicu on 12/08/15.
  */
-public class CreatePageTest extends AbstractTest {
-    public CreatePageTest() {
+public class OtherTest extends AbstractTest {
+    public OtherTest() {
+        super();
     }
 
     @Override
@@ -14,6 +15,6 @@ public class CreatePageTest extends AbstractTest {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Creating page...");
+        System.out.println("Other test...");
     }
 }

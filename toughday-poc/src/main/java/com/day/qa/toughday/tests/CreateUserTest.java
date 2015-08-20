@@ -1,4 +1,4 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.tests;
 
 /**
  * Created by tuicu on 12/08/15.

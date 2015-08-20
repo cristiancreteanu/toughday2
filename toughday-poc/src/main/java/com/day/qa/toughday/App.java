@@ -1,6 +1,10 @@
 package com.day.qa.toughday;
 
 
+import com.day.qa.toughday.tests.CreatePageTest;
+import com.day.qa.toughday.tests.CreateUserTest;
+import com.day.qa.toughday.tests.OtherTest;
+
 /**
  * Hello world!
  *
