@@ -80,7 +80,10 @@ public abstract class AbstractTest {
     }
 
     private boolean validateMethod(Method method, Class<? extends Annotation> annotation) {
-        //TODO check that annotated method dues
+        if(method.getParameterTypes().length != 0) {
+            System.out.println("Method " + method + " annotated with " + annotation.getSimpleName() + " cannot have parameters");
+            return false;
+        }
         return true;
     }
 
