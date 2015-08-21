@@ -17,6 +17,6 @@ public class App
                 .add(new CreatePageTest(), 50)
                 .add(new CreateUserTest(), 35)
                 .add(new OtherTest(), 15);
-        suite.test();
+        suite.runTests();
     }
 }

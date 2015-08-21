@@ -49,7 +49,7 @@ public class TestSuite {
     }
 
     private int duration;
-    private List<AbstractTest> testSuite;
+    private List<AbstractTest> globalTestList;
     private int totalWeight;
     private int delay;
     private int concurrency;
@@ -59,7 +59,7 @@ public class TestSuite {
     HashMap<AbstractTest, Integer> weightMap;
 
     public TestSuite(int durationSec, int delay, int concurrency) {
-        this.testSuite = new ArrayList<>();
+        this.globalTestList = new ArrayList<>();
         this.delay = delay;
         this.concurrency = concurrency;
         this.executorService = Executors.newFixedThreadPool(concurrency + 1);
@@ -69,14 +69,14 @@ public class TestSuite {
     }
 
     public TestSuite add(AbstractTest test, int weight) {
-        testSuite.add(test);
+        globalTestList.add(test);
         totalWeight += weight;
         weightMap.put(test, weight);
         globalRunMap.addTest(test);
         return this;
     }
     
-    public void test() {
+    public void runTests() {
         List<AsyncTestRunner> testRunners = new ArrayList<>();
         for(int i = 0; i < concurrency; i++) {
             AsyncTestRunner runner = new AsyncTestRunner(globalRunMap.newInstance());
@@ -112,8 +112,15 @@ public class TestSuite {
 
     private class AsyncTestRunner extends AsyncTestSuiteRunner {
         private RunMap localRunMap;
+        private List<AbstractTest> localTests;
 
         public AsyncTestRunner(RunMap localRunMap) {
+            localTests = new ArrayList<>();
+            for(AbstractTest test : globalTestList) {
+                AbstractTest localTest = test.newInstance();
+                localTest.setID(test.getId());
+                localTests.add(localTest);
+            }
             this.localRunMap = localRunMap;
         }
 
@@ -125,8 +132,7 @@ public class TestSuite {
         public void run() {
             try {
                 while (!finish) {
-                    AbstractTest nextTest = getNextTest(testSuite, totalWeight);
-                    //TODO choose timeunit
+                    AbstractTest nextTest = getNextTest(localTests, totalWeight);
                     try {
                         Long nanoSecElapsed = nextTest.runTest();
                         synchronized (localRunMap) {

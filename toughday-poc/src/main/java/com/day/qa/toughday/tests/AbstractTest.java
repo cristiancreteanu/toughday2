@@ -7,6 +7,7 @@ import com.day.qa.toughday.tests.annotations.Setup;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.UUID;
 
 /**
  * Created by tuicu on 12/08/15.
@@ -16,8 +17,10 @@ public abstract class AbstractTest {
     private Method setupMethod;
     private Method beforeMethod;
     private Method afterMethod;
+    private UUID id;
 
     AbstractTest() {
+        this.id = UUID.randomUUID();
         setupExecuted = true;
         for(Method method : this.getClass().getMethods()) {
             for (Annotation annotation : method.getAnnotations()) {
@@ -87,5 +90,27 @@ public abstract class AbstractTest {
         return true;
     }
 
+    public UUID getId() {
+        return id;
+    }
+
+    public void setID(UUID id) {
+        this.id = id;
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if(!(other instanceof AbstractTest)) {
+            return false;
+        }
+        return ((AbstractTest)other).getId().equals(id);
+    }
+
     protected abstract void test();
+    public abstract AbstractTest newInstance();
 }

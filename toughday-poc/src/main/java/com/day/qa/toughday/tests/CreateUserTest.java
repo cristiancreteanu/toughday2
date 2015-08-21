@@ -17,4 +17,9 @@ public class CreateUserTest extends AbstractTest {
         }
         System.out.println("Creating user...");
     }
+
+    @Override
+    public AbstractTest newInstance() {
+        return new CreateUserTest();
+    }
 }

@@ -18,4 +18,9 @@ public class OtherTest extends AbstractTest {
         System.out.println("Other test...");
     }
 
+    @Override
+    public AbstractTest newInstance() {
+        return new OtherTest();
+    }
+
 }

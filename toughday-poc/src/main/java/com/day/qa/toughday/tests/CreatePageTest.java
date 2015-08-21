@@ -21,6 +21,11 @@ public class CreatePageTest extends AbstractTest {
         System.out.println("Creating page...");
     }
 
+    @Override
+    public AbstractTest newInstance() {
+        return new CreatePageTest();
+    }
+
     @Setup
     public void setup() {
         System.out.println("Setup");
