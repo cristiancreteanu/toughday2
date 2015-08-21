@@ -1,9 +1,15 @@
 package com.day.qa.toughday;
 
+import com.day.qa.toughday.publishers.AbstractPublisher;
 import com.day.qa.toughday.tests.AbstractTest;
 
-import java.util.*;
-import java.util.concurrent.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by tuicu on 12/08/15.
@@ -55,6 +61,7 @@ public class TestSuite {
     private int concurrency;
     private ExecutorService executorService;
     private RunMap globalRunMap;
+    private List<AbstractPublisher> publishers;
 
     HashMap<AbstractTest, Integer> weightMap;
 
@@ -66,6 +73,7 @@ public class TestSuite {
         this.duration = durationSec;
         this.weightMap = new HashMap<>();
         this.globalRunMap = new RunMap();
+        this.publishers = new ArrayList<>();
     }
 
     public TestSuite add(AbstractTest test, int weight) {
@@ -73,6 +81,11 @@ public class TestSuite {
         totalWeight += weight;
         weightMap.put(test, weight);
         globalRunMap.addTest(test);
+        return this;
+    }
+
+    public TestSuite add(AbstractPublisher publisher) {
+        publishers.add(publisher);
         return this;
     }
     
@@ -96,10 +109,13 @@ public class TestSuite {
             resultAggregator.finishExecution();
         }
         shutdownAndAwaitTermination(executorService);
-        System.out.println("********************************************************************");
-        System.out.println("                       FINAL RESULTS");
-        System.out.println("********************************************************************");
-        resultAggregator.showResults();
+        publishFinalResults();
+    }
+
+    private void publishFinalResults() {
+        for(AbstractPublisher publisher : publishers) {
+            publisher.publishFinal(globalRunMap.getTestStatistics());
+        }
     }
 
     private abstract class AsyncTestSuiteRunner implements Runnable {
@@ -175,7 +191,7 @@ public class TestSuite {
                 while(!finish) {
                     Thread.sleep(RESULT_AGGREATION_DELAY);
                     aggregateResults();
-                    showResults();
+                    publishIntermediateResults();
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -183,19 +199,9 @@ public class TestSuite {
             aggregateResults();
         }
 
-        public void showResults() {
-            for(RunMap.TestStatistics statistics : globalRunMap.getTestStatistics()) {
-                System.out.println(
-                        "Test " + statistics.getTest().getName()
-                                + " Total Duration: " + statistics.getTotalDuration()
-                                + " Runs: " + statistics.getTotalRuns()
-                                + " Fails: " + statistics.getFailRuns()
-                                + " Min: " + statistics.getMinDuration()
-                                + " Max: " + statistics.getMaxDuration()
-                                + " Average: " + statistics.getAverageDuration()
-                                + " Throughput: " + statistics.getThroughput()
-                                + " Median: " + statistics.getMedianDuration()
-                );
+        public void publishIntermediateResults() {
+            for(AbstractPublisher publisher : publishers) {
+                publisher.publishIntermediate(globalRunMap.getTestStatistics());
             }
         }
     }
