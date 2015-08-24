@@ -7,7 +7,7 @@ import java.util.Collection;
 /**
  * Created by tuicu on 21/08/15.
  */
-public class ConsolePublisher extends AbstractPublisher {
+public class ConsolePublisher implements Publisher {
     private void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {
         for(RunMap.TestStatistics statistics : testStatistics) {
             System.out.println(

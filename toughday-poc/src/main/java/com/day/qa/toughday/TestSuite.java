@@ -1,6 +1,6 @@
 package com.day.qa.toughday;
 
-import com.day.qa.toughday.publishers.AbstractPublisher;
+import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
 
 import java.util.ArrayList;
@@ -61,7 +61,7 @@ public class TestSuite {
     private int concurrency;
     private ExecutorService executorService;
     private RunMap globalRunMap;
-    private List<AbstractPublisher> publishers;
+    private List<Publisher> publishers;
 
     HashMap<AbstractTest, Integer> weightMap;
 
@@ -84,7 +84,7 @@ public class TestSuite {
         return this;
     }
 
-    public TestSuite add(AbstractPublisher publisher) {
+    public TestSuite addPublisher(Publisher publisher) {
         publishers.add(publisher);
         return this;
     }
@@ -113,7 +113,7 @@ public class TestSuite {
     }
 
     private void publishFinalResults() {
-        for(AbstractPublisher publisher : publishers) {
+        for(Publisher publisher : publishers) {
             publisher.publishFinal(globalRunMap.getTestStatistics());
         }
     }
@@ -200,7 +200,7 @@ public class TestSuite {
         }
 
         public void publishIntermediateResults() {
-            for(AbstractPublisher publisher : publishers) {
+            for(Publisher publisher : publishers) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
             }
         }
