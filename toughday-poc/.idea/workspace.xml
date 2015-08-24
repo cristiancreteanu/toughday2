@@ -27,39 +27,27 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="113" column="35" selection-start-line="113" selection-start-column="35" selection-end-line="113" selection-end-column="35" />
+              <caret line="113" column="10" selection-start-line="113" selection-start-column="10" selection-end-line="113" selection-end-column="10" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="pom.xml" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/pom.xml">
+      <file leaf-file-name="AppTest.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/java/com/day/qa/toughday/AppTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="18" column="40" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
+              <caret line="10" column="15" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="App.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/App.java">
+      <file leaf-file-name="TestCase.class" pinned="false" current-in-tab="false">
+        <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/junit/framework/TestCase.class">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="21" column="25" selection-start-line="21" selection-start-column="25" selection-end-line="21" selection-end-column="25" />
-              <folding>
-                <element signature="imports" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="TestSuite.java" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-1.6944444">
-              <caret line="111" column="30" selection-start-line="111" selection-start-column="30" selection-end-line="111" selection-end-column="30" />
+            <state vertical-scroll-proportion="-3.3333333">
+              <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
               <folding />
             </state>
           </provider>
@@ -77,11 +65,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="ConsolePublisher.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/ConsolePublisher.java">
+      <file leaf-file-name="test.iml" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/test/test.iml">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="9" column="40" selection-start-line="9" selection-start-column="40" selection-end-line="9" selection-end-column="40" />
+              <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="ConsolePublisher.java" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/ConsolePublisher.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.6388889">
+              <caret line="23" column="9" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -89,11 +87,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="RunMap.java" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/RunMap.java">
+      <file leaf-file-name="TestSuite.java" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="146" column="25" selection-start-line="146" selection-start-column="25" selection-end-line="146" selection-end-column="25" />
+              <caret line="156" column="43" selection-start-line="156" selection-start-column="43" selection-end-line="156" selection-end-column="43" />
               <folding />
             </state>
           </provider>
@@ -108,12 +106,6 @@
                 <element signature="imports" expanded="true" />
                 <element signature="e#599#600#0" expanded="true" />
                 <element signature="e#642#643#0" expanded="true" />
-                <element signature="e#680#681#0" expanded="true" />
-                <element signature="e#723#724#0" expanded="true" />
-                <element signature="e#763#764#0" expanded="true" />
-                <element signature="e#807#808#0" expanded="true" />
-                <element signature="e#845#846#0" expanded="true" />
-                <element signature="e#888#889#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -123,7 +115,7 @@
         <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/OtherTest.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="22" column="30" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="30" />
+              <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
               <folding>
                 <element signature="e#445#446#0" expanded="true" />
                 <element signature="e#483#484#0" expanded="true" />
@@ -178,12 +170,13 @@
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/CreateUserTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/OtherTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestRunner.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/App.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/AbstractPublisher.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/Publisher.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/ConsolePublisher.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java" />
+        <option value="$PROJECT_DIR$/src/test/java/com/day/qa/toughday/AppTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/ConsolePublisher.java" />
       </list>
     </option>
   </component>
@@ -259,6 +252,36 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="toughday-poc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="toughday-poc" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="test" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="toughday" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -631,78 +654,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/CreatePageTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-          <folding>
-            <element signature="imports" expanded="true" />
-            <element signature="e#599#600#0" expanded="true" />
-            <element signature="e#642#643#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#723#724#0" expanded="true" />
-            <element signature="e#763#764#0" expanded="true" />
-            <element signature="e#807#808#0" expanded="true" />
-            <element signature="e#845#846#0" expanded="true" />
-            <element signature="e#888#889#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/toughday-poc.iml">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/CreateUserTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-          <folding>
-            <element signature="e#458#459#0" expanded="true" />
-            <element signature="e#501#502#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/OtherTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="13" selection-start-line="5" selection-start-column="13" selection-end-line="5" selection-end-column="13" />
-          <folding>
-            <element signature="e#445#446#0" expanded="true" />
-            <element signature="e#483#484#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/out/production/main/com/day/qa/toughday/AbstractTest.class">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="53" selection-start-line="14" selection-start-column="53" selection-end-line="14" selection-end-column="53" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="5" column="22" selection-start-line="5" selection-start-column="22" selection-end-line="5" selection-end-column="22" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/App.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="11" column="6" selection-start-line="11" selection-start-column="6" selection-end-line="11" selection-end-column="6" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -727,12 +678,6 @@
             <element signature="imports" expanded="true" />
             <element signature="e#599#600#0" expanded="true" />
             <element signature="e#642#643#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#723#724#0" expanded="true" />
-            <element signature="e#763#764#0" expanded="true" />
-            <element signature="e#807#808#0" expanded="true" />
-            <element signature="e#845#846#0" expanded="true" />
-            <element signature="e#888#889#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -815,12 +760,6 @@
             <element signature="imports" expanded="true" />
             <element signature="e#599#600#0" expanded="true" />
             <element signature="e#642#643#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#723#724#0" expanded="true" />
-            <element signature="e#763#764#0" expanded="true" />
-            <element signature="e#807#808#0" expanded="true" />
-            <element signature="e#845#846#0" expanded="true" />
-            <element signature="e#888#889#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -903,12 +842,6 @@
             <element signature="imports" expanded="true" />
             <element signature="e#599#600#0" expanded="true" />
             <element signature="e#642#643#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#723#724#0" expanded="true" />
-            <element signature="e#763#764#0" expanded="true" />
-            <element signature="e#807#808#0" expanded="true" />
-            <element signature="e#845#846#0" expanded="true" />
-            <element signature="e#888#889#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -995,17 +928,11 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/annotations/Setup.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="14" column="1" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/annotations/Before.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="1" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1013,6 +940,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="14" column="1" selection-start-line="14" selection-start-column="1" selection-end-line="14" selection-end-column="1" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1020,6 +948,80 @@
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
           <caret line="18" column="40" selection-start-line="18" selection-start-column="40" selection-end-line="18" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/App.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="21" column="25" selection-start-line="21" selection-start-column="25" selection-end-line="21" selection-end-column="25" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/RunMap.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="146" column="25" selection-start-line="146" selection-start-column="25" selection-end-line="146" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/junit/framework/TestSuite.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.0">
+          <caret line="180" column="17" selection-start-line="180" selection-start-column="13" selection-end-line="180" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/junit/framework/Test.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.1754386">
+          <caret line="9" column="17" selection-start-line="9" selection-start-column="17" selection-end-line="9" selection-end-column="17" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/junit/framework/TestResult.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-6.888889">
+          <caret line="95" column="24" selection-start-line="95" selection-start-column="24" selection-end-line="95" selection-end-column="24" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/test/test.iml">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/annotations/Setup.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.25">
+          <caret line="12" column="18" selection-start-line="12" selection-start-column="18" selection-end-line="12" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/org/junit/Before.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23391813">
+          <caret line="14" column="18" selection-start-line="14" selection-start-column="18" selection-end-line="14" selection-end-column="18" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="113" column="10" selection-start-line="113" selection-start-column="10" selection-end-line="113" selection-end-column="10" />
           <folding />
         </state>
       </provider>
@@ -1032,12 +1034,6 @@
             <element signature="imports" expanded="true" />
             <element signature="e#599#600#0" expanded="true" />
             <element signature="e#642#643#0" expanded="true" />
-            <element signature="e#680#681#0" expanded="true" />
-            <element signature="e#723#724#0" expanded="true" />
-            <element signature="e#763#764#0" expanded="true" />
-            <element signature="e#807#808#0" expanded="true" />
-            <element signature="e#845#846#0" expanded="true" />
-            <element signature="e#888#889#0" expanded="true" />
           </folding>
         </state>
       </provider>
@@ -1056,7 +1052,7 @@
     <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/OtherTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="22" column="30" selection-start-line="22" selection-start-column="30" selection-end-line="22" selection-end-column="30" />
+          <caret line="26" column="0" selection-start-line="26" selection-start-column="0" selection-end-line="26" selection-end-column="0" />
           <folding>
             <element signature="e#445#446#0" expanded="true" />
             <element signature="e#483#484#0" expanded="true" />
@@ -1064,21 +1060,27 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/RunMap.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="146" column="25" selection-start-line="146" selection-start-column="25" selection-end-line="146" selection-end-column="25" />
+          <caret line="156" column="43" selection-start-line="156" selection-start-column="43" selection-end-line="156" selection-end-column="43" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/App.java">
+    <entry file="file://$PROJECT_DIR$/src/test/java/com/day/qa/toughday/AppTest.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="21" column="25" selection-start-line="21" selection-start-column="25" selection-end-line="21" selection-end-column="25" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+          <caret line="10" column="15" selection-start-line="10" selection-start-column="15" selection-end-line="10" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="jar://$MAVEN_REPOSITORY$/junit/junit/4.7/junit-4.7.jar!/junit/framework/TestCase.class">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="-3.3333333">
+          <caret line="14" column="22" selection-start-line="14" selection-start-column="22" selection-end-line="14" selection-end-column="22" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -1094,27 +1096,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/publishers/ConsolePublisher.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="9" column="40" selection-start-line="9" selection-start-column="40" selection-end-line="9" selection-end-column="40" />
+        <state vertical-scroll-proportion="0.6388889">
+          <caret line="23" column="9" selection-start-line="23" selection-start-column="9" selection-end-line="23" selection-end-column="9" />
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/tests/AbstractTest.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="113" column="35" selection-start-line="113" selection-start-column="35" selection-end-line="113" selection-end-column="35" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/day/qa/toughday/TestSuite.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-1.6944444">
-          <caret line="111" column="30" selection-start-line="111" selection-start-column="30" selection-end-line="111" selection-end-column="30" />
-          <folding />
         </state>
       </provider>
     </entry>

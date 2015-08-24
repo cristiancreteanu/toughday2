@@ -111,6 +111,6 @@ public abstract class AbstractTest {
         return ((AbstractTest)other).getId().equals(id);
     }
 
-    protected abstract void test();
+    public abstract void test();
     public abstract AbstractTest newInstance();
 }
