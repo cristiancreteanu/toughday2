@@ -1,5 +1,7 @@
 package com.day.qa.toughday.tests;
 
+import com.day.qa.toughday.tests.annotations.Before;
+
 /**
  * Created by tuicu on 12/08/15.
  */
@@ -16,6 +18,11 @@ public class OtherTest extends AbstractTest {
             e.printStackTrace();
         }
         System.out.println("Other test...");
+    }
+
+    @Before
+    public void before() {
+        System.out.println("Before");
     }
 
     @Override

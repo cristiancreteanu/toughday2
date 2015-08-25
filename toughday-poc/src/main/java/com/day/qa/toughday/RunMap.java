@@ -32,8 +32,8 @@ public class RunMap {
         runMap.get(test).recordRun(duration);
     }
 
-    public void recordFail(AbstractTest test) {
-        runMap.get(test).recordFail();
+    public void recordFail(AbstractTest test, Exception e) {
+        runMap.get(test).recordFail(e);
     }
 
     public void aggregateAndReinitialize(RunMap other) {
@@ -72,12 +72,14 @@ public class RunMap {
             private double maxDuration;
             private long failRuns;
             private HashMap<Integer, Long> durationDistribution;
+            private HashMap<Class<? extends Exception>, Long> failsMap;
 
             private void init() {
                 totalDuration = 0;
                 totalRuns = 0;
                 failRuns = 0;
                 durationDistribution = new HashMap<>();
+                failsMap = new HashMap<>();
                 minDuration = Double.MAX_VALUE;
                 maxDuration = Double.MIN_VALUE;
             }
@@ -87,8 +89,13 @@ public class RunMap {
                 init();
             }
 
-            public void recordFail() {
-                 failRuns++;
+            public void recordFail(Exception e) {
+                if(!failsMap.containsKey(e.getClass())) {
+                    failsMap.put(e.getClass(), 0L);
+                }
+                failsMap.put(e.getClass(), failsMap.get(e.getClass()) + 1);
+
+                failRuns++;
             }
 
             public void recordRun(double duration) {
@@ -158,6 +165,12 @@ public class RunMap {
                         this.durationDistribution.put(entry.getKey(), 0L);
                     }
                     this.durationDistribution.put(entry.getKey(), this.durationDistribution.get(entry.getKey()) + entry.getValue());
+                }
+                for(Map.Entry<Class<? extends Exception>, Long> entry : other.failsMap.entrySet()) {
+                    if(!this.failsMap.containsKey(entry.getKey())) {
+                        this.failsMap.put(entry.getKey(), 0L);
+                    }
+                    this.failsMap.put(entry.getKey(), this.failsMap.get(entry.getKey()) + entry.getValue());
                 }
                 other.init();
             }

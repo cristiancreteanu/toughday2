@@ -162,7 +162,7 @@ public class TestSuite {
                         }
                     } catch (Exception e) {
                         synchronized (localRunMap) {
-                            localRunMap.recordFail(nextTest);
+                            localRunMap.recordFail(nextTest, e);
                         }
                     }
                     Thread.sleep(delay);

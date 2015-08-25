@@ -21,7 +21,7 @@ public class TestRunner {
 
     public TestRunner(Class<? extends AbstractTest> testClass) {
         setupExecuted = true;
-        for (Method method : testClass.getClass().getMethods()) {
+        for (Method method : testClass.getMethods()) {
             for (Annotation annotation : method.getAnnotations()) {
                 if (annotation.annotationType() == Setup.class) {
                     if (validateMethod(method, Setup.class)) {
@@ -46,25 +46,25 @@ public class TestRunner {
             synchronized (this) {
                 if(!setupExecuted) {
                     setupExecuted = true;
-                    executeMethod(setupMethod, Setup.class);
+                    executeMethod(testObject, setupMethod, Setup.class);
                 }
             }
         }
         if(beforeMethod != null) {
-            executeMethod(beforeMethod, Before.class);
+            executeMethod(testObject, beforeMethod, Before.class);
         }
         Long start = System.nanoTime();
         testObject.test();
         Long elapsed = (System.nanoTime() - start) / 1000000l;
         if(afterMethod != null) {
-            executeMethod(afterMethod, After.class);
+            executeMethod(testObject, afterMethod, After.class);
         }
         return elapsed;
     }
 
-    private void executeMethod(Method method, Class<? extends Annotation> annotation) {
+    private void executeMethod(AbstractTest testObject, Method method, Class<? extends Annotation> annotation) {
         try {
-            method.invoke(this);
+            method.invoke(testObject);
         } catch (IllegalAccessException e) {
             System.out.println("Could not execute " + method.getName() +
                     " annotated with " + annotation.getSimpleName() + ": Illegal Access.");
