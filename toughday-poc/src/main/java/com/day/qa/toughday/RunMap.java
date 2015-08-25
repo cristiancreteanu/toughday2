@@ -150,6 +150,7 @@ public class RunMap {
             public void aggregateAndReinitialize(TestEntry other) {
                 this.totalRuns += other.totalRuns;
                 this.totalDuration += other.totalDuration;
+                this.failRuns += other.failRuns;
                 this.minDuration = Math.min(this.minDuration, other.minDuration);
                 this.maxDuration = Math.max(this.maxDuration, other.maxDuration);
                 for(Map.Entry<Integer, Long> entry : other.durationDistribution.entrySet()) {
