@@ -1,5 +1,6 @@
 package com.day.qa.toughday.tests;
 
+import com.adobe.granite.testing.ClientException;
 import com.day.qa.toughday.tests.annotations.After;
 import com.day.qa.toughday.tests.annotations.Before;
 import com.day.qa.toughday.tests.annotations.Setup;
@@ -47,7 +48,7 @@ public abstract class AbstractTest {
     public String getName() {
         return getClass().getSimpleName();
     }
-    public long runTest() {
+    public long runTest() throws ClientException {
         if(!setupExecuted) {
             synchronized (this) {
                 if(!setupExecuted) {
@@ -111,6 +112,6 @@ public abstract class AbstractTest {
         return ((AbstractTest)other).getId().equals(id);
     }
 
-    public abstract void test();
+    public abstract void test() throws ClientException;
     public abstract AbstractTest newInstance();
 }
