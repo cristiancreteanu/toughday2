@@ -3,7 +3,6 @@ package com.day.qa.toughday.tests;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.adobe.granite.testing.util.FormEntityBuilder;
-import com.day.qa.toughday.tests.annotations.Setup;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -13,9 +12,12 @@ import java.util.concurrent.atomic.AtomicInteger;
  * Created by tuicu on 12/08/15.
  */
 public class CreatePageTest extends AbstractTest {
-    GraniteClient client;
+    private GraniteClient client;
     static AtomicInteger pageNumber = new AtomicInteger(0);
 
+    public CreatePageTest() {
+        client = new GraniteClient("http://localhost:4502", "admin", "admin");
+    }
 
     public static final String CMD_CREATE_PAGE = "createPage";
     public static final String PARENT_PATH = "/content/geometrixx-outdoors/en/men";
@@ -38,10 +40,5 @@ public class CreatePageTest extends AbstractTest {
     @Override
     public AbstractTest newInstance() {
         return new CreatePageTest();
-    }
-
-    @Setup
-    public void setup() {
-        this.client = new GraniteClient("http://localhost:4502", "admin", "admin");
     }
 }
