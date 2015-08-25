@@ -62,6 +62,7 @@ public class TestSuite {
     private ExecutorService executorService;
     private RunMap globalRunMap;
     private List<Publisher> publishers;
+    private HashMap<Class<? extends AbstractTest>, TestRunner> testRunners;
 
     HashMap<AbstractTest, Integer> weightMap;
 
@@ -74,6 +75,7 @@ public class TestSuite {
         this.weightMap = new HashMap<>();
         this.globalRunMap = new RunMap();
         this.publishers = new ArrayList<>();
+        this.testRunners = new HashMap<>();
     }
 
     public TestSuite add(AbstractTest test, int weight) {
@@ -81,6 +83,9 @@ public class TestSuite {
         totalWeight += weight;
         weightMap.put(test, weight);
         globalRunMap.addTest(test);
+        if(!testRunners.containsKey(test.getClass())) {
+            testRunners.put(test.getClass(), new TestRunner(test.getClass()));
+        }
         return this;
     }
 
@@ -150,7 +155,8 @@ public class TestSuite {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);
                     try {
-                        Long nanoSecElapsed = nextTest.runTest();
+                        TestRunner runner = testRunners.get(nextTest.getClass());
+                        Long nanoSecElapsed = runner.runTest(nextTest);
                         synchronized (localRunMap) {
                             localRunMap.recordRun(nextTest, nanoSecElapsed);
                         }
