@@ -12,14 +12,15 @@ public class ConsolePublisher implements Publisher {
         for(RunMap.TestStatistics statistics : testStatistics) {
             System.out.println(
                     "Test " + statistics.getTest().getName()
-                            + " Total Duration: " + statistics.getTotalDuration()
+                            + " Total Duration: " + statistics.getTotalDuration() + " ms"
                             + " Runs: " + statistics.getTotalRuns()
                             + " Fails: " + statistics.getFailRuns()
-                            + " Min: " + statistics.getMinDuration()
-                            + " Max: " + statistics.getMaxDuration()
-                            + " Average: " + statistics.getAverageDuration()
-                            + " Throughput: " + statistics.getThroughput()
-                            + " Median: " + statistics.getMedianDuration()
+                            + " Min: " + statistics.getMinDuration() + " ms"
+                            + " Max: " + statistics.getMaxDuration() + " ms"
+                            + " Average: " + statistics.getAverageDuration() + " ms"
+                            + " Median: " + statistics.getMedianDuration() + " ms"
+                            + " Real Throughput: " + statistics.getRealThroughput() + " runs/s"
+                            + " Reqs Throughoput: " + statistics.getExecutionThroughput() + " runs/s"
             );
         }
     }

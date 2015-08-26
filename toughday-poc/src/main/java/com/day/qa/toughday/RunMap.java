@@ -50,7 +50,8 @@ public class RunMap {
         AbstractTest getTest();
         double getTotalDuration();
         long getTotalRuns();
-        double getThroughput();
+        double getRealThroughput();
+        double getExecutionThroughput();
         double getMinDuration();
         double getMaxDuration();
         double getAverageDuration();
@@ -73,6 +74,8 @@ public class RunMap {
             private long failRuns;
             private HashMap<Integer, Long> durationDistribution;
             private HashMap<Class<? extends Exception>, Long> failsMap;
+            private long startNanoTime;
+            private long lastNanoTime;
 
             private void init() {
                 totalDuration = 0;
@@ -85,6 +88,7 @@ public class RunMap {
             }
 
             public TestEntry(AbstractTest test) {
+                this.startNanoTime = System.nanoTime();
                 this.test = test;
                 init();
             }
@@ -99,6 +103,7 @@ public class RunMap {
             }
 
             public void recordRun(double duration) {
+                lastNanoTime = System.nanoTime();
                 totalRuns++;
                 totalDuration += duration;
                 minDuration = Math.min(minDuration, duration);
@@ -121,9 +126,15 @@ public class RunMap {
                 return totalRuns;
             }
 
-            public double getThroughput() {
-                return totalRuns / totalDuration;
-            }
+        @Override
+        public double getRealThroughput() {
+            return totalRuns * 1000000000l / (lastNanoTime - startNanoTime) ;
+        }
+
+        @Override
+        public double getExecutionThroughput() {
+            return getAverageDuration() * 1000;
+        }
 
             public double getMinDuration() {
                 return minDuration;
@@ -155,6 +166,7 @@ public class RunMap {
             }
 
             public void aggregateAndReinitialize(TestEntry other) {
+                this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
                 this.totalRuns += other.totalRuns;
                 this.totalDuration += other.totalDuration;
                 this.failRuns += other.failRuns;
