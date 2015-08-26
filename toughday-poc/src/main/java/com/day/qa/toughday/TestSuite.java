@@ -151,6 +151,7 @@ public class TestSuite {
 
         @Override
         public void run() {
+            System.out.println("Thread running: " + Thread.currentThread());
             try {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);
