@@ -73,7 +73,7 @@ public class TestSuite {
         this.executorService = Executors.newFixedThreadPool(concurrency + 1);
         this.duration = durationSec;
         this.weightMap = new HashMap<>();
-        this.globalRunMap = new RunMap();
+        this.globalRunMap = new RunMap(concurrency);
         this.publishers = new ArrayList<>();
         this.testRunners = new HashMap<>();
     }

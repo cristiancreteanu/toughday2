@@ -11,11 +11,11 @@ public class CreateUserTest extends AbstractTest {
     @Override
     public void test() {
         try {
-            Thread.sleep(20);
+            Thread.sleep(30);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        System.out.println("Creating user...");
+        //System.out.println("Creating user...");
     }
 
     @Override
