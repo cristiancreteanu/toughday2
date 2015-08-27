@@ -20,7 +20,7 @@ public class ConsolePublisher implements Publisher {
                             + " Average: " + statistics.getAverageDuration() + " ms"
                             + " Median: " + statistics.getMedianDuration() + " ms"
                             + " Real Throughput: " + statistics.getRealThroughput() + " runs/s"
-                            + " Reqs Throughoput: " + statistics.getExecutionThroughput() + " runs/s"
+                            + " Reqs Throughput: " + statistics.getExecutionThroughput() + " runs/s"
             );
         }
     }

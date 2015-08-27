@@ -12,13 +12,15 @@ import java.util.Map;
  */
 public class RunMap {
     private HashMap<AbstractTest, TestEntry> runMap;
+    private int threads;
 
-    public RunMap() {
+    public RunMap(int threads) {
+        this.threads = threads;
         runMap = new HashMap<>();
     }
 
-    private RunMap(Collection<AbstractTest> tests) {
-        this();
+    private RunMap(int threads, Collection<AbstractTest> tests) {
+        this(threads);
         for (AbstractTest test : tests) {
             runMap.put(test, new TestEntry(test));
         }
@@ -43,7 +45,7 @@ public class RunMap {
     }
 
     public RunMap newInstance() {
-        return new RunMap(runMap.keySet());
+        return new RunMap(threads, runMap.keySet());
     }
 
     public interface TestStatistics {
@@ -65,7 +67,7 @@ public class RunMap {
     /**
      * Created by tuicu on 19/08/15.
      */
-    private static class TestEntry implements TestStatistics{
+    private class TestEntry implements TestStatistics{
             private AbstractTest test;
             private double totalDuration;
             private long totalRuns;
@@ -133,7 +135,7 @@ public class RunMap {
 
         @Override
         public double getExecutionThroughput() {
-            return getAverageDuration() * 1000;
+            return 1000 * threads / getAverageDuration() ;
         }
 
             public double getMinDuration() {
