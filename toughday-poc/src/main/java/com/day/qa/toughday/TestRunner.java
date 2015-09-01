@@ -5,6 +5,8 @@ import com.day.qa.toughday.tests.AbstractTest;
 import com.day.qa.toughday.tests.annotations.After;
 import com.day.qa.toughday.tests.annotations.Before;
 import com.day.qa.toughday.tests.annotations.Setup;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -14,6 +16,7 @@ import java.lang.reflect.Method;
  * Created by tuicu on 25/08/15.
  */
 public class TestRunner {
+    private static final Logger logger = LoggerFactory.getLogger(TestRunner.class);
     private boolean setupExecuted;
     private Method setupMethod;
     private Method beforeMethod;
@@ -66,19 +69,19 @@ public class TestRunner {
         try {
             method.invoke(testObject);
         } catch (IllegalAccessException e) {
-            System.out.println("Could not execute " + method.getName() +
-                    " annotated with " + annotation.getSimpleName() + ": Illegal Access.");
+            logger.error("Could not execute " + method.getName() +
+                    " annotated with " + annotation.getSimpleName() + ": Illegal Access.", e);
             e.printStackTrace();
         } catch (InvocationTargetException e) {
-            System.out.println("Could not execute " + method.getName() +
-                    " annotated with " + annotation.getSimpleName());
+            logger.error("Could not execute " + method.getName() +
+                    " annotated with " + annotation.getSimpleName(), e);
             e.printStackTrace();
         }
     }
 
     private boolean validateMethod(Method method, Class<? extends Annotation> annotation) {
         if(method.getParameterTypes().length != 0) {
-            System.out.println("Method " + method + " annotated with " + annotation.getSimpleName() + " cannot have parameters");
+            logger.error("Method " + method + " annotated with " + annotation.getSimpleName() + " cannot have parameters");
             return false;
         }
         return true;

@@ -3,6 +3,8 @@ package com.day.qa.toughday;
 import com.day.qa.toughday.cli.CliArg;
 import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -16,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * Created by tuicu on 12/08/15.
  */
 public class TestSuite {
-
+    private static final Logger logger = LoggerFactory.getLogger(TestSuite.class);
     private static final int RESULT_AGGREATION_DELAY = 1000; //in ms
     private static final int WAIT_TERMINATION_FACTOR = 3;
     private static Random _rnd = new Random();
@@ -45,7 +47,7 @@ public class TestSuite {
                 pool.shutdownNow(); // Cancel currently executing tasks
                 // Wait a while for tasks to respond to being cancelled
                 if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS))
-                    System.err.println("Pool did not terminate");
+                    logger.error("Thread pool did not terminate. Process must be killed");
             }
         } catch (InterruptedException ie) {
             // (Re-)Cancel if current thread also interrupted
@@ -167,7 +169,7 @@ public class TestSuite {
 
         @Override
         public void run() {
-            System.out.println("Thread running: " + Thread.currentThread());
+            logger.info("Thread running: " + Thread.currentThread());
             try {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);

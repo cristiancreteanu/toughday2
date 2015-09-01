@@ -2,6 +2,8 @@ package com.day.qa.toughday.publishers;
 
 import com.day.qa.toughday.RunMap;
 import com.day.qa.toughday.cli.CliArg;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,6 +14,7 @@ import java.util.Collection;
  * Created by tuicu on 01/09/15.
  */
 public class CSVPublisher implements Publisher {
+    private static final Logger logger = LoggerFactory.getLogger(CSVPublisher.class);
     private String filePath = "results.csv";
     private static String HEADER = "Name, Total Duration, Runs, Fails, Min, Max, Average, Median, Real Throughput, Reqs Throughput";
 
@@ -53,7 +56,7 @@ public class CSVPublisher implements Publisher {
             writer.close();
             printWriter.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Could not publish results", e);
         }
     }
 }
