@@ -1,5 +1,6 @@
 package com.day.qa.toughday;
 
+import com.day.qa.toughday.cli.CliArg;
 import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
 
@@ -66,16 +67,31 @@ public class TestSuite {
 
     HashMap<AbstractTest, Integer> weightMap;
 
-    public TestSuite(int durationSec, int delay, int concurrency) {
+    public TestSuite() {
         this.globalTestList = new ArrayList<>();
-        this.delay = delay;
-        this.concurrency = concurrency;
-        this.executorService = Executors.newFixedThreadPool(concurrency + 1);
-        this.duration = durationSec;
         this.weightMap = new HashMap<>();
-        this.globalRunMap = new RunMap(concurrency);
         this.publishers = new ArrayList<>();
         this.testRunners = new HashMap<>();
+    }
+
+    @CliArg
+    public TestSuite setConcurrency(String concurrencyString) {
+        this.concurrency = Integer.parseInt(concurrencyString);
+        this.executorService = Executors.newFixedThreadPool(concurrency + 1);
+        this.globalRunMap = new RunMap(concurrency);
+        return this;
+    }
+
+    @CliArg
+    public TestSuite setDuration(String durationString) {
+        this.duration = Integer.parseInt(durationString);
+        return this;
+    }
+
+    @CliArg
+    public TestSuite setWaitTime(String waitTime) {
+        this.delay = Integer.parseInt(waitTime);
+        return this;
     }
 
     public TestSuite add(AbstractTest test, int weight) {

@@ -1,6 +1,7 @@
 package com.day.qa.toughday.tests;
 
 import com.adobe.granite.testing.ClientException;
+import com.day.qa.toughday.cli.CliArg;
 
 import java.util.UUID;
 
@@ -9,13 +10,19 @@ import java.util.UUID;
  */
 public abstract class AbstractTest {
     private UUID id;
+    private String name;
 
     AbstractTest() {
         this.id = UUID.randomUUID();
     }
 
     public String getName() {
-        return getClass().getSimpleName();
+        return name != null ? name : getClass().getSimpleName();
+    }
+
+    @CliArg(required = false)
+    public void setName(String name) {
+        this.name = name;
     }
 
 

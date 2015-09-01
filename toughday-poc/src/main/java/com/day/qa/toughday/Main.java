@@ -2,10 +2,8 @@ package com.day.qa.toughday;
 
 
 import com.day.qa.toughday.cli.Cli;
-import com.day.qa.toughday.publishers.ConsolePublisher;
-import com.day.qa.toughday.tests.CreatePageTest;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
+
+import java.lang.reflect.InvocationTargetException;
 
 /**
  * Hello world!
@@ -13,18 +11,14 @@ import org.apache.commons.cli.Options;
  */
 public class Main
 {
-    public static void main( String[] args )
-    {
-        Options options = Cli.getOptions();
-
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(100, "toughday","", options, "");
-
-        TestSuite suite = new TestSuite(300, 10, 100)
-                .add(new CreatePageTest(), 100)
-                //.add(new CreateUserTest(), 35)
-                //.add(new OtherTest(), 15)
-                .addPublisher(new ConsolePublisher());
-        //suite.runTests();
+    public static void main( String[] args ) throws IllegalAccessException, InvocationTargetException, InstantiationException {
+        Cli commandLineParser = new Cli();
+        if(args.length == 0 || (args.length == 1 && args[0] == "--help")) {
+            commandLineParser.printHelp();
+        }
+        else {
+            TestSuite suite = commandLineParser.createTestSuite(args);
+            suite.runTests();
+        }
     }
 }
