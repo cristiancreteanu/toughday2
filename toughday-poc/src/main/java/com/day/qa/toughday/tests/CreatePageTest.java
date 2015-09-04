@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tuicu on 12/08/15.
  */
-public class CreatePageTest extends AbstractTest {
+public class CreatePageTest extends TestBase {
     private GraniteClient client;
     private String parentPath;
     private String template;

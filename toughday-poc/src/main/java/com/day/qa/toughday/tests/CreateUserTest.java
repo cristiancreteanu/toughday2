@@ -3,7 +3,7 @@ package com.day.qa.toughday.tests;
 /**
  * Created by tuicu on 12/08/15.
  */
-public class CreateUserTest extends AbstractTest {
+public class CreateUserTest extends TestBase {
     public CreateUserTest() {
         super();
     }

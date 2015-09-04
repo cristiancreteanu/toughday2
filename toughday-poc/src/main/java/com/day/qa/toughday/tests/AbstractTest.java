@@ -1,6 +1,6 @@
 package com.day.qa.toughday.tests;
 
-import com.adobe.granite.testing.ClientException;
+import com.day.qa.toughday.AbstractTestRunner;
 import com.day.qa.toughday.cli.CliArg;
 
 import java.util.UUID;
@@ -26,27 +26,27 @@ public abstract class AbstractTest {
     }
 
 
-    public UUID getId() {
+    public final UUID getId() {
         return id;
     }
 
-    public void setID(UUID id) {
+    public final void setID(UUID id) {
         this.id = id;
     }
 
     @Override
-    public int hashCode() {
+    public final int hashCode() {
         return id.hashCode();
     }
 
     @Override
-    public boolean equals(Object other) {
+    public final boolean equals(Object other) {
         if(!(other instanceof AbstractTest)) {
             return false;
         }
         return ((AbstractTest)other).getId().equals(id);
     }
 
-    public abstract void test() throws ClientException;
+    public abstract Class<? extends AbstractTestRunner> getTestRunnerClass();
     public abstract AbstractTest newInstance();
 }

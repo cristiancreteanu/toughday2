@@ -3,9 +3,12 @@ package com.day.qa.toughday;
 import com.day.qa.toughday.cli.CliArg;
 import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,7 +68,8 @@ public class TestSuite {
     private ExecutorService executorService;
     private RunMap globalRunMap;
     private List<Publisher> publishers;
-    private HashMap<Class<? extends AbstractTest>, TestRunner> testRunners;
+    private HashMap<Class<? extends AbstractTest>, AbstractTestRunner> testRunners;
+    private SuiteSetup setupStep;
 
     HashMap<AbstractTest, Integer> weightMap;
 
@@ -96,13 +100,40 @@ public class TestSuite {
         return this;
     }
 
-    public TestSuite add(AbstractTest test, int weight) {
+    @CliArg(required = false)
+    public TestSuite setSetupStep(String setupStep)
+            throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
+        Reflections reflections = new Reflections("com.day.qa");
+        Class<? extends SuiteSetup> setupStepClass = null;
+        for(Class<? extends SuiteSetup> klass : reflections.getSubTypesOf(SuiteSetup.class)) {
+            if(klass.getSimpleName().equals(setupStep)) {
+                setupStepClass = klass;
+                break;
+            }
+        }
+        if(setupStepClass == null) {
+            throw new ClassNotFoundException("Could not find class " + setupStep + " for suite setup step");
+        }
+        Constructor constructor = setupStepClass.getConstructor(null);
+        this.setupStep = (SuiteSetup) constructor.newInstance();
+        return this;
+    }
+
+    public TestSuite add(AbstractTest test, int weight)
+            throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         globalTestList.add(test);
         totalWeight += weight;
         weightMap.put(test, weight);
         globalRunMap.addTest(test);
         if(!testRunners.containsKey(test.getClass())) {
-            testRunners.put(test.getClass(), new TestRunner(test.getClass()));
+            Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
+            try {
+                Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
+                testRunners.put(test.getClass(), constructor.newInstance(test.getClass()));
+            } catch (NoSuchMethodException e) {
+                logger.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
+                throw new NoSuchMethodException("Test runners must have a constructor with only one parameter, the test Class");
+            }
         }
         return this;
     }
@@ -112,7 +143,10 @@ public class TestSuite {
         return this;
     }
     
-    public void runTests() {
+    public void runTests() throws Exception {
+        if(setupStep != null) {
+            setupStep.setup();
+        }
         List<AsyncTestRunner> testRunners = new ArrayList<>();
         for(int i = 0; i < concurrency; i++) {
             AsyncTestRunner runner = new AsyncTestRunner(globalRunMap.newInstance());
@@ -173,17 +207,8 @@ public class TestSuite {
             try {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);
-                    try {
-                        TestRunner runner = testRunners.get(nextTest.getClass());
-                        Long nanoSecElapsed = runner.runTest(nextTest);
-                        synchronized (localRunMap) {
-                            localRunMap.recordRun(nextTest, nanoSecElapsed);
-                        }
-                    } catch (Exception e) {
-                        synchronized (localRunMap) {
-                            localRunMap.recordFail(nextTest, e);
-                        }
-                    }
+                    AbstractTestRunner runner = testRunners.get(nextTest.getClass());
+                    runner.runTest(nextTest, localRunMap);
                     Thread.sleep(delay);
                 }
             } catch (InterruptedException e) {

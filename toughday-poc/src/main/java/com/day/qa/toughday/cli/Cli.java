@@ -1,5 +1,6 @@
 package com.day.qa.toughday.cli;
 
+import com.day.qa.toughday.SuiteSetup;
 import com.day.qa.toughday.TestSuite;
 import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
@@ -11,6 +12,7 @@ import org.reflections.Reflections;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,8 +38,11 @@ public class Cli {
         options.addOption(Option.builder().longOpt("Concurrency=val")
                 .desc("number of concurrent users")
                 .build());
+
         Reflections reflections = new Reflections("com.day.qa");
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
+            if(Modifier.isAbstract(testClass.getModifiers()))
+                continue;
             if(testClasses.containsKey(testClass.getSimpleName()))
                 throw new IllegalStateException("A test class with this name already exists here: "
                         + testClasses.get(testClass.getSimpleName()).getName());
@@ -46,12 +51,21 @@ public class Cli {
         }
 
         for(Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
+            if(Modifier.isAbstract(publisherClass.getModifiers()))
+                continue;
             if(publisherClasses.containsKey(publisherClass.getSimpleName()))
                 throw new IllegalStateException("A publisher class with this name already exists here: "
                         + publisherClasses.get(publisherClass.getSimpleName()).getName());
             publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
             options.addOption(getOptionFromPublisher(publisherClass));
         }
+
+
+        String desc = "add setup step for the suite. \"val\" can be:";
+        for(Class<? extends SuiteSetup> suiteSetupClass : reflections.getSubTypesOf(SuiteSetup.class)) {
+            desc += " " + suiteSetupClass.getSimpleName();
+        }
+        options.addOption(Option.builder().longOpt("SetupStep=val").desc(desc).required(false).build());
     }
 
     private String propertyFromMethod(String methodName) {
@@ -148,7 +162,8 @@ public class Cli {
         args.put(optionValue[0], optionValue[1]);
     }
 
-    public TestSuite createTestSuite(String[] cmdLineArgs) throws IllegalAccessException, InstantiationException, InvocationTargetException {
+    public TestSuite createTestSuite(String[] cmdLineArgs)
+            throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         HashMap<String, String> suiteArgs = new HashMap<>();
 
         for(String arg : cmdLineArgs) {

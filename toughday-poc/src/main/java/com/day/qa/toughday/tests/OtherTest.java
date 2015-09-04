@@ -5,7 +5,7 @@ import com.day.qa.toughday.tests.annotations.Before;
 /**
  * Created by tuicu on 12/08/15.
  */
-public class OtherTest extends AbstractTest {
+public class OtherTest extends TestBase {
     public OtherTest() {
         super();
     }
@@ -29,5 +29,4 @@ public class OtherTest extends AbstractTest {
     public AbstractTest newInstance() {
         return new OtherTest();
     }
-
 }
