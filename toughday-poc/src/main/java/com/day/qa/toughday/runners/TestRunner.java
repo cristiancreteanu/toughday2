@@ -3,7 +3,7 @@ package com.day.qa.toughday.runners;
 import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.RunMap;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.tests.TestBase;
+import com.day.qa.toughday.tests.serial_tests.TestBase;
 
 /**
  * Created by tuicu on 04/09/15.

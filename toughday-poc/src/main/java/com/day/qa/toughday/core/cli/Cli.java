@@ -225,6 +225,6 @@ public class Cli {
 
     public void printHelp() {
         HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(120, "toughday","", options, "");
+        helpFormatter.printHelp(150, "toughday","", options, "");
     }
 }

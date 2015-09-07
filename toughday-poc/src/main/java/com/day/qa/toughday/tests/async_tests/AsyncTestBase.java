@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests;
+package com.day.qa.toughday.tests.async_tests;
 
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.AbstractTestRunner;

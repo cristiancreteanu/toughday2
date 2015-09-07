@@ -11,7 +11,7 @@ public abstract class AbstractTest {
     private UUID id;
     private String name;
 
-    AbstractTest() {
+    public AbstractTest() {
         this.id = UUID.randomUUID();
     }
 

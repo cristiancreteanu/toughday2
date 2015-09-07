@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests;
+package com.day.qa.toughday.tests.serial_tests;
 
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.test_annotations.Before;

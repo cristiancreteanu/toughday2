@@ -17,7 +17,7 @@ public class GlobalArgs {
             GlobalArgs.instance = instance;
     }
 
-    public GlobalArgs getInstance() {
+    public static GlobalArgs getInstance() {
         return instance;
     }
 

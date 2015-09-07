@@ -2,7 +2,7 @@ package com.day.qa.toughday.runners;
 
 import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.RunMap;
-import com.day.qa.toughday.tests.AsyncTestBase;
+import com.day.qa.toughday.tests.async_tests.AsyncTestBase;
 
 /**
  * Created by tuicu on 04/09/15.
