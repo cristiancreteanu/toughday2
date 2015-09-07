@@ -1,11 +1,13 @@
 package com.day.qa.toughday.cli;
 
+import com.day.qa.toughday.GlobalArgs;
 import com.day.qa.toughday.SuiteSetup;
 import com.day.qa.toughday.TestSuite;
 import com.day.qa.toughday.publishers.Publisher;
 import com.day.qa.toughday.tests.AbstractTest;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
+import org.apache.commons.cli.OptionGroup;
 import org.apache.commons.cli.Options;
 import org.reflections.Reflections;
 
@@ -38,6 +40,8 @@ public class Cli {
         options.addOption(Option.builder().longOpt("Concurrency=val")
                 .desc("number of concurrent users")
                 .build());
+
+        options.addOptionGroup(getOptionsForClass(GlobalArgs.class));
 
         Reflections reflections = new Reflections("com.day.qa");
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
@@ -119,6 +123,19 @@ public class Cli {
         return argName.length() == 0 ? builder.build() : builder.hasArgs().argName(argName).build();
     }
 
+    public OptionGroup getOptionsForClass(Class klass) {
+        OptionGroup group = new OptionGroup();
+        for(Method m : klass.getMethods()) {
+            if(m.getAnnotation(CliArg.class) != null) {
+                CliArg annotation = m.getAnnotation(CliArg.class);
+                group.addOption(Option.builder()
+                        .longOpt(propertyFromMethod(m.getName()) + "=val")
+                        .build());
+            }
+         }
+        return group;
+    }
+
 
     public <T> T createObject(Class<? extends T> classObject, HashMap<String, String> args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -164,17 +181,21 @@ public class Cli {
 
     public TestSuite createTestSuite(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-        HashMap<String, String> suiteArgs = new HashMap<>();
+        HashMap<String, String> globalArgs = new HashMap<>();
 
         for(String arg : cmdLineArgs) {
             if(arg.startsWith("--")) {
                 arg = arg.substring(2);
                 if (!(testClasses.containsKey(arg) || publisherClasses.containsKey(arg))) {
-                    parseAndAddProperty(arg, suiteArgs);
+                    parseAndAddProperty(arg, globalArgs);
                 }
             }
         }
-        TestSuite suite = createObject(TestSuite.class, suiteArgs);
+
+        GlobalArgs globalArgsObject = createObject(GlobalArgs.class, globalArgs);
+        GlobalArgs.setInstance(globalArgsObject);
+
+        TestSuite suite = createObject(TestSuite.class, globalArgs);
 
         for(int i = 0; i < cmdLineArgs.length; i++) {
             if(cmdLineArgs[i].startsWith("--")) {
