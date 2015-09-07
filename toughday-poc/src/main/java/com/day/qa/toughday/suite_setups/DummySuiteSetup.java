@@ -1,4 +1,6 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.suite_setups;
+
+import com.day.qa.toughday.core.SuiteSetup;
 
 /**
  * Created by tuicu on 04/09/15.

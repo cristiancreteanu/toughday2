@@ -1,7 +1,6 @@
-package com.day.qa.toughday.tests;
+package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.AbstractTestRunner;
-import com.day.qa.toughday.cli.CliArg;
+import com.day.qa.toughday.core.cli.CliArg;
 
 import java.util.UUID;
 

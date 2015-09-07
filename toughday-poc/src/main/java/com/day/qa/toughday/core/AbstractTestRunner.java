@@ -1,9 +1,8 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.tests.AbstractTest;
-import com.day.qa.toughday.tests.annotations.After;
-import com.day.qa.toughday.tests.annotations.Before;
-import com.day.qa.toughday.tests.annotations.Setup;
+import com.day.qa.toughday.core.test_annotations.After;
+import com.day.qa.toughday.core.test_annotations.Before;
+import com.day.qa.toughday.core.test_annotations.Setup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests.annotations;
+package com.day.qa.toughday.core.test_annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
-public @interface Setup {
+public @interface After {
 
 }

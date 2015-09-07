@@ -1,6 +1,6 @@
-package com.day.qa.toughday.publishers;
+package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.RunMap;
+import com.day.qa.toughday.core.RunMap;
 
 import java.util.Collection;
 

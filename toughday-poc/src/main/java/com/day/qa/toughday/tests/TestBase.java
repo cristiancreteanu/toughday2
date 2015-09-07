@@ -1,8 +1,9 @@
 package com.day.qa.toughday.tests;
 
 import com.adobe.granite.testing.ClientException;
-import com.day.qa.toughday.AbstractTestRunner;
-import com.day.qa.toughday.TestRunner;
+import com.day.qa.toughday.core.AbstractTest;
+import com.day.qa.toughday.core.AbstractTestRunner;
+import com.day.qa.toughday.runners.TestRunner;
 
 
 /**

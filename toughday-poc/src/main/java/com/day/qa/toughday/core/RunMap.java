@@ -1,6 +1,4 @@
-package com.day.qa.toughday;
-
-import com.day.qa.toughday.tests.AbstractTest;
+package com.day.qa.toughday.core;
 
 import java.util.Arrays;
 import java.util.Collection;

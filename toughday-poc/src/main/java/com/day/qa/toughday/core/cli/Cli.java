@@ -1,10 +1,10 @@
-package com.day.qa.toughday.cli;
+package com.day.qa.toughday.core.cli;
 
-import com.day.qa.toughday.GlobalArgs;
-import com.day.qa.toughday.SuiteSetup;
-import com.day.qa.toughday.TestSuite;
-import com.day.qa.toughday.publishers.Publisher;
-import com.day.qa.toughday.tests.AbstractTest;
+import com.day.qa.toughday.core.GlobalArgs;
+import com.day.qa.toughday.core.SuiteSetup;
+import com.day.qa.toughday.core.TestSuite;
+import com.day.qa.toughday.core.Publisher;
+import com.day.qa.toughday.core.AbstractTest;
 import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.OptionGroup;

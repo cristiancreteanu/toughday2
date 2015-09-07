@@ -1,7 +1,8 @@
 package com.day.qa.toughday.publishers;
 
-import com.day.qa.toughday.RunMap;
-import com.day.qa.toughday.cli.CliArg;
+import com.day.qa.toughday.core.Publisher;
+import com.day.qa.toughday.core.RunMap;
+import com.day.qa.toughday.core.cli.CliArg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

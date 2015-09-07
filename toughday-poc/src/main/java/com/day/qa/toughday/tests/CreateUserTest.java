@@ -1,5 +1,7 @@
 package com.day.qa.toughday.tests;
 
+import com.day.qa.toughday.core.AbstractTest;
+
 /**
  * Created by tuicu on 12/08/15.
  */

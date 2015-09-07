@@ -1,6 +1,6 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.cli.CliArg;
+import com.day.qa.toughday.core.cli.CliArg;
 
 /**
  * Created by tuicu on 07/09/15.

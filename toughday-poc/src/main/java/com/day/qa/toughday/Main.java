@@ -1,7 +1,8 @@
 package com.day.qa.toughday;
 
 
-import com.day.qa.toughday.cli.Cli;
+import com.day.qa.toughday.core.cli.Cli;
+import com.day.qa.toughday.core.TestSuite;
 
 /**
  * Hello world!

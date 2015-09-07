@@ -3,7 +3,8 @@ package com.day.qa.toughday.tests;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.adobe.granite.testing.util.FormEntityBuilder;
-import com.day.qa.toughday.cli.CliArg;
+import com.day.qa.toughday.core.AbstractTest;
+import com.day.qa.toughday.core.cli.CliArg;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 

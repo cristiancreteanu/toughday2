@@ -1,8 +1,6 @@
-package com.day.qa.toughday;
+package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.cli.CliArg;
-import com.day.qa.toughday.publishers.Publisher;
-import com.day.qa.toughday.tests.AbstractTest;
+import com.day.qa.toughday.core.cli.CliArg;
 import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -132,7 +130,7 @@ public class TestSuite {
                 testRunners.put(test.getClass(), constructor.newInstance(test.getClass()));
             } catch (NoSuchMethodException e) {
                 logger.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
-                throw new NoSuchMethodException("Test runners must have a constructor with only one parameter, the test Class");
+                throw new NoSuchMethodException("Test com.day.qa.toughday.runners must have a constructor with only one parameter, the test Class");
             }
         }
         return this;

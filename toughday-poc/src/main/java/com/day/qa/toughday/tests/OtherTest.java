@@ -1,6 +1,7 @@
 package com.day.qa.toughday.tests;
 
-import com.day.qa.toughday.tests.annotations.Before;
+import com.day.qa.toughday.core.AbstractTest;
+import com.day.qa.toughday.core.test_annotations.Before;
 
 /**
  * Created by tuicu on 12/08/15.
