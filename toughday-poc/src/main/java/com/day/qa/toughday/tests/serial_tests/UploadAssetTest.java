@@ -3,21 +3,25 @@ package com.day.qa.toughday.tests.serial_tests;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.GraniteConstants;
 import com.adobe.granite.testing.client.GraniteClient;
-import com.adobe.granite.testing.util.InputStreamBodyWithLength;
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.cli.CliArg;
 import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by tuicu on 07/09/15.
  */
 public class UploadAssetTest extends TestBase {
+
     private String fileName;
     private String resourcePath;
     private String mimeType;
@@ -25,6 +29,8 @@ public class UploadAssetTest extends TestBase {
 
     public UploadAssetTest() {
     }
+
+    private static AtomicInteger next = new AtomicInteger(0);
 
     private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
         this.fileName = fileName;
@@ -35,13 +41,15 @@ public class UploadAssetTest extends TestBase {
 
     @Override
     public void test() throws ClientException {
-        MultipartEntity multiPartEntity = new MultipartEntity();
+        MultipartEntity multiPartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             // the file
-            multiPartEntity.addPart("file", new InputStreamBodyWithLength(resourcePath, mimeType, fileName));
+            //multiPartEntity.addPart("file", new InputStreamBodyWithLength(resourcePath, mimeType, fileName));
+            multiPartEntity.addPart("file", new FileBody(new File(resourcePath)));
             // add String parameters
+
             multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
-            multiPartEntity.addPart("fileName", new StringBody(fileName, Charset.forName(GraniteConstants.CHARSET_UTF8)));
+            multiPartEntity.addPart("fileName", new StringBody(fileName + next.getAndIncrement(), Charset.forName(GraniteConstants.CHARSET_UTF8)));
         } catch (UnsupportedEncodingException e) {
             throw new ClientException("Could not create Multipart Post!", e);
         }
