@@ -15,7 +15,9 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
         for(AbstractTest child : testObject.getChildren()) {
             AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(child);
             try {
-                runner.runTest(child, runMap);
+                synchronized (runMap) {
+                    runner.runTest(child, runMap);
+                }
             } catch (ChildTestFailedException e) {
                 runMap.recordFail(testObject, e);
                 if(testObject.getParent() != null) {
@@ -24,6 +26,10 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
                     return;
                 }
             }
+        }
+        Long elapsed = (System.nanoTime() - start) / 1000000l;
+        synchronized (runMap) {
+            runMap.recordRun(testObject, elapsed);
         }
     }
 }
