@@ -1,11 +1,11 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.day.qa.toughday.core.AbstractTest;
 
 /**
  * Created by tuicu on 12/08/15.
  */
-public class CreateUserTest extends TestBase {
+public class CreateUserTest extends SequentialTestBase {
     public CreateUserTest() {
         super();
     }

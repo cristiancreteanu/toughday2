@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.client.GraniteClient;
@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tuicu on 12/08/15.
  */
-public class CreatePageTest extends TestBase {
+public class CreatePageTest extends SequentialTestBase {
     private String parentPath;
     private String template;
     static AtomicInteger pageNumber = new AtomicInteger(0);

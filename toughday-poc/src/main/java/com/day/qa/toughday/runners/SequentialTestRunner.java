@@ -4,18 +4,18 @@ import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.ChildTestFailedException;
 import com.day.qa.toughday.core.RunMap;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.tests.serial_tests.TestBase;
+import com.day.qa.toughday.tests.sequential.SequentialTestBase;
 
 /**
  * Created by tuicu on 04/09/15.
  */
-public class TestRunner extends AbstractTestRunner<TestBase> {
-    public TestRunner(Class<? extends AbstractTest> testClass) {
+public class SequentialTestRunner extends AbstractTestRunner<SequentialTestBase> {
+    public SequentialTestRunner(Class<? extends AbstractTest> testClass) {
         super(testClass);
     }
 
     @Override
-    protected void run(TestBase testObject, RunMap runMap) throws ChildTestFailedException {
+    protected void run(SequentialTestBase testObject, RunMap runMap) throws ChildTestFailedException {
         Long start = System.nanoTime();
         try {
             testObject.test();
@@ -32,6 +32,5 @@ public class TestRunner extends AbstractTestRunner<TestBase> {
                 throw new ChildTestFailedException(e);
             }
         }
-
     }
 }

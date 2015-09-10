@@ -11,6 +11,7 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
 
     @Override
     protected void run(CompositeTest testObject, RunMap runMap) throws ChildTestFailedException {
+        Long start = System.nanoTime();
         for(AbstractTest child : testObject.getChildren()) {
             AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(child);
             try {

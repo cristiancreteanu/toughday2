@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.test_annotations.Before;
@@ -6,7 +6,7 @@ import com.day.qa.toughday.core.test_annotations.Before;
 /**
  * Created by tuicu on 12/08/15.
  */
-public class OtherTest extends TestBase {
+public class OtherTest extends SequentialTestBase {
     public OtherTest() {
         super();
     }

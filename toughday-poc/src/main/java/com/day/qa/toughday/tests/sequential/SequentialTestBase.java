@@ -1,11 +1,11 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.GlobalArgs;
-import com.day.qa.toughday.runners.TestRunner;
+import com.day.qa.toughday.runners.SequentialTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
 /**
  * Created by tuicu on 04/09/15.
  */
-public abstract class TestBase extends AbstractTest {
+public abstract class SequentialTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();
     private GraniteClient defaultClient;
 
@@ -26,7 +26,7 @@ public abstract class TestBase extends AbstractTest {
 
     @Override
     public Class<? extends AbstractTestRunner> getTestRunnerClass() {
-        return TestRunner.class;
+        return SequentialTestRunner.class;
     }
 
     public GraniteClient getDefaultClient() {

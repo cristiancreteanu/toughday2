@@ -1,4 +1,4 @@
-package com.day.qa.toughday.suite_setups;
+package com.day.qa.toughday.suitesetups;
 
 import com.day.qa.toughday.core.SuiteSetup;
 

@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.GraniteConstants;
@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tuicu on 07/09/15.
  */
-public class UploadAssetTest extends TestBase {
+public class UploadAssetTest extends SequentialTestBase {
 
     private String fileName;
     private String resourcePath;

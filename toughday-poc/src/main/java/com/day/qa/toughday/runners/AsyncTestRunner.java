@@ -3,7 +3,7 @@ package com.day.qa.toughday.runners;
 import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.ChildTestFailedException;
 import com.day.qa.toughday.core.RunMap;
-import com.day.qa.toughday.tests.async_tests.AsyncTestBase;
+import com.day.qa.toughday.tests.async.AsyncTestBase;
 
 /**
  * Created by tuicu on 04/09/15.

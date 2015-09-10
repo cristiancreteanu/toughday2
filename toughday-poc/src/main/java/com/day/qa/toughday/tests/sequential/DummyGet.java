@@ -1,4 +1,4 @@
-package com.day.qa.toughday.tests.serial_tests;
+package com.day.qa.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
 import com.day.qa.toughday.core.AbstractTest;
@@ -6,7 +6,7 @@ import com.day.qa.toughday.core.AbstractTest;
 /**
  * Created by tuicu on 08/09/15.
  */
-public class DummyGet extends TestBase {
+public class DummyGet extends SequentialTestBase {
 
     @Override
     public void test() throws ClientException {
