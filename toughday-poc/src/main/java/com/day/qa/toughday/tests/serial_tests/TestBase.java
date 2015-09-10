@@ -7,12 +7,22 @@ import com.day.qa.toughday.core.AbstractTestRunner;
 import com.day.qa.toughday.core.GlobalArgs;
 import com.day.qa.toughday.runners.TestRunner;
 
+import java.util.ArrayList;
+import java.util.List;
+
 
 /**
  * Created by tuicu on 04/09/15.
  */
 public abstract class TestBase extends AbstractTest {
+    private static final List<AbstractTest> noChildren = new ArrayList<>();
     private GraniteClient defaultClient;
+
+
+    @Override
+    public List<AbstractTest> getChildren() {
+        return noChildren;
+    }
 
     @Override
     public Class<? extends AbstractTestRunner> getTestRunnerClass() {

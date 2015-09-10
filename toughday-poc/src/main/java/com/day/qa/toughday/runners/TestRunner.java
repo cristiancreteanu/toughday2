@@ -1,6 +1,7 @@
 package com.day.qa.toughday.runners;
 
 import com.day.qa.toughday.core.AbstractTestRunner;
+import com.day.qa.toughday.core.ChildTestFailedException;
 import com.day.qa.toughday.core.RunMap;
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.tests.serial_tests.TestBase;
@@ -14,7 +15,7 @@ public class TestRunner extends AbstractTestRunner<TestBase> {
     }
 
     @Override
-    protected void run(TestBase testObject, RunMap runMap) {
+    protected void run(TestBase testObject, RunMap runMap) throws ChildTestFailedException {
         Long start = System.nanoTime();
         try {
             testObject.test();
@@ -26,6 +27,9 @@ public class TestRunner extends AbstractTestRunner<TestBase> {
         catch (Exception e) {
             synchronized (runMap) {
                 runMap.recordFail(testObject, e);
+            }
+            if(testObject.getParent() != null) {
+                throw new ChildTestFailedException(e);
             }
         }
 

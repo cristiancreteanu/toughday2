@@ -2,6 +2,7 @@ package com.day.qa.toughday.core;
 
 import com.day.qa.toughday.core.cli.CliArg;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -10,13 +11,18 @@ import java.util.UUID;
 public abstract class AbstractTest {
     private UUID id;
     private String name;
+    private AbstractTest parent;
 
     public AbstractTest() {
         this.id = UUID.randomUUID();
     }
 
-    public String getName() {
+    public String getSimpleName() {
         return name != null ? name : getClass().getSimpleName();
+    }
+
+    public String getName() {
+        return parent != null ? parent.getName() + "." + getSimpleName() : getSimpleName();
     }
 
     @CliArg(required = false)
@@ -33,6 +39,14 @@ public abstract class AbstractTest {
         this.id = id;
     }
 
+    public AbstractTest getParent() {
+        return parent;
+    }
+
+    public void setParent(AbstractTest parent) {
+        this.parent = parent;
+    }
+
     @Override
     public final int hashCode() {
         return id.hashCode();
@@ -46,6 +60,13 @@ public abstract class AbstractTest {
         return ((AbstractTest)other).getId().equals(id);
     }
 
+    public AbstractTest clone() {
+        AbstractTest newInstance = newInstance();
+        newInstance.setID(this.id);
+        return newInstance;
+    }
+
+    public abstract List<AbstractTest> getChildren();
     public abstract Class<? extends AbstractTestRunner> getTestRunnerClass();
     public abstract AbstractTest newInstance();
 }

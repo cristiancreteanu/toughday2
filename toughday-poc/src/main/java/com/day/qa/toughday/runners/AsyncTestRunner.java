@@ -1,6 +1,7 @@
 package com.day.qa.toughday.runners;
 
 import com.day.qa.toughday.core.AbstractTestRunner;
+import com.day.qa.toughday.core.ChildTestFailedException;
 import com.day.qa.toughday.core.RunMap;
 import com.day.qa.toughday.tests.async_tests.AsyncTestBase;
 
@@ -13,7 +14,7 @@ public class AsyncTestRunner extends AbstractTestRunner<AsyncTestBase> {
     }
 
     @Override
-    protected void run(AsyncTestBase testObject, RunMap runMap) {
+    protected void run(AsyncTestBase testObject, RunMap runMap) throws ChildTestFailedException {
 
     }
 }

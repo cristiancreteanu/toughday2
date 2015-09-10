@@ -66,7 +66,6 @@ public class TestSuite {
     private ExecutorService executorService;
     private RunMap globalRunMap;
     private List<Publisher> publishers;
-    private HashMap<Class<? extends AbstractTest>, AbstractTestRunner> testRunners;
     private SuiteSetup setupStep;
 
     HashMap<AbstractTest, Integer> weightMap;
@@ -75,7 +74,6 @@ public class TestSuite {
         this.globalTestList = new ArrayList<>();
         this.weightMap = new HashMap<>();
         this.publishers = new ArrayList<>();
-        this.testRunners = new HashMap<>();
     }
 
     @CliArg
@@ -123,17 +121,23 @@ public class TestSuite {
         totalWeight += weight;
         weightMap.put(test, weight);
         globalRunMap.addTest(test);
-        if(!testRunners.containsKey(test.getClass())) {
-            Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
-            try {
-                Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
-                testRunners.put(test.getClass(), constructor.newInstance(test.getClass()));
-            } catch (NoSuchMethodException e) {
-                logger.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
-                throw new NoSuchMethodException("Test com.day.qa.toughday.runners must have a constructor with only one parameter, the test Class");
-            }
+        RunnersContainer.getInstance().addRunner(test);
+        for(AbstractTest child : test.getChildren()) {
+            add(child);
         }
         return this;
+    }
+
+    private void add(AbstractTest child)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        for(AbstractTest c : child.getChildren()) {
+            add(c);
+        }
+        /* Children are added to the runners container and the run map only.
+           They must not be added to the test list or the weight map, because they will
+           not be ran outside of their composite test */
+        RunnersContainer.getInstance().addRunner(child);
+        globalRunMap.addTest(child);
     }
 
     public TestSuite addPublisher(Publisher publisher) {
@@ -188,8 +192,7 @@ public class TestSuite {
         public AsyncTestRunner(RunMap localRunMap) {
             localTests = new ArrayList<>();
             for(AbstractTest test : globalTestList) {
-                AbstractTest localTest = test.newInstance();
-                localTest.setID(test.getId());
+                AbstractTest localTest = test.clone();
                 localTests.add(localTest);
             }
             this.localRunMap = localRunMap;
@@ -205,8 +208,11 @@ public class TestSuite {
             try {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);
-                    AbstractTestRunner runner = testRunners.get(nextTest.getClass());
-                    runner.runTest(nextTest, localRunMap);
+                    AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(nextTest);
+                    try {
+                        runner.runTest(nextTest, localRunMap);
+                    } catch (ChildTestFailedException e) {
+                    }
                     Thread.sleep(delay);
                 }
             } catch (InterruptedException e) {

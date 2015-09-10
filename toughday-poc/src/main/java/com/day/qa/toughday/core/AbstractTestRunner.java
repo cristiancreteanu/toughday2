@@ -65,16 +65,25 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         }
     }
 
-    public void runTest(AbstractTest testObject, RunMap runMap) {
+    public void runTest(AbstractTest testObject, RunMap runMap) throws ChildTestFailedException {
         executeSetup(testObject);
         executeBefore(testObject);
 
-        run( (T) testObject, runMap);
+        ChildTestFailedException exception = null;
+        try {
+            run((T) testObject, runMap);
+        } catch (ChildTestFailedException e) {
+            exception = e;
+        }
 
         executeAfter(testObject);
+
+        if(exception != null) {
+            throw exception;
+        }
     }
 
-    protected abstract void run(T testObject, RunMap runMap);
+    protected abstract void run(T testObject, RunMap runMap) throws ChildTestFailedException;
 
     private void executeMethod(AbstractTest testObject, Method method, Class<? extends Annotation> annotation) {
         try {
