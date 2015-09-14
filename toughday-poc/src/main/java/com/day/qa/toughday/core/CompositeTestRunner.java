@@ -15,16 +15,23 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
         for(AbstractTest child : testObject.getChildren()) {
             AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(child);
             try {
-                synchronized (runMap) {
-                    runner.runTest(child, runMap);
-                }
+                runner.runTest(child, runMap);
             } catch (ChildTestFailedException e) {
-                runMap.recordFail(testObject, e);
+                synchronized (runMap) {
+                    runMap.recordFail(testObject, e);
+                }
                 if(testObject.getParent() != null) {
                     throw e;
                 } else {
-                    return;
+                    return; //don't let exceptions get to the suite
                 }
+            }
+            if(Thread.interrupted()) {
+                ChildTestFailedException timeout = new ChildTestFailedException(new InterruptedException());
+                synchronized (runMap) {
+                    runMap.recordFail(testObject, timeout);
+                }
+                throw timeout;
             }
         }
         Long elapsed = (System.nanoTime() - start) / 1000000l;

@@ -67,6 +67,7 @@ public class TestSuite {
     private RunMap globalRunMap;
     private List<Publisher> publishers;
     private SuiteSetup setupStep;
+    private int timeout;
 
     HashMap<AbstractTest, Integer> weightMap;
 
@@ -149,21 +150,23 @@ public class TestSuite {
         if(setupStep != null) {
             setupStep.setup();
         }
-        List<AsyncTestRunner> testRunners = new ArrayList<>();
+        List<AsyncTestWorker> testWorkers = new ArrayList<>();
         for(int i = 0; i < concurrency; i++) {
-            AsyncTestRunner runner = new AsyncTestRunner(globalRunMap.newInstance());
-            testRunners.add(runner);
+            AsyncTestWorker runner = new AsyncTestWorker(globalRunMap.newInstance());
+            testWorkers.add(runner);
             executorService.execute(runner);
         }
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(testRunners);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(testWorkers);
         executorService.execute(resultAggregator);
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testWorkers);
+        executorService.execute(timeoutChecker);
         try {
             Thread.sleep(duration * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         finally {
-            for(AsyncTestRunner run : testRunners)
+            for(AsyncTestWorker run : testWorkers)
                 run.finishExecution();
             resultAggregator.finishExecution();
         }
@@ -177,7 +180,7 @@ public class TestSuite {
         }
     }
 
-    private abstract class AsyncTestSuiteRunner implements Runnable {
+    private abstract class AsyncTestSuiteWorker implements Runnable {
         protected boolean finish = false;
 
         public void finishExecution() {
@@ -185,11 +188,14 @@ public class TestSuite {
         }
     }
 
-    private class AsyncTestRunner extends AsyncTestSuiteRunner {
+    private class AsyncTestWorker extends AsyncTestSuiteWorker {
         private RunMap localRunMap;
         private List<AbstractTest> localTests;
+        private Thread workerThread;
+        private long lastTestStart;
+        private boolean testRunning;
 
-        public AsyncTestRunner(RunMap localRunMap) {
+        public AsyncTestWorker(RunMap localRunMap) {
             localTests = new ArrayList<>();
             for(AbstractTest test : globalTestList) {
                 AbstractTest localTest = test.clone();
@@ -198,20 +204,38 @@ public class TestSuite {
             this.localRunMap = localRunMap;
         }
 
+        public Thread getWorkerThread() {
+            return workerThread;
+        }
+
+        public boolean isTestRunning() {
+            return testRunning;
+        }
+
+        public long getLastTestStart() {
+            return lastTestStart;
+        }
+
         public RunMap getLocalRunMap() {
             return localRunMap;
         }
 
         @Override
         public void run() {
-            logger.info("Thread running: " + Thread.currentThread());
+            workerThread = Thread.currentThread();
+            logger.info("Thread running: " + workerThread);
             try {
                 while (!finish) {
                     AbstractTest nextTest = getNextTest(localTests, totalWeight);
                     AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(nextTest);
+
                     try {
+                        lastTestStart = System.nanoTime();
+                        testRunning = true;
                         runner.runTest(nextTest, localRunMap);
+                        testRunning = false;
                     } catch (ChildTestFailedException e) {
+                        logger.warn("Exceptions from tests should not reach this point", e);
                     }
                     Thread.sleep(delay);
                 }
@@ -221,16 +245,17 @@ public class TestSuite {
         }
     }
 
-    private class AsyncResultAggregator extends AsyncTestSuiteRunner {
-        private List<AsyncTestRunner> testRunners;
+    private class AsyncResultAggregator extends AsyncTestSuiteWorker {
+        private List<AsyncTestWorker> testWorkers;
 
-        public AsyncResultAggregator(List<AsyncTestRunner> testRunners) {
-            this.testRunners = testRunners;
+        public AsyncResultAggregator(List<AsyncTestWorker> testWorkers) {
+            this.testWorkers = testWorkers;
         }
-        
+
+
         private void aggregateResults() {
-            for(AsyncTestRunner runner : testRunners) {
-                RunMap localRunMap = runner.getLocalRunMap();
+            for(AsyncTestWorker worker : testWorkers) {
+                RunMap localRunMap = worker.getLocalRunMap();
                 synchronized (globalRunMap) {
                     synchronized (localRunMap) {
                         globalRunMap.aggregateAndReinitialize(localRunMap);
@@ -256,6 +281,29 @@ public class TestSuite {
         public void publishIntermediateResults() {
             for(Publisher publisher : publishers) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
+            }
+        }
+    }
+
+    private class AsyncTimeoutChecker extends AsyncTestSuiteWorker {
+        private List<AsyncTestWorker> testWorkers;
+
+        public AsyncTimeoutChecker(List<AsyncTestWorker> testWorkers) {
+            this.testWorkers = testWorkers;
+        }
+        @Override
+        public void run() {
+            try {
+                while(!finish) {
+                    Thread.sleep(timeout / 2);
+                    for(AsyncTestWorker worker : testWorkers) {
+                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000000l > timeout) {
+                            worker.getWorkerThread().interrupt();
+                        }
+                    }
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
         }
     }
