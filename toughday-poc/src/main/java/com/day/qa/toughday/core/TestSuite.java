@@ -159,7 +159,7 @@ public class TestSuite {
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(testWorkers);
         executorService.execute(resultAggregator);
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testWorkers);
-        executorService.execute(timeoutChecker);
+        //executorService.execute(timeoutChecker);
         try {
             Thread.sleep(duration * 1000);
         } catch (InterruptedException e) {

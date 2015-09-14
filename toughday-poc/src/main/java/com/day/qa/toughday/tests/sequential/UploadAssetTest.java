@@ -26,6 +26,7 @@ public class UploadAssetTest extends SequentialTestBase {
     private String resourcePath;
     private String mimeType;
     private String parentPath;
+    private AtomicInteger nextAssetNumber;
 
     public UploadAssetTest() {
     }
@@ -33,10 +34,10 @@ public class UploadAssetTest extends SequentialTestBase {
     private static AtomicInteger next = new AtomicInteger(0);
 
     private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
-        this.fileName = fileName;
         this.resourcePath = resourcePath;
         this.mimeType = mimeType;
         this.parentPath = parentPath;
+        this.nextAssetNumber = next;
     }
 
     @Override
@@ -82,5 +83,13 @@ public class UploadAssetTest extends SequentialTestBase {
     @CliArg
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
+    }
+
+    public void setNextAssetNumber(AtomicInteger assetNumber) {
+        nextAssetNumber = assetNumber;
+    }
+
+    public AtomicInteger getNextAssetNumber() {
+        return nextAssetNumber;
     }
 }

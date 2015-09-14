@@ -2,6 +2,7 @@ package com.day.qa.toughday.core;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * Created by tuicu on 09/09/15.
@@ -22,6 +23,14 @@ public abstract class CompositeTest extends AbstractTest {
         child.setParent(this);
         children.add(child);
         return this;
+    }
+
+    public AbstractTest getChild(UUID id) {
+        for(AbstractTest child : children) {
+            if(child.getId() == id)
+                return child;
+        }
+        return null;
     }
 
     @Override

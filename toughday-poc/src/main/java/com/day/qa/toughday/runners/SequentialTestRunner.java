@@ -28,7 +28,7 @@ public class SequentialTestRunner extends AbstractTestRunner<SequentialTestBase>
             synchronized (runMap) {
                 runMap.recordFail(testObject, e);
             }
-            if(testObject.getParent() != null) {
+            if(testObject.getParent() != null) { //don't let exceptions get to the suite
                 throw new ChildTestFailedException(e);
             }
         }

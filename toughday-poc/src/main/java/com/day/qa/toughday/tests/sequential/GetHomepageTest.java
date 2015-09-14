@@ -6,7 +6,7 @@ import com.day.qa.toughday.core.AbstractTest;
 /**
  * Created by tuicu on 08/09/15.
  */
-public class DummyGet extends SequentialTestBase {
+public class GetHomepageTest extends SequentialTestBase {
 
     @Override
     public void test() throws ClientException {
@@ -15,6 +15,6 @@ public class DummyGet extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new DummyGet();
+        return new GetHomepageTest();
     }
 }
