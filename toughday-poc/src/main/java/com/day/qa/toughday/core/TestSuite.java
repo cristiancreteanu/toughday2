@@ -97,6 +97,12 @@ public class TestSuite {
         return this;
     }
 
+    @CliArg
+    public TestSuite setTimeout(String timeout) {
+        this.timeout = Integer.parseInt(timeout) * 1000;
+        return this;
+    }
+
     @CliArg(required = false)
     public TestSuite setSetupStep(String setupStep)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
@@ -297,7 +303,7 @@ public class TestSuite {
                 while(!finish) {
                     Thread.sleep(timeout / 2);
                     for(AsyncTestWorker worker : testWorkers) {
-                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000000l > timeout) {
+                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > timeout) {
                             worker.getWorkerThread().interrupt();
                         }
                     }

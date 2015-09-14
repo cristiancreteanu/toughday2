@@ -40,6 +40,9 @@ public class Cli {
         options.addOption(Option.builder().longOpt("Concurrency=val")
                 .desc("number of concurrent users")
                 .build());
+        options.addOption(Option.builder().longOpt("Timeout=val")
+                .desc("how long can a test run before it is interrupted and marked as failed")
+                .build());
 
         options.addOptionGroup(getOptionsForClass(GlobalArgs.class));
 
