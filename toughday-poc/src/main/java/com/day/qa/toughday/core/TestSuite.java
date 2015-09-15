@@ -97,11 +97,12 @@ public class TestSuite {
         return this;
     }
 
+    /*
     @CliArg
     public TestSuite setTimeout(String timeout) {
         this.timeout = Integer.parseInt(timeout) * 1000;
         return this;
-    }
+    } */
 
     @CliArg(required = false)
     public TestSuite setSetupStep(String setupStep)

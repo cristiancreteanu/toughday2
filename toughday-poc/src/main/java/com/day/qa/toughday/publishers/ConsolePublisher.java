@@ -24,6 +24,9 @@ public class ConsolePublisher implements Publisher {
                             + " Reqs Throughput: " + statistics.getExecutionThroughput() + " runs/s"
             );
         }
+        System.out.println();
+        System.out.println();
+        System.out.println();
     }
 
     @Override

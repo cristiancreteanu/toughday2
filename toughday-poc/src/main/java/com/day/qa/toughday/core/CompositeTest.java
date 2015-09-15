@@ -48,8 +48,9 @@ public abstract class CompositeTest extends AbstractTest {
 
         List<AbstractTest> clonedChildren = new ArrayList<>();
         for(AbstractTest test : children) {
-            test.setParent(newComposite);
-            clonedChildren.add(test.clone());
+            AbstractTest newTest = test.clone();
+            newTest.setParent(newComposite);
+            clonedChildren.add(newTest);
         }
 
         newComposite.setChildren(clonedChildren);

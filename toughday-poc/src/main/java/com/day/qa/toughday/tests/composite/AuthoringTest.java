@@ -40,6 +40,8 @@ public class AuthoringTest extends CompositeTest{
 
             this.deletePageTest.setForce(Boolean.toString(true))
                     .setNext(createPageTest.getNextPageNumber());
+
+
             this.deleteAssetTest.setForce(Boolean.toString(true))
                     .setNext(uploadAssetTest.getNextAssetNumber());
         }

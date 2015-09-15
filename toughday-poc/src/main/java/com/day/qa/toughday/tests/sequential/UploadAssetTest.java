@@ -33,11 +33,11 @@ public class UploadAssetTest extends SequentialTestBase {
 
     private static AtomicInteger next = new AtomicInteger(0);
 
-    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
+    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath, AtomicInteger nextAssetNumber) {
         this.resourcePath = resourcePath;
         this.mimeType = mimeType;
         this.parentPath = parentPath;
-        this.nextAssetNumber = next;
+        this.nextAssetNumber = nextAssetNumber;
     }
 
     @Override
@@ -50,7 +50,10 @@ public class UploadAssetTest extends SequentialTestBase {
             // add String parameters
 
             multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
-            multiPartEntity.addPart("fileName", new StringBody(fileName + next.getAndIncrement(), Charset.forName(GraniteConstants.CHARSET_UTF8)));
+            multiPartEntity.addPart("fileName",
+                    new StringBody(fileName + ( nextAssetNumber != null ? nextAssetNumber.getAndIncrement() : "" ),
+                            Charset.forName(GraniteConstants.CHARSET_UTF8))
+            );
         } catch (UnsupportedEncodingException e) {
             throw new ClientException("Could not create Multipart Post!", e);
         }
@@ -62,7 +65,7 @@ public class UploadAssetTest extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
+        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath, nextAssetNumber);
     }
 
     @CliArg

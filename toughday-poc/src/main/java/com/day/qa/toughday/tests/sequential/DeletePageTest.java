@@ -31,7 +31,7 @@ public class DeletePageTest extends SequentialTestBase {
 
     @Override
     public void test() throws ClientException {
-        int nextNumber = next.getAndDecrement();
+        int nextNumber = next.get();
         if(nextNumber == 0)
             return;
         FormEntityBuilder feb = new FormEntityBuilder().addParameter("cmd", CMD_DELETE_PAGE)
@@ -69,6 +69,22 @@ public class DeletePageTest extends SequentialTestBase {
     public DeletePageTest setNext(AtomicInteger next) {
         this.next = next;
         return this;
+    }
+
+    public boolean getForce() {
+        return force;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public AtomicInteger getNext() {
+        return next;
+    }
+
+    public String getParentPath() {
+        return parentPath;
     }
 
 }
