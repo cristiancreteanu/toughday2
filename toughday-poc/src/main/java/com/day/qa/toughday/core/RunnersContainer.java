@@ -15,7 +15,7 @@ public class RunnersContainer {
     private static RunnersContainer instance = new RunnersContainer();
     public static RunnersContainer getInstance() { return instance; }
 
-    private HashMap<Class<? extends AbstractTest>, AbstractTestRunner> testRunners;
+    private HashMap<AbstractTest, AbstractTestRunner> testRunners;
     private RunnersContainer() {
         this.testRunners = new HashMap<>();
     }
@@ -26,7 +26,7 @@ public class RunnersContainer {
             Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
             try {
                 Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
-                testRunners.put(test.getClass(), constructor.newInstance(test.getClass()));
+                testRunners.put(test, constructor.newInstance(test.getClass()));
             } catch (NoSuchMethodException e) {
                 logger.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
                 throw new NoSuchMethodException("Test runners must have a constructor with only one parameter, the test Class");
@@ -35,6 +35,6 @@ public class RunnersContainer {
     }
 
     public AbstractTestRunner getRunner(AbstractTest test) {
-        return testRunners.get(test.getClass());
+        return testRunners.get(test);
     }
 }

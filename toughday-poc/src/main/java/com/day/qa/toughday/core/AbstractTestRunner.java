@@ -46,8 +46,8 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         if(!setupExecuted) {
             synchronized (this) {
                 if(!setupExecuted) {
-                    setupExecuted = true;
                     executeMethod(testObject, setupMethod, Setup.class);
+                    setupExecuted = true;
                 }
             }
         }
