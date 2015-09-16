@@ -63,6 +63,7 @@ public abstract class AbstractTest {
     public AbstractTest clone() {
         AbstractTest newInstance = newInstance();
         newInstance.setID(this.id);
+        newInstance.setName(this.getSimpleName());
         return newInstance;
     }
 
