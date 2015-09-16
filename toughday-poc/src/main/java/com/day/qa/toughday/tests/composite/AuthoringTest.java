@@ -8,8 +8,6 @@ import com.day.qa.toughday.tests.sequential.DeleteAssetTest;
 import com.day.qa.toughday.tests.sequential.DeletePageTest;
 import com.day.qa.toughday.tests.sequential.UploadAssetTest;
 
-import java.util.concurrent.atomic.AtomicInteger;
-
 /**
  * Created by tuicu on 10/09/15.
  */
@@ -35,15 +33,8 @@ public class AuthoringTest extends CompositeTest{
             this.addChild(deletePageTest);
             this.addChild(deleteAssetTest);
 
-            this.createPageTest.setLastPageNumber(new AtomicInteger(0));
-            this.uploadAssetTest.setNextAssetNumber(new AtomicInteger(0));
-
-            this.deletePageTest.setForce(Boolean.toString(true))
-                    .setNext(createPageTest.getNextPageNumber());
-
-
-            this.deleteAssetTest.setForce(Boolean.toString(true))
-                    .setNext(uploadAssetTest.getNextAssetNumber());
+            this.deletePageTest.setForce(Boolean.toString(true));
+            this.deleteAssetTest.setForce(Boolean.toString(true));
         }
     }
 

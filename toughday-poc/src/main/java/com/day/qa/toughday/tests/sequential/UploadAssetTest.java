@@ -15,6 +15,7 @@ import org.apache.sling.testing.tools.http.RequestExecutor;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -26,22 +27,25 @@ public class UploadAssetTest extends SequentialTestBase {
     private String resourcePath;
     private String mimeType;
     private String parentPath;
-    private AtomicInteger nextAssetNumber;
+
+    public static ConcurrentHashMap<Thread, String> lastCreated = new ConcurrentHashMap<Thread, String>();
+    public static final AtomicInteger nextNumber = new AtomicInteger(0);
 
     public UploadAssetTest() {
     }
 
-    private static AtomicInteger next = new AtomicInteger(0);
-
-    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath, AtomicInteger nextAssetNumber) {
+    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
         this.resourcePath = resourcePath;
         this.mimeType = mimeType;
         this.parentPath = parentPath;
-        this.nextAssetNumber = nextAssetNumber;
+        this.fileName = fileName;
     }
 
     @Override
     public void test() throws ClientException {
+        String nextFileName = fileName + nextNumber.getAndIncrement();
+        lastCreated.put(Thread.currentThread(), nextFileName);
+
         MultipartEntity multiPartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             // the file
@@ -50,8 +54,7 @@ public class UploadAssetTest extends SequentialTestBase {
             // add String parameters
 
             multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
-            multiPartEntity.addPart("fileName",
-                    new StringBody(fileName + ( nextAssetNumber != null ? nextAssetNumber.getAndIncrement() : "" ),
+            multiPartEntity.addPart("fileName", new StringBody(nextFileName,
                             Charset.forName(GraniteConstants.CHARSET_UTF8))
             );
         } catch (UnsupportedEncodingException e) {
@@ -65,7 +68,7 @@ public class UploadAssetTest extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath, nextAssetNumber);
+        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
     }
 
     @CliArg
@@ -86,13 +89,5 @@ public class UploadAssetTest extends SequentialTestBase {
     @CliArg
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
-    }
-
-    public void setNextAssetNumber(AtomicInteger assetNumber) {
-        nextAssetNumber = assetNumber;
-    }
-
-    public AtomicInteger getNextAssetNumber() {
-        return nextAssetNumber;
     }
 }

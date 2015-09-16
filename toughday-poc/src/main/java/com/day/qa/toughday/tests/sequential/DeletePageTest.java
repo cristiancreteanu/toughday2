@@ -17,27 +17,30 @@ public class DeletePageTest extends SequentialTestBase {
     private String parentPath;
     private String title;
     private boolean force;
-    private AtomicInteger next;
 
     public DeletePageTest(){
     }
 
-    public DeletePageTest(String parentPath, boolean force, String title, AtomicInteger next) {
+    public DeletePageTest(String parentPath, boolean force, String title) {
         this.parentPath = parentPath;
         this.force = force;
-        this.next = next;
         this.title = title;
+    }
+
+    protected String getNextTitle() {
+        return CreatePageTest.lastCreated.get(Thread.currentThread());
     }
 
     @Override
     public void test() throws ClientException {
-        int nextNumber = next.get();
-        if(nextNumber == 0)
-            return;
+        String nextTitle = getNextTitle();
+        if(nextTitle == null)
+            throw new ClientException("No page created. Abort.");
+
         FormEntityBuilder feb = new FormEntityBuilder().addParameter("cmd", CMD_DELETE_PAGE)
                 .addParameter("force", Boolean.valueOf(force).toString())
                 .addParameter("shallow", Boolean.toString(false))
-                .addParameter("path", parentPath + title + nextNumber);
+                .addParameter("path", parentPath + nextTitle);
 
         RequestExecutor executor = getDefaultClient().http().doPost("/bin/wcmcommand", feb.getEntity());
         checkStatus(executor.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
@@ -45,7 +48,7 @@ public class DeletePageTest extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new DeletePageTest(parentPath, force, title, next);
+        return new DeletePageTest(parentPath, force, title);
     }
 
     @CliArg
@@ -67,7 +70,6 @@ public class DeletePageTest extends SequentialTestBase {
     }
 
     public DeletePageTest setNext(AtomicInteger next) {
-        this.next = next;
         return this;
     }
 
@@ -77,10 +79,6 @@ public class DeletePageTest extends SequentialTestBase {
 
     public String getTitle() {
         return title;
-    }
-
-    public AtomicInteger getNext() {
-        return next;
     }
 
     public String getParentPath() {
