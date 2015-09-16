@@ -31,6 +31,7 @@ public class DemoTest extends SequentialTestBase {
      * @param property
      */
     public DemoTest(String property) {
+        this.property = property;
     }
 
 
@@ -43,7 +44,8 @@ public class DemoTest extends SequentialTestBase {
         System.out.println(getName() + " Setup");
         try {
             /* Sleeps are not required, actually they are quite harmful, because they reduce the rate with which
-            the tests and affect the throughput. Use them only if the tests simulates wait between requests.
+            the tests and affect the throughput. Use them only if the tests simulates wait between requests, otherwise
+            use the --WaitTime parameter to specify wait between test runs.
              */
             Thread.sleep(1000);
         } catch (InterruptedException e) {
