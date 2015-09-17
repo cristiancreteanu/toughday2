@@ -20,14 +20,10 @@ public class SequentialTestRunner extends AbstractTestRunner<SequentialTestBase>
         try {
             testObject.test();
             Long elapsed = (System.nanoTime() - start) / 1000000l;
-            synchronized (runMap) {
-                runMap.recordRun(testObject, elapsed);
-            }
+            runMap.recordRun(testObject, elapsed);
         }
         catch (Exception e) {
-            synchronized (runMap) {
-                runMap.recordFail(testObject, e);
-            }
+            runMap.recordFail(testObject, e);
             if(testObject.getParent() != null) { //don't let exceptions get to the suite
                 throw new ChildTestFailedException(e);
             }

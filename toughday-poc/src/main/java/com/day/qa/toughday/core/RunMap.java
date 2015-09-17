@@ -93,7 +93,7 @@ public class RunMap {
                 init();
             }
 
-            public void recordFail(Exception e) {
+            public synchronized void recordFail(Exception e) {
                 if(!failsMap.containsKey(e.getClass())) {
                     failsMap.put(e.getClass(), 0L);
                 }
@@ -102,7 +102,7 @@ public class RunMap {
                 failRuns++;
             }
 
-            public void recordRun(double duration) {
+            public synchronized void recordRun(double duration) {
                 lastNanoTime = System.nanoTime();
                 totalRuns++;
                 totalDuration += duration;
@@ -165,26 +165,28 @@ public class RunMap {
                 return -1;
             }
 
-            public void aggregateAndReinitialize(TestEntry other) {
-                this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
-                this.totalRuns += other.totalRuns;
-                this.totalDuration += other.totalDuration;
-                this.failRuns += other.failRuns;
-                this.minDuration = Math.min(this.minDuration, other.minDuration);
-                this.maxDuration = Math.max(this.maxDuration, other.maxDuration);
-                for(Map.Entry<Integer, Long> entry : other.durationDistribution.entrySet()) {
-                    if(!this.durationDistribution.containsKey(entry.getKey())) {
-                        this.durationDistribution.put(entry.getKey(), 0L);
+            public synchronized void aggregateAndReinitialize(TestEntry other) {
+                synchronized (other) {
+                    this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
+                    this.totalRuns += other.totalRuns;
+                    this.totalDuration += other.totalDuration;
+                    this.failRuns += other.failRuns;
+                    this.minDuration = Math.min(this.minDuration, other.minDuration);
+                    this.maxDuration = Math.max(this.maxDuration, other.maxDuration);
+                    for (Map.Entry<Integer, Long> entry : other.durationDistribution.entrySet()) {
+                        if (!this.durationDistribution.containsKey(entry.getKey())) {
+                            this.durationDistribution.put(entry.getKey(), 0L);
+                        }
+                        this.durationDistribution.put(entry.getKey(), this.durationDistribution.get(entry.getKey()) + entry.getValue());
                     }
-                    this.durationDistribution.put(entry.getKey(), this.durationDistribution.get(entry.getKey()) + entry.getValue());
-                }
-                for(Map.Entry<Class<? extends Exception>, Long> entry : other.failsMap.entrySet()) {
-                    if(!this.failsMap.containsKey(entry.getKey())) {
-                        this.failsMap.put(entry.getKey(), 0L);
+                    for (Map.Entry<Class<? extends Exception>, Long> entry : other.failsMap.entrySet()) {
+                        if (!this.failsMap.containsKey(entry.getKey())) {
+                            this.failsMap.put(entry.getKey(), 0L);
+                        }
+                        this.failsMap.put(entry.getKey(), this.failsMap.get(entry.getKey()) + entry.getValue());
                     }
-                    this.failsMap.put(entry.getKey(), this.failsMap.get(entry.getKey()) + entry.getValue());
+                    other.init();
                 }
-                other.init();
             }
     }
 }

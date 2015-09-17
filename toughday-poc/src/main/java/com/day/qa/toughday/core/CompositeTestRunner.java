@@ -17,9 +17,7 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
             try {
                 runner.runTest(child, runMap);
             } catch (ChildTestFailedException e) {
-                synchronized (runMap) {
-                    runMap.recordFail(testObject, e);
-                }
+                runMap.recordFail(testObject, e);
                 if(testObject.getParent() != null) {
                     throw e;
                 } else {
@@ -28,9 +26,7 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
             }
             if(Thread.interrupted()) {
                 ChildTestFailedException timeout = new ChildTestFailedException(new InterruptedException());
-                synchronized (runMap) {
-                    runMap.recordFail(testObject, timeout);
-                }
+                runMap.recordFail(testObject, timeout);
                 throw timeout;
             }
         }

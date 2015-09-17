@@ -263,11 +263,7 @@ public class TestSuite {
         private void aggregateResults() {
             for(AsyncTestWorker worker : testWorkers) {
                 RunMap localRunMap = worker.getLocalRunMap();
-                synchronized (globalRunMap) {
-                    synchronized (localRunMap) {
-                        globalRunMap.aggregateAndReinitialize(localRunMap);
-                    }
-                }
+                globalRunMap.aggregateAndReinitialize(localRunMap);
             }
         }
 
