@@ -1,6 +1,7 @@
 package com.day.qa.toughday;
 
 
+import com.day.qa.toughday.core.Engine;
 import com.day.qa.toughday.core.cli.Cli;
 import com.day.qa.toughday.core.TestSuite;
 
@@ -18,7 +19,8 @@ public class Main
         }
         else {
             TestSuite suite = commandLineParser.createTestSuite(args);
-            suite.runTests();
+            Engine engine = new Engine(suite);
+            engine.runTests();
         }
     }
 }
