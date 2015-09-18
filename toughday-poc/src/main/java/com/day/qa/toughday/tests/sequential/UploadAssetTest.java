@@ -4,7 +4,7 @@ import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.GraniteConstants;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -71,22 +71,22 @@ public class UploadAssetTest extends SequentialTestBase {
         return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
     }
 
-    @CliArg
+    @ConfigArg
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @CliArg
+    @ConfigArg
     public void setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
-    @CliArg
+    @ConfigArg
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    @CliArg
+    @ConfigArg
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }

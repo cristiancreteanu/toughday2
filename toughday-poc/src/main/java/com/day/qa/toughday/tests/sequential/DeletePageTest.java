@@ -3,7 +3,7 @@ package com.day.qa.toughday.tests.sequential;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -51,19 +51,19 @@ public class DeletePageTest extends SequentialTestBase {
         return new DeletePageTest(parentPath, force, title);
     }
 
-    @CliArg
+    @ConfigArg
     public DeletePageTest setParentPath(String parentPath) {
         this.parentPath = (parentPath.endsWith("/") ? parentPath : parentPath + "/") ;
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public DeletePageTest setForce(String force) {
         this.force = Boolean.parseBoolean(force);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public DeletePageTest setTitle(String title) {
         this.title = title;
         return this;

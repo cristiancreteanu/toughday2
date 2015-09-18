@@ -1,4 +1,4 @@
-package com.day.qa.toughday.core.cli;
+package com.day.qa.toughday.core.config;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -10,6 +10,6 @@ import java.lang.annotation.Target;
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
-public @interface CliArg {
+public @interface ConfigArg {
     boolean required() default true;
 }

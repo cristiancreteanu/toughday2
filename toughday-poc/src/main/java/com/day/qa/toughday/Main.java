@@ -2,8 +2,8 @@ package com.day.qa.toughday;
 
 
 import com.day.qa.toughday.core.Engine;
-import com.day.qa.toughday.core.cli.Cli;
 import com.day.qa.toughday.core.TestSuite;
+import com.day.qa.toughday.core.config.ConfigurationManager;
 
 /**
  * Hello world!
@@ -13,12 +13,12 @@ public class Main
 {
     public static void main( String[] args )
             throws Exception {
-        Cli commandLineParser = new Cli();
+        ConfigurationManager configurationManager = new ConfigurationManager();
         if(args.length == 0 || (args.length == 1 && args[0] == "--help")) {
-            commandLineParser.printHelp();
+            configurationManager.printHelp();
         }
         else {
-            TestSuite suite = commandLineParser.createTestSuite(args);
+            TestSuite suite = configurationManager.createTestSuite(args);
             Engine engine = new Engine(suite);
             engine.runTests();
         }

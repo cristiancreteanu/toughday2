@@ -1,6 +1,6 @@
 package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 
 /**
  * Created by tuicu on 07/09/15.
@@ -21,22 +21,22 @@ public class GlobalArgs {
         return instance;
     }
 
-    @CliArg
+    @ConfigArg
     public void setHost(String host) {
         this.host = host;
     }
 
-    @CliArg
+    @ConfigArg
     public void setPort(String port) {
         this.port = Integer.parseInt(port);
     }
 
-    @CliArg
+    @ConfigArg
     public void setUser(String user) {
         this.user = user;
     }
 
-    @CliArg
+    @ConfigArg
     public void setPassword(String password) {
         this.password = password;
     }

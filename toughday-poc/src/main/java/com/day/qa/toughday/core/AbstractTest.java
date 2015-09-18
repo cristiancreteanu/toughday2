@@ -1,6 +1,6 @@
 package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 
 import java.util.List;
 import java.util.UUID;
@@ -25,7 +25,7 @@ public abstract class AbstractTest {
         return parent != null ? parent.getName() + "." + getSimpleName() : getSimpleName();
     }
 
-    @CliArg(required = false)
+    @ConfigArg(required = false)
     public void setName(String name) {
         this.name = name;
     }

@@ -1,7 +1,6 @@
 package com.day.qa.toughday.core;
 
-import com.day.qa.toughday.core.cli.CliArg;
-import org.reflections.Reflections;
+import com.day.qa.toughday.core.config.ConfigArg;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -36,18 +35,14 @@ public class TestSuite {
         return this;
     }
 
-    @CliArg(required = false)
+    @ConfigArg(required = false)
     public TestSuite setSetupStep(String setupStepClassName)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
-        Reflections reflections = new Reflections("com.day.qa");
+
         Class<? extends SuiteSetup> setupStepClass = null;
-        for (Class<? extends SuiteSetup> klass : reflections.getSubTypesOf(SuiteSetup.class)) {
-            if (klass.getSimpleName().equals(setupStepClassName)) {
-                setupStepClass = klass;
-                break;
-            }
-        }
+        setupStepClass = ReflectionsContainer.getInstance().getSuiteSetupClasses().get(setupStepClassName);
+
         if (setupStepClass == null) {
             throw new ClassNotFoundException("Could not find class " + setupStepClassName + " for suite setup step");
         }
@@ -69,25 +64,25 @@ public class TestSuite {
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public TestSuite setConcurrency(String concurrencyString) {
         this.concurrency = Integer.parseInt(concurrencyString);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public TestSuite setDuration(String durationString) {
         this.duration = Integer.parseInt(durationString);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public TestSuite setWaitTime(String waitTime) {
         this.waitTime = Integer.parseInt(waitTime);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public TestSuite setTimeout(String timeout) {
         this.timeout = Integer.parseInt(timeout) * 1000;
         return this;

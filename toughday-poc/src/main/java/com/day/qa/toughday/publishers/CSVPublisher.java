@@ -2,7 +2,7 @@ package com.day.qa.toughday.publishers;
 
 import com.day.qa.toughday.core.Publisher;
 import com.day.qa.toughday.core.RunMap;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,7 +19,7 @@ public class CSVPublisher implements Publisher {
     private String filePath = "results.csv";
     private static String HEADER = "Name, Total Duration, Runs, Fails, Min, Max, Average, Median, Real Throughput, Reqs Throughput";
 
-    @CliArg(required = false)
+    @ConfigArg(required = false)
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }

@@ -2,7 +2,7 @@ package com.day.qa.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import com.day.qa.toughday.core.test_annotations.After;
 import com.day.qa.toughday.core.test_annotations.Before;
 import com.day.qa.toughday.core.test_annotations.Setup;
@@ -100,13 +100,13 @@ public class DemoTest extends SequentialTestBase {
 
     /**
      * Command line argument property.
-     * Annotating your setter with CliArg will expose it to the command line as a property for this test.
-     * Properties annotated with CliArg are by default required, if the user doesn't give a value for it
+     * Annotating your setter with ConfigArg will expose it to the command line as a property for this test.
+     * Properties annotated with ConfigArg are by default required, if the user doesn't give a value for it
      * Toughday won't run. You can set the property to optional if you have a default for it
      * @param property value as given by the user in the command line. Must be of type String
      * @return usually tests respect the builder pattern and return "this", but it's not a requirement
      */
-    @CliArg(/*required = true*/)
+    @ConfigArg(/*required = true*/)
     public DemoTest setProperty(String property) {
         this.property = property;
         return this;

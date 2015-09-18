@@ -2,7 +2,7 @@ package com.day.qa.toughday.tests.composite;
 
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.CompositeTest;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import com.day.qa.toughday.tests.sequential.CreatePageTest;
 import com.day.qa.toughday.tests.sequential.DeleteAssetTest;
 import com.day.qa.toughday.tests.sequential.DeletePageTest;
@@ -43,13 +43,13 @@ public class AuthoringTest extends CompositeTest{
         return new AuthoringTest(false);
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
         deletePageTest.setParentPath(parentPath);
@@ -58,26 +58,26 @@ public class AuthoringTest extends CompositeTest{
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setResourcePath(String resourcePath) {
         uploadAssetTest.setResourcePath(resourcePath);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setMimeType(String mimeType) {
         uploadAssetTest.setMimeType(mimeType);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setPageTitle(String title) {
         this.createPageTest.setTitle(title);
         this.deletePageTest.setTitle(title);
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AuthoringTest setAssetName(String name) {
         this.uploadAssetTest.setFileName(name);
         this.deleteAssetTest.setTitle(name);

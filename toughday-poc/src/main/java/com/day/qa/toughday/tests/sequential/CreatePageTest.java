@@ -3,7 +3,7 @@ package com.day.qa.toughday.tests.sequential;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.day.qa.toughday.core.AbstractTest;
-import com.day.qa.toughday.core.cli.CliArg;
+import com.day.qa.toughday.core.config.ConfigArg;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -55,19 +55,19 @@ public class CreatePageTest extends SequentialTestBase {
         return new CreatePageTest(parentPath, template, title);
     }
 
-    @CliArg
+    @ConfigArg
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AbstractTest setParentPath(String parentPath) {
         this.parentPath = parentPath;
         return this;
     }
 
-    @CliArg
+    @ConfigArg
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;
