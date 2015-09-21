@@ -45,5 +45,5 @@ public abstract class SequentialTestBase extends AbstractTest {
         }
     }
 
-    public abstract void test() throws ClientException;
+    public abstract void test() throws Exception;
 }

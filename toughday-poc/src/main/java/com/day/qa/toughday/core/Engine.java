@@ -18,6 +18,7 @@ public class Engine {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
     private static final int RESULT_AGGREATION_DELAY = 1000; //in ms
     private static final int WAIT_TERMINATION_FACTOR = 3;
+    private static final double TIMEOUT_CHECK_FACTOR = 0.5;
     private static Random _rnd = new Random();
 
     private AbstractTest getNextTest(TestSuite testSuite) {
@@ -92,7 +93,7 @@ public class Engine {
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(testWorkers);
         executorService.execute(resultAggregator);
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers);
-        //executorService.execute(timeoutChecker);
+        executorService.execute(timeoutChecker);
         try {
             Thread.sleep(GlobalArgs.getInstance().getDuration() * 1000);
         } catch (InterruptedException e) {
@@ -169,13 +170,19 @@ public class Engine {
                         testRunning = true;
                         runner.runTest(nextTest, localRunMap);
                         testRunning = false;
+                        /* It is possible for the timeout mechanism (see AsyncTimeoutChecker) to interrupt this thread
+                         even when the test has finished running, but the thread didn't have time to update its state.
+                         In that case we clear the interrupted flag, so it doesn't affect the execution of the next test
+                         */
+                        Thread.interrupted();
                     } catch (ChildTestFailedException e) {
                         logger.warn("Exceptions from tests should not reach this point", e);
                     }
                     Thread.sleep(GlobalArgs.getInstance().getWaitTime());
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                logger.error("InterruptedException(s) should not reach this point", e);
             }
         }
     }
@@ -204,7 +211,8 @@ public class Engine {
                     publishIntermediateResults();
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                logger.error("InterruptedException(s) should not reach this point", e);
             }
             aggregateResults();
         }
@@ -222,19 +230,25 @@ public class Engine {
         public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers) {
             this.testWorkers = testWorkers;
         }
+
+        private void interruptWorkerIfTimeout(AsyncTestWorker worker) {
+            if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > GlobalArgs.getInstance().getTimeout()) {
+                worker.getWorkerThread().interrupt();
+            }
+        }
+
         @Override
         public void run() {
             try {
                 while(!finish) {
-                    Thread.sleep(GlobalArgs.getInstance().getTimeout() / 2);
+                    Thread.sleep(Math.round(Math.ceil(GlobalArgs.getInstance().getTimeout() * TIMEOUT_CHECK_FACTOR)));
                     for(AsyncTestWorker worker : testWorkers) {
-                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > GlobalArgs.getInstance().getTimeout()) {
-                            worker.getWorkerThread().interrupt();
-                        }
+                        interruptWorkerIfTimeout(worker);
                     }
                 }
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
+                logger.error("InterruptedException(s) should not reach this point", e);
             }
         }
     }
