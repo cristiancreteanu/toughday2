@@ -4,34 +4,51 @@ import com.day.qa.toughday.core.config.ConfigArg;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
+import java.util.Set;
 
 /**
  * Created by tuicu on 12/08/15.
  */
 public class TestSuite {
     private SuiteSetup setupStep;
-    private List<AbstractTest> testList;
-    private int totalWeight;
-    private HashMap<AbstractTest, Integer> weightMap;
-    private int concurrency;
-    private int waitTime;
-    private int duration;
-    private List<Publisher> publishers;
-    private int timeout;
+    private WeightMap weightMap;
+
+    private static class WeightMap extends HashMap<AbstractTest, Integer> {
+        private int totalWeight;
+
+        @Override
+        public Integer put(AbstractTest test, Integer weight) {
+            Integer previous = super.put(test, weight);
+            totalWeight += -(previous != null ? previous : 0) + weight;
+            return previous;
+        }
+
+        @Override
+        public Integer remove(Object test) {
+            Integer previous = super.remove(test);
+            totalWeight -= (previous != null ? previous : 0);
+            return previous;
+        }
+
+        public int getTotalWeight() {
+            return totalWeight;
+        }
+    }
+
 
     public TestSuite() {
-        testList = new ArrayList<>();
-        weightMap = new HashMap<>();
-        publishers = new ArrayList<>();
+        weightMap = new WeightMap();
     }
 
     public TestSuite add(AbstractTest test, int weight) {
-        testList.add(test);
-        totalWeight += weight;
         weightMap.put(test, weight);
+        return this;
+    }
+
+
+    public TestSuite addAll(TestSuite testSuite) {
+        this.weightMap.putAll(testSuite.weightMap);
         return this;
     }
 
@@ -64,69 +81,22 @@ public class TestSuite {
         return this;
     }
 
-    @ConfigArg
-    public TestSuite setConcurrency(String concurrencyString) {
-        this.concurrency = Integer.parseInt(concurrencyString);
-        return this;
+
+    public SuiteSetup getSetupStep() {
+        return setupStep;
     }
 
-    @ConfigArg
-    public TestSuite setDuration(String durationString) {
-        this.duration = Integer.parseInt(durationString);
-        return this;
-    }
-
-    @ConfigArg
-    public TestSuite setWaitTime(String waitTime) {
-        this.waitTime = Integer.parseInt(waitTime);
-        return this;
-    }
-
-    @ConfigArg
-    public TestSuite setTimeout(String timeout) {
-        this.timeout = Integer.parseInt(timeout) * 1000;
-        return this;
-    }
-
-    public TestSuite addPublisher(Publisher publisher) {
-        publishers.add(publisher);
-        return this;
-    }
 
     public HashMap<AbstractTest, Integer> getWeightMap() {
         return weightMap;
     }
 
     public int getTotalWeight() {
-        return totalWeight;
+        return weightMap.getTotalWeight();
     }
 
-    public int getConcurrency() {
-        return concurrency;
-    }
-
-    public int getWaitTime() {
-        return waitTime;
-    }
-
-    public int getDuration() {
-        return duration;
-    }
-
-    public SuiteSetup getSetupStep() {
-        return setupStep;
-    }
-
-    public List<Publisher> getPublishers() {
-        return publishers;
-    }
-
-    public List<AbstractTest> getTests() {
-        return testList;
-    }
-
-    public int getTimeout() {
-        return timeout;
+    public Set<AbstractTest> getTests() {
+        return weightMap.keySet();
     }
 }
 

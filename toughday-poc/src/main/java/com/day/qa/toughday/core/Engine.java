@@ -61,8 +61,8 @@ public class Engine {
     public Engine(TestSuite testSuite)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.testSuite = testSuite;
-        this.executorService = Executors.newFixedThreadPool(testSuite.getConcurrency() + 2);
-        this.globalRunMap = new RunMap(testSuite.getConcurrency());
+        this.executorService = Executors.newFixedThreadPool(GlobalArgs.getInstance().getConcurrency() + 2);
+        this.globalRunMap = new RunMap(GlobalArgs.getInstance().getConcurrency());
         for(AbstractTest test : testSuite.getTests()) {
             add(test);
         }
@@ -84,7 +84,7 @@ public class Engine {
             testSuite.getSetupStep().setup();
         }
         List<AsyncTestWorker> testWorkers = new ArrayList<>();
-        for(int i = 0; i < testSuite.getConcurrency(); i++) {
+        for(int i = 0; i < GlobalArgs.getInstance().getConcurrency(); i++) {
             AsyncTestWorker runner = new AsyncTestWorker(testSuite, globalRunMap.newInstance());
             testWorkers.add(runner);
             executorService.execute(runner);
@@ -94,7 +94,7 @@ public class Engine {
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers);
         //executorService.execute(timeoutChecker);
         try {
-            Thread.sleep(testSuite.getConcurrency() * 1000);
+            Thread.sleep(GlobalArgs.getInstance().getDuration() * 1000);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -108,7 +108,7 @@ public class Engine {
     }
 
     private void publishFinalResults() {
-        for(Publisher publisher : testSuite.getPublishers()) {
+        for(Publisher publisher : GlobalArgs.getInstance().getPublishers()) {
             publisher.publishFinal(globalRunMap.getTestStatistics());
         }
     }
@@ -172,7 +172,7 @@ public class Engine {
                     } catch (ChildTestFailedException e) {
                         logger.warn("Exceptions from tests should not reach this point", e);
                     }
-                    Thread.sleep(testSuite.getWaitTime());
+                    Thread.sleep(GlobalArgs.getInstance().getWaitTime());
                 }
             } catch (InterruptedException e) {
                 e.printStackTrace();
@@ -210,7 +210,7 @@ public class Engine {
         }
 
         public void publishIntermediateResults() {
-            for(Publisher publisher : testSuite.getPublishers()) {
+            for(Publisher publisher : GlobalArgs.getInstance().getPublishers()) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
             }
         }
@@ -218,19 +218,17 @@ public class Engine {
 
     private class AsyncTimeoutChecker extends AsyncEngineWorker {
         private List<AsyncTestWorker> testWorkers;
-        private TestSuite testSuite;
 
         public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers) {
             this.testWorkers = testWorkers;
-            this.testSuite = testSuite;
         }
         @Override
         public void run() {
             try {
                 while(!finish) {
-                    Thread.sleep(this.testSuite.getTimeout() / 2);
+                    Thread.sleep(GlobalArgs.getInstance().getTimeout() / 2);
                     for(AsyncTestWorker worker : testWorkers) {
-                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > testSuite.getTimeout()) {
+                        if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > GlobalArgs.getInstance().getTimeout()) {
                             worker.getWorkerThread().interrupt();
                         }
                     }

@@ -27,7 +27,6 @@ public class ConfigurationManager {
             }
         }
 
-
         if(constructor == null) {
             throw new IllegalStateException(classObject.getSimpleName() + " class must have a constructor without arguments");
         }
@@ -68,6 +67,13 @@ public class ConfigurationManager {
         GlobalArgs globalArgsObject = createObject(GlobalArgs.class, globalArgs);
         GlobalArgs.setInstance(globalArgsObject);
 
+        for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
+            Publisher publisher = createObject(
+                    ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
+                    publisherMeta.getParameters());
+            globalArgsObject.addPublisher(publisher);
+        }
+
         TestSuite suite = createObject(TestSuite.class, globalArgs);
 
         for(ConfigParams.ParametrizedObject testMeta : configParams.getTests()) {
@@ -77,13 +83,6 @@ public class ConfigurationManager {
             if(!testMeta.getParameters().containsKey("Weight"))
                 throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
             suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
-        }
-
-        for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
-            Publisher publisher = createObject(
-                    ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
-                    publisherMeta.getParameters());
-            suite.addPublisher(publisher);
         }
 
         return suite;
