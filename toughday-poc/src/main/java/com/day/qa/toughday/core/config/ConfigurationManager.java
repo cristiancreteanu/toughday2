@@ -67,6 +67,9 @@ public class ConfigurationManager {
         GlobalArgs globalArgsObject = createObject(GlobalArgs.class, globalArgs);
         GlobalArgs.setInstance(globalArgsObject);
 
+        if(configParams.getPublishers().size() == 0)
+            throw new IllegalStateException("No publishers added.");
+
         for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
             Publisher publisher = createObject(
                     ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
@@ -75,6 +78,9 @@ public class ConfigurationManager {
         }
 
         TestSuite suite = createObject(TestSuite.class, globalArgs);
+
+        if(configParams.getTests().size() == 0)
+            throw new IllegalStateException("No tests added to the suite.");
 
         for(ConfigParams.ParametrizedObject testMeta : configParams.getTests()) {
             AbstractTest test = createObject(
