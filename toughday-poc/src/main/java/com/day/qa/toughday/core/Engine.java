@@ -95,7 +95,7 @@ public class Engine {
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers);
         executorService.execute(timeoutChecker);
         try {
-            Thread.sleep(GlobalArgs.getInstance().getDuration() * 1000);
+            Thread.sleep(GlobalArgs.getInstance().getDuration() * 1000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

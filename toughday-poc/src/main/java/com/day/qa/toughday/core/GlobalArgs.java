@@ -14,10 +14,10 @@ public class GlobalArgs {
     private String user;
     private String password;
     private int concurrency;
-    private int waitTime;
-    private int duration;
+    private long waitTime;
+    private long duration;
     private List<Publisher> publishers;
-    private int timeout;
+    private long timeout;
 
     private static GlobalArgs instance;
 
@@ -32,6 +32,35 @@ public class GlobalArgs {
 
     public GlobalArgs() {
         publishers = new ArrayList<>();
+    }
+
+    private static long unitToSeconds(char unit) {
+        long factor = 1;
+        switch (unit) {
+            case 'd': factor *= 24;
+            case 'h': factor *= 60;
+            case 'm': factor *= 60;
+            case 's': factor *= 1;
+                break;
+            default:
+                throw new IllegalArgumentException("Unknown duration unit: " + unit);
+        }
+        return factor;
+    }
+
+    private static long parseDurationToSeconds(String duration) {
+        long finalDuration = 0l;
+        long intermDuration = 0;
+
+        for(char c : duration.toCharArray()) {
+            if(Character.isDigit(c)) {
+                intermDuration = intermDuration * 10 + (long) (c - '0');
+            } else {
+                finalDuration += intermDuration * unitToSeconds(c);
+                intermDuration = 0;
+            }
+        }
+        return finalDuration;
     }
 
     @ConfigArg
@@ -61,7 +90,7 @@ public class GlobalArgs {
 
     @ConfigArg
     public void setDuration(String durationString) {
-        this.duration = Integer.parseInt(durationString);
+        this.duration = parseDurationToSeconds(durationString);
     }
 
     @ConfigArg
@@ -82,11 +111,11 @@ public class GlobalArgs {
         return concurrency;
     }
 
-    public int getWaitTime() {
+    public long getWaitTime() {
         return waitTime;
     }
 
-    public int getDuration() {
+    public long getDuration() {
         return duration;
     }
 
@@ -94,7 +123,7 @@ public class GlobalArgs {
         return publishers;
     }
 
-    public int getTimeout() {
+    public long getTimeout() {
         return timeout;
     }
 
