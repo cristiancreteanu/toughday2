@@ -1,36 +1,81 @@
 package com.day.qa.toughday.core.config;
 
-import com.day.qa.toughday.core.*;
+import com.day.qa.toughday.core.AbstractTest;
+import com.day.qa.toughday.core.Publisher;
+import com.day.qa.toughday.core.ReflectionsContainer;
+import com.day.qa.toughday.core.TestSuite;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by tuicu on 18/09/15.
  */
 public class ConfigurationManager {
+    private static GlobalArgs globalArgsObject = new GlobalArgs();
+    private TestSuite suite;
 
+    public ConfigurationManager(String[] cmdLineArgs)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        this(cmdLineArgs, true);
+    }
+
+    public ConfigurationManager(String[] cmdLineArgs, boolean overrideGlobalArgs)
+            throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+        ConfigurationParser parser = getConfigurationParser(cmdLineArgs);
+        ConfigParams configParams= parser.parse(cmdLineArgs);
+
+        HashMap<String, String> globalArgs = configParams.getGlobalParams();
+
+        if(overrideGlobalArgs) {
+            setObjectProperties(globalArgsObject, globalArgs);
+        }
+
+
+        if(configParams.getPublishers().size() == 0)
+            throw new IllegalStateException("No publishers added.");
+
+        for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
+            Publisher publisher = createObject(
+                    ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
+                    publisherMeta.getParameters());
+            globalArgsObject.addPublisher(publisher);
+        }
+
+        suite = createObject(TestSuite.class, globalArgs);
+
+        if(configParams.getTests().size() == 0)
+            throw new IllegalStateException("No tests added to the suite.");
+
+        for(ConfigParams.ParametrizedObject testMeta : configParams.getTests()) {
+            AbstractTest test = createObject(
+                    ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
+                    testMeta.getParameters());
+            if(!testMeta.getParameters().containsKey("Weight"))
+                throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
+            suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
+        }
+    }
+
+    public TestSuite getTestSuite() {
+        return suite;
+    }
+
+    public static GlobalArgs getGlobalArgsInstance() {
+        return globalArgsObject;
+
+    }
     public static String propertyFromMethod(String methodName) {
         return methodName.startsWith("set") ? methodName.substring(3) : methodName;
     }
 
 
-
-    public <T> T createObject(Class<? extends T> classObject, HashMap<String, String> args)
-            throws IllegalAccessException, InvocationTargetException, InstantiationException {
-        Constructor constructor = null;
-        for(Constructor iterator : classObject.getConstructors()) {
-            if(iterator.getParameterTypes().length == 0) {
-                constructor = iterator;
-            }
-        }
-
-        if(constructor == null) {
-            throw new IllegalStateException(classObject.getSimpleName() + " class must have a constructor without arguments");
-        }
-        T testObject = (T) constructor.newInstance();
+    public static <T> T setObjectProperties(T object, HashMap<String, String> args) throws InvocationTargetException, IllegalAccessException {
+        Class classObject = object.getClass();
         for(Method method : classObject.getMethods()) {
             ConfigArg annotation = method.getAnnotation(ConfigArg.class);
             if(annotation == null) {
@@ -47,9 +92,26 @@ public class ConfigurationManager {
                     continue;
                 }
             }
-            method.invoke(testObject, value);
+            method.invoke(object, value);
         }
-        return testObject;
+        return object;
+    }
+
+    public static <T> T createObject(Class<? extends T> classObject, HashMap<String, String> args)
+            throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+        Constructor constructor = null;
+        try {
+            constructor = classObject.getConstructor(null);
+        } catch (NoSuchMethodException e) {
+            NoSuchMethodException explicitException = new NoSuchMethodException(classObject.getSimpleName()
+                    + " class must have a constructor without arguments");
+            explicitException.initCause(e);
+            throw explicitException;
+        }
+
+        T object = (T) constructor.newInstance();
+        setObjectProperties(object, args);
+        return object;
     }
 
     private ConfigurationParser getConfigurationParser(String[] args) {
@@ -57,46 +119,136 @@ public class ConfigurationManager {
         return new CliParser();
     }
 
-    public TestSuite createTestSuite(String[] args)
-            throws IllegalAccessException, InstantiationException, InvocationTargetException {
-        ConfigurationParser parser = getConfigurationParser(args);
-        ConfigParams configParams= parser.parse(args);
-
-        HashMap<String, String> globalArgs = configParams.getGlobalParams();
-
-        GlobalArgs globalArgsObject = createObject(GlobalArgs.class, globalArgs);
-        GlobalArgs.setInstance(globalArgsObject);
-
-        if(configParams.getPublishers().size() == 0)
-            throw new IllegalStateException("No publishers added.");
-
-        for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
-            Publisher publisher = createObject(
-                    ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
-                    publisherMeta.getParameters());
-            globalArgsObject.addPublisher(publisher);
-        }
-
-        TestSuite suite = createObject(TestSuite.class, globalArgs);
-
-        if(configParams.getTests().size() == 0)
-            throw new IllegalStateException("No tests added to the suite.");
-
-        for(ConfigParams.ParametrizedObject testMeta : configParams.getTests()) {
-            AbstractTest test = createObject(
-                    ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
-                    testMeta.getParameters());
-            if(!testMeta.getParameters().containsKey("Weight"))
-                throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
-            suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
-        }
-
-        return suite;
-    }
-
     public void printHelp() {
         CliParser cliParser = new CliParser();
         cliParser.printHelp();
     }
 
+    /**
+     * Created by tuicu on 07/09/15.
+     */
+    public static class GlobalArgs {
+        private String host;
+        private int port;
+        private String user;
+        private String password;
+        private int concurrency;
+        private long waitTime;
+        private long duration;
+        private List<Publisher> publishers;
+        private long timeout;
+
+        private GlobalArgs() {
+            publishers = new ArrayList<>();
+        }
+
+        private static long unitToSeconds(char unit) {
+            long factor = 1;
+            switch (unit) {
+                case 'd': factor *= 24;
+                case 'h': factor *= 60;
+                case 'm': factor *= 60;
+                case 's': factor *= 1;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown duration unit: " + unit);
+            }
+            return factor;
+        }
+
+        private static long parseDurationToSeconds(String duration) {
+            long finalDuration = 0l;
+            long intermDuration = 0;
+
+            for(char c : duration.toCharArray()) {
+                if(Character.isDigit(c)) {
+                    intermDuration = intermDuration * 10 + (long) (c - '0');
+                } else {
+                    finalDuration += intermDuration * unitToSeconds(c);
+                    intermDuration = 0;
+                }
+            }
+            return finalDuration;
+        }
+
+        @ConfigArg
+        public void setHost(String host) {
+            this.host = host;
+        }
+
+        @ConfigArg
+        public void setPort(String port) {
+            this.port = Integer.parseInt(port);
+        }
+
+        @ConfigArg
+        public void setUser(String user) {
+            this.user = user;
+        }
+
+        @ConfigArg
+        public void setPassword(String password) {
+            this.password = password;
+        }
+
+        @ConfigArg
+        public void setConcurrency(String concurrencyString) {
+            this.concurrency = Integer.parseInt(concurrencyString);
+        }
+
+        @ConfigArg
+        public void setDuration(String durationString) {
+            this.duration = parseDurationToSeconds(durationString);
+        }
+
+        @ConfigArg
+        public void setWaitTime(String waitTime) {
+            this.waitTime = Integer.parseInt(waitTime);
+        }
+
+        @ConfigArg
+        public void setTimeout(String timeout) {
+            this.timeout = Integer.parseInt(timeout) * 1000;
+        }
+
+        public void addPublisher(Publisher publisher) {
+            publishers.add(publisher);
+        }
+
+        public int getConcurrency() {
+            return concurrency;
+        }
+
+        public long getWaitTime() {
+            return waitTime;
+        }
+
+        public long getDuration() {
+            return duration;
+        }
+
+        public List<Publisher> getPublishers() {
+            return publishers;
+        }
+
+        public long getTimeout() {
+            return timeout;
+        }
+
+        public String getHost() {
+            return host;
+        }
+
+        public int getPort() {
+            return port;
+        }
+
+        public String getUser() {
+            return user;
+        }
+
+        public String getPassword() {
+            return password;
+        }
+    }
 }

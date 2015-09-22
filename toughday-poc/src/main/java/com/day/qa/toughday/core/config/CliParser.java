@@ -33,7 +33,7 @@ public class CliParser implements ConfigurationParser {
                 .desc("how long can a test run before it is interrupted and marked as failed")
                 .build());
 
-        options.addOptionGroup(getOptionsForClass(GlobalArgs.class));
+        options.addOptionGroup(getOptionsForClass(ConfigurationManager.GlobalArgs.class));
 
         for(Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()) {
             options.addOption(getOptionFromTestClass(testClass));

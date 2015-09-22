@@ -4,7 +4,7 @@ import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.day.qa.toughday.core.AbstractTest;
 import com.day.qa.toughday.core.AbstractTestRunner;
-import com.day.qa.toughday.core.GlobalArgs;
+import com.day.qa.toughday.core.config.ConfigurationManager;
 import com.day.qa.toughday.runners.SequentialTestRunner;
 
 import java.util.ArrayList;
@@ -31,9 +31,9 @@ public abstract class SequentialTestBase extends AbstractTest {
 
     public GraniteClient getDefaultClient() {
         if(defaultClient == null) {
-            defaultClient = new GraniteClient(GlobalArgs.getInstance().getHost() + ":" + GlobalArgs.getInstance().getPort(),
-                                    GlobalArgs.getInstance().getUser(),
-                                    GlobalArgs.getInstance().getPassword());
+            defaultClient = new GraniteClient(ConfigurationManager.getGlobalArgsInstance().getHost() + ":" + ConfigurationManager.getGlobalArgsInstance().getPort(),
+                                    ConfigurationManager.getGlobalArgsInstance().getUser(),
+                                    ConfigurationManager.getGlobalArgsInstance().getPassword());
 
         }
         return defaultClient;

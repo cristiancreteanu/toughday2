@@ -13,12 +13,12 @@ public class Main
 {
     public static void main( String[] args )
             throws Exception {
-        ConfigurationManager configurationManager = new ConfigurationManager();
+        ConfigurationManager configurationManager = new ConfigurationManager(args);
         if(args.length == 0 || (args.length == 1 && args[0] == "--help")) {
             configurationManager.printHelp();
         }
         else {
-            TestSuite suite = configurationManager.createTestSuite(args);
+            TestSuite suite = configurationManager.getTestSuite();
             Engine engine = new Engine(suite);
             engine.runTests();
         }

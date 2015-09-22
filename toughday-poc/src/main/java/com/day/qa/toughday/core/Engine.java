@@ -1,5 +1,6 @@
 package com.day.qa.toughday.core;
 
+import com.day.qa.toughday.core.config.ConfigurationManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,8 +63,8 @@ public class Engine {
     public Engine(TestSuite testSuite)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.testSuite = testSuite;
-        this.executorService = Executors.newFixedThreadPool(GlobalArgs.getInstance().getConcurrency() + 2);
-        this.globalRunMap = new RunMap(GlobalArgs.getInstance().getConcurrency());
+        this.executorService = Executors.newFixedThreadPool(ConfigurationManager.getGlobalArgsInstance().getConcurrency() + 2);
+        this.globalRunMap = new RunMap(ConfigurationManager.getGlobalArgsInstance().getConcurrency());
         for(AbstractTest test : testSuite.getTests()) {
             add(test);
         }
@@ -85,7 +86,7 @@ public class Engine {
             testSuite.getSetupStep().setup();
         }
         List<AsyncTestWorker> testWorkers = new ArrayList<>();
-        for(int i = 0; i < GlobalArgs.getInstance().getConcurrency(); i++) {
+        for(int i = 0; i < ConfigurationManager.getGlobalArgsInstance().getConcurrency(); i++) {
             AsyncTestWorker runner = new AsyncTestWorker(testSuite, globalRunMap.newInstance());
             testWorkers.add(runner);
             executorService.execute(runner);
@@ -95,7 +96,7 @@ public class Engine {
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers);
         executorService.execute(timeoutChecker);
         try {
-            Thread.sleep(GlobalArgs.getInstance().getDuration() * 1000L);
+            Thread.sleep(ConfigurationManager.getGlobalArgsInstance().getDuration() * 1000L);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -109,7 +110,7 @@ public class Engine {
     }
 
     private void publishFinalResults() {
-        for(Publisher publisher : GlobalArgs.getInstance().getPublishers()) {
+        for(Publisher publisher : ConfigurationManager.getGlobalArgsInstance().getPublishers()) {
             publisher.publishFinal(globalRunMap.getTestStatistics());
         }
     }
@@ -178,7 +179,7 @@ public class Engine {
                     } catch (ChildTestFailedException e) {
                         logger.warn("Exceptions from tests should not reach this point", e);
                     }
-                    Thread.sleep(GlobalArgs.getInstance().getWaitTime());
+                    Thread.sleep(ConfigurationManager.getGlobalArgsInstance().getWaitTime());
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
@@ -218,7 +219,7 @@ public class Engine {
         }
 
         public void publishIntermediateResults() {
-            for(Publisher publisher : GlobalArgs.getInstance().getPublishers()) {
+            for(Publisher publisher : ConfigurationManager.getGlobalArgsInstance().getPublishers()) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
             }
         }
@@ -232,7 +233,7 @@ public class Engine {
         }
 
         private void interruptWorkerIfTimeout(AsyncTestWorker worker) {
-            if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > GlobalArgs.getInstance().getTimeout()) {
+            if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > ConfigurationManager.getGlobalArgsInstance().getTimeout()) {
                 worker.getWorkerThread().interrupt();
             }
         }
@@ -241,7 +242,7 @@ public class Engine {
         public void run() {
             try {
                 while(!finish) {
-                    Thread.sleep(Math.round(Math.ceil(GlobalArgs.getInstance().getTimeout() * TIMEOUT_CHECK_FACTOR)));
+                    Thread.sleep(Math.round(Math.ceil(ConfigurationManager.getGlobalArgsInstance().getTimeout() * TIMEOUT_CHECK_FACTOR)));
                     for(AsyncTestWorker worker : testWorkers) {
                         interruptWorkerIfTimeout(worker);
                     }
