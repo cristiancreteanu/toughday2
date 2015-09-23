@@ -1,6 +1,7 @@
 package com.day.qa.toughday.core;
 
 import com.day.qa.toughday.core.config.ConfigArg;
+import com.day.qa.toughday.core.config.Configuration;
 
 import java.util.List;
 import java.util.UUID;
@@ -12,6 +13,7 @@ public abstract class AbstractTest {
     private UUID id;
     private String name;
     private AbstractTest parent;
+    private Configuration.GlobalArgs globalArgs;
 
     public AbstractTest() {
         this.id = UUID.randomUUID();
@@ -65,6 +67,14 @@ public abstract class AbstractTest {
         newInstance.setID(this.id);
         newInstance.setName(this.getSimpleName());
         return newInstance;
+    }
+
+    public void setGlobalArgs(Configuration.GlobalArgs globalArgs) {
+        this.globalArgs = globalArgs;
+    }
+
+    public Configuration.GlobalArgs getGlobalArgs() {
+        return globalArgs;
     }
 
     public abstract List<AbstractTest> getChildren();

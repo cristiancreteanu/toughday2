@@ -15,25 +15,19 @@ import java.util.List;
 /**
  * Created by tuicu on 18/09/15.
  */
-public class ConfigurationManager {
-    private static GlobalArgs globalArgsObject = new GlobalArgs();
+public class Configuration {
+    private GlobalArgs globalArgs;
     private TestSuite suite;
 
-    public ConfigurationManager(String[] cmdLineArgs)
-            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        this(cmdLineArgs, true);
-    }
 
-    public ConfigurationManager(String[] cmdLineArgs, boolean overrideGlobalArgs)
+    public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         ConfigurationParser parser = getConfigurationParser(cmdLineArgs);
         ConfigParams configParams= parser.parse(cmdLineArgs);
 
-        HashMap<String, String> globalArgs = configParams.getGlobalParams();
+        HashMap<String, String> globalArgsMeta = configParams.getGlobalParams();
 
-        if(overrideGlobalArgs) {
-            setObjectProperties(globalArgsObject, globalArgs);
-        }
+        this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
 
 
         if(configParams.getPublishers().size() == 0)
@@ -43,10 +37,10 @@ public class ConfigurationManager {
             Publisher publisher = createObject(
                     ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
                     publisherMeta.getParameters());
-            globalArgsObject.addPublisher(publisher);
+            this.globalArgs.addPublisher(publisher);
         }
 
-        suite = createObject(TestSuite.class, globalArgs);
+        suite = createObject(TestSuite.class, globalArgsMeta);
 
         if(configParams.getTests().size() == 0)
             throw new IllegalStateException("No tests added to the suite.");
@@ -55,6 +49,7 @@ public class ConfigurationManager {
             AbstractTest test = createObject(
                     ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
                     testMeta.getParameters());
+            test.setGlobalArgs(this.globalArgs);
             if(!testMeta.getParameters().containsKey("Weight"))
                 throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
             suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
@@ -65,10 +60,10 @@ public class ConfigurationManager {
         return suite;
     }
 
-    public static GlobalArgs getGlobalArgsInstance() {
-        return globalArgsObject;
-
+    public GlobalArgs getGlobalArgs() {
+        return globalArgs;
     }
+
     public static String propertyFromMethod(String methodName) {
         return methodName.startsWith("set") ? methodName.substring(3) : methodName;
     }
@@ -138,7 +133,7 @@ public class ConfigurationManager {
         private List<Publisher> publishers;
         private long timeout;
 
-        private GlobalArgs() {
+        public GlobalArgs() {
             publishers = new ArrayList<>();
         }
 

@@ -33,7 +33,7 @@ public class CliParser implements ConfigurationParser {
                 .desc("how long can a test run before it is interrupted and marked as failed")
                 .build());
 
-        options.addOptionGroup(getOptionsForClass(ConfigurationManager.GlobalArgs.class));
+        options.addOptionGroup(getOptionsForClass(Configuration.GlobalArgs.class));
 
         for(Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()) {
             options.addOption(getOptionFromTestClass(testClass));
@@ -70,7 +70,7 @@ public class CliParser implements ConfigurationParser {
                 if (i != 0)
                     argName += "> <";
                 Method current = properties.get(i);
-                String currentArgName = ConfigurationManager.propertyFromMethod(current.getName()) + "=val";
+                String currentArgName = Configuration.propertyFromMethod(current.getName()) + "=val";
                 currentArgName = current.getAnnotation(ConfigArg.class).required() ? currentArgName : "[" + currentArgName + "]";
                 argName += currentArgName;
             }
@@ -105,7 +105,7 @@ public class CliParser implements ConfigurationParser {
             if(m.getAnnotation(ConfigArg.class) != null) {
                 ConfigArg annotation = m.getAnnotation(ConfigArg.class);
                 group.addOption(Option.builder()
-                        .longOpt(ConfigurationManager.propertyFromMethod(m.getName()) + "=val")
+                        .longOpt(Configuration.propertyFromMethod(m.getName()) + "=val")
                         .build());
             }
          }

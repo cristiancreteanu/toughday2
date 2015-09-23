@@ -2,8 +2,7 @@ package com.day.qa.toughday;
 
 
 import com.day.qa.toughday.core.Engine;
-import com.day.qa.toughday.core.TestSuite;
-import com.day.qa.toughday.core.config.ConfigurationManager;
+import com.day.qa.toughday.core.config.Configuration;
 
 /**
  * Hello world!
@@ -13,13 +12,12 @@ public class Main
 {
     public static void main( String[] args )
             throws Exception {
-        ConfigurationManager configurationManager = new ConfigurationManager(args);
+        Configuration configuration = new Configuration(args);
         if(args.length == 0 || (args.length == 1 && args[0] == "--help")) {
-            configurationManager.printHelp();
+            configuration.printHelp();
         }
         else {
-            TestSuite suite = configurationManager.getTestSuite();
-            Engine engine = new Engine(suite);
+            Engine engine = new Engine(configuration);
             engine.runTests();
         }
     }
