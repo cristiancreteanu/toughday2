@@ -52,7 +52,13 @@ public class Configuration {
             test.setGlobalArgs(this.globalArgs);
             if(!testMeta.getParameters().containsKey("Weight"))
                 throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
-            suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
+
+            if(!testMeta.getParameters().containsKey("Timeout")) {
+                suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")));
+            } else {
+                suite.add(test, Integer.parseInt(testMeta.getParameters().get("Weight")),
+                        Integer.parseInt(testMeta.getParameters().get("Timeout")));
+            }
         }
     }
 

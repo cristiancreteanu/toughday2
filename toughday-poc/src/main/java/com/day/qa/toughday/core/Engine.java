@@ -106,6 +106,7 @@ public class Engine {
             for(AsyncTestWorker run : testWorkers)
                 run.finishExecution();
             resultAggregator.finishExecution();
+            timeoutChecker.finishExecution();
         }
         shutdownAndAwaitTermination(executorService);
         publishFinalResults();
@@ -132,6 +133,7 @@ public class Engine {
         private long lastTestStart;
         private boolean testRunning;
         private TestSuite testSuite;
+        private AbstractTest currentTest;
 
         public AsyncTestWorker(TestSuite testSuite, RunMap localRunMap) {
             this.testSuite = testSuite;
@@ -159,19 +161,21 @@ public class Engine {
             return localRunMap;
         }
 
+        public AbstractTest getCurrentTest() { return currentTest; }
+
         @Override
         public void run() {
             workerThread = Thread.currentThread();
             logger.info("Thread running: " + workerThread);
             try {
                 while (!finish) {
-                    AbstractTest nextTest = getNextTest(this.testSuite);
-                    AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(nextTest);
+                    currentTest = getNextTest(this.testSuite);
+                    AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(currentTest);
 
                     try {
                         lastTestStart = System.nanoTime();
                         testRunning = true;
-                        runner.runTest(nextTest, localRunMap);
+                        runner.runTest(currentTest, localRunMap);
                         testRunning = false;
                         /* It is possible for the timeout mechanism (see AsyncTimeoutChecker) to interrupt this thread
                          even when the test has finished running, but the thread didn't have time to update its state.
@@ -229,13 +233,36 @@ public class Engine {
 
     private class AsyncTimeoutChecker extends AsyncEngineWorker {
         private List<AsyncTestWorker> testWorkers;
+        private long minTimeout;
+        private TestSuite testSuite;
 
         public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers) {
             this.testWorkers = testWorkers;
+            this.testSuite = testSuite;
+            minTimeout = globalArgs.getTimeout();
+            for(AbstractTest test : testSuite.getTests()) {
+                if(testSuite.getTimeout(test) == null) {
+                    continue;
+                }
+                minTimeout = Math.min(minTimeout, testSuite.getTimeout(test));
+            }
         }
 
         private void interruptWorkerIfTimeout(AsyncTestWorker worker) {
-            if(worker.isTestRunning() && (System.nanoTime() - worker.getLastTestStart()) / 1000000l > globalArgs.getTimeout()) {
+            AbstractTest currentTest = worker.getCurrentTest();
+            if(currentTest == null)
+                return;
+
+            Long testTimeout = testSuite.getTimeout(currentTest);
+            long timeout = testTimeout != null ? testTimeout : globalArgs.getTimeout();
+
+            if(((System.nanoTime() - worker.getLastTestStart()) / 1000000l > timeout)
+                    && worker.isTestRunning()
+                    && currentTest == worker.getCurrentTest()) {
+                /* there is a small probability that after the if condition is evaluated
+                this thread is removed from the CPU and the worker thread starts a new test.
+                in this particular case, the new test will fail
+                 */
                 worker.getWorkerThread().interrupt();
             }
         }
@@ -244,7 +271,7 @@ public class Engine {
         public void run() {
             try {
                 while(!finish) {
-                    Thread.sleep(Math.round(Math.ceil(globalArgs.getTimeout() * TIMEOUT_CHECK_FACTOR)));
+                    Thread.sleep(Math.round(Math.ceil(minTimeout * TIMEOUT_CHECK_FACTOR)));
                     for(AsyncTestWorker worker : testWorkers) {
                         interruptWorkerIfTimeout(worker);
                     }

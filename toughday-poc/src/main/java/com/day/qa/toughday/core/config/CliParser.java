@@ -84,7 +84,7 @@ public class CliParser implements ConfigurationParser {
                 .desc("add a " + testClass.getSimpleName() + " test to the suite");
 
         String argName = getOptionArgNameForClass(testClass);
-        argName = "Weight=val" + (argName.length() != 0 ? "> <" + argName : argName);
+        argName = "Weight=val" + (argName.length() != 0 ? "> <" + argName : argName) + "> <[Timeout=val]";
         builder.hasArgs().argName(argName);
 
         return builder.build();

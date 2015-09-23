@@ -13,6 +13,7 @@ import java.util.Set;
 public class TestSuite {
     private SuiteSetup setupStep;
     private WeightMap weightMap;
+    private HashMap<AbstractTest, Long> timeoutMap;
 
     private static class WeightMap extends HashMap<AbstractTest, Integer> {
         private int totalWeight;
@@ -39,6 +40,7 @@ public class TestSuite {
 
     public TestSuite() {
         weightMap = new WeightMap();
+        timeoutMap = new HashMap<>();
     }
 
     public TestSuite add(AbstractTest test, int weight) {
@@ -46,9 +48,17 @@ public class TestSuite {
         return this;
     }
 
+    public TestSuite add(AbstractTest test, int weight, long timeout) {
+        add(test, weight);
+        timeoutMap.put(test, timeout);
+        return this;
+    }
+
+
 
     public TestSuite addAll(TestSuite testSuite) {
         this.weightMap.putAll(testSuite.weightMap);
+        this.timeoutMap.putAll(testSuite.timeoutMap);
         return this;
     }
 
@@ -84,6 +94,10 @@ public class TestSuite {
 
     public SuiteSetup getSetupStep() {
         return setupStep;
+    }
+
+    public Long getTimeout(AbstractTest test) {
+        return timeoutMap.get(test);
     }
 
 
