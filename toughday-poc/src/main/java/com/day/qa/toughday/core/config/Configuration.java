@@ -133,8 +133,22 @@ public class Configuration {
         private List<Publisher> publishers;
         private long timeout;
 
+        private static final String DEFAULT_USER = "admin";
+        private static final String DEFAULT_PASSWORD = "admin";
+        private static final int DEFAULT_PORT = 4502;
+        private static final long DEFAULT_TIMEOUT = 300000; //5minutes
+        private static final int DEFAULT_CONCURRENCY = 1;
+        private static final long DEFAULT_WAIT_TIME = 10;
+
+
         public GlobalArgs() {
-            publishers = new ArrayList<>();
+            this.publishers = new ArrayList<>();
+            this.port = DEFAULT_PORT;
+            this.user = DEFAULT_USER;
+            this.password = DEFAULT_PASSWORD;
+            this.timeout = DEFAULT_TIMEOUT;
+            this.waitTime = DEFAULT_WAIT_TIME;
+            this.concurrency = DEFAULT_CONCURRENCY;
         }
 
         private static long unitToSeconds(char unit) {
@@ -171,22 +185,22 @@ public class Configuration {
             this.host = host;
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setPort(String port) {
             this.port = Integer.parseInt(port);
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setUser(String user) {
             this.user = user;
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setPassword(String password) {
             this.password = password;
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setConcurrency(String concurrencyString) {
             this.concurrency = Integer.parseInt(concurrencyString);
         }
@@ -196,12 +210,12 @@ public class Configuration {
             this.duration = parseDurationToSeconds(durationString);
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setWaitTime(String waitTime) {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArg
+        @ConfigArg(required = false)
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
