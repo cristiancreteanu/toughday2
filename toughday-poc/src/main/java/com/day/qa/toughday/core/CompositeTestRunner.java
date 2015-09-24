@@ -9,6 +9,8 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
         super(testClass);
     }
 
+
+
     @Override
     protected void run(CompositeTest testObject, RunMap runMap) throws ChildTestFailedException {
         Long start = System.nanoTime();
@@ -24,10 +26,15 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
                     return; //don't let exceptions get to the suite
                 }
             }
+            /* Timeout can occur between steps of the composite test */
             if(Thread.interrupted()) {
                 ChildTestFailedException timeout = new ChildTestFailedException(new InterruptedException());
                 runMap.recordFail(testObject, timeout);
-                throw timeout;
+                if(testObject.getParent() != null) {
+                    throw timeout;
+                } else {
+                    return; //don't let exceptions get to the suite
+                }
             }
         }
         Long elapsed = (System.nanoTime() - start) / 1000000l;
