@@ -12,18 +12,14 @@ public class OtherTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() {
-        try {
-            Thread.sleep(10);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+    public void test() throws InterruptedException {
+        Thread.sleep(30);
         System.out.println("Other test...");
     }
 
     @Before
     public void before() {
-        System.out.println("Before");
+        //System.out.println("Before");
     }
 
     @Override

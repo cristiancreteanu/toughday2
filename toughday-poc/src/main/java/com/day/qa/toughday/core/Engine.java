@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by tuicu on 17/09/15.
@@ -19,7 +20,7 @@ public class Engine {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
     private static final int RESULT_AGGREATION_DELAY = 1000; //in ms
     private static final int WAIT_TERMINATION_FACTOR = 3;
-    private static final double TIMEOUT_CHECK_FACTOR = 0.5;
+    private static final double TIMEOUT_CHECK_FACTOR = 0.3;
     private static Random _rnd = new Random();
 
     private AbstractTest getNextTest(TestSuite testSuite) {
@@ -134,8 +135,10 @@ public class Engine {
         private boolean testRunning;
         private TestSuite testSuite;
         private AbstractTest currentTest;
+        private ReentrantLock mutex;
 
         public AsyncTestWorker(TestSuite testSuite, RunMap localRunMap) {
+            this.mutex = new ReentrantLock();
             this.testSuite = testSuite;
             localTests = new ArrayList<>();
             for(AbstractTest test : testSuite.getTests()) {
@@ -163,33 +166,34 @@ public class Engine {
 
         public AbstractTest getCurrentTest() { return currentTest; }
 
+        public ReentrantLock getMutex() { return mutex; }
+
         @Override
         public void run() {
             workerThread = Thread.currentThread();
             logger.info("Thread running: " + workerThread);
+            mutex.lock();
             try {
                 while (!finish) {
                     currentTest = getNextTest(this.testSuite);
                     AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(currentTest);
 
+                    lastTestStart = System.nanoTime();
+                    mutex.unlock();
                     try {
-                        lastTestStart = System.nanoTime();
-                        testRunning = true;
                         runner.runTest(currentTest, localRunMap);
-                        testRunning = false;
-                        /* It is possible for the timeout mechanism (see AsyncTimeoutChecker) to interrupt this thread
-                         even when the test has finished running, but the thread didn't have time to update its state.
-                         In that case we clear the interrupted flag, so it doesn't affect the execution of the next test
-                         */
-                        Thread.interrupted();
                     } catch (ChildTestFailedException e) {
                         logger.warn("Exceptions from tests should not reach this point", e);
                     }
+                    mutex.lock();
+                    Thread.interrupted();
                     Thread.sleep(globalArgs.getWaitTime());
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 logger.error("InterruptedException(s) should not reach this point", e);
+            } finally {
+                mutex.unlock();
             }
         }
     }
@@ -256,14 +260,19 @@ public class Engine {
             Long testTimeout = testSuite.getTimeout(currentTest);
             long timeout = testTimeout != null ? testTimeout : globalArgs.getTimeout();
 
-            if(((System.nanoTime() - worker.getLastTestStart()) / 1000000l > timeout)
-                    && worker.isTestRunning()
-                    && currentTest == worker.getCurrentTest()) {
-                /* there is a small probability that after the if condition is evaluated
-                this thread is removed from the CPU and the worker thread starts a new test.
-                in this particular case, the new test will fail
-                 */
-                worker.getWorkerThread().interrupt();
+            if(!worker.getMutex().tryLock()) {
+                /* nothing to interrupt. if the test was running
+                   the mutex would've been successfully acquired. */
+                return;
+            }
+            
+            try {
+                if (((System.nanoTime() - worker.getLastTestStart()) / 1000000l > timeout)
+                        && currentTest == worker.getCurrentTest()) {
+                    worker.getWorkerThread().interrupt();
+                }
+            } finally {
+                worker.getMutex().unlock();
             }
         }
 
