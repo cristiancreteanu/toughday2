@@ -120,11 +120,12 @@ public class Engine {
     }
 
     private abstract class AsyncEngineWorker implements Runnable {
-        protected boolean finish = false;
+        private boolean finish = false;
 
         public void finishExecution() {
             finish = true;
         }
+        public boolean isFinished() { return finish; }
     }
 
     private class AsyncTestWorker extends AsyncEngineWorker {
@@ -174,7 +175,7 @@ public class Engine {
             logger.info("Thread running: " + workerThread);
             mutex.lock();
             try {
-                while (!finish) {
+                while (!isFinished()) {
                     currentTest = getNextTest(this.testSuite);
                     AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(currentTest);
 
@@ -216,7 +217,7 @@ public class Engine {
         @Override
         public void run() {
             try {
-                while(!finish) {
+                while(!isFinished()) {
                     Thread.sleep(RESULT_AGGREATION_DELAY);
                     aggregateResults();
                     publishIntermediateResults();
@@ -265,7 +266,7 @@ public class Engine {
                    the mutex would've been successfully acquired. */
                 return;
             }
-            
+
             try {
                 if (((System.nanoTime() - worker.getLastTestStart()) / 1000000l > timeout)
                         && currentTest == worker.getCurrentTest()) {
@@ -279,7 +280,7 @@ public class Engine {
         @Override
         public void run() {
             try {
-                while(!finish) {
+                while(!isFinished()) {
                     Thread.sleep(Math.round(Math.ceil(minTimeout * TIMEOUT_CHECK_FACTOR)));
                     for(AsyncTestWorker worker : testWorkers) {
                         interruptWorkerIfTimeout(worker);
