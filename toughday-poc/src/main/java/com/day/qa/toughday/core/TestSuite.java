@@ -15,12 +15,14 @@ public class TestSuite {
     private SuiteSetup setupStep;
     private WeightMap weightMap;
     private HashMap<AbstractTest, Long> timeoutMap;
+    private String description = "";
 
     /**
      * Weight map class.
      */
     private static class WeightMap extends HashMap<AbstractTest, Integer> {
         private int totalWeight;
+        private HashMap<String, AbstractTest> nameMap = new HashMap<>();
 
         /**
          * Puts the test in the map with the associated weight and returns the previous weight.
@@ -30,6 +32,7 @@ public class TestSuite {
          */
         @Override
         public Integer put(AbstractTest test, Integer weight) {
+            nameMap.put(test.getSimpleName(), test);
             Integer previous = super.put(test, weight);
             totalWeight += -(previous != null ? previous : 0) + weight;
             return previous;
@@ -42,6 +45,10 @@ public class TestSuite {
          */
         @Override
         public Integer remove(Object test) {
+            if(!(test instanceof AbstractTest))
+                throw new IllegalArgumentException("Argument must extend AbstractTest");
+            nameMap.remove(((AbstractTest) test).getSimpleName());
+
             Integer previous = super.remove(test);
             totalWeight -= (previous != null ? previous : 0);
             return previous;
@@ -53,6 +60,16 @@ public class TestSuite {
          */
         public int getTotalWeight() {
             return totalWeight;
+        }
+
+        public AbstractTest getTest(String testName) {
+            if(!nameMap.containsKey(testName))
+                throw new IllegalArgumentException("Test suite doesn't contain a test with this name: " + testName);
+            return nameMap.get(testName);
+        }
+
+        public boolean contains(String testName) {
+            return nameMap.containsKey(testName);
         }
     }
 
@@ -87,11 +104,22 @@ public class TestSuite {
         timeoutMap.put(test, timeout);
         return this;
     }
+    
+    public TestSuite replaceWeight(String testName, int weight) {
+        AbstractTest test = weightMap.getTest(testName);
+        weightMap.put(test, weight);
+        return this;
+    }
+
+    public TestSuite replaceTimeout(String testName, long timeout) {
+        AbstractTest test = weightMap.getTest(testName);
+        timeoutMap.put(test, timeout);
+        return this;
+    }
 
     /**
-     * Method for merging test suites.
-     * @param testSuite
-     * @return
+     * Getter for the setup step.
+     * @return a SetupStep object if configured, null otherwise.
      */
     public TestSuite addAll(TestSuite testSuite) {
         this.weightMap.putAll(testSuite.weightMap);
@@ -152,6 +180,15 @@ public class TestSuite {
         return this;
     }
 
+    public TestSuite setDescription(String description) {
+        this.description = description;
+        return this;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
     /**
      * Getter for the setup step.
      * @return a SetupStep object if configured, null otherwise.
@@ -189,6 +226,22 @@ public class TestSuite {
      */
     public Set<AbstractTest> getTests() {
         return weightMap.keySet();
+    }
+
+    public AbstractTest getTest(String testName) {
+        return weightMap.getTest(testName);
+    }
+
+    public void remove(String testName) {
+        weightMap.remove(weightMap.getTest(testName));
+    }
+
+    public void remove(AbstractTest test) {
+        weightMap.remove(test);
+    }
+
+    public boolean contains(String testName) {
+        return weightMap.contains(testName);
     }
 }
 

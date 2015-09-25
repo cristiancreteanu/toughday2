@@ -44,8 +44,9 @@ public abstract class AbstractTest {
      * Setter for the name
      */
     @ConfigArg(required = false)
-    public void setName(String name) {
+    public AbstractTest setName(String name) {
         this.name = name;
+        return this;
     }
 
     /**

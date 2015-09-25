@@ -14,11 +14,26 @@ import java.util.List;
 
 /**
  * Created by tuicu on 18/09/15.
+ * An object that has all that configurations parsed and objects instantiated.
  */
 public class Configuration {
     private GlobalArgs globalArgs;
     private TestSuite suite;
+    PredefinedSuites predefinedSuites = new PredefinedSuites();
 
+    private TestSuite getTestSuite(HashMap<String, String> globalArgsMeta)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if(!globalArgsMeta.containsKey("Suite"))
+            return createObject(TestSuite.class, globalArgsMeta);
+
+        /* TODO allow multiple predefined test suites.
+         What happens with the setup step if two or more suites have setup steps? */
+        String testSuiteName = globalArgsMeta.get("Suite");
+        if(!predefinedSuites.containsKey(testSuiteName)) {
+            throw new IllegalArgumentException("Unknown suite: " + testSuiteName);
+        }
+        return predefinedSuites.get(testSuiteName);
+    }
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
@@ -29,27 +44,39 @@ public class Configuration {
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
 
-
-        if(configParams.getPublishers().size() == 0)
-            throw new IllegalStateException("No publishers added.");
-
-        for(ConfigParams.ParametrizedObject publisherMeta : configParams.getPublishers()) {
+        for(ConfigParams.ClassMetaObject publisherMeta : configParams.getPublishers()) {
             Publisher publisher = createObject(
                     ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
                     publisherMeta.getParameters());
             this.globalArgs.addPublisher(publisher);
         }
 
-        suite = createObject(TestSuite.class, globalArgsMeta);
+        suite = getTestSuite(globalArgsMeta);
 
-        if(configParams.getTests().size() == 0)
-            throw new IllegalStateException("No tests added to the suite.");
+        for(String testName : configParams.getTestsToExclude()) {
+            suite.remove(testName);
+        }
 
-        for(ConfigParams.ParametrizedObject testMeta : configParams.getTests()) {
+        for(ConfigParams.NamedMetaObject testMeta : configParams.getTestsToConfig()) {
+            AbstractTest testObject = suite.getTest(testMeta.getName());
+            setObjectProperties(testObject, testMeta.getParameters());
+            if (testMeta.getParameters().containsKey("Timeout")) {
+                suite.replaceTimeout(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("Timeout")));
+            }
+            if (testMeta.getParameters().containsKey("Weight")) {
+                    suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("Weight")));
+            }
+        }
+
+        for(ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
+            String testName = testMeta.getParameters().get("Name");
+            if(suite.contains(testName)) {
+                throw new IllegalArgumentException("Suite already contains a test named: " + testName);
+            }
+
             AbstractTest test = createObject(
                     ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
                     testMeta.getParameters());
-            test.setGlobalArgs(this.globalArgs);
             if(!testMeta.getParameters().containsKey("Weight"))
                 throw new IllegalArgumentException("Property Weight is required for class " + test.getClass().getSimpleName());
 
@@ -60,6 +87,20 @@ public class Configuration {
                         Integer.parseInt(testMeta.getParameters().get("Timeout")));
             }
         }
+
+        for(AbstractTest test : suite.getTests()) {
+            test.setGlobalArgs(this.globalArgs);
+        }
+
+        if(suite.getTests().size() == 0)
+            throw new IllegalStateException("No tests added to the suite.");
+
+        if(globalArgs.getPublishers().size() == 0)
+            throw new IllegalStateException("No publishers added.");
+    }
+
+    public HashMap<String, TestSuite> getPredefinedSuites(){
+        return predefinedSuites;
     }
 
     public TestSuite getTestSuite() {
@@ -206,22 +247,22 @@ public class Configuration {
             this.password = password;
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, desc = "number of concurrent users")
         public void setConcurrency(String concurrencyString) {
             this.concurrency = Integer.parseInt(concurrencyString);
         }
 
-        @ConfigArg
+        @ConfigArg(desc = "how long will toughday run")
         public void setDuration(String durationString) {
             this.duration = parseDurationToSeconds(durationString);
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds")
         public void setWaitTime(String waitTime) {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, desc ="how long can a test run before it is interrupted and marked as failed")
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }

@@ -1,133 +1,70 @@
 package com.day.qa.toughday.core.config;
 
 import com.day.qa.toughday.core.*;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionGroup;
-import org.apache.commons.cli.Options;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by tuicu on 27/08/15.
  */
 public class CliParser implements ConfigurationParser {
-    private Options options; //used for printing help message only
+    private static final List<String> actions;
+    private static final HashMap<String, String> actionsParams;
+    private static final HashMap<String, String> actionsDescription;
 
-    public CliParser() {
+    static {
+        actions = new ArrayList<>();
+        actions.add("add");
+        actions.add("config");
+        actions.add("exclude");
 
-        options = new Options();
-        options = new Options();
-        options.addOption(Option.builder().longOpt("Duration=val")
-                .desc("how long will toughday run")
-                .build());
-        options.addOption(Option.builder().longOpt("WaitTime=val")
-                .desc("wait time between two consecutive test runs for a user in milliseconds")
-                .build());
-        options.addOption(Option.builder().longOpt("Concurrency=val")
-                .desc("number of concurrent users")
-                .build());
-        options.addOption(Option.builder().longOpt("Timeout=val")
-                .desc("how long can a test run before it is interrupted and marked as failed")
-                .build());
+        actionsParams = new HashMap<>();
+        actionsParams.put("add", "TestClass/PublisherClass property1=val property2=val");
+        actionsParams.put("config", "TestName property1=val property2=val");
+        actionsParams.put("exclude", "TestName");
 
-        options.addOptionGroup(getOptionsForClass(Configuration.GlobalArgs.class));
-
-        for(Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()) {
-            options.addOption(getOptionFromTestClass(testClass));
-        }
-
-        for(Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
-            options.addOption(getOptionFromPublisher(publisherClass));
-        }
-
-
-        String desc = "add setup step for the suite. \"val\" can be:";
-        for(Class<? extends SuiteSetup> suiteSetupClass : ReflectionsContainer.getInstance().getSuiteSetupClasses().values()) {
-            desc += " " + suiteSetupClass.getSimpleName();
-        }
-        options.addOption(Option.builder().longOpt("SetupStep=val").desc(desc).required(false).build());
+        actionsDescription = new HashMap<>();
+        actionsDescription.put("add", "add a test to the suite or a publisher");
+        actionsDescription.put("config", "override parameters for a test from a predefined suite");
+        actionsDescription.put("exclude", "exclude a test from a predefined suite");
     }
 
-
-    private String getOptionArgNameForClass(Class<?> klass) {
-        ArrayList<Method> properties = new ArrayList<>();
-        for(Method method : klass.getMethods()) {
-            if(method.getAnnotation(ConfigArg.class) != null) {
-                if(method.getParameterTypes().length != 1 || !method.getParameterTypes()[0].isAssignableFrom(String.class)) {
-                    throw new IllegalStateException("Setters annotated with ConfigArg must have one parameter of type String");
-                }
-                properties.add(method);
-            }
-        }
-
-        String argName = "";
-
-        if(properties.size() != 0) {
-            for (int i = 0; i < properties.size(); i++) {
-                if (i != 0)
-                    argName += "> <";
-                Method current = properties.get(i);
-                String currentArgName = Configuration.propertyFromMethod(current.getName()) + "=val";
-                currentArgName = current.getAnnotation(ConfigArg.class).required() ? currentArgName : "[" + currentArgName + "]";
-                argName += currentArgName;
-            }
-        }
-        return argName;
+    private static String getActionParams(String action) {
+        return actionsParams.get(action) != null ? actionsParams.get(action) : "";
     }
 
-    private Option getOptionFromTestClass(Class<? extends AbstractTest> testClass) {
-        Option.Builder builder = Option.builder()
-                .longOpt(testClass.getSimpleName())
-                .desc("add a " + testClass.getSimpleName() + " test to the suite");
-
-        String argName = getOptionArgNameForClass(testClass);
-        argName = "Weight=val" + (argName.length() != 0 ? "> <" + argName : argName) + "> <[Timeout=val]";
-        builder.hasArgs().argName(argName);
-
-        return builder.build();
+    private static String getActionDescription(String action) {
+        return actionsDescription.get(action) != null ? actionsDescription.get(action) : "";
     }
 
-    public Option getOptionFromPublisher(Class<? extends Publisher> publisher) {
-        Option.Builder builder = Option.builder()
-                .longOpt(publisher.getSimpleName())
-                .desc("add a " + publisher.getSimpleName() + " publisher");
-
-        String argName = getOptionArgNameForClass(publisher);
-        return argName.length() == 0 ? builder.build() : builder.hasArgs().argName(argName).build();
-    }
-
-    public OptionGroup getOptionsForClass(Class klass) {
-        OptionGroup group = new OptionGroup();
-        for(Method m : klass.getMethods()) {
-            if(m.getAnnotation(ConfigArg.class) != null) {
-                ConfigArg annotation = m.getAnnotation(ConfigArg.class);
-                group.addOption(Option.builder()
-                        .longOpt(Configuration.propertyFromMethod(m.getName()) + "=val")
-                        .build());
-            }
-         }
-        return group;
-    }
-
-
+    /**
+     * Method for parsing and adding a property to the args map.
+     * @param propertyAndValue string that contains both the property name and the property value separated by "="
+     * @param args map in which the parsed property should be put
+     */
     private void parseAndAddProperty(String propertyAndValue, HashMap<String, String> args) {
-        String[] optionValue = propertyAndValue.split("=");
+        //TODO handle spaces.
+        String[] optionValue = propertyAndValue.split("=", 2);
         if(optionValue.length != 2)
             throw new IllegalArgumentException("Properties must have the following form: property=value. Found: " + propertyAndValue);
         args.put(optionValue[0], optionValue[1]);
     }
 
+    /**
+     * Implementation of parser interface
+     * @param cmdLineArgs command line arguments
+     * @return a populated ConfigParams object
+     */
     public ConfigParams parse(String[] cmdLineArgs) {
         HashMap<String, String> globalArgs = new HashMap<>();
         ConfigParams configParams = new ConfigParams();
         for(String arg : cmdLineArgs) {
             if(arg.startsWith("--")) {
                 arg = arg.substring(2);
-                if (!(ReflectionsContainer.getInstance().getTestClasses().containsKey(arg)
-                        || ReflectionsContainer.getInstance().getPublisherClasses().containsKey(arg))) {
+                if (!actions.contains(arg)) {
                     parseAndAddProperty(arg, globalArgs);
                 }
             }
@@ -137,19 +74,34 @@ public class CliParser implements ConfigurationParser {
 
         for(int i = 0; i < cmdLineArgs.length; i++) {
             if(cmdLineArgs[i].startsWith("--")) {
-                String option = cmdLineArgs[i].substring(2);
-                if(ReflectionsContainer.getInstance().getTestClasses().containsKey(option)
-                        || ReflectionsContainer.getInstance().getPublisherClasses().containsKey(option)) {
+                String action = cmdLineArgs[i].substring(2);
+                if(actions.contains(action)) {
+                    String identifier = cmdLineArgs[i + 1];
                     HashMap<String, String> args = new HashMap<>();
-                    for(int j = i + 1; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
+                    for (int j = i + 2; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
                         parseAndAddProperty(cmdLineArgs[j], args);
                         i = j;
                     }
-                    if(ReflectionsContainer.getInstance().getTestClasses().containsKey(option)) {
-                        configParams.addTest(option, args);
-                    }
-                    else if(ReflectionsContainer.getInstance().getPublisherClasses().containsKey(option)) {
-                        configParams.addPublisher(option, args);
+                    if (action.equals("add")) {
+                        if(ReflectionsContainer.getInstance().getTestClasses().containsKey(identifier)) {
+                            configParams.addTest(identifier, args);
+                        } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
+                            configParams.addPublisher(identifier, args);
+                        } else {
+                            throw new IllegalArgumentException("Unknown publisher or test class: " + identifier);
+                        }
+                    } else if (action.equals("config")) {
+                        configParams.configTest(identifier, args);
+                    } else if (action.equals("exclude")) {
+                        if(args.size() != 0) {
+                            throw new IllegalArgumentException("--exclude cannot have properties for identifier: " + identifier);
+                        }
+
+                        if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
+                            //TODO
+                        } else {
+                            configParams.excludeTest(identifier);
+                        }
                     }
                 }
             }
@@ -158,8 +110,80 @@ public class CliParser implements ConfigurationParser {
         return configParams;
     }
 
-    public void printHelp() {
-        HelpFormatter helpFormatter = new HelpFormatter();
-        helpFormatter.printHelp(100, "toughday","", options, "");
+    /**
+     * Get the complete description for SuiteSetup parameter.
+     */
+    private String getSuiteSetupDescription() {
+        String suiteSetupDesc = "setup step for the test suite. where \"val\" can be: ";
+        for(Class<? extends SuiteSetup> suiteSetupClass : ReflectionsContainer.getInstance().getSuiteSetupClasses().values()) {
+            suiteSetupDesc += " " + suiteSetupClass.getSimpleName();
+        }
+        return suiteSetupDesc;
     }
+
+    /**
+     * Method for printing the help message
+     */
+    public void printHelp() {
+        System.out.println("usage: java -jar <toughday-jar> <global arguments>|<actions>");
+        System.out.println("global arguments:");
+
+        for(Method method : Configuration.GlobalArgs.class.getMethods()) {
+            if(method.getAnnotation(ConfigArg.class) != null) {
+                ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+                System.out.println("\t--" + Configuration.propertyFromMethod(method.getName()) + "=val"
+                        + "\t\t\t\t" + annotation.desc());
+            }
+        }
+        System.out.println("\t--SuiteSetup=val" + "\t\t\t\t" + getSuiteSetupDescription());
+        System.out.println("\t--Suite=val" + "\t\t\t\t" + "where \"val\" can be one, or more predefined suite. (use comas to separate them)");
+
+        System.out.println();
+        System.out.println("available actions:");
+        for(String action : actions) {
+            System.out.println("\t--" + action + " " + getActionParams(action)
+                    + "\t\t\t\t " + getActionDescription(action));
+        }
+
+        PredefinedSuites predefinedSuites = new PredefinedSuites();
+        System.out.println();
+        System.out.println("predefined suites");
+        for(String testSuiteName : predefinedSuites.keySet()) {
+            TestSuite testSuite = predefinedSuites.get(testSuiteName);
+            System.out.println("\t" + testSuiteName + "\t\t\t\t" + testSuite.getDescription());
+            for(AbstractTest test : testSuite.getTests()) {
+                System.out.println("\t\t" + test.getName() + " [" + test.getClass().getSimpleName() + "]");
+                //TODO print default properties
+            }
+        }
+
+        System.out.println();
+        System.out.println("available test classes:");
+        for(Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
+            System.out.println("\t" + testClass.getSimpleName());
+            for(Method method : testClass.getMethods()) {
+                if(method.getAnnotation(ConfigArg.class) != null) {
+                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+                    System.out.println("\t\t" + Configuration.propertyFromMethod(method.getName()) + "=val"
+                            + "\t\t\t\t" + "required=" + (annotation.required() ? "true" : "false") + "\t\t\t\t" + annotation.desc());
+                }
+            }
+            System.out.println("\t\t" + "Weight=val" + "\t\t\t\t" + "required=true");
+            System.out.println("\t\t" + "Timeout=val"+ "\t\t\t\t" + "required=false");
+        }
+
+        System.out.println();
+        System.out.println("available publishers classes:");
+        for(Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
+            System.out.println("\t" + publisherClass.getSimpleName());
+            for (Method method : publisherClass.getMethods()) {
+                if (method.getAnnotation(ConfigArg.class) != null) {
+                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+                    System.out.println("\t\t" + Configuration.propertyFromMethod(method.getName()) + "=val"
+                            + "\t\t\t\t" + "required=" + (annotation.required() ? "true" : "false") + "\t\t\t\t" + annotation.desc());
+                }
+            }
+        }
+    }
+
 }
