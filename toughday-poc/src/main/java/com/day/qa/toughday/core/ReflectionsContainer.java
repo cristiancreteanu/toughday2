@@ -52,9 +52,9 @@ public class ReflectionsContainer {
         for(Class<? extends SuiteSetup> suiteSetupClass : reflections.getSubTypesOf(SuiteSetup.class)) {
             if(Modifier.isAbstract(suiteSetupClass.getModifiers()))
                 continue;
-            if(publisherClasses.containsKey(suiteSetupClass.getSimpleName()))
-                throw new IllegalStateException("A publisher class with this name already exists here: "
-                        + publisherClasses.get(suiteSetupClass.getSimpleName()).getName());
+            if(suiteSetupClasses.containsKey(suiteSetupClass.getSimpleName()))
+                throw new IllegalStateException("A suite class with this name already exists here: "
+                        + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
         }
 
