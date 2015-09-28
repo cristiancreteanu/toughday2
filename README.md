@@ -1,7 +1,7 @@
 # toughday2
 Toughday 2.0
 
-usage: java -jar <toughday-jar> <global arguments>|<actions>
+usage: java -jar \<toughday-jar\> \<global arguments\>|\<actions\>
 
 * global arguments:
 --Host=val
