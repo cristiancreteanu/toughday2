@@ -25,10 +25,10 @@ global arguments:
 
 
 available actions:
-	--add TestClass/PublisherClass property1=val property2=val    add a test to the suite or a publisher
+--add TestClass/PublisherClass property1=val property2=val    add a test to the suite or a publisher
 
-	--config TestName property1=val property2=val                 override parameters for a test from a predefined suite
+--config TestName property1=val property2=val                 override parameters for a test from a predefined suite
 
-	--exclude TestName                                            exclude a test from a predefined suite
+--exclude TestName                                            exclude a test from a predefined suite
 	
 For more details run java -jar <toughday-jar> --help
