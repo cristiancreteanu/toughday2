@@ -11,7 +11,6 @@ global arguments:
 	--WaitTime=val				wait time between two consecutive test runs for a user in milliseconds
 	--Timeout=val				how long can a test run before it is interrupted and marked as failed
 	--Port=val				
-2015-09-28 17:05:58 INFO  Reflections:229 - Reflections took 109 ms to scan 1 urls, producing 17 keys and 41 values 
 	--SuiteSetup=val				setup step for the test suite. where "val" can be:  DummySuiteSetup
 	--Suite=val				where "val" can be one, or more predefined suite. (use comas to separate them)
 
