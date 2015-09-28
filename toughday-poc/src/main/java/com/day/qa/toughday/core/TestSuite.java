@@ -104,13 +104,25 @@ public class TestSuite {
         timeoutMap.put(test, timeout);
         return this;
     }
-    
+
+    /**
+     * Method for replacing the weight for a test
+     * @param testName
+     * @param weight
+     * @return
+     */
     public TestSuite replaceWeight(String testName, int weight) {
         AbstractTest test = weightMap.getTest(testName);
         weightMap.put(test, weight);
         return this;
     }
 
+    /**
+     * Method for replacing the weight for a test
+     * @param testName
+     * @param timeout
+     * @return
+     */
     public TestSuite replaceTimeout(String testName, long timeout) {
         AbstractTest test = weightMap.getTest(testName);
         timeoutMap.put(test, timeout);
@@ -180,11 +192,20 @@ public class TestSuite {
         return this;
     }
 
+    /**
+     * Method for setting the description
+     * @param description
+     * @return
+     */
     public TestSuite setDescription(String description) {
         this.description = description;
         return this;
     }
 
+    /**
+     * Getter for the description
+     * @return
+     */
     public String getDescription() {
         return description;
     }
@@ -228,18 +249,36 @@ public class TestSuite {
         return weightMap.keySet();
     }
 
+    /**
+     * Getter for a name given a test
+     * @param testName
+     * @return
+     */
     public AbstractTest getTest(String testName) {
         return weightMap.getTest(testName);
     }
 
+    /**
+     * Method for removing a test given it's name
+     * @param testName
+     */
     public void remove(String testName) {
         weightMap.remove(weightMap.getTest(testName));
     }
 
+    /**
+     * Method for removing a test
+     * @param test
+     */
     public void remove(AbstractTest test) {
         weightMap.remove(test);
     }
 
+    /**
+     * Method for finding if the suite contains a test with the given name
+     * @param testName
+     * @return
+     */
     public boolean contains(String testName) {
         return weightMap.contains(testName);
     }

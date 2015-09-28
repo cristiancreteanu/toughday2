@@ -17,7 +17,7 @@ import java.lang.reflect.Method;
  * replicated for each thread. Aside from setup step execution, this class is not thread safe. Any other required
  * synchronization must be implemented by subtypes, but it could affect the throughput of the executed tests. Ideally
  * runners should have no state.
- * TODO: investigate what happens if there are multiple engines.
+ * TODO: investigate what happens if there are multiple engines. Since they use the same container, Setup will not work correctly
  */
 public abstract class AbstractTestRunner<T extends AbstractTest> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTestRunner.class);
@@ -59,8 +59,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param testObject
      */
     protected void executeSetup(AbstractTest testObject) {
-        /* Before making changes here, make sure you understand correctly what happens. :)
-        The synchronized block, the second if and the assignation of the variable setupExecuted only after
+        /* The synchronized block, the second if and the assignation of the variable setupExecuted only after
         the call of the method, are to ensure that the setup is executed exactly once, even if this runner is used
         by multiple threads. The first if is to ensure that no bottleneck occurs due to synchronization. */
         if(!setupExecuted) {

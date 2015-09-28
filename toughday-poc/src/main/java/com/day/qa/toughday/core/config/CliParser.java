@@ -9,6 +9,7 @@ import java.util.List;
 
 /**
  * Created by tuicu on 27/08/15.
+ * Parser for the command line arguments. It also prints the help message.
  */
 public class CliParser implements ConfigurationParser {
     private static final List<String> actions;

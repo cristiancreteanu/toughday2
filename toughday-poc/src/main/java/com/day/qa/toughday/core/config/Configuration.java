@@ -99,23 +99,48 @@ public class Configuration {
             throw new IllegalStateException("No publishers added.");
     }
 
+    /**
+     * Getter for the predefined suites
+     * @return
+     */
     public HashMap<String, TestSuite> getPredefinedSuites(){
         return predefinedSuites;
     }
 
+    /**
+     * Getter for the suite
+     * @return
+     */
     public TestSuite getTestSuite() {
         return suite;
     }
 
+    /**
+     * Getter for the global args
+     * @return
+     */
     public GlobalArgs getGlobalArgs() {
         return globalArgs;
     }
 
+    /**
+     * Method for getting the property from a setter method
+     * @param methodName
+     * @return
+     */
     public static String propertyFromMethod(String methodName) {
         return methodName.startsWith("set") ? methodName.substring(3) : methodName;
     }
 
-
+    /**
+     * Method for setting an object properties annotated with ConfigArg using reflection
+     * @param object
+     * @param args
+     * @param <T>
+     * @return the object with the properties set
+     * @throws InvocationTargetException caused by reflection
+     * @throws IllegalAccessException caused by reflection
+     */
     public static <T> T setObjectProperties(T object, HashMap<String, String> args) throws InvocationTargetException, IllegalAccessException {
         Class classObject = object.getClass();
         for(Method method : classObject.getMethods()) {
@@ -139,6 +164,17 @@ public class Configuration {
         return object;
     }
 
+    /**
+     * Method for creating and configuring an object using reflection
+     * @param classObject
+     * @param args
+     * @param <T>
+     * @return
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws NoSuchMethodException
+     */
     public static <T> T createObject(Class<? extends T> classObject, HashMap<String, String> args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         Constructor constructor = null;
@@ -156,18 +192,19 @@ public class Configuration {
         return object;
     }
 
+    /**
+     * Method for getting the parser for the configuration.
+     * @param args
+     * @return
+     */
     private ConfigurationParser getConfigurationParser(String[] args) {
-        //Insert logic here to select from other types of parsers
+        //TODO Insert logic here to select from other types of parsers
         return new CliParser();
-    }
-
-    public void printHelp() {
-        CliParser cliParser = new CliParser();
-        cliParser.printHelp();
     }
 
     /**
      * Created by tuicu on 07/09/15.
+     * Class for global arguments.
      */
     public static class GlobalArgs {
         private String host;
@@ -187,7 +224,9 @@ public class Configuration {
         private static final int DEFAULT_CONCURRENCY = 1;
         private static final long DEFAULT_WAIT_TIME = 10;
 
-
+        /**
+         * Constructor
+         */
         public GlobalArgs() {
             this.publishers = new ArrayList<>();
             this.port = DEFAULT_PORT;
