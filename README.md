@@ -2,7 +2,8 @@
 Toughday 2.0
 
 usage: java -jar <toughday-jar> <global arguments>|<actions>
-global arguments:
+
+* global arguments:
 --Host=val
 
 --User=val
@@ -24,7 +25,8 @@ global arguments:
 --Suite=val        where "val" can be one, or more predefined suite. (use comas to separate them)
 
 
-available actions:
+* available actions:
+
 --add TestClass/PublisherClass property1=val property2=val    add a test to the suite or a publisher
 
 --config TestName property1=val property2=val                 override parameters for a test from a predefined suite
