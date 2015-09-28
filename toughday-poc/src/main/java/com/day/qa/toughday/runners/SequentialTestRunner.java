@@ -8,6 +8,7 @@ import com.day.qa.toughday.tests.sequential.SequentialTestBase;
 
 /**
  * Created by tuicu on 04/09/15.
+ * Runner for a sequential test.
  */
 public class SequentialTestRunner extends AbstractTestRunner<SequentialTestBase> {
     public SequentialTestRunner(Class<? extends AbstractTest> testClass) {

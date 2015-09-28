@@ -7,6 +7,7 @@ import java.util.Map;
 
 /**
  * Created by tuicu on 19/08/15.
+ * Map for storing benchmarks. Thread safe for benchmarking operations. Not thread safe for  adding and removing tests.
  */
 public class RunMap {
     private HashMap<AbstractTest, TestEntry> runMap;

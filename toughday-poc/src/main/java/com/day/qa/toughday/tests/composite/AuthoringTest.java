@@ -10,6 +10,7 @@ import com.day.qa.toughday.tests.sequential.UploadAssetTest;
 
 /**
  * Created by tuicu on 10/09/15.
+ * Authoring test. Steps: create page, upload asset, delete page, delete asset.
  */
 public class AuthoringTest extends CompositeTest{
     private CreatePageTest createPageTest;

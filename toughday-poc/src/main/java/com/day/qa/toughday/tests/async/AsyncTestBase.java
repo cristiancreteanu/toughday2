@@ -10,6 +10,7 @@ import java.util.List;
 
 /**
  * Created by tuicu on 04/09/15.
+ * Base class for async tests.
  */
 public abstract class AsyncTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();

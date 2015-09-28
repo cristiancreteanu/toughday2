@@ -9,15 +9,25 @@ import java.util.Set;
 
 /**
  * Created by tuicu on 12/08/15.
+ * Test suite class.
  */
 public class TestSuite {
     private SuiteSetup setupStep;
     private WeightMap weightMap;
     private HashMap<AbstractTest, Long> timeoutMap;
 
+    /**
+     * Weight map class.
+     */
     private static class WeightMap extends HashMap<AbstractTest, Integer> {
         private int totalWeight;
 
+        /**
+         * Puts the test in the map with the associated weight and returns the previous weight.
+         * @param test
+         * @param weight
+         * @return
+         */
         @Override
         public Integer put(AbstractTest test, Integer weight) {
             Integer previous = super.put(test, weight);
@@ -25,6 +35,11 @@ public class TestSuite {
             return previous;
         }
 
+        /**
+         * Removes the test from the map.
+         * @param test
+         * @return
+         */
         @Override
         public Integer remove(Object test) {
             Integer previous = super.remove(test);
@@ -32,36 +47,68 @@ public class TestSuite {
             return previous;
         }
 
+        /**
+         * Getter for the total weight.
+         * @return
+         */
         public int getTotalWeight() {
             return totalWeight;
         }
     }
 
-
+    /**
+     * Constructor.
+     */
     public TestSuite() {
         weightMap = new WeightMap();
         timeoutMap = new HashMap<>();
     }
 
+    /**
+     * Method for adding a test with the weight.
+     * @param test
+     * @param weight
+     * @return this object. (builder pattern)
+     */
     public TestSuite add(AbstractTest test, int weight) {
         weightMap.put(test, weight);
         return this;
     }
 
+    /**
+     * Method for adding a test with weight and timeout.
+     * @param test
+     * @param weight
+     * @param timeout
+     * @return
+     */
     public TestSuite add(AbstractTest test, int weight, long timeout) {
         add(test, weight);
         timeoutMap.put(test, timeout);
         return this;
     }
 
-
-
+    /**
+     * Method for merging test suites.
+     * @param testSuite
+     * @return
+     */
     public TestSuite addAll(TestSuite testSuite) {
         this.weightMap.putAll(testSuite.weightMap);
         this.timeoutMap.putAll(testSuite.timeoutMap);
         return this;
     }
 
+    /**
+     * Setter for the setup step, as seen from the configuration.
+     * @param setupStepClassName
+     * @return this object. (builder pattern)
+     * @throws ClassNotFoundException caused by reflection
+     * @throws NoSuchMethodException caused by reflection
+     * @throws IllegalAccessException caused by reflection
+     * @throws InvocationTargetException caused by reflection
+     * @throws InstantiationException caused by reflection
+     */
     @ConfigArg(required = false)
     public TestSuite setSetupStep(String setupStepClassName)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
@@ -77,7 +124,16 @@ public class TestSuite {
         return this;
     }
 
-
+    /**
+     * Overload of setSetupStep.
+     * @param setupStepClass
+     * @return this object. (builder pattern)
+     * @throws ClassNotFoundException caused by reflection
+     * @throws NoSuchMethodException caused by reflection
+     * @throws IllegalAccessException caused by reflection
+     * @throws InvocationTargetException caused by reflection
+     * @throws InstantiationException caused by reflection
+     */
     public TestSuite setSetupStep(Class<? extends SuiteSetup> setupStepClass)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
@@ -86,29 +142,51 @@ public class TestSuite {
         return this;
     }
 
+    /**
+     * Overload of setSetupStep.
+     * @param setupStep
+     * @return
+     */
     public TestSuite setSetupStep(SuiteSetup setupStep) {
         this.setupStep = setupStep;
         return this;
     }
 
-
+    /**
+     * Getter for the setup step.
+     * @return a SetupStep object if configured, null otherwise.
+     */
     public SuiteSetup getSetupStep() {
         return setupStep;
     }
 
+    /**
+     * Method for getting the timeout for a specific test.
+     * @param test
+     * @return the timeout if configured, null otherwise.
+     */
     public Long getTimeout(AbstractTest test) {
         return timeoutMap.get(test);
     }
 
-
+    /**
+     * Getter for the weight map.
+     * @return
+     */
     public HashMap<AbstractTest, Integer> getWeightMap() {
         return weightMap;
     }
 
+    /**
+     * Getter for the total weight.
+     */
     public int getTotalWeight() {
         return weightMap.getTotalWeight();
     }
 
+    /**
+     * Getter for the test set.
+     */
     public Set<AbstractTest> getTests() {
         return weightMap.keySet();
     }

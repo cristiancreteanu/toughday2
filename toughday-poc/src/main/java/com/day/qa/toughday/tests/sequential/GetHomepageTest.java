@@ -5,6 +5,7 @@ import com.day.qa.toughday.core.AbstractTest;
 
 /**
  * Created by tuicu on 08/09/15.
+ * Test for getting the homepage.
  */
 public class GetHomepageTest extends SequentialTestBase {
 

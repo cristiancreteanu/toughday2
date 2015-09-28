@@ -7,6 +7,7 @@ import java.lang.annotation.Target;
 
 /**
  * Created by tuicu on 20/08/15.
+ * Annotation for executing a method before each run of a test.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)

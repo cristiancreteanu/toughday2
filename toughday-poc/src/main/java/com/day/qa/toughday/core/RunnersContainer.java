@@ -9,6 +9,7 @@ import java.util.HashMap;
 
 /**
  * Created by tuicu on 09/09/15.
+ * Container for runners.
  */
 public class RunnersContainer {
     private static final Logger logger = LoggerFactory.getLogger(RunnersContainer.class);
@@ -20,6 +21,14 @@ public class RunnersContainer {
         this.testRunners = new HashMap<>();
     }
 
+    /**
+     * Adds a runner to the container for the specified test.
+     * @param test the test for which a runner will be added to the container
+     * @throws IllegalAccessException caused by reflection
+     * @throws InvocationTargetException caused by reflection
+     * @throws InstantiationException caused by reflection
+     * @throws NoSuchMethodException caused by reflection
+     */
     public void addRunner(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         if(!testRunners.containsKey(test.getClass())) {
@@ -34,6 +43,11 @@ public class RunnersContainer {
         }
     }
 
+    /**
+     * Method for getting the runner for the specified test, only if the test was previously added.
+     * @param test
+     * @return the runner for the specified test if it was previously added, null otherwise.
+     */
     public AbstractTestRunner getRunner(AbstractTest test) {
         return testRunners.get(test);
     }

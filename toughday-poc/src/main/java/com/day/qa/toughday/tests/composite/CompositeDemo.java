@@ -9,6 +9,7 @@ import com.day.qa.toughday.tests.sequential.*;
 
 /**
  * Created by tuicu on 16/09/15.
+ * Composite demo test.
  */
 public class CompositeDemo extends CompositeTest {
     DemoTest test1;

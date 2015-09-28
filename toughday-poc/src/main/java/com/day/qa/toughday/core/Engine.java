@@ -15,6 +15,7 @@ import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by tuicu on 17/09/15.
+ * Engine for running a test suite.
  */
 public class Engine {
     private static final Logger logger = LoggerFactory.getLogger(Engine.class);
@@ -23,7 +24,10 @@ public class Engine {
     private static final double TIMEOUT_CHECK_FACTOR = 0.3;
     private static Random _rnd = new Random();
 
-    private AbstractTest getNextTest(TestSuite testSuite) {
+    /**
+     * Method for getting the next weighted random test form the test suite
+     */
+    private static AbstractTest getNextTest(TestSuite testSuite) {
         int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
 
         AbstractTest selectedTest = null;
@@ -39,6 +43,10 @@ public class Engine {
         return selectedTest;
     }
 
+    /**
+     * Method for forcing a ExecutorService to finnish.
+     * @param pool
+     */
     void shutdownAndAwaitTermination(ExecutorService pool) {
         pool.shutdown(); // Disable new tasks from being submitted
         try {
@@ -62,6 +70,14 @@ public class Engine {
     private ExecutorService executorService;
     private RunMap globalRunMap;
 
+    /**
+     * Constructor
+     * @param configuration A Configuration object.
+     * @throws InvocationTargetException caused by reflection
+     * @throws NoSuchMethodException caused by reflection
+     * @throws InstantiationException caused by reflection
+     * @throws IllegalAccessException caused by reflection
+     */
     public Engine(Configuration configuration)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.testSuite = configuration.getTestSuite();
@@ -73,7 +89,15 @@ public class Engine {
         }
     }
 
-
+    /**
+     * Recursive method for preparing a test to run.
+     * @param test
+     * @return this object. (builder pattern)
+     * @throws IllegalAccessException
+     * @throws InvocationTargetException
+     * @throws InstantiationException
+     * @throws NoSuchMethodException
+     */
     private Engine add(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         globalRunMap.addTest(test);
@@ -84,6 +108,10 @@ public class Engine {
         return this;
     }
 
+    /**
+     * Method for starting running tests.
+     * @throws Exception
+     */
     public void runTests() throws Exception {
         if(testSuite.getSetupStep() != null) {
             testSuite.getSetupStep().setup();
@@ -113,31 +141,51 @@ public class Engine {
         publishFinalResults();
     }
 
+    /**
+     * Publish final results.
+     */
     private void publishFinalResults() {
         for(Publisher publisher : globalArgs.getPublishers()) {
             publisher.publishFinal(globalRunMap.getTestStatistics());
         }
     }
 
+    /**
+     * Base class for all async workers in engine.
+     */
     private abstract class AsyncEngineWorker implements Runnable {
         private boolean finish = false;
 
+        /**
+         * Method for correctly shutting down a worker.
+         */
         public void finishExecution() {
             finish = true;
         }
+
+        /**
+         * Method for checking if a worker has finished.
+         */
         public boolean isFinished() { return finish; }
     }
 
+    /**
+     * Async worker for running tests. There will be GlobalArgs.Concurrency test workers.
+     */
     private class AsyncTestWorker extends AsyncEngineWorker {
         private RunMap localRunMap;
         private List<AbstractTest> localTests;
         private Thread workerThread;
         private long lastTestStart;
-        private boolean testRunning;
         private TestSuite testSuite;
         private AbstractTest currentTest;
         private ReentrantLock mutex;
 
+        /**
+         * Constructor
+         * @param testSuite the test suite
+         * @param localRunMap a deep clone a the global run map.
+         */
         public AsyncTestWorker(TestSuite testSuite, RunMap localRunMap) {
             this.mutex = new ReentrantLock();
             this.testSuite = testSuite;
@@ -149,26 +197,42 @@ public class Engine {
             this.localRunMap = localRunMap;
         }
 
+        /**
+         * Getter for the thread running this worker.
+         * @return thread running this worker, if the worker has started running, null otherwise.
+         */
         public Thread getWorkerThread() {
             return workerThread;
         }
 
-        public boolean isTestRunning() {
-            return testRunning;
-        }
-
+        /**
+         * Getter for the nanoTime of the last time a test has started running.
+         */
         public long getLastTestStart() {
             return lastTestStart;
         }
 
+        /**
+         * Getter for the local run map.
+         */
         public RunMap getLocalRunMap() {
             return localRunMap;
         }
 
+        /**
+         * Getter for the current running test.
+         * @return the running test, or null if no test has started running.
+         */
         public AbstractTest getCurrentTest() { return currentTest; }
 
+        /**
+         * Getter for the mutex that is only unlocked when the test is running.
+         */
         public ReentrantLock getMutex() { return mutex; }
 
+        /**
+         * Method for running tests.
+         */
         @Override
         public void run() {
             workerThread = Thread.currentThread();
@@ -199,14 +263,23 @@ public class Engine {
         }
     }
 
+    /**
+     * Worker for aggregating and publishing benchmarks.
+     */
     private class AsyncResultAggregator extends AsyncEngineWorker {
         private List<AsyncTestWorker> testWorkers;
 
+        /**
+         * Constructor.
+         * @param testWorkers list of test workers from this engine.
+         */
         public AsyncResultAggregator(List<AsyncTestWorker> testWorkers) {
             this.testWorkers = testWorkers;
         }
 
-
+        /**
+         * Method aggregating results.
+         */
         private void aggregateResults() {
             for(AsyncTestWorker worker : testWorkers) {
                 RunMap localRunMap = worker.getLocalRunMap();
@@ -214,6 +287,9 @@ public class Engine {
             }
         }
 
+        /**
+         * Implementation of the Runnable interface.
+         */
         @Override
         public void run() {
             try {
@@ -229,6 +305,9 @@ public class Engine {
             aggregateResults();
         }
 
+        /**
+         * Method for publishing intermediate results.
+         */
         public void publishIntermediateResults() {
             for(Publisher publisher : globalArgs.getPublishers()) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
@@ -236,11 +315,20 @@ public class Engine {
         }
     }
 
+    /**
+     * Worker for checking timeout and interrupting test worker threads when timeout is exceeded.
+     * It uses Thread.interrupt for letting workers know the
+     */
     private class AsyncTimeoutChecker extends AsyncEngineWorker {
         private List<AsyncTestWorker> testWorkers;
         private long minTimeout;
         private TestSuite testSuite;
 
+        /**
+         * Constructor.
+         * @param testSuite
+         * @param testWorkers list of test workers from this engine.
+         */
         public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers) {
             this.testWorkers = testWorkers;
             this.testSuite = testSuite;
@@ -253,6 +341,12 @@ public class Engine {
             }
         }
 
+        /**
+         * Method for checking timeout and interrupting test worker threads if timeout is exceeded.
+         * It uses Thread.interrupt for letting worker threads know the timeout has exceeded. Runners must know
+         * how to correctly handled all outcomes of a Thread.interrupt see:
+         * http://docs.oracle.com/javase/7/docs/api/java/lang/Thread.html#interrupt()
+         */
         private void interruptWorkerIfTimeout(AsyncTestWorker worker) {
             AbstractTest currentTest = worker.getCurrentTest();
             if(currentTest == null)
@@ -277,6 +371,9 @@ public class Engine {
             }
         }
 
+        /**
+         * Implementation of Runnable interface.
+         */
         @Override
         public void run() {
             try {

@@ -12,7 +12,7 @@ import com.day.qa.toughday.core.test_annotations.Setup;
  * A demo test class that explains how tests must be written. It extends the SequentialTestBase,
  * meaning will have the test method as defined there and it will be run by SequentialTestRunner.
  * Since it is also a subtype of AbstractTest, it will be automatically picked up by the core
- * and can be added to the suite from the command line with --DemoTest Property=myValue
+ * and can be added to the suite from the command line with --add DemoTest Property=myValue
  */
 public class DemoTest extends SequentialTestBase {
     private String property;

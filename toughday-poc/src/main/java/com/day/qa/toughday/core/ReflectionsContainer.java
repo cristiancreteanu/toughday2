@@ -7,25 +7,33 @@ import java.util.HashMap;
 
 /**
  * Created by tuicu on 18/09/15.
+ * Wrapper for the reflections library. Uses singleton.
  */
 public class ReflectionsContainer {
     private static Reflections reflections = new Reflections("com.day.qa");
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
-
+    /**
+     * Getter for the container.
+     */
     public static ReflectionsContainer getInstance() {
         return instance;
     }
 
+    /**
+     * Getter for the underlining instance of the Reflections object.
+     */
     public static Reflections getReflections() {
         return reflections;
     }
-
 
     private HashMap<String, Class<? extends AbstractTest>> testClasses;
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
 
+    /**
+     * Constructor.
+     */
     private ReflectionsContainer() {
         testClasses = new HashMap<>();
         publisherClasses = new HashMap<>();
@@ -60,14 +68,23 @@ public class ReflectionsContainer {
 
     }
 
+    /**
+     * Getter for the map of test classes.
+     */
     public HashMap<String, Class<? extends AbstractTest>> getTestClasses() {
         return testClasses;
     }
 
+    /**
+     * Getter for the map of publisher classes.
+     */
     public HashMap<String, Class<? extends Publisher>> getPublisherClasses() {
         return publisherClasses;
     }
 
+    /**
+     * Getter for the map of SuiteSetup classes.
+     */
     public HashMap<String, Class<? extends SuiteSetup>> getSuiteSetupClasses() {
         return suiteSetupClasses;
     }

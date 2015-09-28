@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by tuicu on 07/09/15.
+ * Test for uploading assets.
  */
 public class UploadAssetTest extends SequentialTestBase {
 
@@ -51,7 +52,6 @@ public class UploadAssetTest extends SequentialTestBase {
             // the file
             //multiPartEntity.addPart("file", new InputStreamBodyWithLength(resourcePath, mimeType, fileName));
             multiPartEntity.addPart("file", new FileBody(new File(resourcePath)));
-            // add String parameters
 
             multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
             multiPartEntity.addPart("fileName", new StringBody(nextFileName,

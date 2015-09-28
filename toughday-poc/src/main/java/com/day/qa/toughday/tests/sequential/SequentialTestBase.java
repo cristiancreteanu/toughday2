@@ -12,6 +12,7 @@ import java.util.List;
 
 /**
  * Created by tuicu on 04/09/15.
+ * Base class for sequential tests.
  */
 public abstract class SequentialTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();

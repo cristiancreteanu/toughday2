@@ -13,6 +13,7 @@ import java.util.Collection;
 
 /**
  * Created by tuicu on 01/09/15.
+ *
  */
 public class CSVPublisher implements Publisher {
     private static final Logger logger = LoggerFactory.getLogger(CSVPublisher.class);

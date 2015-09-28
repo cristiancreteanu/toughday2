@@ -7,6 +7,10 @@ import java.lang.annotation.Target;
 
 /**
  * Created by tuicu on 27/08/15.
+ * Use this annotation on a setter that received a String parameter to expose it as a configuration property.
+ * These properties will be automatically picked up, shown in help and the they will be called by Configuration
+ * when the object is instantiated. Supported classes: subtypes of AbstractTest, classes that implement Publisher and
+ * GlobalArgs.
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(value = ElementType.METHOD)
