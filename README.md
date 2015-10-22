@@ -9,8 +9,8 @@ Use --print_tests to show full help of all the available tests, suites and actio
 
 Global arguments
 ----------------
-
---------------------------------|---------------------------------------------------------------------------------
+| Parameter                     |   Description
+| ----------------------------- | --------------------------------------------------------------------------------
 | --port=val                    |
 |	--waittime=val                |   Wait time between two consecutive test runs for a user in milliseconds
 |	--duration=val                |   How long to run toughday
@@ -24,7 +24,8 @@ Global arguments
 
 Available actions
 -----------------
-------------------------------------------------------------------|--------------------------------------------------
+| Paramerer                                                       |  Description
+| --------------------------------------------------------------- | -------------------------------------------------
 | --add TestClass/PublisherClass property1=val property2=val      |  add a test to the suite or a publisher
 | --config TestName property1=val property2=val                   |  override parameters for a test from a predefined suite
 | --exclude TestName                                              |  exclude a test from a predefined suite
