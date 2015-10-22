@@ -1,0 +1,37 @@
+package com.adobe.qe.toughday;
+
+
+import com.adobe.qe.toughday.core.Engine;
+import com.adobe.qe.toughday.core.config.CliParser;
+import com.adobe.qe.toughday.core.config.Configuration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+
+/**
+ * Main class. Creates a Configuration and an engine and runs the tests.
+ */
+public class Main {
+    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+
+    public static void main (String[] args) throws Exception {
+        CliParser cliParser = new CliParser();
+        if (args.length == 0 || (args.length == 1 && args[0].equals("--help"))) {
+            cliParser.printShortHelp();
+        } else if (args.length == 1 && args[0].equals("--print_tests")) {
+            cliParser.printHelp();
+        } else {
+            Configuration configuration = null;
+            try {
+                configuration = new Configuration(args);
+            } catch (IllegalArgumentException e) {
+                LOG.error("Bad configuration: {}", e.getMessage());
+                System.exit(1);
+                cliParser.printShortHelp();
+            }
+
+            Engine engine = new Engine(configuration);
+            engine.runTests();
+        }
+    }
+}

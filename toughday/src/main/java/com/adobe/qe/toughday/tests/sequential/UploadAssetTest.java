@@ -1,0 +1,152 @@
+package com.adobe.qe.toughday.tests.sequential;
+
+import com.adobe.granite.testing.ClientException;
+import com.adobe.granite.testing.GraniteConstants;
+import com.adobe.granite.testing.client.GraniteClient;
+import com.adobe.granite.testing.util.InputStreamBodyWithLength;
+import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.test_annotations.After;
+import com.adobe.qe.toughday.core.test_annotations.Before;
+import org.apache.commons.httpclient.HttpStatus;
+import org.apache.http.entity.mime.HttpMultipartMode;
+import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.content.FileBody;
+import org.apache.http.entity.mime.content.InputStreamBody;
+import org.apache.http.entity.mime.content.StringBody;
+import org.apache.sling.testing.tools.http.RequestExecutor;
+
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicInteger;
+
+/**
+ * Test for uploading assets.
+ */
+public class UploadAssetTest extends SequentialTestBase {
+
+    private String fileName;
+    private String resourcePath;
+    private String mimeType;
+    private String parentPath;
+
+    public static ThreadLocal<File> lastCreated = new ThreadLocal<>();
+    public static Random rnd = new Random();
+    public static final AtomicInteger nextNumber = new AtomicInteger(0);
+
+    private BufferedImage img;
+    private InputStream imageStream;
+
+    public UploadAssetTest() {
+    }
+
+    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
+        this.resourcePath = resourcePath;
+        this.mimeType = mimeType;
+        this.parentPath = parentPath;
+        this.fileName = fileName;
+    }
+
+    @Before
+    public void before() throws ClientException, IOException {
+        String nextFileName = fileName + nextNumber.getAndIncrement() + ".png";
+
+        // image processing: read, add noise and save to file
+        imageStream = UploadAssetTest.getImage(this.resourcePath);
+        img = ImageIO.read(imageStream);
+        addNoise(img);
+        File last = new File(workspace, nextFileName);
+        ImageIO.write(img, "png", last);
+        lastCreated.set(last);
+    }
+
+    @Override
+    public void test() throws ClientException {
+        MultipartEntity multiPartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        try {
+            multiPartEntity.addPart("file", new FileBody(lastCreated.get()));
+
+            multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
+            multiPartEntity.addPart("fileName", new StringBody(lastCreated.get().getName(),
+                            Charset.forName(GraniteConstants.CHARSET_UTF8)));
+        } catch (UnsupportedEncodingException e) {
+            throw new ClientException("Could not create Multipart Post!", e);
+        }
+
+        GraniteClient client = getDefaultClient();
+        RequestExecutor req = client.http().doPost(parentPath + ".createasset.html", multiPartEntity);
+        checkStatus(req.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+    }
+
+    @After
+    public void after() {
+        if (!lastCreated.get().delete()) {
+            throw new RuntimeException("Cannot delete file " + lastCreated.get().getName());
+        }
+    }
+
+
+    @Override
+    public AbstractTest newInstance() {
+        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
+    }
+
+    @ConfigArg
+    public void setFileName(String fileName) {
+        this.fileName = fileName;
+    }
+
+    @ConfigArg
+    public void setResourcePath(String resourcePath) {
+        this.resourcePath = resourcePath;
+    }
+
+    @ConfigArg
+    public void setMimeType(String mimeType) {
+        this.mimeType = mimeType;
+    }
+
+    @ConfigArg
+    public void setParentPath(String parentPath) {
+        this.parentPath = parentPath;
+    }
+
+
+    /**
+     * Get an InputStream of an image, either from the filesystem or from the resources.
+     * @param filename
+     * @return
+     * @throws ClientException if filename is not found either on the filesystem or in the resources
+     */
+    public static InputStream getImage(String filename) throws ClientException {
+        InputStream in;
+        try {
+            in = new FileInputStream(filename);
+        } catch (FileNotFoundException e) {
+            // try the classpath
+            in = UploadAssetTest.class.getClassLoader().getResourceAsStream(filename);
+            if (null == in) {
+                throw new ClientException("Could not find " + filename + " in classpath or in path");
+            }
+        }
+        return in;
+    }
+
+    /**
+     * Add noise to a {@see BufferedImage}
+     * @param img
+     */
+    public static void addNoise(BufferedImage img) {
+        for (int i = 0; i < 200; i++) {
+            int x = rnd.nextInt(img.getWidth());
+            int y = rnd.nextInt(img.getHeight());
+            img.setRGB(x, y, Color.CYAN.getRGB());
+        }
+    }
+}
