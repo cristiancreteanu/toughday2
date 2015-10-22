@@ -35,3 +35,13 @@ Building
 
 $  __mvn clean package__
 
+Examples
+========
+
+smoke_tests
+-----------
+
+$ __java -jar toughday2.jar --suite=smoke_tests__
+$ __java -jar toughday2.jar --suite=smoke_tests --concurrency=30 --waittime=500__
+$ __java -jar toughday2.jar --suite=smoke_tests --add ConsolePublisher --add CSVPublisher filepath=myresults.csv__
+

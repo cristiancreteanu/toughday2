@@ -49,7 +49,7 @@ public class Configuration {
 
         // Add a default publisher if none is specified
         if (configParams.getPublishers().size() == 0) {
-            configParams.addPublisher(ConsolePublisher.class.getName(), new HashMap<String, String>() {{ put("Clear", "true"); }});
+            configParams.addPublisher(ConsolePublisher.class.getSimpleName(), new HashMap<String, String>() {{ put("Clear", "true"); }});
         }
 
         for(ConfigParams.ClassMetaObject publisherMeta : configParams.getPublishers()) {
