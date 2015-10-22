@@ -62,13 +62,13 @@ public class AuthoringTest extends CompositeTest {
         return new AuthoringTest(false);
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
         deletePageTest.setParentPath(parentPath);
@@ -77,26 +77,26 @@ public class AuthoringTest extends CompositeTest {
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setResourcePath(String resourcePath) {
         uploadAssetTest.setResourcePath(resourcePath);
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setMimeType(String mimeType) {
         uploadAssetTest.setMimeType(mimeType);
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setPageTitle(String title) {
         this.createPageTest.setTitle(title);
         this.deletePageTest.setTitle(title);
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AuthoringTest setAssetName(String name) {
         this.uploadAssetTest.setFileName(name);
         this.deleteAssetTest.setTitle(name);
