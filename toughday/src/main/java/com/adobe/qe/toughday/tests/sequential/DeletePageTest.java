@@ -4,6 +4,7 @@ import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -14,11 +15,11 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class DeletePageTest extends SequentialTestBase {
     private static final String CMD_DELETE_PAGE = "deletePage";
-    private String parentPath;
-    private String title;
-    private boolean force;
+    private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
+    private String title = AuthoringTest.DEFAULT_PAGE_TITLE;
+    private boolean force = true;
 
-    public DeletePageTest(){
+    public DeletePageTest() {
     }
 
     public DeletePageTest(String parentPath, boolean force, String title) {
@@ -34,8 +35,8 @@ public class DeletePageTest extends SequentialTestBase {
     @Override
     public void test() throws ClientException {
         String nextTitle = getNextTitle();
-        if(nextTitle == null)
-            throw new ClientException("No page created. Abort.");
+        if (nextTitle == null)
+            throw new ClientException("No page created (by CreatePageTest). Marking as fail.");
 
         FormEntityBuilder feb = new FormEntityBuilder().addParameter("cmd", CMD_DELETE_PAGE)
                 .addParameter("force", Boolean.valueOf(force).toString())
@@ -51,19 +52,19 @@ public class DeletePageTest extends SequentialTestBase {
         return new DeletePageTest(parentPath, force, title);
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public DeletePageTest setParentPath(String parentPath) {
         this.parentPath = (parentPath.endsWith("/") ? parentPath : parentPath + "/") ;
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public DeletePageTest setForce(String force) {
         this.force = Boolean.parseBoolean(force);
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public DeletePageTest setTitle(String title) {
         this.title = title;
         return this;

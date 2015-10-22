@@ -8,6 +8,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.test_annotations.After;
 import com.adobe.qe.toughday.core.test_annotations.Before;
+import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -31,10 +32,10 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 public class UploadAssetTest extends SequentialTestBase {
 
-    private String fileName;
-    private String resourcePath;
-    private String mimeType;
-    private String parentPath;
+    private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
+    private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
+    private String mimeType = AuthoringTest.DEFAULT_MIME_TYPE;
+    private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
 
     public static ThreadLocal<File> lastCreated = new ThreadLocal<>();
     public static Random rnd = new Random();
@@ -97,22 +98,22 @@ public class UploadAssetTest extends SequentialTestBase {
         return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public void setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }

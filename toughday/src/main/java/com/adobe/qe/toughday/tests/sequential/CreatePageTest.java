@@ -4,6 +4,7 @@ import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -14,9 +15,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class CreatePageTest extends SequentialTestBase {
-    private String parentPath;
-    private String template;
-    private String title;
+    private String parentPath = DEFAULT_PARENT_PATH;
+    private String template = DEFAULT_TEMPLATE;
+    private String title = AuthoringTest.DEFAULT_PAGE_TITLE;
 
     public static ConcurrentHashMap<Thread, String> lastCreated = new ConcurrentHashMap<Thread, String>();
 
@@ -56,19 +57,19 @@ public class CreatePageTest extends SequentialTestBase {
         return new CreatePageTest(parentPath, template, title);
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AbstractTest setParentPath(String parentPath) {
         this.parentPath = parentPath;
         return this;
     }
 
-    @ConfigArg
+    @ConfigArg(required = false)
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;

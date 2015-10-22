@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
  *
  */
 public class DeleteAssetTest extends DeletePageTest {
+
     public DeleteAssetTest() {
     }
 
