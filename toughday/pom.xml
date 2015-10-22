@@ -8,6 +8,13 @@
     <name>toughday</name>
     <url>http://maven.apache.org</url>
 
+    <scm>
+        <connection>scm:git:git@git.corp.adobe.com:QE/toughday2</connection>
+        <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2</developerConnection>
+        <url>https://git.corp.adobe.com/QE/toughday2</url>
+        <tag>HEAD</tag>
+    </scm>
+
     <distributionManagement>
         <repository>
             <id>${releaseRepository-Id}</id>
