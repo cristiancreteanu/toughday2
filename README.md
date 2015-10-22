@@ -3,7 +3,7 @@ Tough Day 2.0
 
 Usage
 =====
-java -jar toughday2.jar [--help | --print_tests] [\<global arguments\> | \<actions\>]
+** java -jar toughday2.jar [--help | --print_tests] [\<global arguments\> | \<actions\>] **
 
 Use --print_tests to show full help of all the available tests, suites and actions
 
@@ -33,5 +33,5 @@ Available actions
 Building
 ========
 
-$ mvn clean package
+$ ** mvn clean package **
 
