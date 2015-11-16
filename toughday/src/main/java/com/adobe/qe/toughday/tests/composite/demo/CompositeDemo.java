@@ -1,11 +1,11 @@
-package com.adobe.qe.toughday.tests.composite;
+package com.adobe.qe.toughday.tests.composite.demo;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.test_annotations.After;
-import com.adobe.qe.toughday.core.test_annotations.Before;
-import com.adobe.qe.toughday.core.test_annotations.Setup;
-import com.adobe.qe.toughday.tests.sequential.DemoTest;
+import com.adobe.qe.toughday.core.annotations.After;
+import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 
 /**
  * Composite demo test.

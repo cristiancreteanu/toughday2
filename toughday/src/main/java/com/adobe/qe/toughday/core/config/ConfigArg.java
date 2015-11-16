@@ -16,4 +16,5 @@ import java.lang.annotation.Target;
 public @interface ConfigArg {
     boolean required() default true;
     String desc() default "";
+    String defaultValue() default "";
 }

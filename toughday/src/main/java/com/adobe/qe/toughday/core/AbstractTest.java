@@ -2,16 +2,16 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.config.Configuration;
+import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
 /**
  * Abstract base class for all tests. Normally you would not extend this class directly, because you would
  * have to write a runner for your new type of test. Instead you should extend the existing convenience classes
- * that already have a runner. {@link com.adobe.qe.toughday.tests.sequential.DemoTest} for a detailed example.
+ * that already have a runner. {@link DemoTest} for a detailed example.
  */
 public abstract class AbstractTest {
     private UUID id;
@@ -48,7 +48,7 @@ public abstract class AbstractTest {
     /**
      * Setter for the name
      */
-    @ConfigArg(required = false, desc = "The name of this test")
+    @ConfigArg(required = false, defaultValue = "The class name", desc = "The name of this test")
     public AbstractTest setName(String name) {
         this.name = name;
         return this;

@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.core.test_annotations;
+package com.adobe.qe.toughday.core.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

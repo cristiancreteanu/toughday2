@@ -29,14 +29,15 @@ public class DeletePageTest extends SequentialTestBase {
     }
 
     protected String getNextTitle() {
-        return CreatePageTest.lastCreated.get(Thread.currentThread());
+        return CreatePageTest.lastCreated.get();
     }
 
     @Override
     public void test() throws ClientException {
         String nextTitle = getNextTitle();
-        if (nextTitle == null)
+        if (nextTitle == null) {
             throw new ClientException("No page created (by CreatePageTest). Marking as fail.");
+        }
 
         FormEntityBuilder feb = new FormEntityBuilder().addParameter("cmd", CMD_DELETE_PAGE)
                 .addParameter("force", Boolean.valueOf(force).toString())
@@ -47,24 +48,30 @@ public class DeletePageTest extends SequentialTestBase {
         checkStatus(executor.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
     }
 
+
+
+    // Test params
+
     @Override
     public AbstractTest newInstance() {
         return new DeletePageTest(parentPath, force, title);
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
+            desc = "The parent path of the page to be deleted. E.g. The one created by CreatePageTest")
     public DeletePageTest setParentPath(String parentPath) {
         this.parentPath = (parentPath.endsWith("/") ? parentPath : parentPath + "/") ;
         return this;
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = "true", desc = "true/ false; Whether to force delete the page.")
     public DeletePageTest setForce(String force) {
         this.force = Boolean.parseBoolean(force);
         return this;
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_PAGE_TITLE,
+            desc = "The title of the page to be deleted. e.g. The one from CreatePageTest")
     public DeletePageTest setTitle(String title) {
         this.title = title;
         return this;

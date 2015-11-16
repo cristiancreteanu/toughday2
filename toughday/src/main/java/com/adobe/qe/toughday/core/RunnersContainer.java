@@ -11,7 +11,7 @@ import java.util.HashMap;
  * Container for runners.
  */
 public class RunnersContainer {
-    private static final Logger logger = LoggerFactory.getLogger(RunnersContainer.class);
+    private static final Logger LOG = LoggerFactory.getLogger(RunnersContainer.class);
     private static RunnersContainer instance = new RunnersContainer();
     public static RunnersContainer getInstance() { return instance; }
 
@@ -30,13 +30,13 @@ public class RunnersContainer {
      */
     public void addRunner(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
-        if(!testRunners.containsKey(test.getClass())) {
+        if (!testRunners.containsKey(test.getClass())) {
             Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
             try {
                 Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
                 testRunners.put(test, constructor.newInstance(test.getClass()));
             } catch (NoSuchMethodException e) {
-                logger.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
+                LOG.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
                 throw new NoSuchMethodException("Test runners must have a constructor with only one parameter, the test Class");
             }
         }

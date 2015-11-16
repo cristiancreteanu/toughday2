@@ -1,8 +1,8 @@
 package com.adobe.qe.toughday.core;
 
-import com.adobe.qe.toughday.core.test_annotations.Before;
-import com.adobe.qe.toughday.core.test_annotations.After;
-import com.adobe.qe.toughday.core.test_annotations.Setup;
+import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.core.annotations.After;
+import com.adobe.qe.toughday.core.annotations.Setup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

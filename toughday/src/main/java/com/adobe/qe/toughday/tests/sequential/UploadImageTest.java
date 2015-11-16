@@ -3,17 +3,15 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.granite.testing.ClientException;
 import com.adobe.granite.testing.GraniteConstants;
 import com.adobe.granite.testing.client.GraniteClient;
-import com.adobe.granite.testing.util.InputStreamBodyWithLength;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
-import com.adobe.qe.toughday.core.test_annotations.After;
-import com.adobe.qe.toughday.core.test_annotations.Before;
+import com.adobe.qe.toughday.core.annotations.After;
+import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
-import org.apache.http.entity.mime.content.InputStreamBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
@@ -22,15 +20,13 @@ import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Test for uploading assets.
  */
-public class UploadAssetTest extends SequentialTestBase {
+public class UploadImageTest extends SequentialTestBase {
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
     private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
@@ -44,10 +40,10 @@ public class UploadAssetTest extends SequentialTestBase {
     private BufferedImage img;
     private InputStream imageStream;
 
-    public UploadAssetTest() {
+    public UploadImageTest() {
     }
 
-    private UploadAssetTest(String fileName, String resourcePath, String mimeType, String parentPath) {
+    private UploadImageTest(String fileName, String resourcePath, String mimeType, String parentPath) {
         this.resourcePath = resourcePath;
         this.mimeType = mimeType;
         this.parentPath = parentPath;
@@ -59,7 +55,7 @@ public class UploadAssetTest extends SequentialTestBase {
         String nextFileName = fileName + nextNumber.getAndIncrement() + ".png";
 
         // image processing: read, add noise and save to file
-        imageStream = UploadAssetTest.getImage(this.resourcePath);
+        imageStream = UploadImageTest.getImage(this.resourcePath);
         img = ImageIO.read(imageStream);
         addNoise(img);
         File last = new File(workspace, nextFileName);
@@ -95,25 +91,27 @@ public class UploadAssetTest extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new UploadAssetTest(fileName, resourcePath, mimeType, parentPath);
+        return new UploadImageTest(fileName, resourcePath, mimeType, parentPath);
     }
 
-    @ConfigArg(required = false)
+
+    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_ASSET_NAME, desc = "The name of the file to be created")
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_RESOURCE_PATH,
+            desc = "The image resource path either in the classpath or the filesystem")
     public void setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_MIME_TYPE, desc = "The mime type of the uploaded image")
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    @ConfigArg(required = false)
+    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
@@ -131,7 +129,7 @@ public class UploadAssetTest extends SequentialTestBase {
             in = new FileInputStream(filename);
         } catch (FileNotFoundException e) {
             // try the classpath
-            in = UploadAssetTest.class.getClassLoader().getResourceAsStream(filename);
+            in = UploadImageTest.class.getClassLoader().getResourceAsStream(filename);
             if (null == in) {
                 throw new ClientException("Could not find " + filename + " in classpath or in path");
             }

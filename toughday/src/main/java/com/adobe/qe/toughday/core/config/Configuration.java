@@ -225,16 +225,16 @@ public class Configuration {
         private long waitTime;
         private long duration;
         private List<Publisher> publishers;
-        private static final String DEFAULT_DURATION = "1d";
         private long timeout;
 
-        private static final String DEFAULT_USER = "admin";
-        private static final String DEFAULT_PASSWORD = "admin";
-        private static final String DEFAULT_HOST = "localhost";
-        private static final int DEFAULT_PORT = 4502;
-        private static final long DEFAULT_TIMEOUT = 5 * 60 * 1000l; // 5 minutes
-        private static final int DEFAULT_CONCURRENCY = 30;
-        private static final long DEFAULT_WAIT_TIME = 1000;
+        public static final String DEFAULT_DURATION = "1d";
+        public static final String DEFAULT_USER = "admin";
+        public static final String DEFAULT_PASSWORD = "admin";
+        public static final String DEFAULT_HOST = "localhost";
+        public static final int DEFAULT_PORT = 4502;
+        public static final long DEFAULT_TIMEOUT = 5 * 60 * 1000l; // 5 minutes
+        public static final int DEFAULT_CONCURRENCY = 30;
+        public static final long DEFAULT_WAIT_TIME = 1000;
 
         /**
          * Constructor

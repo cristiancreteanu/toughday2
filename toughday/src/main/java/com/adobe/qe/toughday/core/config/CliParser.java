@@ -185,11 +185,15 @@ public class CliParser implements ConfigurationParser {
             for (Method method : testClass.getMethods()) {
                 if (method.getAnnotation(ConfigArg.class) != null) {
                     ConfigArg annotation = method.getAnnotation(ConfigArg.class);
-                    printTestClass(Configuration.propertyFromMethod(method.getName()), annotation.required(), annotation.desc());
+                    printTestClass(Configuration.propertyFromMethod(method.getName()),
+                            annotation.required(),
+                            annotation.defaultValue(),
+                            annotation.desc());
                 }
             }
-            printTestClass("weight", true, "");
-            printTestClass("timeout", false, "");
+            printTestClass("weight", true, "1", "The weight of this test" );
+            printTestClass("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
+                    "Time in milliseconds after which the test is interrupted");
         }
 
         System.out.println();
@@ -199,7 +203,10 @@ public class CliParser implements ConfigurationParser {
             for (Method method : publisherClass.getMethods()) {
                 if (method.getAnnotation(ConfigArg.class) != null) {
                     ConfigArg annotation = method.getAnnotation(ConfigArg.class);
-                    printTestClass(Configuration.propertyFromMethod(method.getName()), annotation.required(), annotation.desc());
+                    printTestClass(Configuration.propertyFromMethod(method.getName()),
+                            annotation.required(),
+                            annotation.defaultValue(),
+                            annotation.desc());
                 }
             }
         }
@@ -223,8 +230,11 @@ public class CliParser implements ConfigurationParser {
         }
     }
 
-    private static void printTestClass(String name, boolean required, String description) {
-        System.out.printf("\t\t%-32s %-32s %-32s\r\n", name + "=val", "required: " + (required ? "yes" : "no"), description);
+    private static void printTestClass(String name, boolean required, String defaultValue, String description) {
+        System.out.printf("\t\t%-32s %-64s %-32s\r\n",
+                name + "=val" + (required ? "" : " (optional)"),
+                defaultValue,
+                description);
     }
 
 }

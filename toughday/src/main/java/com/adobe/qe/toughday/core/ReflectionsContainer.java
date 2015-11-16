@@ -45,7 +45,6 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A test class with this name already exists here: "
                         + testClasses.get(testClass.getSimpleName()).getName());
             testClasses.put(testClass.getSimpleName(), testClass);
-            testClasses.put(testClass.getName(), testClass);
         }
 
         for (Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
@@ -64,7 +63,6 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A suite class with this name already exists here: "
                         + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
-            suiteSetupClasses.put(suiteSetupClass.getName(), suiteSetupClass);
         }
 
     }
