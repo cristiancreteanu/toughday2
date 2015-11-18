@@ -5,8 +5,9 @@ import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.tools.http.RequestExecutor;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -15,6 +16,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class CreatePageTest extends SequentialTestBase {
+    public static final Logger LOG = getLogger(CreatePageTest.class);
+
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;
     private String title = AuthoringTest.DEFAULT_PAGE_TITLE;

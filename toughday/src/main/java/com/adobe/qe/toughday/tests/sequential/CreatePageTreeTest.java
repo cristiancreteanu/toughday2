@@ -5,13 +5,13 @@ import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.tools.http.RequestExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,12 +19,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  *
  */
+@Description(name="create_pages_tree", desc=
+                "This test creates pages hierarchically. Each child on each level has 10 children. " +
+                "Each author thread fills in a level in the pages tree, up to 10^level")
 public class CreatePageTreeTest extends SequentialTestBase {
+    public static final Logger LOG = getLogger(CreatePageTreeTest.class);
 
-    private static final Logger LOG = LoggerFactory.getLogger(CreatePageTreeTest.class);
     // needed for syncronizing
     static class MyPhaser extends Phaser {
-
         public MyPhaser() {
             super();
             this.monitor();
@@ -42,14 +44,13 @@ public class CreatePageTreeTest extends SequentialTestBase {
             this.nextChildPerLevel.set(0);
             maxChildrenPerLevel = maxChildrenPerLevel * BASE;
             // Return false, never terminate phaser.
-            LOG.debug("onAdvance. phase={} registeredParties={} tid={}",
-                    phase, registeredParties, Thread.currentThread().getId());
+            if (LOG.isDebugEnabled()) LOG.debug("onAdvance. phase=%d registeredParties=%d tid=%d", phase, registeredParties, Thread.currentThread().getId());
             return false;
         }
         public int getNextNode() {
             int childNumber = this.nextChildPerLevel.getAndIncrement();
             if (childNumber >= maxChildrenPerLevel) {
-                LOG.debug("Waiting for sync. tid = {}", Thread.currentThread().getId());
+                if (LOG.isDebugEnabled()) LOG.debug("Waiting for sync. tid = " + Thread.currentThread().getId());
                 this.arriveAndAwaitAdvance();
                 return getNextNode();
             }
@@ -130,18 +131,18 @@ public class CreatePageTreeTest extends SequentialTestBase {
             createPage();
         } catch (Exception e) {
             this.failed.set(Boolean.TRUE);
-            // log and throw. It's normally an antipattern, but we don't log exceptions anywhere on the upper level,
+            // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we're just count them.
             LOG.warn("Failed to create page {}{}", parentPath.get(), nodeName.get());
             throw e;
         }
-        LOG.debug("tid=%{} nextChild={} level={} path={}",
+        if (LOG.isDebugEnabled()) LOG.debug("tid=%{} nextChild={} level={} path={}",
                 Thread.currentThread().getId(), nextChild.get(), phaser.getLevel(), parentPath.get() + nodeName.get());
     }
 
     @After
     public void after() {
-        LOG.debug("In after() tid={}", Thread.currentThread().getId());
+        if (LOG.isDebugEnabled()) LOG.debug("In after() tid={}", Thread.currentThread().getId());
         // make sure the page was created
         for (int i=0; i<5; i++) {
             try {
@@ -150,7 +151,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 if (!failed.get().booleanValue() || getDefaultClient().exists(this.parentPath.get() + nodeName.get())) {
                     break;
                 } else {
-                    LOG.debug("Retrying to create page tid={} nextChild={} phase={} path={}\n",
+                    if (LOG.isDebugEnabled()) LOG.debug("Retrying to create page tid={} nextChild={} phase={} path={}\n",
                             Thread.currentThread().getId(), nextChild.get(), phaser.getLevel(),
                             parentPath.get() + nodeName.get());
                     createPage();

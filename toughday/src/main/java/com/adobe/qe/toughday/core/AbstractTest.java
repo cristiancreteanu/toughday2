@@ -1,8 +1,19 @@
 package com.adobe.qe.toughday.core;
 
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.Layout;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.config.AppenderRef;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
 import java.util.List;
@@ -127,6 +138,37 @@ public abstract class AbstractTest {
     }
 
     /**
+     * Get the logger of this test
+     * @param clazz
+     * @return
+     */
+    public static Logger getLogger(Class<?> clazz) {
+
+        String name = clazz.getSimpleName();
+        if (clazz.isAnnotationPresent(Description.class)) {
+            Description d = clazz.getAnnotation(Description.class);
+            name = d.name();
+        }
+
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+        Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", null, config,
+                null, null, false, false, null, null);
+        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s.log", name),
+                "false", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
+        appender.start();
+        config.addAppender(appender);
+        AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
+        AppenderRef[] refs = new AppenderRef[] {ref};
+        LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.INFO, clazz.getName(), "true", refs, null, config, null);
+        loggerConfig.addAppender(appender, null, null);
+        config.addLogger(clazz.getName(), loggerConfig);
+        ctx.updateLoggers();
+        Logger logger = LogManager.getLogger(clazz);
+        return logger;
+    }
+
+    /**
      * Setter for global args
      * @param globalArgs
      */
@@ -161,5 +203,6 @@ public abstract class AbstractTest {
      * @return a new, already configured instance of this test.
      */
     public abstract AbstractTest newInstance();
+
 
 }

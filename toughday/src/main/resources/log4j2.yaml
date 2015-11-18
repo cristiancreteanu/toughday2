@@ -1,0 +1,43 @@
+Configuration:
+    status: warn
+
+    Appenders:
+        Console:
+            name: Console
+            target: SYSTEM_OUT
+            PatternLayout:
+                Pattern: "%d{yyyy-MM-dd HH:mm:ss} %-5p: %m%n"
+
+        RollingFile:
+          - name: RollingFile
+            fileName: logs/toughday.log
+            filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
+            PatternLayout:
+                Pattern: "%d{yyyy-MM-dd HH:mm:ss} %-5p: %m%n"
+            Policies:
+                SizeBasedTriggeringPolicy:
+                  size: 250 MB
+          - name: RollingFileTests
+            fileName: logs/toughday_tests.log
+            filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
+            PatternLayout:
+                Pattern: "%d{yyyy-MM-dd HH:mm:ss} %-5p: %m%n"
+            Policies:
+                SizeBasedTriggeringPolicy:
+                  size: 250 MB
+    Loggers:
+        Root:
+            level: warn
+            AppenderRef:
+                ref: RollingFile
+        Logger:
+          - name: com.adobe.qe.toughday.Main
+            level: info
+            additivity: false
+            AppenderRef:
+                ref: Console
+          - name: com.adobe.qe.toughday.tests
+            level: info
+            additivity: false
+            AppenderRef:
+                ref: RollingFileTests

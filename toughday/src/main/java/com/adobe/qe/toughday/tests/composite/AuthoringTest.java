@@ -7,6 +7,7 @@ import com.adobe.qe.toughday.tests.sequential.CreatePageTest;
 import com.adobe.qe.toughday.tests.sequential.DeleteImageTest;
 import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
 import com.adobe.qe.toughday.tests.sequential.UploadImageTest;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Authoring test. Steps: create page, upload asset, delete page, delete asset.
@@ -16,6 +17,7 @@ public class AuthoringTest extends CompositeTest {
     public static final String DEFAULT_ASSET_NAME = "toughday_png_asset";
     public static final String DEFAULT_MIME_TYPE = "image/png";
     public static final String DEFAULT_RESOURCE_PATH = "image.png";
+    private static final Logger LOG = getLogger(AuthoringTest.class);
 
     private CreatePageTest createPageTest;
     private UploadImageTest uploadAssetTest;

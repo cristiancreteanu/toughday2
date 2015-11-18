@@ -4,15 +4,15 @@ package com.adobe.qe.toughday;
 import com.adobe.qe.toughday.core.Engine;
 import com.adobe.qe.toughday.core.config.CliParser;
 import com.adobe.qe.toughday.core.config.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
  * Main class. Creates a Configuration and an engine and runs the tests.
  */
 public class Main {
-    private static final Logger LOG = LoggerFactory.getLogger(Main.class);
+    private static final Logger LOG = LogManager.getLogger(Main.class);
 
     public static void main (String[] args) throws Exception {
         CliParser cliParser = new CliParser();
