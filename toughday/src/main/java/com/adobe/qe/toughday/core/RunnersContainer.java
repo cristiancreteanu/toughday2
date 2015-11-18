@@ -36,7 +36,7 @@ public class RunnersContainer {
                 Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
                 testRunners.put(test, constructor.newInstance(test.getClass()));
             } catch (NoSuchMethodException e) {
-                LOG.error("Cannot run test " + test.getName() + " because the runner doesn't have the appropriate constructor");
+                LOG.error("Cannot run test " + test.getFullName() + " because the runner doesn't have the appropriate constructor");
                 throw new NoSuchMethodException("Test runners must have a constructor with only one parameter, the test Class");
             }
         }

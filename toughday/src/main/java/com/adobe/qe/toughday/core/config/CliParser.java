@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.core.config;
 
 import com.adobe.qe.toughday.core.*;
+import com.adobe.qe.toughday.core.annotations.Description;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Method;
@@ -173,7 +174,7 @@ public class CliParser implements ConfigurationParser {
             TestSuite testSuite = predefinedSuites.get(testSuiteName);
             System.out.printf("\t%-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
             for (AbstractTest test : testSuite.getTests()) {
-                System.out.printf("\t\t%-32s\r\n", test.getName() + " [" + test.getClass().getSimpleName() + "]");
+                System.out.printf("\t\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");
                 //TODO print default properties
             }
         }
@@ -181,7 +182,14 @@ public class CliParser implements ConfigurationParser {
         System.out.println();
         System.out.println("Available test classes:");
         for (Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
-            System.out.println("\t" + testClass.getSimpleName());
+            String name = testClass.getSimpleName();
+            String desc = "";
+            if (testClass.isAnnotationPresent(Description.class)) {
+                Description d = testClass.getAnnotation(Description.class);
+                name = name + " [" + d.name() + "]";
+                desc = d.desc();
+            }
+            System.out.println(String.format("\r\n\t%-40s - %s", name, desc));
             for (Method method : testClass.getMethods()) {
                 if (method.getAnnotation(ConfigArg.class) != null) {
                     ConfigArg annotation = method.getAnnotation(ConfigArg.class);

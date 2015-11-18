@@ -41,7 +41,7 @@ public class CSVPublisher implements Publisher {
             writer.write(HEADER);
             writer.newLine();
             for (RunMap.TestStatistics statistics : testStatistics) {
-                writer.write(statistics.getTest().getName() + ", " +
+                writer.write(statistics.getTest().getFullName() + ", " +
                         statistics.getDurationPerUser() + ", " +
                         statistics.getTotalRuns() + ", " +
                         statistics.getFailRuns() + ", " +

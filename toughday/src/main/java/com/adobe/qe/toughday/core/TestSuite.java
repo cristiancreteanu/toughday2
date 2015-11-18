@@ -31,7 +31,7 @@ public class TestSuite {
          */
         @Override
         public Integer put(AbstractTest test, Integer weight) {
-            nameMap.put(test.getSimpleName(), test);
+            nameMap.put(test.getName(), test);
             Integer previous = super.put(test, weight);
             totalWeight += -(previous != null ? previous : 0) + weight;
             return previous;
@@ -46,7 +46,7 @@ public class TestSuite {
         public Integer remove(Object test) {
             if(!(test instanceof AbstractTest))
                 throw new IllegalArgumentException("Argument must extend AbstractTest");
-            nameMap.remove(((AbstractTest) test).getSimpleName());
+            nameMap.remove(((AbstractTest) test).getName());
 
             Integer previous = super.remove(test);
             totalWeight -= (previous != null ? previous : 0);

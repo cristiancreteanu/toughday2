@@ -45,15 +45,20 @@ public abstract class AbstractTest {
      * Getter for the name of the test. It will not include the name of the parents.
      * @return by default, it will return the class name, except otherwise configured using the setter
      */
-    public String getSimpleName() {
-        return name != null ? name : getClass().getSimpleName();
+    public String getName() {
+        String simpleName = getClass().getSimpleName();
+        if (getClass().isAnnotationPresent(Description.class)) {
+            Description d = getClass().getAnnotation(Description.class);
+            simpleName = d.name();
+        }
+        return name != null ? name : simpleName;
     }
 
     /**
      * Getter for the full name of the test. It has prefixed, in order, all the names of the parents
      */
-    public String getName() {
-        return parent != null ? parent.getName() + "." + getSimpleName() : getSimpleName();
+    public String getFullName() {
+        return parent != null ? parent.getFullName() + "." + getName() : getName();
     }
 
     /**
@@ -132,7 +137,7 @@ public abstract class AbstractTest {
     public AbstractTest clone() {
         AbstractTest newInstance = newInstance();
         newInstance.setID(this.id);
-        newInstance.setName(this.getSimpleName());
+        newInstance.setName(this.getName());
         newInstance.setGlobalArgs(this.getGlobalArgs());
         return newInstance;
     }

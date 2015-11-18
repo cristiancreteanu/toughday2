@@ -34,7 +34,7 @@ public class ConsolePublisher implements Publisher {
         for (RunMap.TestStatistics statistics : testStatistics) {
             double minDuration = (statistics.getMinDuration()  == Double.MAX_VALUE) ? 0 : statistics.getMinDuration();
             System.out.printf("%-35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n",
-                    statistics.getTest().getName(),
+                    statistics.getTest().getFullName(),
                     "Duration / user: " + getFriendlyDuration((long)statistics.getDurationPerUser()),
                     "Runs:     " + String.format("%d", statistics.getTotalRuns()),
                     "Fails:    " + String.format("%d", statistics.getFailRuns()),

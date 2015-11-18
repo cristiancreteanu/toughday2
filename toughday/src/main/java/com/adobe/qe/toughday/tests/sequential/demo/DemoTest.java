@@ -41,7 +41,7 @@ public class DemoTest extends SequentialTestBase {
      */
     @Setup
     public void setupMethod() {
-        System.out.println(getName() + " Setup");
+        System.out.println(getFullName() + " Setup");
         try {
             /* Sleeps are not required, actually they are quite harmful, because they reduce the rate with which
             the tests and affect the throughput. Use them only if the tests simulates wait between requests, otherwise
@@ -59,7 +59,7 @@ public class DemoTest extends SequentialTestBase {
      */
     @Before
     public void beforeMethod() {
-        System.out.println(getName() + " Before");
+        System.out.println(getFullName() + " Before");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -73,7 +73,7 @@ public class DemoTest extends SequentialTestBase {
      */
     @After
     public void afterMethod() {
-        System.out.println(getName() + " After");
+        System.out.println(getFullName() + " After");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -90,7 +90,7 @@ public class DemoTest extends SequentialTestBase {
      */
     @Override
     public void test() throws ClientException {
-        System.out.println(getName() + " Running test with Property=" + property);
+        System.out.println(getFullName() + " Running test with Property=" + property);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
