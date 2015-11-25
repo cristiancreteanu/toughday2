@@ -5,10 +5,7 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Parser for the command line arguments. It also prints the help message.
@@ -35,12 +32,18 @@ public class CliParser implements ConfigurationParser {
         actionsDescription.put("exclude", "Exclude a test from a predefined suite");
     }
 
-    private static Map<String, String> availableGlobalArgs = new HashMap<>();
+    private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
+    private static Map<Integer, Map<String, ConfigArg>> availableGlobalArgs = new HashMap<>();
     static {
-        for (Method method : Configuration.GlobalArgs.class.getMethods()) {
+        for (Method method : globalArgMethods) {
             if (method.getAnnotation(ConfigArg.class) != null) {
                 ConfigArg annotation = method.getAnnotation(ConfigArg.class);
-                availableGlobalArgs.put(Configuration.propertyFromMethod(method.getName()), annotation.desc());
+                int order = annotation.order();
+                if (null == availableGlobalArgs.get(order)) {
+                    availableGlobalArgs.put(order, new HashMap<String, ConfigArg>());
+                }
+                Map<String, ConfigArg> globalArgMap = availableGlobalArgs.get(order);
+                globalArgMap.put(Configuration.propertyFromMethod(method.getName()), annotation);
             }
         }
     }
@@ -49,8 +52,20 @@ public class CliParser implements ConfigurationParser {
         return actionsParams.get(action) != null ? actionsParams.get(action) : "";
     }
 
+
     private static String getActionDescription(String action) {
         return actionsDescription.get(action) != null ? actionsDescription.get(action) : "";
+    }
+
+
+    // Fields
+    private PredefinedSuites predefinedSuites;
+
+    /**
+     * Constructor
+     */
+    public CliParser() {
+        this.predefinedSuites = new PredefinedSuites();
     }
 
     /**
@@ -151,7 +166,7 @@ public class CliParser implements ConfigurationParser {
         for(Class<? extends SuiteSetup> suiteSetupClass : ReflectionsContainer.getInstance().getSuiteSetupClasses().values()) {
             suiteSetupDesc += " " + suiteSetupClass.getSimpleName();
         }
-        return suiteSetupDesc;
+        return (suiteSetupDesc.isEmpty() ? "(none)" : suiteSetupDesc);
     }
 
 
@@ -161,14 +176,13 @@ public class CliParser implements ConfigurationParser {
      */
     public void printHelp() {
         // print the shorter part of the help
-        printShortHelp();
+        printShortHelp(false);
 
         // Follow up with the rest
         printTestsHelp();
     }
 
     public void printTestsHelp() {
-        PredefinedSuites predefinedSuites = new PredefinedSuites();
         System.out.println("\r\nPredefined suites");
         for (String testSuiteName : predefinedSuites.keySet()) {
             TestSuite testSuite = predefinedSuites.get(testSuiteName);
@@ -220,22 +234,44 @@ public class CliParser implements ConfigurationParser {
         }
     }
 
-    public void printShortHelp() {
+    public void printShortHelp(boolean printSuites) {
         System.out.println("Usage: java -jar toughday2.jar [--help | --print_tests] [<global arguments> | <actions>]");
-        System.out.println("Running the jar with no parameters or '--help' prints the help. Use '--print_tests' to print full help.\r\n");
-        System.out.println("Global arguments:");
+        System.out.println("Running the jar with no parameters or '--help' prints the help. Use '--print_tests' to print full help.");
 
-        for (String param : availableGlobalArgs.keySet()) {
-                System.out.printf("\t--%-32s\t %s\r\n", param + "=val", availableGlobalArgs.get(param));
+        System.out.println("\r\nExamples: \r\n");
+        System.out.println("\t java -jar toughday2.jar --suite=tree_authoring --host=localhost --port=4502");
+        System.out.println("\t java -jar toughday2.jar --suite=tree_authoring --config AuthoringTreeTest pageTemplate=/apps/my/mytemplate");
+
+        System.out.println("\r\nGlobal arguments:");
+
+        for (Integer order : availableGlobalArgs.keySet()) {
+            Map<String, ConfigArg> paramGroup = availableGlobalArgs.get(order);
+            for (String param : paramGroup.keySet()) {
+                System.out.printf("\t--%-32s\t Default: %s - %s\r\n",
+                        param + "=val", paramGroup.get(param).defaultValue(), paramGroup.get(param).desc());
+            }
         }
+
         System.out.printf("\t%-32s\t %s\r\n", "--SuiteSetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
-                "where \"val\" can be one, or more predefined suite. (use comas to separate them)");
+                "where \"val\" can be one, or more predefined suite. (use commas to separate them)");
+
+        if (printSuites) {
+            System.out.println("\r\nPredefined suites");
+            for (String testSuiteName : predefinedSuites.keySet()) {
+                TestSuite testSuite = predefinedSuites.get(testSuiteName);
+                System.out.printf("\t%-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
+            }
+        }
 
         System.out.println("\r\nAvailable actions:");
         for (String action : actions) {
             System.out.printf("\t--%-71s %s\r\n", action + " " + getActionParams(action), getActionDescription(action));
         }
+    }
+
+    public void printShortHelp() {
+        printShortHelp(true);
     }
 
     private static void printTestClass(String name, boolean required, String defaultValue, String description) {

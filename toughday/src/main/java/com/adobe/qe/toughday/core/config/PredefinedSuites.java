@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.core.config;
 
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
+import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.sequential.GetHomepageTest;
 import com.adobe.qe.toughday.tests.sequential.GetTest;
 
@@ -15,7 +16,7 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
     public static final String DEFAULT_SUITE_NAME = "smoke_tests";
 
     public PredefinedSuites() {
-        put("smoke_tests", new TestSuite()
+        put("get_tests", new TestSuite()
                         .add(new GetHomepageTest().setName("Get Homepage"), 10)
                         .add(new GetTest().setPath("/sites.html").setName("Get /sites.html"), 5)
                         .add(new GetTest().setPath("/projects.html").setName("Get /projects.html"), 5)
@@ -24,10 +25,16 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                         // maybe more here?
                         .setDescription("Executes GET requests on common paths")
         );
-        put("authoring_tests", new TestSuite()
-                        .add(new AuthoringTest().setName("Authoring Test"), 2)
+        put("tree_authoring", new TestSuite()
+                        .add(new AuthoringTreeTest().setName("Hierarchical Pages Authoring"), 2)
+                        .setDescription("A full authoring test with \"create hierarchical pages\", \"upload asset\", " +
+                                "\"delete asset\". The pages are not deleted and the repository will grow.")
+        );
+        put("authoring", new TestSuite()
+                        .add(new AuthoringTest().setName("Authoring"), 2)
                         .setDescription("A full authoring test with \"create page\", \"upload asset\", " +
-                                "\"delete asset\", \"delete page\" steps")
+                                "\"delete asset\", \"delete page\" steps. " +
+                                "The pages are deleted as a last step so the repository will not grow much")
         );
     }
 

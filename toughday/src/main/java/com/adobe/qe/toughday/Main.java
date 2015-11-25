@@ -19,6 +19,7 @@ public class Main {
         System.out.println();
         if (args.length == 0 || (args.length == 1 && args[0].equals("--help"))) {
             cliParser.printShortHelp();
+            System.exit(0);
         } else if (args.length == 1 && args[0].equals("--print_tests")) {
             cliParser.printHelp();
             System.exit(0);
@@ -28,8 +29,8 @@ public class Main {
                 configuration = new Configuration(args);
             } catch (IllegalArgumentException e) {
                 LOG.error("Bad configuration: {}", e.getMessage());
-                System.exit(1);
                 cliParser.printShortHelp();
+                System.exit(1);
             }
             Engine engine = new Engine(configuration);
             LOG.info("Running tests for {} seconds", configuration.getGlobalArgs().getDuration());
@@ -37,5 +38,6 @@ public class Main {
             LOG.info("Finished running tests", configuration.getGlobalArgs().getDuration());
             System.exit(0);
         }
+        System.exit(0);
     }
 }

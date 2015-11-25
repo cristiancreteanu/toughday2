@@ -231,10 +231,17 @@ public class Configuration {
         public static final String DEFAULT_USER = "admin";
         public static final String DEFAULT_PASSWORD = "admin";
         public static final String DEFAULT_HOST = "localhost";
-        public static final int DEFAULT_PORT = 4502;
+        public static final String DEFAULT_PORT_STRING = "4502";
+        public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
+
+        public static final String DEFAULT_TIMEOUT_STRING = "5m"; // 5 minutes
         public static final long DEFAULT_TIMEOUT = 5 * 60 * 1000l; // 5 minutes
-        public static final int DEFAULT_CONCURRENCY = 30;
-        public static final long DEFAULT_WAIT_TIME = 1000;
+
+        public static final String DEFAULT_CONCURRENCY_STRING = "30";
+        public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
+
+        public static final String DEFAULT_WAIT_TIME_STRING = "1000";
+        public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
 
         /**
          * Constructor
@@ -251,45 +258,52 @@ public class Configuration {
             this.concurrency = DEFAULT_CONCURRENCY;
         }
 
-        @ConfigArg(required = false)
+        // Global config args
+
+        @ConfigArg(required = false, defaultValue = DEFAULT_HOST, order = 1)
         public void setHost(String host) {
             this.host = host;
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, defaultValue = DEFAULT_PORT_STRING, order = 2)
         public void setPort(String port) {
             this.port = Integer.parseInt(port);
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, defaultValue = DEFAULT_USER, order = 3)
         public void setUser(String user) {
             this.user = user;
         }
 
-        @ConfigArg(required = false)
+        @ConfigArg(required = false, defaultValue = DEFAULT_PASSWORD, order = 4)
         public void setPassword(String password) {
             this.password = password;
         }
 
-        @ConfigArg(required = false, desc = "Number of concurrent users")
+        @ConfigArg(required = false, desc = "Number of concurrent users", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
         public void setConcurrency(String concurrencyString) {
             this.concurrency = Integer.parseInt(concurrencyString);
         }
 
-        @ConfigArg(required = false, desc = "How long to run toughday")
+        @ConfigArg(required = false, desc = "How long to run toughday", defaultValue = DEFAULT_DURATION, order = 6)
         public void setDuration(String durationString) {
             this.duration = parseDurationToSeconds(durationString);
         }
 
-        @ConfigArg(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds")
+        @ConfigArg(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds",
+                defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
         public void setWaitTime(String waitTime) {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArg(required = false, desc ="How long a test runs before it is interrupted and marked as failed")
+        @ConfigArg(required = false, desc ="How long a test runs before it is interrupted and marked as failed",
+                defaultValue = DEFAULT_TIMEOUT_STRING, order = 7)
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
+
+
+        // Adders and getters
 
         public void addPublisher(Publisher publisher) {
             publishers.add(publisher);
@@ -331,6 +345,8 @@ public class Configuration {
             return password;
         }
 
+
+        // Helper methods
 
         private static long unitToSeconds(char unit) {
             long factor = 1;
