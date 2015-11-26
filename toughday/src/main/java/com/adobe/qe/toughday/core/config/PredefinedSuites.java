@@ -26,15 +26,15 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                         .setDescription("Executes GET requests on common paths")
         );
         put("tree_authoring", new TestSuite()
-                        .add(new AuthoringTreeTest().setName("Hierarchical Pages Authoring"), 2)
+                        .add(new AuthoringTreeTest().setName("Tree Authoring"), 2)
                         .setDescription("A full authoring test with \"create hierarchical pages\", \"upload asset\", " +
-                                "\"delete asset\". The pages are not deleted and the repository will grow.")
+                                "\"delete asset\". The pages are not deleted.")
         );
         put("authoring", new TestSuite()
                         .add(new AuthoringTest().setName("Authoring"), 2)
                         .setDescription("A full authoring test with \"create page\", \"upload asset\", " +
                                 "\"delete asset\", \"delete page\" steps. " +
-                                "The pages are deleted as a last step so the repository will not grow much")
+                                "The pages are deleted in the last step")
         );
     }
 

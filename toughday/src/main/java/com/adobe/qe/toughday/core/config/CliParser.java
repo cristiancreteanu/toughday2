@@ -109,7 +109,14 @@ public class CliParser implements ConfigurationParser {
                     String key = res[0];
                     String val = res[1];
                     // if global param does not exist
-                    if (!availableGlobalArgs.containsKey(key) && !key.equals("suite")  && !key.equals("SuiteSetup")) {
+                    boolean found = false;
+                    for (Map<String, ConfigArg> args : availableGlobalArgs.values()) {
+                        if (args.containsKey(key)) {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found && !key.equals("suite")  && !key.equals("SuiteSetup")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                     }
                     globalArgs.put(key, val);
@@ -235,12 +242,12 @@ public class CliParser implements ConfigurationParser {
     }
 
     public void printShortHelp(boolean printSuites) {
-        System.out.println("Usage: java -jar toughday2.jar [--help | --print_tests] [<global arguments> | <actions>]");
+        System.out.println("Usage: java -jar toughday.jar [--help | --print_tests] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help. Use '--print_tests' to print full help.");
 
         System.out.println("\r\nExamples: \r\n");
-        System.out.println("\t java -jar toughday2.jar --suite=tree_authoring --host=localhost --port=4502");
-        System.out.println("\t java -jar toughday2.jar --suite=tree_authoring --config AuthoringTreeTest pageTemplate=/apps/my/mytemplate");
+        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
+        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --config AuthoringTreeTest pageTemplate=/apps/my/mytemplate");
 
         System.out.println("\r\nGlobal arguments:");
 

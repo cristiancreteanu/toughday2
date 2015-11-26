@@ -41,7 +41,7 @@ public class Configuration {
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
 
         ConfigurationParser parser = getConfigurationParser(cmdLineArgs);
-        ConfigParams configParams= parser.parse(cmdLineArgs);
+        ConfigParams configParams = parser.parse(cmdLineArgs);
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
 
