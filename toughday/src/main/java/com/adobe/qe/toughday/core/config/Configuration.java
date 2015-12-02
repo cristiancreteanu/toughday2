@@ -93,15 +93,16 @@ public class Configuration {
             AbstractTest test = createObject(
                     ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
                     testMeta.getParameters());
-            if (!testMeta.getParameters().containsKey("weight"))
-                throw new IllegalArgumentException("Property weight is required for class " + test.getClass().getSimpleName());
 
-            if (!testMeta.getParameters().containsKey("timeout")) {
-                suite.add(test, Integer.parseInt(testMeta.getParameters().get("weight")));
-            } else {
-                suite.add(test, Integer.parseInt(testMeta.getParameters().get("weight")),
-                        Integer.parseInt(testMeta.getParameters().get("timeout")));
-            }
+            // defaults
+            int weight = (testMeta.getParameters().containsKey("weight"))
+                    ? Integer.parseInt(testMeta.getParameters().get("weight")) : 1;
+            long timeout = (testMeta.getParameters().containsKey("timeout"))
+                    ? Integer.parseInt(testMeta.getParameters().get("timeout")) : -1;
+            long counter = (testMeta.getParameters().containsKey("count"))
+                    ? Integer.parseInt(testMeta.getParameters().get("count")) : -1;
+
+            suite.add(test, weight, timeout, counter);
         }
 
         for (AbstractTest test : suite.getTests()) {

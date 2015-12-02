@@ -14,6 +14,7 @@ public class TestSuite {
     private SuiteSetup setupStep;
     private WeightMap weightMap;
     private HashMap<AbstractTest, Long> timeoutMap;
+    private HashMap<AbstractTest, Long> counterMap;
     private String description = "";
 
     /**
@@ -78,6 +79,7 @@ public class TestSuite {
     public TestSuite() {
         weightMap = new WeightMap();
         timeoutMap = new HashMap<>();
+        counterMap = new HashMap<>();
     }
 
     /**
@@ -92,15 +94,21 @@ public class TestSuite {
     }
 
     /**
-     * Method for adding a test with weight and timeout.
-     * @param test
-     * @param weight
-     * @param timeout
+     * Method for adding a test with weight, timeout and a count
+     * @param test the test to be executed
+     * @param weight the weight of this test compared to other tests in this suite
+     * @param timeout the time it takes for a test to be considered timed-out
+     * @param count Maximum number of executions
      * @return
      */
-    public TestSuite add(AbstractTest test, int weight, long timeout) {
+    public TestSuite add(AbstractTest test, int weight, long timeout, long count) {
         add(test, weight);
-        timeoutMap.put(test, timeout);
+        if (timeout >= 0) {
+            timeoutMap.put(test, timeout);
+        }
+        if (count >= 0) {
+            counterMap.put(test, count);
+        }
         return this;
     }
 
@@ -224,6 +232,15 @@ public class TestSuite {
      */
     public Long getTimeout(AbstractTest test) {
         return timeoutMap.get(test);
+    }
+
+    /**
+     * Method for getting the count for a specific test.
+     * @param test
+     * @return the timeout if configured, null otherwise.
+     */
+    public Long getCount(AbstractTest test) {
+        return counterMap.get(test);
     }
 
     /**

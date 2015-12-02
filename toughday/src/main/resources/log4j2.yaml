@@ -28,6 +28,7 @@ Configuration:
     Loggers:
         Root:
             level: warn
+            additivity: false
             AppenderRef:
                 ref: RollingFile
         Logger:

@@ -34,7 +34,7 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                         .add(new AuthoringTest().setName("Authoring"), 2)
                         .setDescription("A full authoring test with \"create page\", \"upload asset\", " +
                                 "\"delete asset\", \"delete page\" steps. " +
-                                "The pages are deleted in the last step")
+                                "The pages are deleted.")
         );
     }
 

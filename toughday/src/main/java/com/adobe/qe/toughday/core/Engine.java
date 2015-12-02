@@ -23,47 +23,6 @@ public class Engine {
     private static final double TIMEOUT_CHECK_FACTOR = 0.3;
     private static Random _rnd = new Random();
 
-    /**
-     * Method for getting the next weighted random test form the test suite
-     */
-    private static AbstractTest getNextTest(TestSuite testSuite) {
-        int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
-
-        AbstractTest selectedTest = null;
-        for (AbstractTest test : testSuite.getTests()) {
-            int testWeight = testSuite.getWeightMap().get(test);
-            if (randomNumber < testWeight) {
-                selectedTest = test;
-                break;
-            }
-            randomNumber = randomNumber - testWeight;
-        }
-
-        return selectedTest;
-    }
-
-    /**
-     * Method for forcing a ExecutorService to finnish.
-     * @param pool
-     */
-    void shutdownAndAwaitTermination(ExecutorService pool) {
-        pool.shutdown(); // Disable new tasks from being submitted
-        try {
-            // Wait a while for existing tasks to terminate
-            if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS)) {
-                pool.shutdownNow(); // Cancel currently executing tasks
-                // Wait a while for tasks to respond to being cancelled
-                if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS))
-                    LOG.error("Thread pool did not terminate. Process must be killed");
-            }
-        } catch (InterruptedException ie) {
-            // (Re-)Cancel if current thread also interrupted
-            pool.shutdownNow();
-            // Preserve interrupt status
-            Thread.currentThread().interrupt();
-        }
-    }
-
     private TestSuite testSuite;
     private Configuration.GlobalArgs globalArgs;
     private ExecutorService executorService;
@@ -123,12 +82,13 @@ public class Engine {
         }
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(testWorkers);
         executorService.execute(resultAggregator);
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers);
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(testSuite, testWorkers, Thread.currentThread());
         executorService.execute(timeoutChecker);
         try {
             Thread.sleep(globalArgs.getDuration() * 1000L);
         } catch (InterruptedException e) {
-            e.printStackTrace();
+
+            LOG.info("Engine Interrupted", e);
         }
         finally {
             for(AsyncTestWorker run : testWorkers)
@@ -239,7 +199,15 @@ public class Engine {
             mutex.lock();
             try {
                 while (!isFinished()) {
-                    currentTest = getNextTest(this.testSuite);
+                    currentTest = getNextTest(this.testSuite, globalRunMap);
+                    // if no test available, finish
+                    if (null == currentTest) {
+                        this.finishExecution();
+                        continue;
+                    }
+
+                    // else, continue with the run
+
                     AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(currentTest);
 
                     lastTestStart = System.nanoTime();
@@ -279,11 +247,16 @@ public class Engine {
         /**
          * Method aggregating results.
          */
-        private void aggregateResults() {
+        private boolean aggregateResults() {
+            boolean finished = true;
             for(AsyncTestWorker worker : testWorkers) {
+                if (!worker.isFinished()) {
+                    finished = false;
+                }
                 RunMap localRunMap = worker.getLocalRunMap();
                 globalRunMap.aggregateAndReinitialize(localRunMap);
             }
+            return finished;
         }
 
         /**
@@ -294,7 +267,10 @@ public class Engine {
             try {
                 while (!isFinished()) {
                     Thread.sleep(RESULT_AGGREATION_DELAY);
-                    aggregateResults();
+                    boolean testsFinished = aggregateResults();
+                    if (testsFinished) {
+                        this.finishExecution();
+                    }
                     publishIntermediateResults();
                 }
             } catch (InterruptedException e) {
@@ -312,6 +288,7 @@ public class Engine {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
             }
         }
+
     }
 
     /**
@@ -319,6 +296,7 @@ public class Engine {
      * It uses Thread.interrupt for letting workers know the
      */
     private class AsyncTimeoutChecker extends AsyncEngineWorker {
+        private final Thread mainThread;
         private List<AsyncTestWorker> testWorkers;
         private long minTimeout;
         private TestSuite testSuite;
@@ -328,7 +306,8 @@ public class Engine {
          * @param testSuite
          * @param testWorkers list of test workers from this engine.
          */
-        public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers) {
+        public AsyncTimeoutChecker(TestSuite testSuite, List<AsyncTestWorker> testWorkers, Thread mainThread) {
+            this.mainThread = mainThread;
             this.testWorkers = testWorkers;
             this.testSuite = testSuite;
             minTimeout = globalArgs.getTimeout();
@@ -378,14 +357,70 @@ public class Engine {
             try {
                 while(!isFinished()) {
                     Thread.sleep(Math.round(Math.ceil(minTimeout * TIMEOUT_CHECK_FACTOR)));
+                    boolean testsFinished = true;
                     for(AsyncTestWorker worker : testWorkers) {
                         interruptWorkerIfTimeout(worker);
+                        if (!worker.isFinished()) {
+                            testsFinished = false;
+                        }
+                    }
+                    if (testsFinished) {
+                        this.finishExecution();
+                        mainThread.interrupt();
                     }
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOG.error("InterruptedException(s) should not reach this point", e);
             }
+        }
+    }
+
+    /**
+     * Method for getting the next weighted random test form the test suite
+     * TODO: optimize
+     */
+    private static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap) {
+        int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
+        AbstractTest selectedTest = null;
+        for (AbstractTest test : testSuite.getTests()) {
+            int testWeight = testSuite.getWeightMap().get(test);
+            boolean selectTest = (randomNumber < testWeight);
+
+            // Approximation based on how many times the test has been run globally
+            long totalRuns = globalRunMap.getRecord(test).getTotalRuns();
+            if (null != testSuite.getCount(test)) {
+                selectTest &= totalRuns < testSuite.getCount(test);
+            }
+            if (selectTest) {
+                selectedTest = test;
+                break;
+            }
+            randomNumber = randomNumber - testWeight;
+        }
+
+        return selectedTest;
+    }
+
+    /**
+     * Method for forcing an ExecutorService to finish.
+     * @param pool
+     */
+    void shutdownAndAwaitTermination(ExecutorService pool) {
+        pool.shutdown(); // Disable new tasks from being submitted
+        try {
+            // Wait a while for existing tasks to terminate
+            if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS)) {
+                pool.shutdownNow(); // Cancel currently executing tasks
+                // Wait a while for tasks to respond to being cancelled
+                if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS))
+                    LOG.error("Thread pool did not terminate. Process must be killed");
+            }
+        } catch (InterruptedException ie) {
+            // (Re-)Cancel if current thread also interrupted
+            pool.shutdownNow();
+            // Preserve interrupt status
+            Thread.currentThread().interrupt();
         }
     }
 }

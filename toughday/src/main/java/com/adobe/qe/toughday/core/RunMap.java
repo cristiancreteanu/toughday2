@@ -25,6 +25,10 @@ public class RunMap {
         runMap.put(test, new TestEntry(test));
     }
 
+    public TestEntry getRecord(AbstractTest test) {
+        return runMap.get(test);
+    }
+
     public void recordRun (AbstractTest test, double duration) {
         runMap.get(test).recordRun(duration);
     }
@@ -101,7 +105,7 @@ public class RunMap {
     /**
      * A test statistics entry
      */
-    private class TestEntry implements TestStatistics {
+    public class TestEntry implements TestStatistics {
         private AbstractTest test;
         private double totalDuration;
         private long totalRuns;
