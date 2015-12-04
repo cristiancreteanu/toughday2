@@ -16,20 +16,20 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Abstract base class for all tests. Normally you would not extend this class directly, because you would
  * have to write a runner for your new type of test. Instead you should extend the existing convenience classes
  * that already have a runner. {@link DemoTest} for a detailed example.
  */
-public abstract class AbstractTest {
+public abstract class AbstractTest implements Comparable<AbstractTest> {
     private UUID id;
     private String name;
     private AbstractTest parent;
     private Configuration.GlobalArgs globalArgs;
     protected File workspace;
+    protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
 
     /**
      * Constructor.
@@ -39,6 +39,14 @@ public abstract class AbstractTest {
         this.workspace = new File("workspace");
         // create dir structure
         this.workspace.mkdirs();
+    }
+
+    public static List<Thread> getExtraThreads() {
+        return extraThreads;
+    }
+
+    public static void addExtraThread(Thread thread) {
+        extraThreads.add(thread);
     }
 
     /**
@@ -191,6 +199,11 @@ public abstract class AbstractTest {
         return globalArgs;
     }
 
+    @Override
+    public int compareTo(AbstractTest that) {
+        return this.getId().compareTo(that.getId());
+    }
+
     /**
      * Getter for the children of this test.
      * @return a list with all children of this test. Must not return null, instead should return an empty list.
@@ -208,6 +221,5 @@ public abstract class AbstractTest {
      * @return a new, already configured instance of this test.
      */
     public abstract AbstractTest newInstance();
-
 
 }

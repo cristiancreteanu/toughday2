@@ -76,11 +76,14 @@ public class Configuration {
         for(ConfigParams.NamedMetaObject testMeta : configParams.getTestsToConfig()) {
             AbstractTest testObject = suite.getTest(testMeta.getName());
             setObjectProperties(testObject, testMeta.getParameters());
+            if (testMeta.getParameters().containsKey("weight")) {
+                suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("weight")));
+            }
             if (testMeta.getParameters().containsKey("timeout")) {
                 suite.replaceTimeout(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("timeout")));
             }
-            if (testMeta.getParameters().containsKey("weight")) {
-                    suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("weight")));
+            if (testMeta.getParameters().containsKey("count")) {
+                suite.replaceCount(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("count")));
             }
         }
 
@@ -235,8 +238,8 @@ public class Configuration {
         public static final String DEFAULT_PORT_STRING = "4502";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
 
-        public static final String DEFAULT_TIMEOUT_STRING = "5m"; // 5 minutes
-        public static final long DEFAULT_TIMEOUT = 5 * 60 * 1000l; // 5 minutes
+        public static final String DEFAULT_TIMEOUT_STRING = "3m"; // 3 minutes
+        public static final long DEFAULT_TIMEOUT = 3 * 60 * 1000l; // 5 minutes
 
         public static final String DEFAULT_CONCURRENCY_STRING = "30";
         public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);

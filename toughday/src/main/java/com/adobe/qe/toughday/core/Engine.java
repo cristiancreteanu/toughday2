@@ -19,8 +19,8 @@ import java.util.concurrent.locks.ReentrantLock;
 public class Engine {
     private static final Logger LOG = LoggerFactory.getLogger(Engine.class);
     private static final int RESULT_AGGREATION_DELAY = 1000; //in ms
-    private static final int WAIT_TERMINATION_FACTOR = 3;
-    private static final double TIMEOUT_CHECK_FACTOR = 0.3;
+    private static final int WAIT_TERMINATION_FACTOR = 30;
+    private static final double TIMEOUT_CHECK_FACTOR = 0.03;
     private static Random _rnd = new Random();
 
     private TestSuite testSuite;
@@ -87,15 +87,24 @@ public class Engine {
         try {
             Thread.sleep(globalArgs.getDuration() * 1000L);
         } catch (InterruptedException e) {
-
             LOG.info("Engine Interrupted", e);
         }
         finally {
-            for(AsyncTestWorker run : testWorkers)
+            for (AsyncTestWorker run : testWorkers) {
                 run.finishExecution();
+            }
             resultAggregator.finishExecution();
             timeoutChecker.finishExecution();
         }
+        // interrupt extra test threads
+        // TODO: this is suboptimal, replace with a better mechanism for notifications
+        List<Thread> threadsList = AbstractTest.getExtraThreads();
+        synchronized (threadsList) {
+            for (Thread t : threadsList) {
+                t.interrupt();
+            }
+        }
+
         shutdownAndAwaitTermination(executorService);
         publishFinalResults();
     }
@@ -104,7 +113,7 @@ public class Engine {
      * Publish final results.
      */
     private void publishFinalResults() {
-        for(Publisher publisher : globalArgs.getPublishers()) {
+        for (Publisher publisher : globalArgs.getPublishers()) {
             publisher.publishFinal(globalRunMap.getTestStatistics());
         }
     }
@@ -276,6 +285,10 @@ public class Engine {
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 LOG.error("InterruptedException(s) should not reach this point", e);
+            } finally {
+                // signal all publishers that they are stopped.
+                // any local threads inside the publishers would have to be stopped
+                stopPublishers();
             }
             aggregateResults();
         }
@@ -286,6 +299,12 @@ public class Engine {
         public void publishIntermediateResults() {
             for(Publisher publisher : globalArgs.getPublishers()) {
                 publisher.publishIntermediate(globalRunMap.getTestStatistics());
+            }
+        }
+
+        private void stopPublishers() {
+            for(Publisher publisher : globalArgs.getPublishers()) {
+                publisher.finish();
             }
         }
 
@@ -358,7 +377,7 @@ public class Engine {
                 while(!isFinished()) {
                     Thread.sleep(Math.round(Math.ceil(minTimeout * TIMEOUT_CHECK_FACTOR)));
                     boolean testsFinished = true;
-                    for(AsyncTestWorker worker : testWorkers) {
+                    for (AsyncTestWorker worker : testWorkers) {
                         interruptWorkerIfTimeout(worker);
                         if (!worker.isFinished()) {
                             testsFinished = false;
@@ -371,7 +390,7 @@ public class Engine {
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
-                LOG.error("InterruptedException(s) should not reach this point", e);
+                LOG.info ("Timeout thread interrupted");
             }
         }
     }
@@ -410,10 +429,10 @@ public class Engine {
         pool.shutdown(); // Disable new tasks from being submitted
         try {
             // Wait a while for existing tasks to terminate
-            if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS)) {
+            if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.MILLISECONDS)) {
                 pool.shutdownNow(); // Cancel currently executing tasks
                 // Wait a while for tasks to respond to being cancelled
-                if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.SECONDS))
+                if (!pool.awaitTermination(WAIT_TERMINATION_FACTOR * RESULT_AGGREATION_DELAY, TimeUnit.MILLISECONDS))
                     LOG.error("Thread pool did not terminate. Process must be killed");
             }
         } catch (InterruptedException ie) {

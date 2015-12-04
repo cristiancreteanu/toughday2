@@ -18,29 +18,49 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class ConsolePublisher implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(ConsolePublisher.class);
     private boolean begun = false;
+    private boolean finished = false;
     private boolean clearScreen = true;
+    private final CleanerThread cleaner;
     private Scanner sc;
     private AtomicInteger extraLines;
 
 
+    class CleanerThread extends Thread {
+
+        @Override
+        public void run() {
+            InputStreamReader isr = new InputStreamReader(System.in);
+            BufferedReader in = new BufferedReader(isr);
+            try {
+                while (!finished && !this.isInterrupted()) {
+                        while (!in.ready()) {
+                        if (finished) {
+                            this.interrupt();
+                            break;
+                        }
+                        this.sleep(200);
+                    }
+
+                    if (finished) {
+                        this.interrupt();
+                        break;
+                    }
+
+                    if (in.readLine() != null) {
+                        extraLines.incrementAndGet();
+                    }
+                }
+            } catch (IOException e) {
+            } catch (InterruptedException e) {
+            }
+        }
+    }
+
     public ConsolePublisher() {
         sc = new Scanner(System.in);
         extraLines = new AtomicInteger(0);
-        new Thread() {
-            @Override
-            public void run() {
-                InputStreamReader isr = new InputStreamReader(System.in);
-                BufferedReader in = new BufferedReader(isr);
-                String line;
-                try {
-                    while ((line = in.readLine()) != null) {
-                        extraLines.incrementAndGet();
-                    }
-                } catch (IOException e) {
-                }
-
-            }
-        }.start();
+        this.cleaner = new CleanerThread();
+        this.cleaner.start();
     }
 
     @ConfigArg(required = false, desc = "Whether to clear the screen before printing each stat")
@@ -98,6 +118,12 @@ public class ConsolePublisher implements Publisher {
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
         publish(testStatistics);
+    }
+
+    @Override
+    public void finish() {
+        this.finished = true;
+        this.cleaner.interrupt();
     }
 
     private static String getFriendlyDuration(long millis) {

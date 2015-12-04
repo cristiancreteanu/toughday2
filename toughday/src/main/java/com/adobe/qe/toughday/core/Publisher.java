@@ -19,4 +19,9 @@ public interface Publisher {
      * @param testStatistics
      */
     void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics);
+
+    /**
+     * Method that signals the publisher that it is stopped
+     */
+    void finish();
 }

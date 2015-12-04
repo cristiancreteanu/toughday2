@@ -16,6 +16,8 @@ import java.util.Collection;
  */
 public class CSVPublisher implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
+    private boolean finished = false;
+
     private String filePath = "results.csv";
     private static String HEADER = "Name, Duration / user, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
 
@@ -32,6 +34,11 @@ public class CSVPublisher implements Publisher {
     @Override
     public void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics) {
         publish(testStatistics);
+    }
+
+    @Override
+    public void finish() {
+        this.finished = true;
     }
 
     public void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {

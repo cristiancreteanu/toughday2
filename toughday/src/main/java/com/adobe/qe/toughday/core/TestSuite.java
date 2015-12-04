@@ -5,7 +5,9 @@ import com.adobe.qe.toughday.core.config.ConfigArg;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * Test suite class.
@@ -17,10 +19,11 @@ public class TestSuite {
     private HashMap<AbstractTest, Long> counterMap;
     private String description = "";
 
+
     /**
      * Weight map class.
      */
-    private static class WeightMap extends HashMap<AbstractTest, Integer> {
+    private static class WeightMap extends TreeMap<AbstractTest, Integer> {
         private int totalWeight;
         private HashMap<String, AbstractTest> nameMap = new HashMap<>();
 
@@ -125,7 +128,7 @@ public class TestSuite {
     }
 
     /**
-     * Method for replacing the weight for a test
+     * Method for replacing the timeout for a test
      * @param testName
      * @param timeout
      * @return
@@ -133,6 +136,18 @@ public class TestSuite {
     public TestSuite replaceTimeout(String testName, long timeout) {
         AbstractTest test = weightMap.getTest(testName);
         timeoutMap.put(test, timeout);
+        return this;
+    }
+
+    /**
+     * Method for replacing the max count for a test
+     * @param testName
+     * @param count
+     * @return
+     */
+    public TestSuite replaceCount(String testName, long count) {
+        AbstractTest test = weightMap.getTest(testName);
+        counterMap.put(test, count);
         return this;
     }
 
@@ -247,7 +262,7 @@ public class TestSuite {
      * Getter for the weight map.
      * @return
      */
-    public HashMap<AbstractTest, Integer> getWeightMap() {
+    public Map<AbstractTest, Integer> getWeightMap() {
         return weightMap;
     }
 

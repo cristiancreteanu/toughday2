@@ -27,6 +27,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     // needed for syncronizing
     static class MyPhaser extends Phaser {
+        public Thread mon;
+
         public MyPhaser() {
             super();
             this.monitor();
@@ -44,7 +46,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
             this.nextChildPerLevel.set(0);
             maxChildrenPerLevel = maxChildrenPerLevel * BASE;
             // Return false, never terminate phaser.
-            if (LOG.isDebugEnabled()) LOG.debug("onAdvance. phase=%d registeredParties=%d tid=%d", phase, registeredParties, Thread.currentThread().getId());
+            if (LOG.isDebugEnabled()) LOG.debug("onAdvance. phase=%d registeredParties=%d tid=%d",
+                    phase, registeredParties, Thread.currentThread().getId());
             return false;
         }
         public int getNextNode() {
@@ -61,7 +64,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
             return this.getPhase() + 1;
         }
         public void monitor() {
-            Thread mon = new Thread() {
+            this.mon = new Thread() {
                 @Override
                 public void run() {
                     do {
@@ -83,6 +86,9 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     }
     public static final MyPhaser phaser = new MyPhaser();
+    static {
+        AbstractTest.addExtraThread(phaser.mon);
+    }
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;
