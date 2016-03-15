@@ -78,7 +78,7 @@ public class RunMap {
         double getRealThroughput();
 
         /**
-         * Get the execution throuhput.
+         * Get the execution throughput.
          * Calculated as follows: <code>number of parallel users / average duration</code>
          * @return
          */
@@ -106,6 +106,7 @@ public class RunMap {
      * A test statistics entry
      */
     public class TestEntry implements TestStatistics {
+        public static final double ONE_BILLION_D = 1000 * 1000 * 1000.0d;
         private AbstractTest test;
         private double totalDuration;
         private long totalRuns;
@@ -184,12 +185,12 @@ public class RunMap {
 
         @Override
         public double getRealThroughput() {
-            return ((double) totalRuns * 1000000000.0d) / (lastNanoTime - startNanoTime);
+            return ((double) totalRuns * ONE_BILLION_D) / (lastNanoTime - startNanoTime);
         }
 
         @Override
         public double getExecutionThroughput() {
-            return 1000 * threads / getAverageDuration();
+            return 1000 * threads / (getAverageDuration() + test.getGlobalArgs().getWaitTime());
         }
 
         @Override

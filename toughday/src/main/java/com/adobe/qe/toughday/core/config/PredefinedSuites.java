@@ -19,9 +19,8 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
         put("get_tests", new TestSuite()
                         .add(new GetHomepageTest().setName("Get Homepage"), 10)
                         .add(new GetTest().setPath("/sites.html").setName("Get /sites.html"), 5)
-                        .add(new GetTest().setPath("/projects.html").setName("Get /projects.html"), 5)
+                        //.add(new GetTest().setPath("/projects.html").setName("Get /projects.html"), 5)
                         .add(new GetTest().setPath("/assets.html").setName("Get /assets.html"), 5)
-                        .add(new GetTest().setPath("/screens.html").setName("Get /screens.html"), 5)
                         // maybe more here?
                         .setDescription("Executes GET requests on common paths")
         );

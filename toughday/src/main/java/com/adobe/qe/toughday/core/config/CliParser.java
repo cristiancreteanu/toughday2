@@ -223,6 +223,7 @@ public class CliParser implements ConfigurationParser {
             printTestClass("weight", true, "1", "The weight of this test" );
             printTestClass("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
                     "Time in milliseconds after which the test is interrupted");
+            printTestClass("count", false, "none", "The number of times this test should run");
         }
 
         System.out.println();

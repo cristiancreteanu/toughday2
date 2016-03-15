@@ -33,11 +33,13 @@ public class Main {
                     cliParser.printShortHelp();
                     System.exit(1);
                 }
+
                 Engine engine = new Engine(configuration);
-                LOG.info("Running tests for {} seconds or until count for all tests has been reached", configuration.getGlobalArgs()
-                        .getDuration());
+                LOG.info("Running tests for {} seconds or until count for all tests has been reached",
+                        configuration.getGlobalArgs().getDuration());
                 engine.runTests();
                 LOG.info("Finished running tests", configuration.getGlobalArgs().getDuration());
+
                 System.exit(0);
             } catch (Throwable t) {
                 LogManager.getLogger(Engine.class).error("Error encountered", t);

@@ -50,6 +50,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
                     phase, registeredParties, Thread.currentThread().getId());
             return false;
         }
+
         public int getNextNode() {
             int childNumber = this.nextChildPerLevel.getAndIncrement();
             if (childNumber >= maxChildrenPerLevel) {
@@ -63,6 +64,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
         public int getLevel() {
             return this.getPhase() + 1;
         }
+
         public void monitor() {
             this.mon = new Thread() {
                 @Override
@@ -139,7 +141,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
             this.failed.set(Boolean.TRUE);
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we're just count them.
-            LOG.warn("Failed to create page {}{}", parentPath.get(), nodeName.get());
+            LOG.warn("Failed to create page {}{} ({})", parentPath.get(), nodeName.get(), e.getMessage());
             throw e;
         }
         if (LOG.isDebugEnabled()) LOG.debug("tid=%{} nextChild={} level={} path={}",

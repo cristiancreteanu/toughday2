@@ -42,3 +42,8 @@ Configuration:
             additivity: false
             AppenderRef:
                 ref: RollingFileTests
+          - name: org.apache
+            level: info
+            additivity: false
+            AppenderRef:
+                ref: RollingFile
