@@ -101,6 +101,8 @@ public class CliParser implements ConfigurationParser {
     public ConfigParams parse(String[] cmdLineArgs) {
         HashMap<String, String> globalArgs = new HashMap<>();
         ConfigParams configParams = new ConfigParams();
+
+        // Global parameters
         for (String arg : cmdLineArgs) {
             if (arg.startsWith("--")) {
                 arg = arg.substring(2);
@@ -126,6 +128,7 @@ public class CliParser implements ConfigurationParser {
         configParams.setGlobalParams(globalArgs);
 
 
+        // Config parameters
         for (int i = 0; i < cmdLineArgs.length; i++) {
             if (cmdLineArgs[i].startsWith("--")) {
                 String action = cmdLineArgs[i].substring(2);
