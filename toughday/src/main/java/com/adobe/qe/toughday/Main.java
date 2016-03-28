@@ -1,7 +1,7 @@
 package com.adobe.qe.toughday;
 
 
-import com.adobe.qe.toughday.core.Engine;
+import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.config.CliParser;
 import com.adobe.qe.toughday.core.config.Configuration;
 import org.apache.logging.log4j.LogManager;

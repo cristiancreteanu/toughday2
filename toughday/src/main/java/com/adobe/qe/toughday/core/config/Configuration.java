@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 /**
  * An object that has all that configurations parsed and objects instantiated.
  */
@@ -305,6 +306,7 @@ public class Configuration {
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
+
 
 
         // Adders and getters
