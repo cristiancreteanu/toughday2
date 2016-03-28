@@ -24,7 +24,7 @@ Global arguments
 
 Available actions
 -----------------
-| Paramerer                                                       |  Description
+| Parameter                                                       |  Description
 | --------------------------------------------------------------- | -------------------------------------------------
 | --add TestClass/PublisherClass property1=val property2=val      |  add a test to the suite or a publisher
 | --config TestName property1=val property2=val                   |  override parameters for a test from a predefined suite
