@@ -2,11 +2,10 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.adobe.qe</groupId>
-    <artifactId>toughday</artifactId>
+    <artifactId>toughday2</artifactId>
     <packaging>jar</packaging>
-    <version>1.0.0-SNAPSHOT</version>
-    <name>toughday</name>
-    <url>http://maven.apache.org</url>
+    <version>0.1.0-SNAPSHOT</version>
+    <name>toughday2</name>
 
     <scm>
         <connection>scm:git:git@git.corp.adobe.com:QE/toughday2</connection>
@@ -35,7 +34,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0-r1585899</version>
+                    <version>3.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
