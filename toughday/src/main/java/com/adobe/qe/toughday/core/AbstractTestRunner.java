@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.LinkedList;
 
 /**
  * Base class of all runners. For each test only one runner will be instantiated by the Engine and placed into the
@@ -20,10 +22,10 @@ import java.lang.reflect.Method;
  */
 public abstract class AbstractTestRunner<T extends AbstractTest> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTestRunner.class);
-    private boolean setupExecuted;
-    private Method setupMethod;
-    private Method beforeMethod;
-    private Method afterMethod;
+    private volatile boolean setupExecuted;
+    private Method[] setupMethods;
+    private Method[] beforeMethods;
+    private Method[] afterMethods;
 
     /**
      * Constructor
@@ -32,24 +34,46 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      */
     public AbstractTestRunner(Class<? extends AbstractTest> testClass) {
         setupExecuted = true;
-        for (Method method : testClass.getMethods()) {
-            for (Annotation annotation : method.getAnnotations()) {
-                if (annotation.annotationType() == Setup.class) {
-                    if (validateMethod(method, Setup.class)) {
-                        setupMethod = method;
-                        setupExecuted = false;
-                    }
-                } else if (annotation.annotationType() == Before.class) {
-                    if (validateMethod(method, Before.class)) {
-                        beforeMethod = method;
-                    }
-                } else if (annotation.annotationType() == After.class) {
-                    if (validateMethod(method, After.class)) {
-                        afterMethod = method;
+        LinkedList<Method> setupMethodList = new LinkedList<>();
+        LinkedList<Method> beforeMethodList = new LinkedList<>();
+        LinkedList<Method> afterMethodList = new LinkedList<>();
+
+        Class currentClass = testClass;
+
+        while(!currentClass.getName().equals(AbstractTest.class.getName())) {
+            System.out.println(currentClass.getName());
+            for (Method method : currentClass.getDeclaredMethods()) {
+                for (Annotation annotation : method.getAnnotations()) {
+                    if (annotation.annotationType() == Setup.class) {
+                        if (validateMethod(method, Setup.class)) {
+                            setupMethodList.addFirst(method);
+                            method.setAccessible(true);
+                            setupExecuted = false;
+                        }
+                    } else if (annotation.annotationType() == Before.class) {
+                        if (validateMethod(method, Before.class)) {
+                            method.setAccessible(true);
+                            beforeMethodList.addFirst(method);
+                        }
+                    } else if (annotation.annotationType() == After.class) {
+                        if (validateMethod(method, After.class)) {
+                            method.setAccessible(true);
+                            afterMethodList.addLast(method);
+                        }
                     }
                 }
             }
+            currentClass = currentClass.getSuperclass();
         }
+
+        if (setupMethodList.size() > 0)
+            this.setupMethods = setupMethodList.toArray(new Method[setupMethodList.size()]);
+
+        if (beforeMethodList.size() >0)
+            this.beforeMethods = beforeMethodList.toArray(new Method[beforeMethodList.size()]);
+
+        if (afterMethodList.size() > 0)
+            this.afterMethods = afterMethodList.toArray(new Method[afterMethodList.size()]);
     }
 
     /**
@@ -64,7 +88,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         if (!setupExecuted) {
             synchronized (this) {
                 if (!setupExecuted) {
-                    executeMethod(testObject, setupMethod, Setup.class);
+                    executeMethods(testObject, setupMethods, Setup.class);
                     setupExecuted = true;
                 }
             }
@@ -77,8 +101,8 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param testObject
      */
     protected void executeBefore(AbstractTest testObject) {
-        if (beforeMethod != null) {
-            executeMethod(testObject, beforeMethod, Before.class);
+        if (beforeMethods != null) {
+            executeMethods(testObject, beforeMethods, Before.class);
         }
     }
 
@@ -88,8 +112,8 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param testObject
      */
     protected void executeAfter(AbstractTest testObject) {
-        if (afterMethod != null) {
-            executeMethod(testObject, afterMethod, After.class);
+        if (afterMethods != null) {
+            executeMethods(testObject, afterMethods, After.class);
         }
     }
 
@@ -128,20 +152,22 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
     /**
      * Run a annotated method using reflections.
      * @param testObject instance of the test for which the method will be executed
-     * @param method that will be invoked by using reflections
+     * @param methods that will be invoked by using reflections
      * @param annotation what annotation caused this method to be ran
      */
-    private void executeMethod(AbstractTest testObject, Method method, Class<? extends Annotation> annotation) {
-        try {
-            method.invoke(testObject);
-        } catch (IllegalAccessException e) {
-            logger.error("Could not execute " + method.getName() +
-                    " annotated with " + annotation.getSimpleName() + ": Illegal Access.", e);
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            logger.error("Could not execute " + method.getName() +
-                    " annotated with " + annotation.getSimpleName(), e);
-            e.printStackTrace();
+    private void executeMethods(AbstractTest testObject, Method[] methods, Class<? extends Annotation> annotation) {
+        for (Method method : methods) {
+            try {
+                method.invoke(testObject);
+            } catch (IllegalAccessException e) {
+                logger.error("Could not execute " + method.getName() +
+                        " annotated with " + annotation.getSimpleName() + ": Illegal Access.", e);
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                logger.error("Could not execute " + method.getName() +
+                        " annotated with " + annotation.getSimpleName(), e);
+                e.printStackTrace();
+            }
         }
     }
 
@@ -154,6 +180,11 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
     private boolean validateMethod(Method method, Class<? extends Annotation> annotation) {
         if(method.getParameterTypes().length != 0) {
             logger.error("Method " + method + " annotated with " + annotation.getSimpleName() + " cannot have parameters");
+            return false;
+        }
+
+        if((method.getModifiers() & Modifier.PRIVATE) == 0) {
+            logger.error("Method " + method + " annotated with " + annotation.getSimpleName() + " must be private");
             return false;
         }
         return true;

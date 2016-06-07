@@ -40,7 +40,7 @@ public class DemoTest extends SequentialTestBase {
      *  This will run only once, before any instances of this test are ran.
      */
     @Setup
-    public void setupMethod() {
+    private void setupMethod() {
         System.out.println(getFullName() + " Setup");
         try {
             /* Sleeps are not required, actually they are quite harmful, because they reduce the rate with which
@@ -58,7 +58,7 @@ public class DemoTest extends SequentialTestBase {
      *  This will run before every test run.
      */
     @Before
-    public void beforeMethod() {
+    private void beforeMethod() {
         System.out.println(getFullName() + " Before");
         try {
             Thread.sleep(1000);
@@ -72,7 +72,7 @@ public class DemoTest extends SequentialTestBase {
      *  This will run after the test, even if the test fails
      */
     @After
-    public void afterMethod() {
+    private void afterMethod() {
         System.out.println(getFullName() + " After");
         try {
             Thread.sleep(1000);
@@ -124,5 +124,9 @@ public class DemoTest extends SequentialTestBase {
         return new DemoTest(property);
         //or you can use the builder pattern
         //return new DemoTest().setProperty(property);
+    }
+
+    public String getProperty() {
+        return property;
     }
 }
