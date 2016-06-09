@@ -21,7 +21,9 @@ package com.adobe.qe.toughday.core.engine;
 import com.adobe.qe.toughday.core.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -30,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 class AsyncTestWorker extends AsyncEngineWorker {
     private final Engine engine;
     private RunMap localRunMap;
-    private List<AbstractTest> localTests;
+    private HashMap<UUID, AbstractTest> localTests;
     private Thread workerThread;
     private long lastTestStart;
     private TestSuite testSuite;
@@ -46,10 +48,10 @@ class AsyncTestWorker extends AsyncEngineWorker {
         this.engine = engine;
         this.mutex = new ReentrantLock();
         this.testSuite = testSuite;
-        localTests = new ArrayList<>();
+        localTests = new HashMap<>();
         for(AbstractTest test : testSuite.getTests()) {
             AbstractTest localTest = test.clone();
-            localTests.add(localTest);
+            localTests.put(localTest.getId(), localTest);
         }
         this.localRunMap = localRunMap;
     }
@@ -103,6 +105,9 @@ class AsyncTestWorker extends AsyncEngineWorker {
                     this.finishExecution();
                     continue;
                 }
+
+                //get the worker's local test to run
+                currentTest = localTests.get(currentTest.getId());
 
                 // else, continue with the run
 
