@@ -42,7 +42,7 @@ public class CompositeDemo extends CompositeTest {
 
 
     @Setup
-    public void setupMethod() {
+    private void setupMethod() {
         System.out.println(getFullName() + " Setup");
         try {
             Thread.sleep(1000);
@@ -53,7 +53,7 @@ public class CompositeDemo extends CompositeTest {
 
 
     @Before
-    public void beforeMethod() {
+    private void beforeMethod() {
         System.out.println(getFullName() + " Before");
         try {
             Thread.sleep(1000);
@@ -64,7 +64,7 @@ public class CompositeDemo extends CompositeTest {
 
 
     @After
-    public void afterMethod() {
+    private void afterMethod() {
         System.out.println(getFullName() + " After");
         try {
             Thread.sleep(1000);

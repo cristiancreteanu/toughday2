@@ -51,7 +51,7 @@ public class UploadImageTest extends SequentialTestBase {
     }
 
     @Before
-    public void before() throws ClientException, IOException {
+    private void before() throws ClientException, IOException {
         String nextFileName = fileName + nextNumber.getAndIncrement() + ".png";
 
         // image processing: read, add noise and save to file
@@ -82,7 +82,7 @@ public class UploadImageTest extends SequentialTestBase {
     }
 
     @After
-    public void after() {
+    private void after() {
         if (!lastCreated.get().delete()) {
             throw new RuntimeException("Cannot delete file " + lastCreated.get().getName());
         }
