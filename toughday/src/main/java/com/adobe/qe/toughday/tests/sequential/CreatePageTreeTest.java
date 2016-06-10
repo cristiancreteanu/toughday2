@@ -121,7 +121,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
     public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
 
     @Before
-    public void setup() {
+    private void setup() {
         phaser.register();
 
         // this gets the next node on the level and potentially waits for other threads to reset the level
@@ -149,7 +149,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
     }
 
     @After
-    public void after() {
+    private void after() {
         if (LOG.isDebugEnabled()) LOG.debug("In after() tid={}", Thread.currentThread().getId());
         // make sure the page was created
         for (int i=0; i<5; i++) {
