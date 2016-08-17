@@ -21,9 +21,9 @@ public class TestAnnotatedMethod extends TestCase {
     }
 
     public static boolean hasAnnotation(Method method) {
-        return method.getDeclaredAnnotation(Before.class) != null
-                || method.getDeclaredAnnotation(After.class) != null
-                || method.getDeclaredAnnotation(Setup.class) != null;
+        return method.getAnnotation(Before.class) != null
+                || method.getAnnotation(After.class) != null
+                || method.getAnnotation(Setup.class) != null;
     }
 
     /**
@@ -41,6 +41,6 @@ public class TestAnnotatedMethod extends TestCase {
 
     public void testArguments() {
         assertTrue("ToughDay2 annotated method \"" + TDAnnotatedMethod + "\" is not allowed to have parameters",
-                TDAnnotatedMethod.getParameterCount() == 0);
+                TDAnnotatedMethod.getParameterTypes().length == 0);
     }
 }

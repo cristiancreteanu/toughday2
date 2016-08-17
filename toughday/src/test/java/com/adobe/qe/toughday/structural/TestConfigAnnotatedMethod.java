@@ -30,7 +30,7 @@ public class TestConfigAnnotatedMethod extends TestCase {
 
     public void testArguments() {
         assertTrue( "ToughDay2 config method \"" + TDConfigAnnotatedMethod + "\" must have only one parameter",
-                TDConfigAnnotatedMethod.getParameterCount() == 1);
+                TDConfigAnnotatedMethod.getParameterTypes().length == 1);
 
         assertTrue( "ToughDay2 config method's \"" + TDConfigAnnotatedMethod + "\" parameter must be of type String",
                 TDConfigAnnotatedMethod.getParameterTypes()[0].isAssignableFrom(String.class));
