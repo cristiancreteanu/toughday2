@@ -17,6 +17,10 @@ import java.util.Collection;
 public class CSVPublisher implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
     private boolean finished = false;
+    private boolean append = false;
+    private boolean created = false;
+    private PrintWriter printWriter;
+    private BufferedWriter writer;
 
     private String filePath = "results.csv";
     private static String HEADER = "Name, Duration / user, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
@@ -24,6 +28,11 @@ public class CSVPublisher implements Publisher {
     @ConfigArg(required = false, desc = "The filename to write results to")
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    @ConfigArg(required = false, desc = "Append instead of rewrite")
+    public void setAppend(String value) {
+        append = Boolean.valueOf(value);
     }
 
     @Override
@@ -43,10 +52,15 @@ public class CSVPublisher implements Publisher {
 
     public void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {
         try {
-            PrintWriter printWriter = new PrintWriter(filePath);
-            BufferedWriter writer = new BufferedWriter(printWriter);
-            writer.write(HEADER);
-            writer.newLine();
+            if(!created || !append) {
+                printWriter = new PrintWriter(filePath);
+                created = true;
+                writer = new BufferedWriter(printWriter);
+                writer.write(HEADER);
+                writer.newLine();
+                writer.flush();
+            }
+
             for (RunMap.TestStatistics statistics : testStatistics) {
                 writer.write(statistics.getTest().getFullName() + ", " +
                         statistics.getDurationPerUser() + ", " +
@@ -61,8 +75,12 @@ public class CSVPublisher implements Publisher {
                 writer.newLine();
             }
             writer.flush();
-            writer.close();
-            printWriter.close();
+            printWriter.flush();
+
+            if(!append) {
+                writer.close();
+                printWriter.close();
+            }
         } catch (IOException e) {
             LOG.error("Could not publish results", e);
         }
