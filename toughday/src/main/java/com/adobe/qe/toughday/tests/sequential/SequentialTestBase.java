@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.granite.testing.ClientException;
+import com.adobe.granite.testing.auth.BasicAuth;
 import com.adobe.granite.testing.client.GraniteClient;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.AbstractTestRunner;
@@ -33,7 +34,7 @@ public abstract class SequentialTestBase extends AbstractTest {
             defaultClient = new GraniteClient("http://" + getGlobalArgs().getHost() + ":" + getGlobalArgs().getPort(),
                                     getGlobalArgs().getUser(),
                                     getGlobalArgs().getPassword());
-
+            defaultClient.setHttpAuth(new BasicAuth());
         }
         return defaultClient;
     }
