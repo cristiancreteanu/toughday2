@@ -1,12 +1,12 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
-import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.http.HttpStatus;
-import org.apache.sling.testing.tools.http.RequestExecutor;
+import org.apache.sling.testing.clients.ClientException;
+import org.apache.sling.testing.clients.SlingHttpResponse;
+import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -33,19 +33,20 @@ public class DeletePageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws ClientException {
+    public void test() throws Exception {
         String nextTitle = getNextTitle();
         if (nextTitle == null) {
             throw new ClientException("No page created (by CreatePageTest). Marking as fail.");
         }
 
-        FormEntityBuilder feb = new FormEntityBuilder().addParameter("cmd", CMD_DELETE_PAGE)
+        FormEntityBuilder feb = FormEntityBuilder.create()
+                .addParameter("cmd", CMD_DELETE_PAGE)
                 .addParameter("force", Boolean.valueOf(force).toString())
                 .addParameter("shallow", Boolean.toString(false))
                 .addParameter("path", parentPath + nextTitle);
 
-        RequestExecutor executor = getDefaultClient().http().doPost("/bin/wcmcommand", feb.getEntity());
-        checkStatus(executor.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        SlingHttpResponse response = getDefaultClient().doPost("/bin/wcmcommand", feb.build());
+        checkStatus(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
     }
 
 

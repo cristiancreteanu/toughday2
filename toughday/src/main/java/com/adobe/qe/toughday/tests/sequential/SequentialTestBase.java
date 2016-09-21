@@ -1,12 +1,12 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
-import com.adobe.granite.testing.auth.BasicAuth;
-import com.adobe.granite.testing.client.GraniteClient;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.AbstractTestRunner;
 import com.adobe.qe.toughday.runners.SequentialTestRunner;
+import org.apache.sling.testing.clients.SlingClient;
+import org.apache.sling.testing.clients.ClientException;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +16,7 @@ import java.util.List;
  */
 public abstract class SequentialTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();
-    private GraniteClient defaultClient;
+    private SlingClient defaultClient;
 
 
     @Override
@@ -29,12 +29,11 @@ public abstract class SequentialTestBase extends AbstractTest {
         return SequentialTestRunner.class;
     }
 
-    public GraniteClient getDefaultClient() {
+    public SlingClient getDefaultClient() throws Exception {
         if (defaultClient == null) {
-            defaultClient = new GraniteClient("http://" + getGlobalArgs().getHost() + ":" + getGlobalArgs().getPort(),
-                                    getGlobalArgs().getUser(),
-                                    getGlobalArgs().getPassword());
-            defaultClient.setHttpAuth(new BasicAuth());
+            defaultClient = new SlingClient(new URI("http://" + getGlobalArgs().getHost() + ":" + getGlobalArgs().getPort()),
+                        getGlobalArgs().getUser(),
+                        getGlobalArgs().getPassword());
         }
         return defaultClient;
     }

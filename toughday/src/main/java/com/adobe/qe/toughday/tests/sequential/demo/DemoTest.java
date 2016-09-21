@@ -1,12 +1,12 @@
 package com.adobe.qe.toughday.tests.sequential.demo;
 
-import com.adobe.granite.testing.ClientException;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import org.apache.sling.testing.clients.ClientException;
 
 /**
  * A demo test class that explains how tests must be written. It extends the SequentialTestBase,

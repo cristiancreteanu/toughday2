@@ -1,14 +1,13 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
-import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
-import org.apache.sling.testing.tools.http.RequestExecutor;
+import org.apache.sling.testing.clients.SlingHttpResponse;
+import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -39,19 +38,19 @@ public class CreatePageTest extends SequentialTestBase {
     public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
 
     @Override
-    public void test() throws ClientException {
+    public void test() throws Exception {
 
         String nextTitle = title + nextNumber.getAndIncrement();
         lastCreated.set(nextTitle);
 
-        FormEntityBuilder feb = new FormEntityBuilder()
+        FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("cmd", CMD_CREATE_PAGE)
                 .addParameter("parentPath", rootParentPath)
                 .addParameter("title", nextTitle)
                 .addParameter("template", template);
 
-        RequestExecutor req = getDefaultClient().http().doPost("/bin/wcmcommand", feb.getEntity());
-        checkStatus(req.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        SlingHttpResponse response = getDefaultClient().doPost("/bin/wcmcommand", feb.build());
+        checkStatus(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
 
     }
 
