@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
+import org.apache.http.HttpStatus;
 
 /**
  * Test for performing a get on a URL
@@ -26,7 +27,7 @@ public class GetTest extends SequentialTestBase {
 
     @Override
     public void test() throws Exception {
-        getDefaultClient().doGet(path);
+        getDefaultClient().doGet(path, HttpStatus.SC_OK);
     }
 
     @Override

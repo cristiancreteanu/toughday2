@@ -45,8 +45,7 @@ public class DeletePageTest extends SequentialTestBase {
                 .addParameter("shallow", Boolean.toString(false))
                 .addParameter("path", parentPath + nextTitle);
 
-        SlingHttpResponse response = getDefaultClient().doPost("/bin/wcmcommand", feb.build());
-        checkStatus(response.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
     }
 
 

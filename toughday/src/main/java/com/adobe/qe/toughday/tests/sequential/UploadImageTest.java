@@ -76,9 +76,7 @@ public class UploadImageTest extends SequentialTestBase {
             throw new ClientException("Could not create Multipart Post!", e);
         }
 
-        SlingClient client = getDefaultClient();
-        SlingHttpResponse req = client.doPost(parentPath + ".createasset.html", multiPartEntity);
-        checkStatus(req.getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        getDefaultClient().doPost(parentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
     }
 
     @After

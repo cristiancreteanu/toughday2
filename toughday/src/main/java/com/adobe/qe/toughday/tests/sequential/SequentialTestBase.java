@@ -38,11 +38,5 @@ public abstract class SequentialTestBase extends AbstractTest {
         return defaultClient;
     }
 
-    public void checkStatus(int receivedStatus, int expectedStatus) throws ClientException{
-        if (receivedStatus != expectedStatus) {
-            throw new ClientException("Expected status code 200, but got " + receivedStatus);
-        }
-    }
-
     public abstract void test() throws Exception;
 }
