@@ -1,7 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
 import com.adobe.qe.toughday.core.AbstractTest;
+import org.apache.http.HttpStatus;
 
 /**
  * Test for getting the homepage.
@@ -9,8 +9,8 @@ import com.adobe.qe.toughday.core.AbstractTest;
 public class GetHomepageTest extends SequentialTestBase {
 
     @Override
-    public void test() throws ClientException {
-        getDefaultClient().http().doGet("/");
+    public void test() throws Exception {
+        getDefaultClient().doGet("/", HttpStatus.SC_OK);
     }
 
     @Override

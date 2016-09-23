@@ -1,7 +1,5 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
-import com.adobe.granite.testing.util.FormEntityBuilder;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
@@ -11,7 +9,8 @@ import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
-import org.apache.sling.testing.tools.http.RequestExecutor;
+import org.apache.sling.testing.clients.SlingHttpResponse;
+import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -134,7 +133,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws ClientException {
+    public void test() throws Exception {
         try {
             createPage();
         } catch (Exception e) {
@@ -164,7 +163,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
                             parentPath.get() + nodeName.get());
                     createPage();
                 }
-            } catch (ClientException e) {
+            } catch (Exception e) {
                 LOG.warn("In after(): Failed to create page {}{}", parentPath.get(), nodeName.get());
             }
         }
@@ -173,15 +172,14 @@ public class CreatePageTreeTest extends SequentialTestBase {
         phaser.arriveAndDeregister();
     }
 
-    private void createPage() throws ClientException {
-        FormEntityBuilder feb = new FormEntityBuilder()
+    private void createPage() throws Exception {
+        FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("cmd", CMD_CREATE_PAGE)
                 .addParameter("parentPath", parentPath.get())
                 .addParameter("title", nodeName.get())
                 .addParameter("template", template);
 
-        RequestExecutor req = getDefaultClient().http().doPost("/bin/wcmcommand", feb.getEntity());
-        checkStatus(req.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
     }
 
 

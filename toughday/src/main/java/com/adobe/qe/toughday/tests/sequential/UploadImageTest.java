@@ -1,8 +1,5 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.granite.testing.ClientException;
-import com.adobe.granite.testing.GraniteConstants;
-import com.adobe.granite.testing.client.GraniteClient;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.annotations.After;
@@ -13,7 +10,10 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.sling.testing.tools.http.RequestExecutor;
+import org.apache.sling.testing.clients.ClientException;
+import org.apache.sling.testing.clients.Constants;
+import org.apache.sling.testing.clients.SlingClient;
+import org.apache.sling.testing.clients.SlingHttpResponse;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -64,21 +64,19 @@ public class UploadImageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws ClientException {
+    public void test() throws Exception {
         MultipartEntity multiPartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             multiPartEntity.addPart("file", new FileBody(lastCreated.get()));
 
-            multiPartEntity.addPart(GraniteConstants.PARAMETER_CHARSET, new StringBody(GraniteConstants.CHARSET_UTF8));
+            multiPartEntity.addPart(Constants.PARAMETER_CHARSET, new StringBody(Constants.CHARSET_UTF8));
             multiPartEntity.addPart("fileName", new StringBody(lastCreated.get().getName(),
-                            Charset.forName(GraniteConstants.CHARSET_UTF8)));
+                            Charset.forName(Constants.CHARSET_UTF8)));
         } catch (UnsupportedEncodingException e) {
             throw new ClientException("Could not create Multipart Post!", e);
         }
 
-        GraniteClient client = getDefaultClient();
-        RequestExecutor req = client.http().doPost(parentPath + ".createasset.html", multiPartEntity);
-        checkStatus(req.getResponse().getStatusLine().getStatusCode(), HttpStatus.SC_OK);
+        getDefaultClient().doPost(parentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
     }
 
     @After
