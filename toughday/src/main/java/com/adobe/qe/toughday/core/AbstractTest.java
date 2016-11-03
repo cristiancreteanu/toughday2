@@ -222,4 +222,15 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      */
     public abstract AbstractTest newInstance();
 
+    protected void communicate(String key, Object message) {
+        if(parent != null)
+            parent.communicate(key, message);
+    }
+
+    protected <T> T getCommunication(String key, T defaultValue) {
+        if(parent != null) {
+            return (T) parent.getCommunication(key, defaultValue);
+        }
+        return defaultValue;
+    }
 }

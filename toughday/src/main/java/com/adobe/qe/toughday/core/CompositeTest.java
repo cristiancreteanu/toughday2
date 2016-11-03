@@ -2,9 +2,7 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.config.Configuration;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Convenience class for creating composite steps. Extend this class to create composite tests. See CompositeDemoTest
@@ -15,6 +13,19 @@ import java.util.UUID;
  */
 public abstract class CompositeTest extends AbstractTest {
     private List<AbstractTest> children;
+
+    private HashMap<String, Object> communications = new HashMap<>();
+
+    @Override
+    protected  <T> T getCommunication(String key, T defaultValue) {
+        Object value = communications.get(key);
+        return value != null ? (T) value : defaultValue;
+    }
+
+    @Override
+    protected void communicate(String key, Object message) {
+        communications.put(key, message);
+    }
 
     /**
      * Constructor.

@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
@@ -12,8 +13,6 @@ import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.Constants;
-import org.apache.sling.testing.clients.SlingClient;
-import org.apache.sling.testing.clients.SlingHttpResponse;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -30,7 +29,7 @@ public class UploadImageTest extends SequentialTestBase {
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
     private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
-    private String mimeType = AuthoringTest.DEFAULT_MIME_TYPE;
+    private String mimeType = AuthoringTest.DEFAULT_MIME_TYPE; //TODO do we really need this?
     private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
 
     public static ThreadLocal<File> lastCreated = new ThreadLocal<>();
@@ -76,7 +75,8 @@ public class UploadImageTest extends SequentialTestBase {
             throw new ClientException("Could not create Multipart Post!", e);
         }
 
-        getDefaultClient().doPost(parentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
+        String currentParentPath = StringUtils.stripEnd(getCommunication("parentPath", parentPath), "/");
+        getDefaultClient().doPost(currentParentPath  + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
     }
 
     @After
@@ -113,7 +113,6 @@ public class UploadImageTest extends SequentialTestBase {
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }
-
 
     /**
      * Get an InputStream of an image, either from the filesystem or from the resources.

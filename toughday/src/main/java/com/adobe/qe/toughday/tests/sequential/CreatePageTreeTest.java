@@ -6,14 +6,11 @@ import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
+import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
-import org.apache.sling.testing.clients.SlingHttpResponse;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
-
-import java.util.concurrent.Phaser;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -24,72 +21,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class CreatePageTreeTest extends SequentialTestBase {
     public static final Logger LOG = getLogger(CreatePageTreeTest.class);
 
-    // needed for syncronizing
-    static class MyPhaser extends Phaser {
-        public Thread mon;
-
-        public MyPhaser() {
-            super();
-            this.monitor();
-        }
-
-        public static final int BASE = 10;
-
-        public final AtomicInteger nextChildPerLevel = new AtomicInteger(0);
-
-        private int maxChildrenPerLevel = BASE;
-
-        protected boolean onAdvance(int phase, int registeredParties) {
-            // Increase the level
-            // reset counter for level
-            this.nextChildPerLevel.set(0);
-            maxChildrenPerLevel = maxChildrenPerLevel * BASE;
-            // Return false, never terminate phaser.
-            if (LOG.isDebugEnabled()) LOG.debug("onAdvance. phase=%d registeredParties=%d tid=%d",
-                    phase, registeredParties, Thread.currentThread().getId());
-            return false;
-        }
-
-        public int getNextNode() {
-            int childNumber = this.nextChildPerLevel.getAndIncrement();
-            if (childNumber >= maxChildrenPerLevel) {
-                if (LOG.isDebugEnabled()) LOG.debug("Waiting for sync. tid = " + Thread.currentThread().getId());
-                this.arriveAndAwaitAdvance();
-                return getNextNode();
-            }
-            return childNumber;
-        }
-
-        public int getLevel() {
-            return this.getPhase() + 1;
-        }
-
-        public void monitor() {
-            this.mon = new Thread() {
-                @Override
-                public void run() {
-                    do {
-                        if (nextChildPerLevel.get() >= maxChildrenPerLevel ) {
-                            arriveAndAwaitAdvance();
-                        } else {
-                            try {
-                                sleep(100);
-                            } catch (InterruptedException e) {
-                                break;
-                            }
-                        }
-                    } while (true);
-                }
-            };
-            this.register();
-            mon.start();
-        }
-
-    }
-    public static final MyPhaser phaser = new MyPhaser();
-    static {
-        AbstractTest.addExtraThread(phaser.mon);
-    }
+    private final TreePhaser phaser;
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;
@@ -107,9 +39,11 @@ public class CreatePageTreeTest extends SequentialTestBase {
     };
 
     public CreatePageTreeTest() {
+        phaser = new TreePhaser();
     }
 
-    protected CreatePageTreeTest(String parentPath, String template, String title) {
+    protected CreatePageTreeTest(TreePhaser phaser, String parentPath, String template, String title) {
+        this.phaser = phaser;
         this.rootParentPath = parentPath;
         this.template = template;
         this.title = title;
@@ -126,8 +60,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild.set(phaser.getNextNode());
-        this.parentPath.set(rootParentPath + computeParentPath(nextChild.get(), phaser.getLevel()));
-        this.nodeName.set(computeNodeName(nextChild.get()));
+        this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel()));
+        this.nodeName.set(TreePhaser.computeNodeName(nextChild.get()));
         this.failed.set(Boolean.FALSE);
 
     }
@@ -185,7 +119,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     @Override
     public AbstractTest newInstance() {
-        return new CreatePageTreeTest(rootParentPath, template, title);
+        return new CreatePageTreeTest(phaser, rootParentPath, template, title);
     }
 
     @ConfigArg(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
@@ -206,21 +140,5 @@ public class CreatePageTreeTest extends SequentialTestBase {
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;
-    }
-
-
-    // private methods
-
-    private static String computeParentPath(int nextChild, int level) {
-        if (level == 1) {
-            return "/";
-        }
-        String path = Integer.toString(nextChild / MyPhaser.BASE, MyPhaser.BASE);
-        path = StringUtils.leftPad(path, level-1, "0");
-        return path.replace("", "/");
-    }
-
-    private static String computeNodeName(int nextChild) {
-        return Integer.toString(nextChild % MyPhaser.BASE, MyPhaser.BASE);
     }
 }

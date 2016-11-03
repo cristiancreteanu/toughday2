@@ -1,10 +1,12 @@
 package com.adobe.qe.toughday.core;
 
+import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 /**
@@ -30,6 +32,13 @@ public class RunnersContainer {
      */
     public void addRunner(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+        //TODO move this to a better place
+        for(Method method : test.getClass().getDeclaredMethods()) {
+            if (method.getAnnotation(FactorySetup.class) != null) {
+                method.setAccessible(true);
+                method.invoke(test);
+            }
+        }
         if (!testRunners.containsKey(test.getClass())) {
             Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
             try {
