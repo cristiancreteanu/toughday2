@@ -50,8 +50,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
     }
 
     public static final String CMD_CREATE_PAGE = "createPage";
-    public static final String DEFAULT_PARENT_PATH = "/content/geometrixx/en";
-    public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
+    public static final String DEFAULT_PARENT_PATH = "/content/we-retail/language-masters/en";
+    public static final String DEFAULT_TEMPLATE = "/conf/we-retail/settings/wcm/templates/hero-page";
 
     @Before
     private void setup() {
@@ -63,7 +63,6 @@ public class CreatePageTreeTest extends SequentialTestBase {
         this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel()));
         this.nodeName.set(TreePhaser.computeNodeName(nextChild.get()));
         this.failed.set(Boolean.FALSE);
-
     }
 
     @Override
@@ -114,6 +113,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 .addParameter("template", template);
 
         getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+        communicate("resource", parentPath.get() + "/" + nodeName.get());
     }
 
 
