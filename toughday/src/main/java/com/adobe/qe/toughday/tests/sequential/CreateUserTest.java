@@ -50,7 +50,6 @@ public class CreateUserTest extends SequentialTestBase {
     private AtomicInteger increment;
 
     public CreateUserTest() {
-        groups.add("analytics-administrators");
         increment = new AtomicInteger(0);
     }
 
