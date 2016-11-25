@@ -225,16 +225,8 @@ public class CreateUserTest extends SequentialTestBase {
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Comma separated group ids. For groups that are in default paths (/home/groups/{id first letter}/{id}")
+    @ConfigArg(required = false, desc = "Comma separated group paths. Newly created users will be added in these groups.")
     public CreateUserTest setGroups(String values) {
-        for(String group : values.split(",")) {
-            groups.add("/home/groups/" + group.substring(0, 1) + "/" + group);
-        }
-        return this;
-    }
-
-    @ConfigArg(required = false, desc = "Comma separated group paths. For groups that are not in default paths.")
-    public CreateUserTest setGroupPaths(String values) {
         groups.addAll(Arrays.asList(values.split(",")));
         return this;
     }
