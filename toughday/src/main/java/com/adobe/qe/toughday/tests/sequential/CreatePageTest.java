@@ -3,10 +3,9 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
-import org.apache.sling.testing.clients.SlingHttpResponse;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;

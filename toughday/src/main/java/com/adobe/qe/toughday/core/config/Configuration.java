@@ -5,7 +5,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

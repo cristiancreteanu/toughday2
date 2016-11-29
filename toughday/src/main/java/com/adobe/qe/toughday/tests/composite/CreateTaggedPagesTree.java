@@ -5,7 +5,8 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.*;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.qe.toughday.tests.sequential.tags.AddTagToResourceTest;
+import com.adobe.qe.toughday.tests.sequential.tags.CreateTagTreeTest;
 
 /**
  * Created by tuicu on 05/11/16.

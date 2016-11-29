@@ -5,7 +5,6 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.clients.ClientException;
-import org.apache.sling.testing.clients.SlingHttpResponse;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;

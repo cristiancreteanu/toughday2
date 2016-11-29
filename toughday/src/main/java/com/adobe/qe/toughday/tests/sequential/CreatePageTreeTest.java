@@ -7,7 +7,7 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;

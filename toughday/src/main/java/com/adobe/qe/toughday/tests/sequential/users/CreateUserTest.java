@@ -1,11 +1,12 @@
-package com.adobe.qe.toughday.tests.sequential;
+package com.adobe.qe.toughday.tests.sequential.users;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
-import org.apache.commons.lang.RandomStringUtils;
+import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 

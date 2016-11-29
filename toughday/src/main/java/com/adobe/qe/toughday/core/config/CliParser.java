@@ -2,7 +2,7 @@ package com.adobe.qe.toughday.core.config;
 
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Method;
 import java.util.*;

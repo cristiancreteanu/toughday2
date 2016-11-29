@@ -1,12 +1,12 @@
 package com.adobe.qe.toughday.tests.utils;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.concurrent.Phaser;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * Created by tuicu on 02/11/16.
+ * Phaser to syncronize creation of a tree when a new level needs to be created
  */
 public class TreePhaser extends Phaser {
     public Thread mon;

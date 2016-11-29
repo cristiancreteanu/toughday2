@@ -4,9 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
-import com.adobe.qe.toughday.tests.sequential.UploadImageTest;
-import org.apache.commons.lang.RandomStringUtils;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 
 /**
  * Created by tuicu on 02/11/16.

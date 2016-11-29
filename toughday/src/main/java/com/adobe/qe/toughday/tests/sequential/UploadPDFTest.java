@@ -4,7 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.config.ConfigArg;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;

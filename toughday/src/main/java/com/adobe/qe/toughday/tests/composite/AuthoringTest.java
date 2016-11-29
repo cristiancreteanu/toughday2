@@ -4,9 +4,9 @@ import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTest;
-import com.adobe.qe.toughday.tests.sequential.DeleteImageTest;
+import com.adobe.qe.toughday.tests.sequential.image.DeleteImageTest;
 import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
-import com.adobe.qe.toughday.tests.sequential.UploadImageTest;
+import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import org.apache.logging.log4j.Logger;
 
 /**

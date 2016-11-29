@@ -1,8 +1,8 @@
-package com.adobe.qe.toughday.tests.sequential;
+package com.adobe.qe.toughday.tests.sequential.tags;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.ChildTestFailedException;
-import org.apache.commons.lang.StringUtils;
+import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 

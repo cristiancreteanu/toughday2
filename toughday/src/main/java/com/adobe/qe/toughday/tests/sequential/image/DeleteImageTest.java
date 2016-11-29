@@ -1,6 +1,7 @@
-package com.adobe.qe.toughday.tests.sequential;
+package com.adobe.qe.toughday.tests.sequential.image;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
 
 /**
  *
