@@ -211,6 +211,12 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     public abstract List<AbstractTest> getChildren();
 
     /**
+     * Determines if children are going to be benchmarked  individually
+     * @return by default, returns true
+     */
+    public boolean includeChildren() { return true; }
+
+    /**
      * Specifies what type of runner knows how this test should be ran and benchmarked.
      * @return runner class
      */

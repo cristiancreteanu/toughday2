@@ -77,10 +77,26 @@ public class Engine {
      */
     private Engine add(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+        createRunners(test);
+        addToRunMap(test);
+        return this;
+    }
+
+    private Engine addToRunMap(AbstractTest test) {
         globalRunMap.addTest(test);
+        if(test.includeChildren()) {
+            for (AbstractTest child : test.getChildren()) {
+                addToRunMap(child);
+            }
+        }
+        return this;
+    }
+
+    private Engine createRunners(AbstractTest test)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         RunnersContainer.getInstance().addRunner(test);
         for(AbstractTest child : test.getChildren()) {
-            add(child);
+            createRunners(child);
         }
         return this;
     }

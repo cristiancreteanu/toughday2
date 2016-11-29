@@ -30,11 +30,17 @@ public class RunMap {
     }
 
     public void recordRun (AbstractTest test, double duration) {
-        runMap.get(test).recordRun(duration);
+        TestEntry entry = runMap.get(test);
+        if(entry != null) {
+            runMap.get(test).recordRun(duration);
+        }
     }
 
     public void recordFail (AbstractTest test, Exception e) {
-        runMap.get(test).recordFail(e);
+        TestEntry entry = runMap.get(test);
+        if(entry != null) {
+            runMap.get(test).recordFail(e);
+        }
     }
 
     public void aggregateAndReinitialize (RunMap other) {
