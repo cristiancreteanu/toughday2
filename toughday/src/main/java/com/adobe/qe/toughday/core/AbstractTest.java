@@ -185,8 +185,9 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      * Setter for global args
      * @param globalArgs
      */
-    public void setGlobalArgs(Configuration.GlobalArgs globalArgs) {
+    public AbstractTest setGlobalArgs(Configuration.GlobalArgs globalArgs) {
         this.globalArgs = globalArgs;
+        return this;
     }
 
     /**

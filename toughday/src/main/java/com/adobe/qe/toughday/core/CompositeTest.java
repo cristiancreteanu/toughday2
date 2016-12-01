@@ -19,7 +19,7 @@ public abstract class CompositeTest extends AbstractTest {
     @Override
     protected  <T> T getCommunication(String key, T defaultValue) {
         Object value = communications.get(key);
-        return value != null ? (T) value : defaultValue;
+        return value != null ? (T) value : (getParent() != null ? getParent().getCommunication(key, defaultValue) : defaultValue);
     }
 
     @Override
@@ -111,11 +111,12 @@ public abstract class CompositeTest extends AbstractTest {
      * @param globalArgs
      */
     @Override
-    public void setGlobalArgs(Configuration.GlobalArgs globalArgs) {
+    public CompositeTest setGlobalArgs(Configuration.GlobalArgs globalArgs) {
         super.setGlobalArgs(globalArgs);
         for (AbstractTest test: children) {
             test.setGlobalArgs(globalArgs);
         }
+        return this;
     }
 
 }

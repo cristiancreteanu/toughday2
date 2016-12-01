@@ -12,24 +12,25 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Description(name = "CreateUserTest", desc = "Creates users")
 public class CreateUserTest extends SequentialTestBase {
-    private static final String DEFAULT_PASSWORD = "toughday";
-    private static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";
-    private static final String DEFAULT_PHONE_NUMBER = "098765654";
-    private static final String DEFAULT_FIRST_NAME = "Tough";
-    private static final String DEFAULT_LAST_NAME = "Day";
-    private static final String DEFAULT_JOB_TITLE = "Performance Tester";
-    private static final String DEFAULT_STREET = "151 South Almaden Boulevard";
-    private static final String DEFAULT_CITY = "San Jose";
-    private static final String DEFAULT_MOBILE = "0987654";
-    private static final String DEFAULT_POSTAL_CODE = "123456";
-    private static final String DEFAULT_COUNTRY = "United States";
-    private static final String DEFAULT_GENDER = "male";
-    private static final String DEFAULT_STATE = "California";
-    private static final String DEFAULT_ABOUT_ME = "Stress testing and performance benchmarking.";
+    public static final String DEFAULT_PASSWORD = "toughday";
+    public static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";
+    public static final String DEFAULT_PHONE_NUMBER = "098765654";
+    public static final String DEFAULT_FIRST_NAME = "Tough";
+    public static final String DEFAULT_LAST_NAME = "Day";
+    public static final String DEFAULT_JOB_TITLE = "Performance Tester";
+    public static final String DEFAULT_STREET = "151 South Almaden Boulevard";
+    public static final String DEFAULT_CITY = "San Jose";
+    public static final String DEFAULT_MOBILE = "0987654";
+    public static final String DEFAULT_POSTAL_CODE = "123456";
+    public static final String DEFAULT_COUNTRY = "United States";
+    public static final String DEFAULT_GENDER = "male";
+    public static final String DEFAULT_STATE = "California";
+    public static final String DEFAULT_ABOUT_ME = "Stress testing and performance benchmarking.";
 
     private String id;
     private String title;
@@ -47,8 +48,10 @@ public class CreateUserTest extends SequentialTestBase {
     private String state = DEFAULT_STATE;
     private String gender = DEFAULT_GENDER;
     private String aboutMe = DEFAULT_ABOUT_ME;
-    private ArrayList<String> groups = new ArrayList<>();
+    private List<String> groups = new ArrayList<>();
     private AtomicInteger increment;
+    private boolean incrementGender = true;
+    private boolean incrementCountry = true;
 
     public CreateUserTest() {
         increment = new AtomicInteger(0);
@@ -80,8 +83,8 @@ public class CreateUserTest extends SequentialTestBase {
             jobTitle += incrementValue;
             aboutMe += incrementValue;
             String[] tmp = emailAddress.split("@");
-            gender = Constants.GENDERS[incrementValue % 2];
-            country = Constants.COUNTRIES[incrementValue % Constants.COUNTRIES.length];
+            gender = incrementGender ? Constants.GENDERS[incrementValue % 2] : gender;
+            country = incrementCountry ? Constants.COUNTRIES[incrementValue % Constants.COUNTRIES.length] : country;
             emailAddress = tmp[0] + incrementValue + "@" + tmp[1];
         }
 
@@ -113,7 +116,7 @@ public class CreateUserTest extends SequentialTestBase {
             addUserToGroup(group, id);
         }
 
-        ArrayList<String> communicatedGroups = getCommunication("groups", new ArrayList<String>());
+        List<String> communicatedGroups = getCommunication("groups", new ArrayList<String>());
         communicatedGroups.remove(groups);
         for(String group : communicatedGroups) {
             addUserToGroup(group, id);
@@ -193,6 +196,7 @@ public class CreateUserTest extends SequentialTestBase {
     @ConfigArg(required = false, desc = "Country for the created users", defaultValue = DEFAULT_COUNTRY)
     public CreateUserTest setCountry(String country) {
         this.country = country;
+        incrementCountry = false;
         return this;
     }
 
@@ -205,6 +209,7 @@ public class CreateUserTest extends SequentialTestBase {
     @ConfigArg(required = false, desc = "Gender for the created users.", defaultValue = DEFAULT_GENDER)
     public CreateUserTest setGender(String gender) {
         this.gender = gender;
+        incrementGender = false;
         return this;
     }
 
@@ -221,7 +226,7 @@ public class CreateUserTest extends SequentialTestBase {
         return this;
     }
 
-    private CreateUserTest setIncrement(AtomicInteger increment) {
+    public CreateUserTest setIncrement(AtomicInteger increment) {
         this.increment = increment;
         return this;
     }
@@ -232,8 +237,18 @@ public class CreateUserTest extends SequentialTestBase {
         return this;
     }
 
-    public CreateUserTest setGroups(ArrayList<String> groups) {
+    public CreateUserTest setGroups(List<String> groups) {
         this.groups = groups;
+        return this;
+    }
+
+    private CreateUserTest setIncrementCountry(boolean incrementCountry) {
+        this.incrementCountry = incrementCountry;
+        return this;
+    }
+
+    private CreateUserTest setIncrementGender(boolean incrementGender) {
+        this.incrementGender = incrementGender;
         return this;
     }
 
@@ -249,12 +264,15 @@ public class CreateUserTest extends SequentialTestBase {
                 .setCity(city)
                 .setState(state)
                 .setCountry(country)
+                .setIncrementCountry(incrementCountry)
                 .setPostalCode(postalCode)
                 .setPhoneNumber(phoneNumber)
                 .setMobile(mobile)
                 .setJobTitle(jobTitle)
                 .setEmailAddress(emailAddress)
-                .setAboutMe(aboutMe);
+                .setAboutMe(aboutMe)
+                .setGender(gender)
+                .setIncrementGender(incrementGender);
     }
 
 }

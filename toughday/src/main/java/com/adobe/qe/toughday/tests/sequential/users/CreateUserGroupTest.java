@@ -99,6 +99,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
         this.description = description;
     }
 
+
     @ConfigArg(required = false, desc = "Increment the group name", defaultValue = "true")
     public void setIncrement(String value) {
         if(!Boolean.valueOf(value))
