@@ -16,17 +16,19 @@ public class TreePhaser extends Phaser {
         this.monitor();
     }
 
-    public static final int BASE = 10;
+    private int base = Integer.parseInt(DEFAULT_BASE);
+
+    public static final String DEFAULT_BASE = "10";
 
     public final AtomicInteger nextChildPerLevel = new AtomicInteger(0);
 
-    private int maxChildrenPerLevel = BASE;
+    private int maxChildrenPerLevel = base;
 
     protected boolean onAdvance(int phase, int registeredParties) {
         // Increase the level
         // reset counter for level
         this.nextChildPerLevel.set(0);
-        maxChildrenPerLevel = maxChildrenPerLevel * BASE;
+        maxChildrenPerLevel = maxChildrenPerLevel * base;
         // Return false, never terminate phaser.
         /*if (LOG.isDebugEnabled()) LOG.debug("onAdvance. phase=%d registeredParties=%d tid=%d",
                 phase, registeredParties, Thread.currentThread().getId());*/
@@ -68,16 +70,24 @@ public class TreePhaser extends Phaser {
         mon.start();
     }
 
-    public static String computeParentPath(int nextChild, int level) {
+    public void setBase(int base) {
+        this.base = base;
+    }
+
+    public int getBase() {
+        return base;
+    }
+
+    public static String computeParentPath(int nextChild, int level, int BASE) {
         if (level == 1) {
             return "/";
         }
-        String path = Integer.toString(nextChild / TreePhaser.BASE, TreePhaser.BASE);
+        String path = Integer.toString(nextChild / BASE, BASE);
         path = StringUtils.leftPad(path, level-1, "0");
         return path.replace("", "/");
     }
 
-    public static String computeNodeName(int nextChild) {
-        return Integer.toString(nextChild % TreePhaser.BASE, TreePhaser.BASE);
+    public static String computeNodeName(int nextChild, int BASE) {
+        return Integer.toString(nextChild % BASE, BASE);
     }
 }

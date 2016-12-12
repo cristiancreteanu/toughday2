@@ -64,8 +64,8 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild = phaser.getNextNode();
-        this.parentPath = rootParentPath + TreePhaser.computeParentPath(nextChild, phaser.getLevel());
-        this.nodeName = TreePhaser.computeNodeName(nextChild);
+        this.parentPath = rootParentPath + TreePhaser.computeParentPath(nextChild, phaser.getLevel(), phaser.getBase());
+        this.nodeName = TreePhaser.computeNodeName(nextChild, phaser.getBase());
         this.failed = false;
     }
 
@@ -139,6 +139,12 @@ public class CreateFolderTreeTest extends SequentialTestBase {
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "How many direct child folders will a folder have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        this.phaser.setBase(Integer.getInteger(base));
         return this;
     }
 }

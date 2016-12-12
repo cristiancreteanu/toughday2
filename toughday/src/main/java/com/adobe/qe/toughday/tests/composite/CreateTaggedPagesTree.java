@@ -7,6 +7,7 @@ import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.*;
 import com.adobe.qe.toughday.tests.sequential.tags.AddTagToResourceTest;
 import com.adobe.qe.toughday.tests.sequential.tags.CreateTagTreeTest;
+import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 /**
  * Created by tuicu on 05/11/16.
@@ -70,6 +71,13 @@ public class CreateTaggedPagesTree extends CompositeTest {
             desc = "The title of the tags. Internally, this will be incremented")
     public AbstractTest setTagTitle(String title) {
         createTagTreeTest.setTitle(title);
+        return this;
+    }
+
+    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        createPageTreeTest.setBase(base);
+        createTagTreeTest.setBase(base);
         return this;
     }
 }

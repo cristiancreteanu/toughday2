@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
+import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 /**
  * Authoring test. Steps: create page, upload asset, delete page, delete asset.
@@ -83,6 +84,12 @@ public class AuthoringTreeTest extends CompositeTest {
     @ConfigArg(required = false, defaultValue = DEFAULT_ASSET_NAME)
     public AuthoringTreeTest setImageName(String name) {
         this.uploadImageTest.setFileName(name);
+        return this;
+    }
+
+    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    public AuthoringTreeTest setBase(String base) {
+        this.createPageTest.setBase(base);
         return this;
     }
 }

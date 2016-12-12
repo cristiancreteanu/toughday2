@@ -60,8 +60,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild.set(phaser.getNextNode());
-        this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel()));
-        this.nodeName.set(TreePhaser.computeNodeName(nextChild.get()));
+        this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel(), phaser.getBase()));
+        this.nodeName.set(TreePhaser.computeNodeName(nextChild.get(), phaser.getBase()));
         this.failed.set(Boolean.FALSE);
     }
 
@@ -139,6 +139,12 @@ public class CreatePageTreeTest extends SequentialTestBase {
     @ConfigArg(required = false, defaultValue = DEFAULT_TEMPLATE)
     public AbstractTest setTemplate(String template) {
         this.template = template;
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "How many direct child pages will a page have.",defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        this.phaser.setBase(Integer.parseInt(base));
         return this;
     }
 }

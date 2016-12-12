@@ -85,8 +85,8 @@ public class CreateTagTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild = phaser.getNextNode();
-        this.parentPath = namespace + ":" + StringUtils.stripStart(TreePhaser.computeParentPath(nextChild, phaser.getLevel()), "/");
-        this.nodeName = TreePhaser.computeNodeName(nextChild);
+        this.parentPath = namespace + ":" + StringUtils.stripStart(TreePhaser.computeParentPath(nextChild, phaser.getLevel(), phaser.getBase()), "/");
+        this.nodeName = TreePhaser.computeNodeName(nextChild, phaser.getBase());
         this.failed = false;
     }
 
@@ -168,6 +168,12 @@ public class CreateTagTreeTest extends SequentialTestBase {
             desc = "The title of the tags. Internally, this will be incremented")
     public AbstractTest setTitle(String title) {
         this.title = title;
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "How many direct child tags will a tag have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        this.phaser.setBase(Integer.getInteger(base));
         return this;
     }
 }

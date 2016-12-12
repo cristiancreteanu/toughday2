@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.UploadPDFTest;
+import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 /**
  * Created by tuicu on 03/11/16.
@@ -62,5 +63,10 @@ public class CreatePDFTreeTest extends CompositeTest {
             desc = "The PDF resource path either in the classpath or the filesystem")
     public void setPDFResourcePath(String resourcePath) {
         uploadPDFTest.setResourcePath(resourcePath);
+    }
+
+    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    public void setBase(String base) {
+        createFolderTreeTest.setBase(base);
     }
 }

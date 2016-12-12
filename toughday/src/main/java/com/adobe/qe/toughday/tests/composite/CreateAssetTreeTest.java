@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
+import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 /**
  * Created by tuicu on 02/11/16.
@@ -59,5 +60,11 @@ public class CreateAssetTreeTest extends CompositeTest {
             desc = "The image resource path either in the classpath or the filesystem")
     public void setAssetResourcePath(String resourcePath) {
         uploadImageTest.setResourcePath(resourcePath);
+    }
+
+    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        createFolderTreeTest.setBase(base);
+        return this;
     }
 }
