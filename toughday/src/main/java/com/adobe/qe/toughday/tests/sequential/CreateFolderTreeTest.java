@@ -21,12 +21,13 @@ public class CreateFolderTreeTest extends SequentialTestBase {
     private static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     private static final String UNSTRUCTURED_RESOURCE_TYPE = "nt:unstructured";
     public static final String DEFAULT_PARENT_PATH = "/content/dam";
+    public static final String DEFAULT_TITLE = "toughday";
 
     // needed for synchronizing
     private TreePhaser phaser;
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
-    private String title = AuthoringTreeTest.DEFAULT_PAGE_TITLE;
+    private String title = DEFAULT_TITLE;
 
     private int nextChild;
 
@@ -64,8 +65,8 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild = phaser.getNextNode();
-        this.parentPath = rootParentPath + TreePhaser.computeParentPath(nextChild, phaser.getLevel(), phaser.getBase());
-        this.nodeName = TreePhaser.computeNodeName(nextChild, phaser.getBase());
+        this.parentPath = rootParentPath + TreePhaser.computeParentPath(nextChild, phaser.getLevel(), phaser.getBase(), title);
+        this.nodeName = TreePhaser.computeNodeName(nextChild, phaser.getBase(), title);
         this.failed = false;
     }
 
@@ -128,7 +129,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         return new CreateFolderTreeTest(phaser, rootParentPath, title);
     }
 
-    @ConfigArg(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArg(required = false, defaultValue = DEFAULT_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
@@ -144,7 +145,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
 
     @ConfigArg(required = false, desc = "How many direct child folders will a folder have.", defaultValue = TreePhaser.DEFAULT_BASE)
     public AbstractTest setBase(String base) {
-        this.phaser.setBase(Integer.getInteger(base));
+        this.phaser.setBase(Integer.parseInt(base));
         return this;
     }
 }

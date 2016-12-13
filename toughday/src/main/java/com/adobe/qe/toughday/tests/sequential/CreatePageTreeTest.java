@@ -60,8 +60,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
         // this gets the next node on the level and potentially waits for other threads to reset the level
         // save those values for later use
         this.nextChild.set(phaser.getNextNode());
-        this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel(), phaser.getBase()));
-        this.nodeName.set(TreePhaser.computeNodeName(nextChild.get(), phaser.getBase()));
+        this.parentPath.set(rootParentPath + TreePhaser.computeParentPath(nextChild.get(), phaser.getLevel(), phaser.getBase(), title));
+        this.nodeName.set(TreePhaser.computeNodeName(nextChild.get(), phaser.getBase(), title));
         this.failed.set(Boolean.FALSE);
     }
 

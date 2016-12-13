@@ -1,4 +1,0 @@
-Name, Duration / user, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput
-CreateGroupWithUsers, 206.0, 1, 0, 206.0, 206.0, 206, 206.0, 4.735237146476961, 0.09798157946306095
-CreateGroupWithUsers.CreateUserGroupTest, 67.0, 1, 0, 67.0, 67.0, 67, 67.0, 13.76569395795335, 0.09933445912387007
-CreateGroupWithUsers.CreateFiveUsersTest, 138.0, 1, 0, 138.0, 138.0, 138, 138.0, 4.735936494501483, 0.09863878477017163

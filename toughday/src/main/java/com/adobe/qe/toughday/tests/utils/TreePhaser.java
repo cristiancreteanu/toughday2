@@ -78,16 +78,16 @@ public class TreePhaser extends Phaser {
         return base;
     }
 
-    public static String computeParentPath(int nextChild, int level, int BASE) {
+    public static String computeParentPath(int nextChild, int level, int BASE, String title) {
         if (level == 1) {
             return "/";
         }
         String path = Integer.toString(nextChild / BASE, BASE);
         path = StringUtils.leftPad(path, level-1, "0");
-        return path.replace("", "/");
+        return StringUtils.stripEnd(path.replace("", "/" + title), title);
     }
 
-    public static String computeNodeName(int nextChild, int BASE) {
-        return Integer.toString(nextChild % BASE, BASE);
+    public static String computeNodeName(int nextChild, int BASE, String title) {
+        return title + Integer.toString(nextChild % BASE, BASE);
     }
 }
