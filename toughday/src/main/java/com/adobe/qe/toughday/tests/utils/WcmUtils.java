@@ -42,7 +42,7 @@ public class WcmUtils {
         return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
     }
 
-    public SlingHttpResponse createLiveCopy(SlingClient client, String label, String title, String destPath, String srcPath,
+    public static SlingHttpResponse createLiveCopy(SlingClient client, String label, String title, String destPath, String srcPath,
                                             boolean shallow, String[] rolloutConfigs, String[] missingPages, boolean excludeSubPages,
                                             int... expectedStatus)
             throws ClientException {

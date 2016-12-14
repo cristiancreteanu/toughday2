@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
+import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
 /**
  * Authoring test. Steps: create page, upload asset, delete page, delete asset.
@@ -35,8 +36,8 @@ public class AuthoringTreeTest extends CompositeTest {
             this.addChild(uploadImageTest);
 
             this.setPageTitle(DEFAULT_PAGE_TITLE);
-            this.setPageTemplate(CreatePageTreeTest.DEFAULT_TEMPLATE);
-            this.setParentPath(CreatePageTreeTest.DEFAULT_PARENT_PATH);
+            this.setPageTemplate(WcmUtils.DEFAULT_TEMPLATE);
+            this.setParentPath(WcmUtils.DEFAULT_PARENT_PATH);
             this.setImageName(DEFAULT_ASSET_NAME);
             this.setMimeType(DEFAULT_MIME_TYPE);
             this.setResourcePath(DEFAULT_RESOURCE_PATH);
@@ -48,13 +49,13 @@ public class AuthoringTreeTest extends CompositeTest {
         return new AuthoringTreeTest(false);
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTreeTest.DEFAULT_TEMPLATE)
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
     public AuthoringTreeTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTreeTest.DEFAULT_PARENT_PATH,
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AuthoringTreeTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);

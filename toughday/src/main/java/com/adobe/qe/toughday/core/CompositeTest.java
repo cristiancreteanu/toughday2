@@ -25,6 +25,7 @@ public abstract class CompositeTest extends AbstractTest {
     @Override
     protected void communicate(String key, Object message) {
         communications.put(key, message);
+        // TODO: add super.communicate() ?
     }
 
     /**

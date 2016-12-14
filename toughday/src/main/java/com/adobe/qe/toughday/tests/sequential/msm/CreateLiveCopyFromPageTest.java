@@ -31,71 +31,42 @@ import java.util.UUID;
 
 @Description(name = "Create LC from Page", desc = "Creates live copies from pages")
 public class CreateLiveCopyFromPageTest extends SequentialTestBase {
-    public static final String SOURCE_PAGE_NAME = "CreateLiveCopyTestPage";
+    public static final String SOURCE_PAGE_NAME = "CreateLiveCopySourcePage";
+    public static final String DESTINATION_PAGE_NAME = "CreateLiveCopyDestPage";
     public static final String DEFAULT_SOURCE_PAGE = ROOT_NODE_PATH + "/" + SOURCE_PAGE_NAME;
+    public static final String DEFAULT_DESTINATION_PAGE = ROOT_NODE_PATH + "/" + DESTINATION_PAGE_NAME;
     public static final String LC_PREFIX = "lc";
 
     private final TreePhaser phaser;
     private String template = WcmUtils.DEFAULT_TEMPLATE;
 
     private String title = LC_PREFIX;
-    private String sourcePage = DEFAULT_SOURCE_PAGE;
-    private String destinationPage = "";
+    private String sourcePage;
+    private String destinationPage;
 
 
     public CreateLiveCopyFromPageTest() {
         this.phaser = new TreePhaser();
     }
 
-    public CreateLiveCopyFromPageTest(TreePhaser phaser, String template, String title, String sourcePage, String destinationPage) {
+    public CreateLiveCopyFromPageTest(TreePhaser phaser, String title) {
         this.phaser = phaser;
-        this.template = template;
         this.title = title;
-        this.sourcePage = sourcePage;
-        this.destinationPage = destinationPage;
-    }
-
-    @FactorySetup
-    private void setup() throws Exception {
-        if (!getDefaultClient().exists(this.sourcePage)) {
-            this.sourcePage = WcmUtils.createPage(getDefaultClient(),
-                    ROOT_NODE_PATH, SOURCE_PAGE_NAME, WcmUtils.DEFAULT_TEMPLATE).getSlingPath();
-        }
     }
 
     @Before
-    private void before() {
-        // TODO
+    private void before() throws Exception {
+        this.sourcePage = getCommunication("sourcePage", DEFAULT_SOURCE_PAGE);
+        this.destinationPage = getCommunication("destinationPage", DEFAULT_DESTINATION_PAGE);
     }
 
     @Override
     public void test() throws Exception {
-
+        WcmUtils.createLiveCopy(getDefaultClient(), title, title, destinationPage, sourcePage, false, null, null, false, 200);
     }
 
     @Override
     public AbstractTest newInstance() {
-        return new CreateLiveCopyFromPageTest(phaser, template, title, sourcePage, destinationPage);
-    }
-
-
-    @ConfigArg(required = false, desc = "The path to the source page", defaultValue = DEFAULT_SOURCE_PAGE)
-    public CreateLiveCopyFromPageTest setSourcePage(String sourcePagePath) {
-        this.sourcePage = sourcePagePath;
-        return this;
-    }
-
-    @ConfigArg(required = false, desc = "The path to the destination page. " +
-            "If empty, a different destination page is created at each execution", defaultValue = "")
-    public CreateLiveCopyFromPageTest setDestination(String destinationPath) {
-        this.destinationPage = destinationPath;
-        return this;
-    }
-
-    @ConfigArg(required = false, desc = "The template in case the source or the destination need to be created",
-            defaultValue = WcmUtils.DEFAULT_TEMPLATE)
-    public CreateLiveCopyFromPageTest setTemplate(String template) {
-        this.template = WcmUtils.DEFAULT_TEMPLATE;
-        return this;
+        return new CreateLiveCopyFromPageTest(phaser, title);
     }
 }
