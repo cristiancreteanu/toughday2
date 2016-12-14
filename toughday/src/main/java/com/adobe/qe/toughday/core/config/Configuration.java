@@ -231,12 +231,14 @@ public class Configuration {
         private long duration;
         private List<Publisher> publishers;
         private long timeout;
+        private String protocol;
 
         public static final String DEFAULT_DURATION = "1d";
         public static final String DEFAULT_USER = "admin";
         public static final String DEFAULT_PASSWORD = "admin";
         public static final String DEFAULT_HOST = "localhost";
         public static final String DEFAULT_PORT_STRING = "4502";
+        public static final String DEFAULT_PROTOCOL = "http";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
 
         public static final String DEFAULT_TIMEOUT_STRING = "3m"; // 3 minutes
@@ -261,6 +263,7 @@ public class Configuration {
             this.timeout = DEFAULT_TIMEOUT;
             this.waitTime = DEFAULT_WAIT_TIME;
             this.concurrency = DEFAULT_CONCURRENCY;
+            this.protocol = DEFAULT_PROTOCOL;
         }
 
         // Global config args
@@ -307,6 +310,9 @@ public class Configuration {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
 
+        @ConfigArg(required = false, desc = "What protocol to use", defaultValue = DEFAULT_PROTOCOL)
+        public void setProtocol(String protocol) { this.protocol = protocol; }
+
 
 
         // Adders and getters
@@ -350,6 +356,8 @@ public class Configuration {
         public String getPassword() {
             return password;
         }
+
+        public String getProtocol() { return protocol; }
 
 
         // Helper methods

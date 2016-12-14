@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.AbstractTestRunner;
 import com.adobe.qe.toughday.runners.SequentialTestRunner;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.ClientException;
 
@@ -31,7 +32,13 @@ public abstract class SequentialTestBase extends AbstractTest {
 
     public SlingClient getDefaultClient() throws Exception {
         if (defaultClient == null) {
-            defaultClient = new SlingClient(new URI("http://" + getGlobalArgs().getHost() + ":" + getGlobalArgs().getPort()),
+            URI uri = new URIBuilder()
+                    .setScheme(getGlobalArgs().getProtocol())
+                    .setHost(getGlobalArgs().getHost())
+                    .setPort(getGlobalArgs().getPort())
+                    .build();
+
+            defaultClient = new SlingClient(uri,
                         getGlobalArgs().getUser(),
                         getGlobalArgs().getPassword());
         }
