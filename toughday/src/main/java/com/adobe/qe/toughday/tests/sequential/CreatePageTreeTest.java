@@ -7,6 +7,7 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
+import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
@@ -23,8 +24,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     private final TreePhaser phaser;
 
-    private String rootParentPath = DEFAULT_PARENT_PATH;
-    private String template = DEFAULT_TEMPLATE;
+    private String rootParentPath = WcmUtils.DEFAULT_PARENT_PATH;
+    private String template = WcmUtils.DEFAULT_TEMPLATE;
     private String title = AuthoringTreeTest.DEFAULT_PAGE_TITLE;
 
     private ThreadLocal<Integer> nextChild = new ThreadLocal<>();
@@ -49,9 +50,6 @@ public class CreatePageTreeTest extends SequentialTestBase {
         this.title = title;
     }
 
-    public static final String CMD_CREATE_PAGE = "createPage";
-    public static final String DEFAULT_PARENT_PATH = "/content/we-retail/language-masters/en";
-    public static final String DEFAULT_TEMPLATE = "/conf/we-retail/settings/wcm/templates/hero-page";
 
     @Before
     private void setup() {
@@ -107,7 +105,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     private void createPage() throws Exception {
         FormEntityBuilder feb = FormEntityBuilder.create()
-                .addParameter("cmd", CMD_CREATE_PAGE)
+                .addParameter("cmd", WcmUtils.CMD_CREATE_PAGE)
                 .addParameter("parentPath", parentPath.get())
                 .addParameter("title", nodeName.get())
                 .addParameter("template", template);
@@ -129,14 +127,14 @@ public class CreatePageTreeTest extends SequentialTestBase {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_PARENT_PATH,
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_TEMPLATE)
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;

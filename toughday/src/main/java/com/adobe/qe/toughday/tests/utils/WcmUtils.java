@@ -1,0 +1,75 @@
+/*******************************************************************************
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements. See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership. The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ ******************************************************************************/
+package com.adobe.qe.toughday.tests.utils;
+
+import org.apache.http.HttpStatus;
+import org.apache.sling.testing.clients.ClientException;
+import org.apache.sling.testing.clients.SlingClient;
+import org.apache.sling.testing.clients.SlingHttpResponse;
+import org.apache.sling.testing.clients.util.FormEntityBuilder;
+
+public class WcmUtils {
+
+    public static final String CMD_CREATE_PAGE = "createPage";
+    public static final String CMD_CREATE_LIVECOPY = "createLiveCopy";
+    public static final String DEFAULT_PARENT_PATH = "/content/geometrixx/en";
+    public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
+
+    public static SlingHttpResponse createPage(SlingClient client, String parentPath, String title, String template, int... expectedStatus)
+            throws ClientException {
+        FormEntityBuilder feb = FormEntityBuilder.create()
+                .addParameter("cmd", CMD_CREATE_PAGE)
+                .addParameter("parentPath", parentPath)
+                .addParameter("title", title)
+                .addParameter("template", template);
+
+        return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
+    }
+
+    public SlingHttpResponse createLiveCopy(SlingClient client, String label, String title, String destPath, String srcPath,
+                                            boolean shallow, String[] rolloutConfigs, String[] missingPages, boolean excludeSubPages,
+                                            int... expectedStatus)
+            throws ClientException {
+        FormEntityBuilder feb = FormEntityBuilder.create()
+                .addParameter("cmd", CMD_CREATE_LIVECOPY)
+                .addParameter("title", title)
+                .addParameter("label", label)
+                .addParameter("destPath", destPath)
+                .addParameter("srcPath", srcPath)
+                .addParameter("missingPage@Delete", "true");
+        fillParameters(feb, "missingPage", missingPages);
+        feb.addParameter("excludeSubPages@Delete", "true");
+
+        // in case if missing pages are created the parameter excludeSubPages is used
+        feb.addParameter("excludeSubPages", Boolean.valueOf(excludeSubPages).toString());
+        feb.addParameter("shallow@Delete", "true");
+        feb.addParameter("shallow", Boolean.valueOf(shallow).toString());
+        feb.addParameter("cq:rolloutConfigs@Delete", "true");
+        fillParameters(feb, "cq:rolloutConfigs", rolloutConfigs);
+
+        return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
+    }
+
+    private static void fillParameters(FormEntityBuilder formEntityBuilder, String paramName, String... values) {
+        if (values != null && values.length > 0) {
+            for (String value : values)
+                formEntityBuilder.addParameter(paramName, value);
+        }
+    }
+}

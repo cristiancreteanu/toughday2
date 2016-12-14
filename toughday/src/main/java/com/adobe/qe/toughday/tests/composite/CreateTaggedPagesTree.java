@@ -8,6 +8,7 @@ import com.adobe.qe.toughday.tests.sequential.*;
 import com.adobe.qe.toughday.tests.sequential.tags.AddTagToResourceTest;
 import com.adobe.qe.toughday.tests.sequential.tags.CreateTagTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
+import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
 /**
  * Created by tuicu on 05/11/16.
@@ -53,14 +54,14 @@ public class CreateTaggedPagesTree extends CompositeTest {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTreeTest.DEFAULT_PARENT_PATH,
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         createPageTreeTest.setParentPath(parentPath);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTreeTest.DEFAULT_TEMPLATE,
+    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE,
         desc = "The title of the pages. Internally, this will be incremented")
     public AbstractTest setTemplate(String template) {
         createPageTreeTest.setTemplate(template);
