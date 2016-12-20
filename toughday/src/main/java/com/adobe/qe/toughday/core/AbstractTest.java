@@ -155,7 +155,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      * @param clazz
      * @return
      */
-    public static Logger getLogger(Class<?> clazz) {
+    public static Logger createLogger(Class<?> clazz) {
 
         String name = clazz.getSimpleName();
         if (clazz.isAnnotationPresent(Description.class)) {
@@ -168,7 +168,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", null, config,
                 null, null, false, false, null, null);
         Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s.log", name),
-                "false", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
+                "true", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
         appender.start();
         config.addAppender(appender);
         AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
@@ -178,6 +178,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         config.addLogger(clazz.getName(), loggerConfig);
         ctx.updateLoggers();
         Logger logger = LogManager.getLogger(clazz);
+        logger.info("Created logger {}", logger);
         return logger;
     }
 

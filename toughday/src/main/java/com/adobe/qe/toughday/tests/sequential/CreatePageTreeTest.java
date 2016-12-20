@@ -20,7 +20,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
                 "This test creates pages hierarchically. Each child on each level has 10 children. " +
                 "Each author thread fills in a level in the pages tree, up to 10^level")
 public class CreatePageTreeTest extends SequentialTestBase {
-    public static final Logger LOG = getLogger(CreatePageTreeTest.class);
+    public static final Logger LOG = createLogger(CreatePageTreeTest.class);
 
     private final TreePhaser phaser;
 

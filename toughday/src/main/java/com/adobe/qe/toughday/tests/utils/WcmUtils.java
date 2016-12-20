@@ -18,7 +18,6 @@
  ******************************************************************************/
 package com.adobe.qe.toughday.tests.utils;
 
-import org.apache.http.HttpStatus;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;

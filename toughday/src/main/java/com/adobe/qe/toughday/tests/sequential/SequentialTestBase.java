@@ -2,16 +2,14 @@ package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.AbstractTestRunner;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import com.adobe.qe.toughday.runners.SequentialTestRunner;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.sling.testing.clients.SlingClient;
-import org.apache.sling.testing.clients.ClientException;
 
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 
 /**
@@ -19,8 +17,8 @@ import java.util.List;
  */
 public abstract class SequentialTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();
-    public static final String ROOT_NODE = "toughday";
-    public static final String ROOT_NODE_PATH ="/content/" + ROOT_NODE ;
+    public final String rootNode = "toughday" + UUID.randomUUID();
+    public final String rootNodePath ="/content/" + rootNode;
     private SlingClient defaultClient;
 
 
@@ -49,10 +47,9 @@ public abstract class SequentialTestBase extends AbstractTest {
         return defaultClient;
     }
 
-    @FactorySetup
-    private void prepareContent() throws Exception {
-        if (!getDefaultClient().exists(ROOT_NODE_PATH)) {
-            getDefaultClient().createFolder(ROOT_NODE, ROOT_NODE, "/content");
+    protected void prepareContent() throws Exception {
+        if (!getDefaultClient().exists(rootNodePath)) {
+            getDefaultClient().createFolder(rootNode, rootNode, "/content");
         }
     }
 

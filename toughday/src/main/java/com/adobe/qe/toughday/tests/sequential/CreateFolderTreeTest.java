@@ -2,7 +2,6 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArg;
-import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +15,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 @Description(name="create_folder_tree", desc="This test creates folders hierarchically. Each child on each level has 10 children. " +
                 "Each author thread fills in a level in the folder tree, up to 10^level")
 public class CreateFolderTreeTest extends SequentialTestBase {
-    public static final Logger LOG = getLogger(CreatePageTreeTest.class);
+    public static final Logger LOG = createLogger(CreatePageTreeTest.class);
 
     private static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     private static final String UNSTRUCTURED_RESOURCE_TYPE = "nt:unstructured";

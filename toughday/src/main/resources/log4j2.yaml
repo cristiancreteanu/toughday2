@@ -9,7 +9,7 @@ Configuration:
                 Pattern: "%d{yyyy-MM-dd HH:mm:ss} %-5p: %m%n"
 
         RollingFile:
-          - name: RollingFile
+          - name: CoreFile
             fileName: logs/toughday.log
             filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
             PatternLayout:
@@ -17,7 +17,7 @@ Configuration:
             Policies:
                 SizeBasedTriggeringPolicy:
                   size: 250 MB
-          - name: RollingFileTests
+          - name: TestsFile
             fileName: logs/toughday_tests.log
             filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
             PatternLayout:
@@ -30,20 +30,25 @@ Configuration:
             level: warn
             additivity: false
             AppenderRef:
-                ref: RollingFile
+                ref: CoreFile
         Logger:
           - name: com.adobe.qe.toughday.Main
             level: info
             additivity: false
             AppenderRef:
                 ref: Console
+          - name: com.adobe.qe.toughday.core
+            level: info
+            additivity: false
+            AppenderRef:
+                ref: CoreFile
           - name: com.adobe.qe.toughday.tests
             level: info
             additivity: false
             AppenderRef:
-                ref: RollingFileTests
+                ref: TestsFile
           - name: org.apache
             level: info
             additivity: false
             AppenderRef:
-                ref: RollingFile
+                ref: CoreFile

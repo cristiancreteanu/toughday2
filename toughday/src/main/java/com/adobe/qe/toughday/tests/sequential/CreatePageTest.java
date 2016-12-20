@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  */
 public class CreatePageTest extends SequentialTestBase {
-    public static final Logger LOG = getLogger(CreatePageTest.class);
+    public static final Logger LOG = createLogger(CreatePageTest.class);
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;

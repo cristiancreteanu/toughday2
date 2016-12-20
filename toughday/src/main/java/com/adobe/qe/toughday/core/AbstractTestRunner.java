@@ -41,7 +41,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         Class currentClass = testClass;
 
         while(!currentClass.getName().equals(AbstractTest.class.getName())) {
-            System.out.println(currentClass.getName()); // ?
+            //System.out.println(currentClass.getName()); // ?
             for (Method method : currentClass.getDeclaredMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {
                     if (annotation.annotationType() == Setup.class) {

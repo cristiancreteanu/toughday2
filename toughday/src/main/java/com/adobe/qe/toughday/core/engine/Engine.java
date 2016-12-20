@@ -105,7 +105,15 @@ public class Engine {
      * Method for starting running tests.
      * @throws Exception
      */
-    public void runTests() throws Exception {
+    public void runTests() {
+        try {
+            run();
+        } catch (Exception e) {
+            LOG.error("Failure in tests execution ", e);
+        }
+    }
+
+    private void run() throws Exception {
         // Run the setup step of the suite
         if (testSuite.getSetupStep() != null) {
             testSuite.getSetupStep().setup();

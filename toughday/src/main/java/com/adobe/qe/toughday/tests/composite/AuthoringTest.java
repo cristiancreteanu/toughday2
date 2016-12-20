@@ -17,7 +17,7 @@ public class AuthoringTest extends CompositeTest {
     public static final String DEFAULT_ASSET_NAME = "toughday_png_asset";
     public static final String DEFAULT_MIME_TYPE = "image/png";
     public static final String DEFAULT_RESOURCE_PATH = "image.png";
-    private static final Logger LOG = getLogger(AuthoringTest.class);
+    private static final Logger LOG = createLogger(AuthoringTest.class);
 
     private CreatePageTest createPageTest;
     private UploadImageTest uploadAssetTest;

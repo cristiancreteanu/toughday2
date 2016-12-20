@@ -25,7 +25,7 @@ import java.util.Arrays;
         "This test creates tags hierarchically. Each child on each level has 10 children. " +
                 "Each author thread fills in a level in the tag tree, up to 10^level")
 public class CreateTagTreeTest extends SequentialTestBase {
-    public static final Logger LOG = getLogger(CreateFolderTreeTest.class);
+    public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 
     public static final String CREATE_TAG_CMD = "createTag";
     public static final String TAG_COMMAND_URL = "/bin/tagcommand";
@@ -97,7 +97,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
         } catch (Exception e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
-            // we're just count them.
+            // we just count them.
             LOG.warn("Failed to create tag {}{} ({})", parentPath, nodeName, e.getMessage());
             throw e;
         }
