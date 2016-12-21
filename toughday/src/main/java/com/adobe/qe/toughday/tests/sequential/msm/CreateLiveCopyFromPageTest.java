@@ -91,7 +91,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     private void createLC() throws Exception {
         WcmUtils.createLiveCopy(getDefaultClient(), nodeName, title, destinationPage, sourcePage, false, null, null, false, 200);
-        communicate("livecopy", destinationPage + "/" + nodeName);
+        communicate("livecopy", destinationPage + nodeName);
     }
 
     @After

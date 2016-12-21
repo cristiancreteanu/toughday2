@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.msm.CreateLiveCopyFromPageTest;
+import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
@@ -13,20 +14,28 @@ public class CreateLiveCopyTreeTest  extends CompositeTest {
     private static final String DEFAULT_SOURCE_PAGE_TITLE = "msmsrc";
     private CreatePageTreeTest createPageTest;
     private CreateLiveCopyFromPageTest createLcTest;
+    private RolloutTest rolloutTest;
 
     public CreateLiveCopyTreeTest() { this(true); }
 
     public CreateLiveCopyTreeTest(boolean createChildren) {
         if (createChildren) {
+
             createLcTest = new CreateLiveCopyFromPageTest();
             createLcTest.setGlobalArgs(this.getGlobalArgs());
 
             createPageTest = new CreatePageTreeTest();
             createPageTest.setTitle(DEFAULT_SOURCE_PAGE_TITLE);
             createPageTest.setGlobalArgs(this.getGlobalArgs());
+            // set root parent path of create_lc_test to be the same as the source
+            createLcTest.setDestinationRoot(createPageTest.rootParentPath);
+
+            rolloutTest = new RolloutTest();
+            rolloutTest.setGlobalArgs(this.getGlobalArgs());
 
             this.addChild(createPageTest);
             this.addChild(createLcTest);
+            this.addChild(rolloutTest);
         }
     }
 
@@ -67,6 +76,18 @@ public class CreateLiveCopyTreeTest  extends CompositeTest {
     public CreateLiveCopyTreeTest setBase(String base) {
         this.createPageTest.setBase(base);
         this.createLcTest.setBase(base);
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "Whether to rollout page / deep", defaultValue = "page")
+    public AbstractTest setType(String type) {
+        this.rolloutTest.setType(type);
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "true/false - Whether to rollout in the background", defaultValue = "false")
+    public AbstractTest setBackground(String background) {
+        this.rolloutTest.setBackground(background);
         return this;
     }
 }

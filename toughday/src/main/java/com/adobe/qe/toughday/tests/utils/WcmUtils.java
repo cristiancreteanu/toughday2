@@ -27,6 +27,8 @@ public class WcmUtils {
 
     public static final String CMD_CREATE_PAGE = "createPage";
     public static final String CMD_CREATE_LIVECOPY = "createLiveCopy";
+    public static final String CMD_ROLLOUT = "rollout";
+
     public static final String DEFAULT_PARENT_PATH = "/content/geometrixx/en";
     public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
 
@@ -70,5 +72,19 @@ public class WcmUtils {
             for (String value : values)
                 formEntityBuilder.addParameter(paramName, value);
         }
+    }
+
+    public static SlingHttpResponse rolloutPage(SlingClient client, String type, boolean background, String[] sourcePaths,
+                                                String[] paragraphPaths, String[] targetPaths, int... expectedStatus)
+            throws ClientException {
+        FormEntityBuilder feb = FormEntityBuilder.create()
+                .addParameter("cmd", CMD_ROLLOUT)
+                .addParameter("type", type)
+                .addParameter("sling:bg", Boolean.valueOf(background).toString())
+                .addParameter("msm:async", Boolean.valueOf(background).toString());
+        fillParameters(feb, "path", sourcePaths);
+        fillParameters(feb, "paras", paragraphPaths);
+        fillParameters(feb, "msm:targetPath", targetPaths);
+        return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
     }
 }

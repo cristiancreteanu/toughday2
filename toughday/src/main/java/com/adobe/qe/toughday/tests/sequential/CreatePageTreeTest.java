@@ -26,7 +26,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     private final TreePhaser phaser;
 
-    private String rootParentPath = rootNodePath;
+    public String rootParentPath = rootNodePath;
     private String template = WcmUtils.DEFAULT_TEMPLATE;
     private String title = AuthoringTreeTest.DEFAULT_PAGE_TITLE;
 
