@@ -23,7 +23,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
 
     public final String defaultDestinationRootPage = rootNodePath + "/" + DESTINATION_PAGE_NAME;
-    public static final String LC_PREFIX = "lc";
+    public static final String DEFAULT_PAGE_TITLE = "lc";
 
     private final TreePhaser phaser;
     private String template = WcmUtils.DEFAULT_TEMPLATE;
@@ -41,7 +41,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         this.phaser = new TreePhaser();
         this.sourcePage = defaultSourceRootPage;
         this.destinationRoot = defaultDestinationRootPage;
-        this.title = LC_PREFIX;
+        this.title = DEFAULT_PAGE_TITLE;
     }
 
     public CreateLiveCopyFromPageTest(TreePhaser phaser, String title, String sourcePage, String destinationRoot) {
@@ -91,7 +91,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     private void createLC() throws Exception {
         WcmUtils.createLiveCopy(getDefaultClient(), nodeName, title, destinationPage, sourcePage, false, null, null, false, 200);
-        communicate("livecopy", destinationPage + "/" + title);
+        communicate("livecopy", destinationPage + "/" + nodeName);
     }
 
     @After
@@ -133,6 +133,18 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     @ConfigArg(required = false, desc = "Default root for live copies")
     public AbstractTest setDestinationRoot(String page) {
         this.destinationRoot = page;
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "Title for livecopies")
+    public AbstractTest setTitle(String title) {
+        this.title = title;
+        return this;
+    }
+
+    @ConfigArg(required = false, desc = "How many direct child pages will a page have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    public AbstractTest setBase(String base) {
+        this.phaser.setBase(Integer.parseInt(base));
         return this;
     }
 }
