@@ -1,9 +1,11 @@
-package com.adobe.qe.toughday.core.config;
+package com.adobe.qe.toughday.core.config.parsers.cli;
 
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.config.*;
 import org.apache.commons.lang3.StringUtils;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
 
@@ -11,29 +13,12 @@ import java.util.*;
  * Parser for the command line arguments. It also prints the help message.
  */
 public class CliParser implements ConfigurationParser {
-    private static final List<String> actions;
-    private static final HashMap<String, String> actionsParams;
-    private static final HashMap<String, String> actionsDescription;
-
-    static {
-        actions = new ArrayList<>();
-        actions.add("add");
-        actions.add("config");
-        actions.add("exclude");
-
-        actionsParams = new HashMap<>();
-        actionsParams.put("add", "TestClass/PublisherClass property1=val property2=val");
-        actionsParams.put("config", "TestName property1=val property2=val");
-        actionsParams.put("exclude", "TestName");
-
-        actionsDescription = new HashMap<>();
-        actionsDescription.put("add", "Add a test to the suite or a publisher");
-        actionsDescription.put("config", "Override parameters for a test from a predefined suite");
-        actionsDescription.put("exclude", "Exclude a test from a predefined suite");
-    }
 
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArg>> availableGlobalArgs = new HashMap<>();
+    private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
+    private static List<String> parserArgs = new ArrayList<>();
+
     static {
         for (Method method : globalArgMethods) {
             if (method.getAnnotation(ConfigArg.class) != null) {
@@ -46,17 +31,21 @@ public class CliParser implements ConfigurationParser {
                 globalArgMap.put(Configuration.propertyFromMethod(method.getName()), annotation);
             }
         }
+
+        for (Class parserClass : ReflectionsContainer.getReflections().getSubTypesOf(ConfigurationParser.class)) {
+            for (Field field : parserClass.getDeclaredFields()) {
+                if(field.getType().isAssignableFrom(ParserArgHelp.class)) {
+                    try {
+                        ParserArgHelp parserArg = (ParserArgHelp) field.get(null);
+                        parserArgHelps.add(parserArg);
+                        parserArgs.add(parserArg.name());
+                    } catch (Exception e) {
+                        throw new IllegalStateException("All parser arg help objects must be public and static", e);
+                    }
+                }
+            }
+        }
     }
-
-    private static String getActionParams(String action) {
-        return actionsParams.get(action) != null ? actionsParams.get(action) : "";
-    }
-
-
-    private static String getActionDescription(String action) {
-        return actionsDescription.get(action) != null ? actionsDescription.get(action) : "";
-    }
-
 
     // Fields
     private PredefinedSuites predefinedSuites;
@@ -85,8 +74,9 @@ public class CliParser implements ConfigurationParser {
             throw new IllegalArgumentException("Properties must have the following form: --property=value or --property. Found: "
                     + propertyAndValue);
         }
-        // make the property name lowercase
-        String prop = StringUtils.lowerCase(optionValue[0].trim());
+        // make the property name lowercase TODO why?
+        //String prop = StringUtils.lowerCase(optionValue[0].trim());
+        String prop = optionValue[0].trim();
         // default to true if there is no "=" or no value after "="
         String val = (optionValue.length == 2) ? optionValue[1] : "true";
 
@@ -106,7 +96,7 @@ public class CliParser implements ConfigurationParser {
         for (String arg : cmdLineArgs) {
             if (arg.startsWith("--")) {
                 arg = arg.substring(2);
-                if (!actions.contains(arg)) {
+                if (!Actions.isAction(arg)) {
                     String[] res = parseProperty(arg);
                     String key = res[0];
                     String val = res[1];
@@ -118,7 +108,7 @@ public class CliParser implements ConfigurationParser {
                             break;
                         }
                     }
-                    if (!found && !key.equals("suite")  && !key.equals("SuiteSetup")) {
+                    if (!found && !parserArgs.contains(key) && !key.equals("suite")  && !key.equals("SuiteSetup")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                     }
                     globalArgs.put(key, val);
@@ -128,39 +118,20 @@ public class CliParser implements ConfigurationParser {
         configParams.setGlobalParams(globalArgs);
 
 
-        // Config parameters
+        // action parameters
         for (int i = 0; i < cmdLineArgs.length; i++) {
             if (cmdLineArgs[i].startsWith("--")) {
-                String action = cmdLineArgs[i].substring(2);
-
-                if (actions.contains(action)) {
+                String actionString = cmdLineArgs[i].substring(2);
+                if(Actions.isAction(actionString)) {
+                    Actions action = Actions.fromString(actionString);
                     String identifier = cmdLineArgs[i + 1];
                     HashMap<String, String> args = new HashMap<>();
                     for (int j = i + 2; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
                         parseAndAddProperty(cmdLineArgs[j], args);
                         i = j;
                     }
-                    if (action.equals("add")) {
-                        if (ReflectionsContainer.getInstance().getTestClasses().containsKey(identifier)) {
-                            configParams.addTest(identifier, args);
-                        } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
-                            configParams.addPublisher(identifier, args);
-                        } else {
-                            throw new IllegalArgumentException("Unknown publisher or test class: " + identifier);
-                        }
-                    } else if (action.equals("config")) {
-                        configParams.configTest(identifier, args);
-                    } else if (action.equals("exclude")) {
-                        if (args.size() != 0) {
-                            throw new IllegalArgumentException("--exclude cannot have properties for identifier: " + identifier);
-                        }
 
-                        if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
-                            //TODO exclude publishers
-                        } else {
-                            configParams.excludeTest(identifier);
-                        }
-                    }
+                    action.apply(configParams, identifier, args);
                 }
             }
         }
@@ -262,6 +233,10 @@ public class CliParser implements ConfigurationParser {
                         param + "=val", paramGroup.get(param).defaultValue(), paramGroup.get(param).desc());
             }
         }
+        for (ParserArgHelp parserArgHelp : parserArgHelps) {
+            System.out.printf("\t--%-32s\t Default: %s - %s\r\n",
+                    parserArgHelp.name() + "=val", parserArgHelp.defaultValue(), parserArgHelp.description());
+        }
 
         System.out.printf("\t%-32s\t %s\r\n", "--SuiteSetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
@@ -276,8 +251,8 @@ public class CliParser implements ConfigurationParser {
         }
 
         System.out.println("\r\nAvailable actions:");
-        for (String action : actions) {
-            System.out.printf("\t--%-71s %s\r\n", action + " " + getActionParams(action), getActionDescription(action));
+        for (Actions action : Actions.values()) {
+            System.out.printf("\t--%-71s %s\r\n", action.value() + " " + action.actionParams(), action.actionDescription());
         }
     }
 

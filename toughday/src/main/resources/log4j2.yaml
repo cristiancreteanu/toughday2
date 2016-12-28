@@ -27,7 +27,7 @@ Configuration:
                   size: 250 MB
     Loggers:
         Root:
-            level: warn
+            level: info
             additivity: false
             AppenderRef:
                 ref: CoreFile

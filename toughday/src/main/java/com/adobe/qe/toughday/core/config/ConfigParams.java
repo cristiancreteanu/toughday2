@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.core.config;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -47,7 +48,7 @@ public class ConfigParams {
         }
     }
 
-    private Map<String, String> globalParams;
+    private Map<String, String> globalParams = new HashMap<>();
     private List<ClassMetaObject> testsToAdd = new ArrayList<>();
     private List<ClassMetaObject> publishers = new ArrayList<>();
     private List<NamedMetaObject> testsToConfig = new ArrayList<>();
@@ -89,5 +90,13 @@ public class ConfigParams {
 
     public List<ClassMetaObject> getPublishers() {
         return publishers;
+    }
+
+    public void merge(ConfigParams other) {
+        globalParams.putAll(other.getGlobalParams());
+        testsToAdd.addAll(other.getTestsToAdd());
+        testsToExclude.addAll(other.getTestsToExclude());
+        testsToConfig.addAll(other.getTestsToConfig());
+        publishers.addAll(other.getPublishers());
     }
 }

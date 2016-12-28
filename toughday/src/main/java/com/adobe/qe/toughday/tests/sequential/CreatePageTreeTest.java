@@ -133,6 +133,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
+        System.out.println("Root parent path is now: " + parentPath);
         return this;
     }
 

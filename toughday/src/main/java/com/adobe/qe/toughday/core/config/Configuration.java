@@ -4,8 +4,13 @@ import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.TestSuite;
+import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
+import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
+import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -20,6 +25,9 @@ import java.util.Map;
  * An object that has all that configurations parsed and objects instantiated.
  */
 public class Configuration {
+    private static final Logger LOGGER =  LogManager.getLogger(Configuration.class);
+
+
     private GlobalArgs globalArgs;
     private TestSuite suite;
     PredefinedSuites predefinedSuites = new PredefinedSuites();
@@ -40,9 +48,7 @@ public class Configuration {
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
-
-        ConfigurationParser parser = getConfigurationParser(cmdLineArgs);
-        ConfigParams configParams = parser.parse(cmdLineArgs);
+        ConfigParams configParams = collectConfigurations(cmdLineArgs);
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
 
@@ -114,6 +120,12 @@ public class Configuration {
         }
     }
 
+    private ConfigParams collectConfigurations(String[] cmdLineArgs) {
+        ConfigParams configs = new YamlParser().parse(cmdLineArgs);
+        configs.merge(new CliParser().parse(cmdLineArgs));
+        return configs;
+    }
+
     /**
      * Getter for the predefined suites
      * @return
@@ -158,6 +170,7 @@ public class Configuration {
      */
     public static <T> T setObjectProperties(T object, Map<String, String> args) throws InvocationTargetException, IllegalAccessException {
         Class classObject = object.getClass();
+        LOGGER.info("Configuring object of class: " + classObject.getSimpleName());
         for (Method method : classObject.getMethods()) {
             ConfigArg annotation = method.getAnnotation(ConfigArg.class);
             if (annotation == null) {
@@ -165,7 +178,7 @@ public class Configuration {
             }
 
             String property = propertyFromMethod(method.getName());
-            String value = args.get(property);
+            Object value = args.get(property);
             if (value == null) {
                 if (annotation.required()) {
                     throw new IllegalArgumentException("Property " + property + " is required for class " + classObject.getSimpleName());
@@ -175,7 +188,10 @@ public class Configuration {
                     continue;
                 }
             }
-            method.invoke(object, value);
+
+            LOGGER.info("\tSetting property \"" + property + "\" to: \"" + value + "\"");
+            //TODO fix this ugly thing: all maps should be String -> String, but snake yaml automatically converts Integers, etc. so for now we call toString.
+            method.invoke(object, value.toString());
         }
         return object;
     }
