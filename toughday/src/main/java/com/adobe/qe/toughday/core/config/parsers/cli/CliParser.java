@@ -47,16 +47,6 @@ public class CliParser implements ConfigurationParser {
         }
     }
 
-    // Fields
-    private PredefinedSuites predefinedSuites;
-
-    /**
-     * Constructor
-     */
-    public CliParser() {
-        this.predefinedSuites = new PredefinedSuites();
-    }
-
     /**
      * Method for parsing and adding a property to the args map.
      * @param propertyAndValue string that contains both the property name and the property value separated by "="
@@ -159,23 +149,13 @@ public class CliParser implements ConfigurationParser {
      */
     public void printHelp() {
         // print the shorter part of the help
-        printShortHelp(false);
+        printShortHelp(true);
 
         // Follow up with the rest
         printExtraHelp();
     }
 
     public void printExtraHelp() {
-        System.out.println("\r\nPredefined suites");
-        for (String testSuiteName : predefinedSuites.keySet()) {
-            TestSuite testSuite = predefinedSuites.get(testSuiteName);
-            System.out.printf("\t%-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
-            for (AbstractTest test : testSuite.getTests()) {
-                System.out.printf("\t\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");
-                //TODO print default properties
-            }
-        }
-
         System.out.println();
         System.out.println("Available test classes:");
         for (Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
@@ -190,31 +170,42 @@ public class CliParser implements ConfigurationParser {
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
-        if (cmdLineArgs.length == 0 || (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help"))) {
+        if (cmdLineArgs.length == 0) {
             printShortHelp();
             return true;
         } else if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
             printHelp();
             return true;
-        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help") &&
-                ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
-            Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
-            printClass(testClass, true);
+        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
+            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
+                Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
+                printClass(testClass, true);
+            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
+                Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
+                printClass(publisherClass, true);
+            } else if (cmdLineArgs[1].startsWith("--suite=")) {
+                printTestSuite(new PredefinedSuites(), cmdLineArgs[1].split("=")[1], true, true);
+            } else {
+                System.out.println("Could not find any test or publisher \"" + cmdLineArgs[1] + "\"");
+            }
             return true;
-        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help") &&
-                ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
-            Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
-            printClass(publisherClass, true);
-            return true;
+        }
+
+        for (String cmdLineArg : cmdLineArgs) {
+            if (cmdLineArg.equals("--help")) {
+                printShortHelp();
+                return true;
+            }
         }
         return false;
     }
 
-    public void printShortHelp(boolean printSuites) {
+    public void printShortHelp(boolean printSuitesTests) {
         System.out.println("Usage: java -jar toughday.jar [--help | --help_full] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help.");
         System.out.println("Use '--help_full' to print full help.");
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
+        System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
@@ -238,22 +229,20 @@ public class CliParser implements ConfigurationParser {
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
                 "where \"val\" can be one predefined suite.");
 
-        if (printSuites) {
-            System.out.println("\r\nPredefined suites");
-            for (String testSuiteName : predefinedSuites.keySet()) {
-                TestSuite testSuite = predefinedSuites.get(testSuiteName);
-                System.out.printf("\t%-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
-            }
-        }
-
         System.out.println("\r\nAvailable actions:");
         for (Actions action : Actions.values()) {
             System.out.printf("\t--%-71s %s\r\n", action.value() + " " + action.actionParams(), action.actionDescription());
         }
+
+        PredefinedSuites predefinedSuites = new PredefinedSuites();
+        System.out.println("\r\nPredefined suites");
+        for (String testSuiteName : predefinedSuites.keySet()) {
+            printTestSuite(predefinedSuites, testSuiteName, printSuitesTests, false);
+        }
     }
 
     public void printShortHelp() {
-        printShortHelp(true);
+        printShortHelp(false);
     }
 
     private static void printClassProperty(String name, boolean required, String defaultValue, String description) {
@@ -277,6 +266,7 @@ public class CliParser implements ConfigurationParser {
 
         System.out.println(String.format(" - %-40s - %s", name, desc));
         if (printProperties) {
+            System.out.println(String.format("\t%-32s %-64s %-32s", "Property", "Default", "Description"));
             for (Method method : klass.getMethods()) {
                 if (method.getAnnotation(ConfigArg.class) != null) {
                     ConfigArg annotation = method.getAnnotation(ConfigArg.class);
@@ -291,6 +281,23 @@ public class CliParser implements ConfigurationParser {
                 printClassProperty("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
                         "Time in milliseconds after which the test is interrupted");
                 printClassProperty("count", false, "none", "The number of times this test should run");
+            }
+        }
+    }
+
+    private static void printTestSuite(PredefinedSuites predefinedSuites, String testSuiteName, boolean withTests, boolean withTestProperties) {
+        TestSuite testSuite = predefinedSuites.get(testSuiteName);
+        if(testSuite == null) {
+            System.out.println("Cannot find a test predefined test suite named " + testSuiteName);
+            return;
+        }
+        System.out.printf(" - %-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
+        if (withTests) {
+            for (AbstractTest test : testSuite.getTests()) {
+                System.out.printf("\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");
+                if (withTestProperties) {
+                    //TODO print default properties
+                }
             }
         }
     }
