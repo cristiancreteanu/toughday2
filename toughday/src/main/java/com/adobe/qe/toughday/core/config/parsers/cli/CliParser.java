@@ -218,7 +218,7 @@ public class CliParser implements ConfigurationParser {
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
-        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --config AuthoringTreeTest pageTemplate=/apps/my/mytemplate");
+        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --config AuthoringTreeTest pagetemplate=/apps/my/mytemplate");
 
         System.out.println("\r\nGlobal arguments:");
 
@@ -236,7 +236,7 @@ public class CliParser implements ConfigurationParser {
 
         System.out.printf("\t%-32s\t %s\r\n", "--SuiteSetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
-                "where \"val\" can be one, or more predefined suite. (use commas to separate them)");
+                "where \"val\" can be one predefined suite.");
 
         if (printSuites) {
             System.out.println("\r\nPredefined suites");
@@ -286,7 +286,7 @@ public class CliParser implements ConfigurationParser {
                             annotation.desc());
                 }
             }
-            if(klass.isAssignableFrom(AbstractTest.class)) {
+            if(AbstractTest.class.isAssignableFrom(klass)) {
                 printClassProperty("weight", true, "1", "The weight of this test");
                 printClassProperty("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
                         "Time in milliseconds after which the test is interrupted");
