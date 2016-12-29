@@ -3,7 +3,6 @@ package com.adobe.qe.toughday.core.config.parsers.cli;
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.*;
-import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -108,7 +107,9 @@ public class CliParser implements ConfigurationParser {
                             break;
                         }
                     }
-                    if (!found && !parserArgs.contains(key) && !key.equals("suite")  && !key.equals("SuiteSetup")) {
+                    if (!found && !parserArgs.contains(key)
+                            && !key.equals("suite")  && !key.equals("SuiteSetup")
+                            && !key.equals("help")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                     }
                     globalArgs.put(key, val);
@@ -160,10 +161,10 @@ public class CliParser implements ConfigurationParser {
         printShortHelp(false);
 
         // Follow up with the rest
-        printTestsHelp();
+        printExtraHelp();
     }
 
-    public void printTestsHelp() {
+    public void printExtraHelp() {
         System.out.println("\r\nPredefined suites");
         for (String testSuiteName : predefinedSuites.keySet()) {
             TestSuite testSuite = predefinedSuites.get(testSuiteName);
@@ -177,48 +178,42 @@ public class CliParser implements ConfigurationParser {
         System.out.println();
         System.out.println("Available test classes:");
         for (Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
-            String name = testClass.getSimpleName();
-            String desc = "";
-            if (testClass.isAnnotationPresent(Description.class)) {
-                Description d = testClass.getAnnotation(Description.class);
-                name = name + " [" + d.name() + "]";
-                desc = d.desc();
-            }
-            System.out.println(String.format("\r\n\t%-40s - %s", name, desc));
-            for (Method method : testClass.getMethods()) {
-                if (method.getAnnotation(ConfigArg.class) != null) {
-                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
-                    printTestClass(Configuration.propertyFromMethod(method.getName()),
-                            annotation.required(),
-                            annotation.defaultValue(),
-                            annotation.desc());
-                }
-            }
-            printTestClass("weight", true, "1", "The weight of this test" );
-            printTestClass("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
-                    "Time in milliseconds after which the test is interrupted");
-            printTestClass("count", false, "none", "The number of times this test should run");
+            printClass(testClass, false);
         }
 
         System.out.println();
         System.out.println("Available publisher classes:");
         for (Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
-            System.out.printf("\t%-32s\r\n", publisherClass.getSimpleName());
-            for (Method method : publisherClass.getMethods()) {
-                if (method.getAnnotation(ConfigArg.class) != null) {
-                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
-                    printTestClass(Configuration.propertyFromMethod(method.getName()),
-                            annotation.required(),
-                            annotation.defaultValue(),
-                            annotation.desc());
-                }
-            }
+            printClass(publisherClass, false);
         }
     }
 
+    public boolean printHelp(String[] cmdLineArgs) {
+        if (cmdLineArgs.length == 0 || (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help"))) {
+            printShortHelp();
+            return true;
+        } else if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
+            printHelp();
+            return true;
+        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help") &&
+                ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
+            Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
+            printClass(testClass, true);
+            return true;
+        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help") &&
+                ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
+            Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
+            printClass(publisherClass, true);
+            return true;
+        }
+        return false;
+    }
+
     public void printShortHelp(boolean printSuites) {
-        System.out.println("Usage: java -jar toughday.jar [--help | --print_tests] [<global arguments> | <actions>]");
-        System.out.println("Running the jar with no parameters or '--help' prints the help. Use '--print_tests' to print full help.");
+        System.out.println("Usage: java -jar toughday.jar [--help | --help_full] [<global arguments> | <actions>]");
+        System.out.println("Running the jar with no parameters or '--help' prints the help.");
+        System.out.println("Use '--help_full' to print full help.");
+        System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
@@ -260,11 +255,38 @@ public class CliParser implements ConfigurationParser {
         printShortHelp(true);
     }
 
-    private static void printTestClass(String name, boolean required, String defaultValue, String description) {
-        System.out.printf("\t\t%-32s %-64s %-32s\r\n",
+    private static void printClassProperty(String name, boolean required, String defaultValue, String description) {
+        System.out.println(String.format("\t%-32s %-64s %-32s",
                 name + "=val" + (required ? "" : " (optional)"),
                 defaultValue,
-                description);
+                description));
     }
 
+    private static void printClass(Class klass, boolean printProperties) {
+        String name = klass.getSimpleName();
+        String desc = "";
+        if (klass.isAnnotationPresent(Description.class)) {
+            Description d = (Description) klass.getAnnotation(Description.class);
+            name = name + " [" + d.name() + "]";
+            desc = d.desc();
+        }
+        System.out.println(String.format(" - %-40s - %s", name, desc));
+        if (printProperties) {
+            for (Method method : klass.getMethods()) {
+                if (method.getAnnotation(ConfigArg.class) != null) {
+                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+                    printClassProperty(Configuration.propertyFromMethod(method.getName()),
+                            annotation.required(),
+                            annotation.defaultValue(),
+                            annotation.desc());
+                }
+            }
+            if(klass.isAssignableFrom(AbstractTest.class)) {
+                printClassProperty("weight", true, "1", "The weight of this test");
+                printClassProperty("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
+                        "Time in milliseconds after which the test is interrupted");
+                printClassProperty("count", false, "none", "The number of times this test should run");
+            }
+        }
+    }
 }

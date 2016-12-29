@@ -17,11 +17,7 @@ public class Main {
     public static void main (String[] args) {
         CliParser cliParser = new CliParser();
         System.out.println();
-        if (args.length == 0 || (args.length == 1 && args[0].equals("--help"))) {
-            cliParser.printShortHelp();
-            System.exit(0);
-        } else if (args.length == 1 && args[0].equals("--print_tests")) {
-            cliParser.printHelp();
+        if (cliParser.printHelp(args)) {
             System.exit(0);
         } else {
             try {
