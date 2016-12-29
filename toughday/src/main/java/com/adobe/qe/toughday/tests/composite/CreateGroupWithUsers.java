@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.composite;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.users.CreateUserGroupTest;
 import com.adobe.qe.toughday.tests.sequential.users.CreateUserTest;
@@ -12,8 +13,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 /**
  * Created by tuicu on 30/11/16.
  */
-@Description(name = "CreateGroupWithUsers",
-        desc = "At every execution creates one group, five users and adds the users to that group. " +
+@Name(name = "CreateGroupWithUsers")
+@Description(desc = "At every execution creates one group, five users and adds the users to that group. " +
                 "Additionally, it creates one extra group at the beginning and all the users are added into that group as well")
 public class CreateGroupWithUsers extends CompositeTest {
     private CreateFiveUsersTest createFiveUsersTest;

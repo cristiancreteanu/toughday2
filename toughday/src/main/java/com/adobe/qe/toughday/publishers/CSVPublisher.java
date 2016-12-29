@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.publishers;
 
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,9 +12,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Collection;
 
-/**
- * Publish statistics to a csv file
- */
+@Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
     private boolean finished = false;

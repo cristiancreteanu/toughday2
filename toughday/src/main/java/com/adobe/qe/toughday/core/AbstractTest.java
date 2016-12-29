@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
@@ -39,6 +40,11 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         this.workspace = new File("workspace");
         // create dir structure
         this.workspace.mkdirs();
+        this.name = getClass().getSimpleName();
+        if (getClass().isAnnotationPresent(Name.class)) {
+            Name d = getClass().getAnnotation(Name.class);
+            this.name = d.name();
+        }
     }
 
     public static List<Thread> getExtraThreads() {
@@ -54,12 +60,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      * @return by default, it will return the class name, except otherwise configured using the setter
      */
     public String getName() {
-        String simpleName = getClass().getSimpleName();
-        if (getClass().isAnnotationPresent(Description.class)) {
-            Description d = getClass().getAnnotation(Description.class);
-            simpleName = d.name();
-        }
-        return name != null ? name : simpleName;
+        return name;
     }
 
     /**
@@ -158,8 +159,8 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     public static Logger createLogger(Class<?> clazz) {
 
         String name = clazz.getSimpleName();
-        if (clazz.isAnnotationPresent(Description.class)) {
-            Description d = clazz.getAnnotation(Description.class);
+        if (clazz.isAnnotationPresent(Name.class)) {
+            Name d = clazz.getAnnotation(Name.class);
             name = d.name();
         }
 

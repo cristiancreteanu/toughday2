@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.sequential.users;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
@@ -16,7 +17,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Description(name = "CreateUserTest", desc = "Creates users")
+@Name(name = "CreateUserTest")
+@Description(desc = "Creates users")
 public class CreateUserTest extends SequentialTestBase {
     public static final String DEFAULT_PASSWORD = "toughday";
     public static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";

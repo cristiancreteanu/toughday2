@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.core.config.parsers.cli;
 
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.*;
 
 import java.lang.reflect.Field;
@@ -265,11 +266,15 @@ public class CliParser implements ConfigurationParser {
     private static void printClass(Class klass, boolean printProperties) {
         String name = klass.getSimpleName();
         String desc = "";
+        if (klass.isAnnotationPresent(Name.class)) {
+            Name d = (Name) klass.getAnnotation(Name.class);
+            name = name + " [" + d.name() + "]";
+        }
         if (klass.isAnnotationPresent(Description.class)) {
             Description d = (Description) klass.getAnnotation(Description.class);
-            name = name + " [" + d.name() + "]";
             desc = d.desc();
         }
+
         System.out.println(String.format(" - %-40s - %s", name, desc));
         if (printProperties) {
             for (Method method : klass.getMethods()) {

@@ -1,10 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
@@ -18,7 +15,8 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
  *
  */
 @SuppressWarnings("Duplicates")
-@Description(name="create_pages_tree", desc=
+@Name(name="create_pages_tree")
+@Description(desc=
                 "This test creates pages hierarchically. Each child on each level has 10 children. " +
                 "Each author thread fills in a level in the pages tree, up to 10^level")
 public class CreatePageTreeTest extends SequentialTestBase {

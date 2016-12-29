@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.publishers;
 
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.Publisher;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,7 @@ import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Publisher for writing at standard output.
- */
+@Description(desc = "Publisher for writing at standard output.")
 public class ConsolePublisher implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(ConsolePublisher.class);
     private boolean begun = false;

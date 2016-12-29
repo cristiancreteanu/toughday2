@@ -1,10 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential.msm;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
@@ -12,8 +9,8 @@ import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.logging.log4j.Logger;
 
 
-
-@Description(name = "create_lc", desc = "Creates live copies from pages")
+@Name(name = "create_lc")
+@Description(desc = "Creates live copies from pages")
 public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreateLiveCopyFromPageTest.class);
 

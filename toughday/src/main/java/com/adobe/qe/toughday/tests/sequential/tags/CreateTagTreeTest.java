@@ -1,10 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential.tags;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArg;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
@@ -21,7 +18,8 @@ import java.util.Arrays;
 /**
  * Created by tuicu on 05/11/16.
  */
-@Description(name="create_tag_tree", desc=
+@Name(name="create_tag_tree")
+@Description(desc=
         "This test creates tags hierarchically. Each child on each level has 10 children. " +
                 "Each author thread fills in a level in the tag tree, up to 10^level")
 public class CreateTagTreeTest extends SequentialTestBase {

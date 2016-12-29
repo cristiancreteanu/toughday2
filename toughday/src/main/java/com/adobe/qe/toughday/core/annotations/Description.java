@@ -9,13 +9,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 public @interface Description {
     /**
-     * The name of the test class
-     * @return
-     */
-    String name();
-
-    /**
-     * The text description of the test class
+     * The text description of the class
      * @return
      */
     String desc();
