@@ -20,7 +20,6 @@ import java.util.Map;
  * Created by tuicu on 26/12/16.
  */
 public class YamlParser implements ConfigurationParser {
-    public static final String DEFAULT_YAML_CONFIG_FILE_PATH = "toughday.yaml";
     public static final String CONFIG_FILE_ARG_NAME = "configfile";
     public static final String CONFIG_FILE_DESCRIPTION = "Config file in yaml format.";
 
@@ -33,7 +32,7 @@ public class YamlParser implements ConfigurationParser {
 
         @Override
         public String defaultValue() {
-            return DEFAULT_YAML_CONFIG_FILE_PATH;
+            return "";
         }
 
         @Override
@@ -44,7 +43,7 @@ public class YamlParser implements ConfigurationParser {
 
     @Override
     public ConfigParams parse(String[] cmdLineArgs) {
-        String configFilePath = Files.exists(Paths.get(DEFAULT_YAML_CONFIG_FILE_PATH)) ? DEFAULT_YAML_CONFIG_FILE_PATH : null;
+        String configFilePath = null;
 
         for(String arg : cmdLineArgs) {
             if (arg.startsWith("--" + CONFIG_FILE_ARG_NAME +  "=")) {
