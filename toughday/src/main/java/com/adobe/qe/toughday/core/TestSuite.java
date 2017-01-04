@@ -172,7 +172,7 @@ public class TestSuite {
      * @throws InstantiationException caused by reflection
      */
     @ConfigArg(required = false)
-    public TestSuite setSetupStep(String setupStepClassName)
+    public TestSuite setSuiteSetup(String setupStepClassName)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
 

@@ -156,7 +156,7 @@ public class Configuration {
      * @return
      */
     public static String propertyFromMethod(String methodName) {
-        return methodName.startsWith("set") ? StringUtils.lowerCase(methodName.substring(3)) : methodName;
+        return methodName.startsWith("set") ? StringUtils.lowerCase(methodName.substring(3)) : StringUtils.lowerCase(methodName);
     }
 
     /**

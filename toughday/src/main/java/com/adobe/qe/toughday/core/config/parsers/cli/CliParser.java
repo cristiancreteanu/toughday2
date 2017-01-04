@@ -99,7 +99,7 @@ public class CliParser implements ConfigurationParser {
                         }
                     }
                     if (!found && !parserArgs.contains(key)
-                            && !key.equals("suite")  && !key.equals("SuiteSetup")
+                            && !key.equals("suite")  && !key.equals("suitesetup")
                             && !key.equals("help")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                     }
@@ -225,7 +225,7 @@ public class CliParser implements ConfigurationParser {
                     parserArgHelp.name() + "=val", parserArgHelp.defaultValue(), parserArgHelp.description());
         }
 
-        System.out.printf("\t%-32s\t %s\r\n", "--SuiteSetup=val", getSuiteSetupDescription());
+        System.out.printf("\t%-32s\t %s\r\n", "--suitesetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
                 "where \"val\" can be one predefined suite.");
 
