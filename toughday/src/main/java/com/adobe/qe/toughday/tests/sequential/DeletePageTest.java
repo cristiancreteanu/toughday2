@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.http.HttpStatus;
@@ -56,20 +57,20 @@ public class DeletePageTest extends SequentialTestBase {
         return new DeletePageTest(parentPath, force, title);
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
+    @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
             desc = "The parent path of the page to be deleted. E.g. The one created by CreatePageTest")
     public DeletePageTest setParentPath(String parentPath) {
         this.parentPath = (parentPath.endsWith("/") ? parentPath : parentPath + "/") ;
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = "true", desc = "true/ false; Whether to force delete the page.")
+    @ConfigArgSet(required = false, defaultValue = "true", desc = "true/ false; Whether to force delete the page.")
     public DeletePageTest setForce(String force) {
         this.force = Boolean.parseBoolean(force);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the page to be deleted. e.g. The one from CreatePageTest")
     public DeletePageTest setTitle(String title) {
         this.title = title;
@@ -80,14 +81,17 @@ public class DeletePageTest extends SequentialTestBase {
         return this;
     }
 
+    @ConfigArgGet
     public boolean getForce() {
         return force;
     }
 
+    @ConfigArgGet
     public String getTitle() {
         return title;
     }
 
+    @ConfigArgGet
     public String getParentPath() {
         return parentPath;
     }

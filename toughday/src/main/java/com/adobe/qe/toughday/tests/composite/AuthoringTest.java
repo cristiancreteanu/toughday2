@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.composite;
 
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTest;
@@ -64,13 +65,18 @@ public class AuthoringTest extends CompositeTest {
         return new AuthoringTest(false);
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_TEMPLATE)
+    @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_TEMPLATE)
     public AuthoringTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
+    @ConfigArgGet
+    public String getPageTemplate() {
+        return this.createPageTest.getTemplate();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AuthoringTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
@@ -80,19 +86,34 @@ public class AuthoringTest extends CompositeTest {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_RESOURCE_PATH)
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.createPageTest.getTemplate();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_RESOURCE_PATH)
     public AuthoringTest setResourcePath(String resourcePath) {
         uploadAssetTest.setResourcePath(resourcePath);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_MIME_TYPE)
+    @ConfigArgGet
+    public String getResourcePath() {
+        return this.uploadAssetTest.getResourcePath();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_MIME_TYPE)
     public AuthoringTest setMimeType(String mimeType) {
         uploadAssetTest.setMimeType(mimeType);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_PAGE_TITLE,
+    @ConfigArgGet
+    public String getMimeType() {
+        return this.uploadAssetTest.getMimeType();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_PAGE_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AuthoringTest setPageTitle(String title) {
         this.createPageTest.setTitle(title);
@@ -100,10 +121,20 @@ public class AuthoringTest extends CompositeTest {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_ASSET_NAME)
+    @ConfigArgGet
+    public String getPageTitle() {
+        return this.createPageTest.getTitle();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_ASSET_NAME)
     public AuthoringTest setImageName(String name) {
         this.uploadAssetTest.setFileName(name);
         this.deleteAssetTest.setTitle(name);
         return this;
+    }
+
+    @ConfigArgGet
+    public String getImageName() {
+        return this.uploadAssetTest.getFileName();
     }
 }

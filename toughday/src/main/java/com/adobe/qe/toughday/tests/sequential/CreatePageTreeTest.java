@@ -2,7 +2,8 @@ package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
@@ -120,14 +121,19 @@ public class CreatePageTreeTest extends SequentialTestBase {
         return new CreatePageTreeTest(phaser, rootParentPath, template, title);
     }
 
-    @ConfigArg(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
+    @ConfigArgGet
+    public String getTitle() {
+        return this.title;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
@@ -135,15 +141,30 @@ public class CreatePageTreeTest extends SequentialTestBase {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.rootParentPath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "How many direct child pages will a page have.",defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getTemplate() {
+        return this.template;
+    }
+
+    @ConfigArgSet(required = false, desc = "How many direct child pages will a page have.",defaultValue = TreePhaser.DEFAULT_BASE)
     public AbstractTest setBase(String base) {
         this.phaser.setBase(Integer.parseInt(base));
         return this;
+    }
+
+    @ConfigArgGet
+    public int getBase() {
+        return this.phaser.getBase();
     }
 }

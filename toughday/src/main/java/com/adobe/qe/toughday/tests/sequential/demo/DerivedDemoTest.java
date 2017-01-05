@@ -4,7 +4,6 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Setup;
-import com.adobe.qe.toughday.core.config.ConfigArg;
 import org.apache.sling.testing.clients.ClientException;
 
 /**

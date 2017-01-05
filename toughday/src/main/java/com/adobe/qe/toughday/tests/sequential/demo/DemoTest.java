@@ -1,7 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential.demo;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Setup;
@@ -100,16 +101,26 @@ public class DemoTest extends SequentialTestBase {
 
     /**
      * Command line argument property.
-     * Annotating your setter with ConfigArg will expose it to the command line as a property for this test.
-     * Properties annotated with ConfigArg are by default required, if the user doesn't give a value for it
+     * Annotating your setter with ConfigArgSet will expose it to the command line as a property for this test.
+     * Properties annotated with ConfigArgSet are by default required, if the user doesn't give a value for it
      * Toughday won't run. You can set the property to optional if you have a default for it
      * @param property value as given by the user in the command line. Must be of type String
      * @return usually tests respect the builder pattern and return "this", but it's not a requirement
      */
-    @ConfigArg(/*required = true*/)
+    @ConfigArgSet(/*required = true*/)
     public DemoTest setProperty(String property) {
         this.property = property;
         return this;
+    }
+
+    /**
+     * Annotating your getter with ConfigArgGet will allow Toughday to obtain the configured value for a particular
+     * test instance once all configurations (code defaults, config file, cmd line, etc.) and log it/print it.
+     * @return
+     */
+    @ConfigArgGet
+    public String getProperty() {
+        return property;
     }
 
     /**
@@ -124,9 +135,5 @@ public class DemoTest extends SequentialTestBase {
         return new DemoTest(property);
         //or you can use the builder pattern
         //return new DemoTest().setProperty(property);
-    }
-
-    public String getProperty() {
-        return property;
     }
 }

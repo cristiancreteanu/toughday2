@@ -1,6 +1,6 @@
 package com.adobe.qe.toughday.core;
 
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -171,7 +171,7 @@ public class TestSuite {
      * @throws InvocationTargetException caused by reflection
      * @throws InstantiationException caused by reflection
      */
-    @ConfigArg(required = false)
+    @ConfigArgSet(required = false)
     public TestSuite setSuiteSetup(String setupStepClassName)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {

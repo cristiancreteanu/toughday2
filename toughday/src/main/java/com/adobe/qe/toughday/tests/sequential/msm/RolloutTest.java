@@ -22,7 +22,8 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.logging.log4j.Logger;
@@ -66,27 +67,47 @@ public class RolloutTest extends SequentialTestBase {
         return new RolloutTest(sourcePage, destinationPage, type, background);
     }
 
-    @ConfigArg(required = true, desc = "The source page to rollout")
+    @ConfigArgSet(required = true, desc = "The source page to rollout")
     public AbstractTest setSourcePage(String page) {
         this.sourcePage = page;
         return this;
     }
 
-    @ConfigArg(required = true, desc = "The destination page to rollout to")
+    @ConfigArgGet
+    public String getSourcePage() {
+        return this.sourcePage;
+    }
+
+    @ConfigArgSet(required = true, desc = "The destination page to rollout to")
     public AbstractTest setDestinationPage(String page) {
         this.destinationPage = page;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "page / deep", defaultValue = "page")
+    @ConfigArgGet
+    public String getDestinationPage() {
+        return this.destinationPage;
+    }
+
+    @ConfigArgSet(required = false, desc = "page / deep", defaultValue = "page")
     public AbstractTest setType(String type) {
         this.type = type;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "true/false - Whether to rollout in the background", defaultValue = "false")
+    @ConfigArgGet
+    public String getType() {
+        return this.type;
+    }
+
+    @ConfigArgSet(required = false, desc = "true/false - Whether to rollout in the background", defaultValue = "false")
     public AbstractTest setBackground(String background) {
         this.background = Boolean.parseBoolean(background);
         return this;
+    }
+
+    @ConfigArgGet
+    public boolean getBackground() {
+        return this.background;
     }
 }

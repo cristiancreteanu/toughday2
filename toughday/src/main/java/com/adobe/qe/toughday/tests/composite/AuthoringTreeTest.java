@@ -2,7 +2,8 @@ package com.adobe.qe.toughday.tests.composite;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
@@ -49,13 +50,18 @@ public class AuthoringTreeTest extends CompositeTest {
         return new AuthoringTreeTest(false);
     }
 
-    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
+    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
     public AuthoringTreeTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
+    @ConfigArgGet
+    public String getPageTemplate() {
+        return createPageTest.getTemplate();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AuthoringTreeTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
@@ -63,34 +69,64 @@ public class AuthoringTreeTest extends CompositeTest {
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_RESOURCE_PATH)
+    @ConfigArgGet
+    public String getParentPath() {
+        return createPageTest.getParentPath();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_RESOURCE_PATH)
     public AuthoringTreeTest setResourcePath(String resourcePath) {
         uploadImageTest.setResourcePath(resourcePath);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_MIME_TYPE)
+    @ConfigArgGet
+    public String getResourcePath() {
+        return uploadImageTest.getResourcePath();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_MIME_TYPE)
     public AuthoringTreeTest setMimeType(String mimeType) {
         uploadImageTest.setMimeType(mimeType);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_PAGE_TITLE,
+    @ConfigArgGet
+    public String getMimeType() {
+        return uploadImageTest.getMimeType();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_PAGE_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AuthoringTreeTest setPageTitle(String title) {
         this.createPageTest.setTitle(title);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_ASSET_NAME)
+    @ConfigArgGet
+    public String getPageTitle() {
+        return this.createPageTest.getTitle();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_ASSET_NAME)
     public AuthoringTreeTest setImageName(String name) {
         this.uploadImageTest.setFileName(name);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getImageName() {
+        return this.uploadImageTest.getFileName();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
     public AuthoringTreeTest setBase(String base) {
         this.createPageTest.setBase(base);
         return this;
+    }
+
+    @ConfigArgGet
+    public int getBase() {
+        return this.createPageTest.getBase();
     }
 }

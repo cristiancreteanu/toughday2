@@ -1,7 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import org.apache.http.HttpStatus;
 
 /**
@@ -19,10 +20,15 @@ public class GetTest extends SequentialTestBase {
     /**
      * Setter for the name
      */
-    @ConfigArg(required = false, defaultValue = DEFAULT_PATH, desc = "The path at which to perform a GET request")
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_PATH, desc = "The path at which to perform a GET request")
     public AbstractTest setPath(String path) {
         this.path = path;
         return this;
+    }
+
+    @ConfigArgGet
+    public String getPath() {
+        return this.path;
     }
 
     @Override

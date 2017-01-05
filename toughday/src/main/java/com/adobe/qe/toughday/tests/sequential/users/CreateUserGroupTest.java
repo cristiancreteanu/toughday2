@@ -3,7 +3,8 @@ package com.adobe.qe.toughday.tests.sequential.users;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.FactorySetup;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 
 import org.apache.commons.io.IOUtils;
@@ -89,20 +90,34 @@ public class CreateUserGroupTest extends SequentialTestBase {
         return new CreateUserGroupTest(increment, groupName, description, extraGroup);
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_GROUP_NAME)
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_GROUP_NAME)
     public void setGroupName(String groupName) {
         this.groupName = groupName;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_GROUP_DESCRIPTION)
+    @ConfigArgGet
+    public String getGroupName() {
+        return groupName;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_GROUP_DESCRIPTION)
     public void setDescription(String description) {
         this.description = description;
     }
 
+    @ConfigArgGet
+    public String getDescription() {
+        return this.description;
+    }
 
-    @ConfigArg(required = false, desc = "Increment the group name", defaultValue = "true")
+    @ConfigArgSet(required = false, desc = "Increment the group name", defaultValue = "true")
     public void setIncrement(String value) {
         if(!Boolean.valueOf(value))
             increment = null;
+    }
+
+    @ConfigArgGet
+    public boolean getIncrement() {
+        return this.increment != null;
     }
 }

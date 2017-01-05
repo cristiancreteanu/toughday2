@@ -3,7 +3,8 @@ package com.adobe.qe.toughday.tests.sequential.search;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 
 @Name(name = "QueryBuilderTest")
@@ -29,8 +30,13 @@ public class QueryBuilderTest extends SequentialTestBase {
         return new QueryBuilderTest(query);
     }
 
-    @ConfigArg(required = false, desc = "Query to be executed by the Query Builder servlet", defaultValue = DEFAULT_QUERY)
+    @ConfigArgSet(required = false, desc = "Query to be executed by the Query Builder servlet", defaultValue = DEFAULT_QUERY)
     public void setQuery(String query) {
         this.query = query;
+    }
+
+    @ConfigArgGet
+    public String getQuery() {
+        return this.query;
     }
 }

@@ -6,7 +6,6 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
-import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -156,11 +155,11 @@ public class Configuration {
      * @return
      */
     public static String propertyFromMethod(String methodName) {
-        return methodName.startsWith("set") ? StringUtils.lowerCase(methodName.substring(3)) : StringUtils.lowerCase(methodName);
+        return methodName.startsWith("set") || methodName.startsWith("get") ? StringUtils.lowerCase(methodName.substring(3)) : StringUtils.lowerCase(methodName);
     }
 
     /**
-     * Method for setting an object properties annotated with ConfigArg using reflection
+     * Method for setting an object properties annotated with ConfigArgSet using reflection
      * @param object
      * @param args
      * @param <T>
@@ -172,7 +171,7 @@ public class Configuration {
         Class classObject = object.getClass();
         LOGGER.info("Configuring object of class: " + classObject.getSimpleName());
         for (Method method : classObject.getMethods()) {
-            ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+            ConfigArgSet annotation = method.getAnnotation(ConfigArgSet.class);
             if (annotation == null) {
                 continue;
             }
@@ -234,6 +233,48 @@ public class Configuration {
         return new CliParser();
     }
 
+    public interface RunMode {
+        String value();
+        String description();
+    }
+
+    //TODO when implementing constant troughput refactor into individual classes.
+    public enum RUN_MODE implements RunMode {
+        DRY {
+            @Override
+            public String value() {
+                return DRY_VALUE;
+            }
+
+            @Override
+            public String description() {
+                return "Prints the resulting configuration. Does not run any test.";
+            }
+        }, NORMAL {
+            @Override
+            public String value() {
+                return NORMAL_VALUE;
+            }
+            @Override
+            public String description() {
+                return "Runs tests normally.";
+            }
+        };
+
+        public static RUN_MODE fromString(String runModeString) {
+            for (RUN_MODE runMode : RUN_MODE.values()) {
+                if(runMode.value().equals(runModeString)) {
+                    return runMode;
+                }
+            }
+
+            throw new IllegalArgumentException("Invalid run mode \"" + runModeString + "\"");
+        }
+
+        public static final String DRY_VALUE = "dry";
+        public static final String NORMAL_VALUE = "normal";
+    }
+
     /**
      * Class for global arguments.
      */
@@ -265,6 +306,7 @@ public class Configuration {
 
         public static final String DEFAULT_WAIT_TIME_STRING = "1000";
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
+        private RUN_MODE runMode = RUN_MODE.NORMAL;
 
         /**
          * Constructor
@@ -284,52 +326,55 @@ public class Configuration {
 
         // Global config args
 
-        @ConfigArg(required = false, defaultValue = DEFAULT_HOST, order = 1)
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_HOST, order = 1)
         public void setHost(String host) {
             this.host = host;
         }
 
-        @ConfigArg(required = false, defaultValue = DEFAULT_PORT_STRING, order = 2)
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_PORT_STRING, order = 2)
         public void setPort(String port) {
             this.port = Integer.parseInt(port);
         }
 
-        @ConfigArg(required = false, defaultValue = DEFAULT_USER, order = 3)
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_USER, order = 3)
         public void setUser(String user) {
             this.user = user;
         }
 
-        @ConfigArg(required = false, defaultValue = DEFAULT_PASSWORD, order = 4)
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_PASSWORD, order = 4)
         public void setPassword(String password) {
             this.password = password;
         }
 
-        @ConfigArg(required = false, desc = "Number of concurrent users", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
+        @ConfigArgSet(required = false, desc = "Number of concurrent users", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
         public void setConcurrency(String concurrencyString) {
             this.concurrency = Integer.parseInt(concurrencyString);
         }
 
-        @ConfigArg(required = false, desc = "How long to run toughday", defaultValue = DEFAULT_DURATION, order = 6)
+        @ConfigArgSet(required = false, desc = "How long to run toughday", defaultValue = DEFAULT_DURATION, order = 6)
         public void setDuration(String durationString) {
             this.duration = parseDurationToSeconds(durationString);
         }
 
-        @ConfigArg(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds",
+        @ConfigArgSet(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds",
                 defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
         public void setWaitTime(String waitTime) {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArg(required = false, desc ="How long a test runs before it is interrupted and marked as failed",
+        @ConfigArgSet(required = false, desc ="How long a test runs before it is interrupted and marked as failed",
                 defaultValue = DEFAULT_TIMEOUT_STRING, order = 7)
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
 
-        @ConfigArg(required = false, desc = "What protocol to use", defaultValue = DEFAULT_PROTOCOL)
+        @ConfigArgSet(required = false, desc = "What protocol to use", defaultValue = DEFAULT_PROTOCOL)
         public void setProtocol(String protocol) { this.protocol = protocol; }
 
-
+        @ConfigArgSet(required = false, desc = "Run mode for test execution", defaultValue = RUN_MODE.NORMAL_VALUE)
+        public void setRunMode(String runMode) {
+            this.runMode = RUN_MODE.fromString(runMode);
+        }
 
         // Adders and getters
 
@@ -337,14 +382,26 @@ public class Configuration {
             publishers.add(publisher);
         }
 
+        @ConfigArgGet
+        public String getRunMode() {
+            return runMode.value();
+        }
+
+        public RUN_MODE getRunModeEnum() {
+            return runMode;
+        }
+
+        @ConfigArgGet
         public int getConcurrency() {
             return concurrency;
         }
 
+        @ConfigArgGet
         public long getWaitTime() {
             return waitTime;
         }
 
+        @ConfigArgGet
         public long getDuration() {
             return duration;
         }
@@ -353,27 +410,35 @@ public class Configuration {
             return publishers;
         }
 
+        @ConfigArgGet
         public long getTimeout() {
             return timeout;
         }
 
+        @ConfigArgGet
         public String getHost() {
             return host;
         }
 
+        @ConfigArgGet
         public int getPort() {
             return port;
         }
 
+        @ConfigArgGet
         public String getUser() {
             return user;
         }
 
+        @ConfigArgGet
         public String getPassword() {
             return password;
         }
 
+        @ConfigArgGet
         public String getProtocol() { return protocol; }
+
+
 
 
         // Helper methods

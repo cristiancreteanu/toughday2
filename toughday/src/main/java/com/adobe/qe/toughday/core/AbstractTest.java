@@ -1,8 +1,8 @@
 package com.adobe.qe.toughday.core;
 
-import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 import org.apache.logging.log4j.Level;
@@ -59,6 +59,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      * Getter for the name of the test. It will not include the name of the parents.
      * @return by default, it will return the class name, except otherwise configured using the setter
      */
+    @ConfigArgGet
     public String getName() {
         return name;
     }
@@ -73,7 +74,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     /**
      * Setter for the name
      */
-    @ConfigArg(required = false, defaultValue = "The class name", desc = "The name of this test")
+    @ConfigArgSet(required = false, defaultValue = "The class name", desc = "The name of this test")
     public AbstractTest setName(String name) {
         this.name = name;
         return this;

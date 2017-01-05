@@ -2,7 +2,8 @@ package com.adobe.qe.toughday.tests.sequential.tags;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
@@ -155,23 +156,38 @@ public class CreateTagTreeTest extends SequentialTestBase {
         return new CreateTagTreeTest(phaser, namespace, title, extra_tag);
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_NAMESPACE,
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_NAMESPACE,
             desc = "The title of the namespace where the tags will be created. A random string will be added internally to make it unique")
     public AbstractTest setNamespace(String namespace) {
         this.namespace = namespace;
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_NAMESPACE,
+    @ConfigArgGet
+    public String getNamespace() {
+        return this.namespace;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_NAMESPACE,
             desc = "The title of the tags. Internally, this will be incremented")
     public AbstractTest setTitle(String title) {
         this.title = title;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "How many direct child tags will a tag have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getTitle() {
+        return this.title;
+    }
+
+    @ConfigArgSet(required = false, desc = "How many direct child tags will a tag have.", defaultValue = TreePhaser.DEFAULT_BASE)
     public AbstractTest setBase(String base) {
         this.phaser.setBase(Integer.parseInt(base));
         return this;
+    }
+
+    @ConfigArgGet
+    public int getBase() {
+        return this.phaser.getBase();
     }
 }

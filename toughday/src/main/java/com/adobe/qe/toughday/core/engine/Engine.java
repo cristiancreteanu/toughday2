@@ -1,11 +1,16 @@
 package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.core.*;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.io.OutputStream;
+import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -17,12 +22,13 @@ import java.util.concurrent.TimeUnit;
  * Engine for running a test suite.
  */
 public class Engine {
-    protected static final Logger LOG = LoggerFactory.getLogger(Engine.class);
+    protected static final Logger LOG = LogManager.getLogger(Engine.class);
     protected static final int RESULT_AGGREATION_DELAY = 1000; //in ms
     protected static final int WAIT_TERMINATION_FACTOR = 30;
     protected static final double TIMEOUT_CHECK_FACTOR = 0.03;
     protected static Random _rnd = new Random();
 
+    private final Configuration configuration;
     private TestSuite testSuite;
     private Configuration.GlobalArgs globalArgs;
     private ExecutorService testsExecutorService;
@@ -39,6 +45,7 @@ public class Engine {
      */
     public Engine(Configuration configuration)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        this.configuration = configuration;
         this.testSuite = configuration.getTestSuite();
         this.globalArgs = configuration.getGlobalArgs();
         this.testsExecutorService = Executors.newFixedThreadPool(globalArgs.getConcurrency());
@@ -101,16 +108,101 @@ public class Engine {
         return this;
     }
 
+    private static class LogStream extends OutputStream {
+        Logger logger;
+        String mem = "";
+
+        public LogStream(Logger logger) {
+            this.logger = logger;
+        }
+
+        @Override
+        public void write (int b) {
+            byte[] bytes = new byte[1];
+            bytes[0] = (byte) (b & 0xff);
+            mem = mem + new String(bytes);
+
+            if (mem.endsWith ("\n")) {
+                mem = mem.substring(0, mem.length () - 1);
+                flush ();
+            }
+        }
+
+        /**
+         * Flushes the output stream.
+         */
+        public void flush () {
+            logger.info(mem);
+            mem = "";
+        }
+    }
+
     /**
      * Method for starting running tests.
      * @throws Exception
      */
     public void runTests() {
         try {
-            run();
+            switch (globalArgs.getRunModeEnum()) {
+                case DRY:
+                    printConfiguration(configuration, System.out);
+                    break;
+                case NORMAL:
+                    printConfiguration(configuration, new PrintStream(new LogStream(LOG)));
+                    run();
+                    break;
+            }
         } catch (Exception e) {
             LOG.error("Failure in tests execution ", e);
         }
+    }
+
+    public static void printConfiguration(Configuration configuration, PrintStream out) throws InvocationTargetException, IllegalAccessException {
+        out.println("#################### Configuration ######################");
+        out.println("Global configuration:");
+        printObject(configuration.getTestSuite(), out, configuration.getGlobalArgs());
+
+        out.println("Tests:");
+        for(AbstractTest test : configuration.getTestSuite().getTests()) {
+            printObject(configuration.getTestSuite(), out, test);
+        }
+
+        out.println("Publishers:");
+        for(Publisher publisher : configuration.getGlobalArgs().getPublishers()) {
+            printObject(configuration.getTestSuite(), out, publisher);
+        }
+        out.println("#########################################################");
+    }
+
+    public static void printObject(TestSuite testSuite, PrintStream out, Object obj) throws InvocationTargetException, IllegalAccessException {
+        Class objectClass = obj.getClass();
+        out.println("- Configuration for object of class " + objectClass.getSimpleName());
+        out.println(String.format("\t%-32s %-64s", "Property", "Value"));
+        for(Method method : objectClass.getMethods()) {
+            if (method.isAnnotationPresent(ConfigArgGet.class)) {
+                ConfigArgGet configArg = method.getAnnotation(ConfigArgGet.class);
+
+                printObjectProperty(out,
+                        StringUtils.isEmpty(configArg.name()) ? Configuration.propertyFromMethod(method.getName()) : configArg.name(),
+                        method.invoke(obj));
+            }
+        }
+        if(AbstractTest.class.isAssignableFrom(objectClass)) {
+            AbstractTest test = (AbstractTest) obj;
+
+            Long count = testSuite.getCount(test);
+            Long timeout = testSuite.getTimeout(test);
+            Integer weight = testSuite.getWeightMap().get(test);
+            printObjectProperty(out, "weight",  weight != null ? weight : 1);
+            printObjectProperty(out, "timeout", timeout != null ? timeout : Configuration.GlobalArgs.DEFAULT_TIMEOUT);
+            printObjectProperty(out, "count", count != null ? count : "none");
+        }
+        out.println();
+        out.println();
+    }
+
+    public static void printObjectProperty(PrintStream out, String propertyName, Object propertyValue) {
+        out.println(String.format("\t%-32s %-64s", propertyName, propertyValue));
     }
 
     private void run() throws Exception {

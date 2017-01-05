@@ -2,7 +2,8 @@ package com.adobe.qe.toughday.tests.sequential.msm;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
@@ -121,27 +122,47 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         return new CreateLiveCopyFromPageTest(phaser, title, sourcePage, destinationRoot);
     }
 
-    @ConfigArg(required = false, desc = "The source page for live copies")
+    @ConfigArgSet(required = false, desc = "The source page for live copies")
     public AbstractTest setSourcePage(String page) {
         this.sourcePage = page;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Default root for live copies")
+    @ConfigArgGet
+    public String getSourcePage() {
+        return this.sourcePage;
+    }
+
+    @ConfigArgSet(required = false, desc = "Default root for live copies")
     public AbstractTest setDestinationRoot(String page) {
         this.destinationRoot = page;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Title for livecopies")
+    @ConfigArgGet
+    public String getDestinationRoot() {
+        return this.destinationRoot;
+    }
+
+    @ConfigArgSet(required = false, desc = "Title for livecopies")
     public AbstractTest setTitle(String title) {
         this.title = title;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "How many direct child pages will a page have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getTitle() {
+        return this.title;
+    }
+
+    @ConfigArgSet(required = false, desc = "How many direct child pages will a page have.", defaultValue = TreePhaser.DEFAULT_BASE)
     public AbstractTest setBase(String base) {
         this.phaser.setBase(Integer.parseInt(base));
         return this;
+    }
+
+    @ConfigArgGet
+    public int getBase() {
+        return this.phaser.getBase();
     }
 }

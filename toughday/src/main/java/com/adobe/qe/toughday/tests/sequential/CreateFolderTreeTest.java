@@ -1,7 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -129,23 +130,38 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         return new CreateFolderTreeTest(phaser, rootParentPath, title);
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_TITLE,
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_PARENT_PATH,
+    @ConfigArgGet
+    public String getTitle() {
+        return this.title;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
         return this;
     }
 
-    @ConfigArg(required = false, desc = "How many direct child folders will a folder have.", defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getParentPath() {
+        return rootParentPath;
+    }
+
+    @ConfigArgSet(required = false, desc = "How many direct child folders will a folder have.", defaultValue = TreePhaser.DEFAULT_BASE)
     public AbstractTest setBase(String base) {
         this.phaser.setBase(Integer.parseInt(base));
         return this;
+    }
+
+    @ConfigArgGet
+    public int getBase() {
+        return this.phaser.getBase();
     }
 }

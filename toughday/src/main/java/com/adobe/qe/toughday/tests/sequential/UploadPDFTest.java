@@ -3,7 +3,8 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -91,20 +92,35 @@ public class UploadPDFTest extends SequentialTestBase {
         return new UploadPDFTest(fileName, resourcePath, parentPath);
     }
 
-    @ConfigArg(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_NAME, desc = "The name of the file to be created")
+    @ConfigArgSet(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_NAME, desc = "The name of the file to be created")
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @ConfigArg(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_PATH,
+    @ConfigArgGet
+    public String getFileName() {
+        return this.fileName;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_PATH,
             desc = "The image resource path either in the classpath or the filesystem")
     public void setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
-    @ConfigArg(required = false, defaultValue = UploadPDFTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
+    @ConfigArgGet
+    public String getResourcePath() {
+        return this.resourcePath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = UploadPDFTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
+    }
+
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.parentPath;
     }
 
     /**

@@ -2,7 +2,8 @@ package com.adobe.qe.toughday.tests.composite.msm;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.msm.CreateLiveCopyFromPageTest;
 import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;
@@ -44,50 +45,85 @@ public class CreateLiveCopyTreeTest  extends CompositeTest {
         return new CreateLiveCopyTreeTest(false);
     }
 
-    @ConfigArg(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE,
+    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE,
             desc="Template for the source pages being created" )
     public CreateLiveCopyTreeTest setPageTemplate(String template) {
         createPageTest.setTemplate(template);
         return this;
     }
 
-    @ConfigArg(required = false, desc = "The path prefix for all source pages.")
+    @ConfigArgGet
+    public String getPageTemplate() {
+        return this.createPageTest.getTemplate();
+    }
+
+    @ConfigArgSet(required = false, desc = "The path prefix for all source pages.")
     public CreateLiveCopyTreeTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
         createLcTest.setDestinationRoot(parentPath);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_SOURCE_PAGE_TITLE,
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.createPageTest.getParentPath();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_SOURCE_PAGE_TITLE,
             desc = "The title of the source page of the LC.")
     public CreateLiveCopyTreeTest setSourcePageTitle(String title) {
         this.createPageTest.setTitle(title);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = CreateLiveCopyFromPageTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgGet
+    public String getSourcePageTitle() {
+        return this.createPageTest.getTitle();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = CreateLiveCopyFromPageTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the source page of the LC.")
     public CreateLiveCopyTreeTest setDestinationPageTitle(String title) {
         this.createLcTest.setTitle(title);
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
+    @ConfigArgGet
+    public String getDestinationPageTitle() {
+        return this.createLcTest.getTitle();
+    }
+
+    @ConfigArgSet(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
     public CreateLiveCopyTreeTest setBase(String base) {
         this.createPageTest.setBase(base);
         this.createLcTest.setBase(base);
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Whether to rollout page / deep", defaultValue = "page")
+    @ConfigArgGet
+    public int getBase() {
+        return this.createPageTest.getBase();
+    }
+
+    @ConfigArgSet(required = false, desc = "Whether to rollout page / deep", defaultValue = "page")
     public AbstractTest setType(String type) {
         this.rolloutTest.setType(type);
         return this;
     }
 
-    @ConfigArg(required = false, desc = "true/false - Whether to rollout in the background", defaultValue = "false")
+    @ConfigArgGet
+    public String getType() {
+        return this.rolloutTest.getType();
+    }
+
+    @ConfigArgSet(required = false, desc = "true/false - Whether to rollout in the background", defaultValue = "false")
     public AbstractTest setBackground(String background) {
         this.rolloutTest.setBackground(background);
         return this;
+    }
+
+    @ConfigArgGet
+    public boolean getBackground() {
+        return this.rolloutTest.getBackground();
     }
 }

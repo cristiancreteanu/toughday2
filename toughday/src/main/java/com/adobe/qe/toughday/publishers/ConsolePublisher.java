@@ -3,7 +3,8 @@ package com.adobe.qe.toughday.publishers;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,9 +63,14 @@ public class ConsolePublisher implements Publisher {
         this.cleaner.start();
     }
 
-    @ConfigArg(required = false, desc = "Whether to clear the screen before printing each stat")
+    @ConfigArgSet(required = false, desc = "Whether to clear the screen before printing each stat")
     public void setClear(String clearScreen) {
         this.clearScreen = Boolean.parseBoolean(clearScreen);
+    }
+
+    @ConfigArgGet
+    public boolean getClear() {
+        return this.clearScreen;
     }
 
     // publish results method, called periodically

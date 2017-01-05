@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.lang3.StringUtils;
@@ -57,24 +58,39 @@ public class CreatePageTest extends SequentialTestBase {
     }
 
 
-    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the page. Internally, this is incremented")
     public AbstractTest setTitle(String title) {
         this.title = title.toLowerCase();
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_PARENT_PATH,
+    @ConfigArgGet
+    public String getTitle() {
+        return this.title;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_PARENT_PATH,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
         return this;
     }
 
-    @ConfigArg(required = false, defaultValue = DEFAULT_TEMPLATE)
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.rootParentPath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_TEMPLATE)
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;
+    }
+
+    @ConfigArgGet
+    public String getTemplate() {
+        return this.template;
     }
 
 

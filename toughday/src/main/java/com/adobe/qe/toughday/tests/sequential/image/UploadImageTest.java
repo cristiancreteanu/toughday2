@@ -1,7 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential.image;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
@@ -95,25 +96,45 @@ public class UploadImageTest extends SequentialTestBase {
     }
 
 
-    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_ASSET_NAME, desc = "The name of the file to be created")
+    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_ASSET_NAME, desc = "The name of the file to be created")
     public void setFileName(String fileName) {
         this.fileName = fileName;
     }
 
-    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_RESOURCE_PATH,
+    @ConfigArgGet
+    public String getFileName() {
+        return this.fileName;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_RESOURCE_PATH,
             desc = "The image resource path either in the classpath or the filesystem")
     public void setResourcePath(String resourcePath) {
         this.resourcePath = resourcePath;
     }
 
-    @ConfigArg(required = false, defaultValue = AuthoringTest.DEFAULT_MIME_TYPE, desc = "The mime type of the uploaded image")
+    @ConfigArgGet
+    public String getResourcePath() {
+        return this.resourcePath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_MIME_TYPE, desc = "The mime type of the uploaded image")
     public void setMimeType(String mimeType) {
         this.mimeType = mimeType;
     }
 
-    @ConfigArg(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
+    @ConfigArgGet
+    public String getMimeType() {
+        return this.mimeType;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
+    }
+
+    @ConfigArgGet
+    public String getParentPath() {
+        return this.parentPath;
     }
 
     /**

@@ -4,6 +4,9 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.*;
+import com.adobe.qe.toughday.core.engine.Engine;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -13,21 +16,22 @@ import java.util.*;
  * Parser for the command line arguments. It also prints the help message.
  */
 public class CliParser implements ConfigurationParser {
+    private static final Logger LOGGER = LogManager.getLogger(CliParser.class);
 
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
-    private static Map<Integer, Map<String, ConfigArg>> availableGlobalArgs = new HashMap<>();
+    private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
     private static List<String> parserArgs = new ArrayList<>();
 
     static {
         for (Method method : globalArgMethods) {
-            if (method.getAnnotation(ConfigArg.class) != null) {
-                ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+            if (method.getAnnotation(ConfigArgSet.class) != null) {
+                ConfigArgSet annotation = method.getAnnotation(ConfigArgSet.class);
                 int order = annotation.order();
                 if (null == availableGlobalArgs.get(order)) {
-                    availableGlobalArgs.put(order, new HashMap<String, ConfigArg>());
+                    availableGlobalArgs.put(order, new HashMap<String, ConfigArgSet>());
                 }
-                Map<String, ConfigArg> globalArgMap = availableGlobalArgs.get(order);
+                Map<String, ConfigArgSet> globalArgMap = availableGlobalArgs.get(order);
                 globalArgMap.put(Configuration.propertyFromMethod(method.getName()), annotation);
             }
         }
@@ -92,7 +96,7 @@ public class CliParser implements ConfigurationParser {
                     String val = res[1];
                     // if global param does not exist
                     boolean found = false;
-                    for (Map<String, ConfigArg> args : availableGlobalArgs.values()) {
+                    for (Map<String, ConfigArgSet> args : availableGlobalArgs.values()) {
                         if (args.containsKey(key)) {
                             found = true;
                             break;
@@ -214,7 +218,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("\r\nGlobal arguments:");
 
         for (Integer order : availableGlobalArgs.keySet()) {
-            Map<String, ConfigArg> paramGroup = availableGlobalArgs.get(order);
+            Map<String, ConfigArgSet> paramGroup = availableGlobalArgs.get(order);
             for (String param : paramGroup.keySet()) {
                 System.out.printf("\t--%-32s\t Default: %s - %s\r\n",
                         param + "=val", paramGroup.get(param).defaultValue(), paramGroup.get(param).desc());
@@ -228,6 +232,12 @@ public class CliParser implements ConfigurationParser {
         System.out.printf("\t%-32s\t %s\r\n", "--suitesetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
                 "where \"val\" can be one predefined suite.");
+
+        System.out.println("\r\nAvailable run modes:");
+        for(Configuration.RUN_MODE run_mode : Configuration.RUN_MODE.values()) {
+            System.out.printf("\t%-71s %s\r\n", run_mode.value(), run_mode.description());
+        }
+
 
         System.out.println("\r\nAvailable actions:");
         for (Actions action : Actions.values()) {
@@ -268,8 +278,8 @@ public class CliParser implements ConfigurationParser {
         if (printProperties) {
             System.out.println(String.format("\t%-32s %-64s %-32s", "Property", "Default", "Description"));
             for (Method method : klass.getMethods()) {
-                if (method.getAnnotation(ConfigArg.class) != null) {
-                    ConfigArg annotation = method.getAnnotation(ConfigArg.class);
+                if (method.getAnnotation(ConfigArgSet.class) != null) {
+                    ConfigArgSet annotation = method.getAnnotation(ConfigArgSet.class);
                     printClassProperty(Configuration.propertyFromMethod(method.getName()),
                             annotation.required(),
                             annotation.defaultValue(),
@@ -296,7 +306,11 @@ public class CliParser implements ConfigurationParser {
             for (AbstractTest test : testSuite.getTests()) {
                 System.out.printf("\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");
                 if (withTestProperties) {
-                    //TODO print default properties
+                    try {
+                        Engine.printObject(testSuite, System.out, test);
+                    } catch (Exception e) {
+                        LOGGER.error("Exception while printing the test suite.", e);
+                    }
                 }
             }
         }

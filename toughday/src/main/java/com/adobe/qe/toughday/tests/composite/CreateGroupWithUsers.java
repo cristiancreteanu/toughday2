@@ -4,7 +4,8 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.users.CreateUserGroupTest;
 import com.adobe.qe.toughday.tests.sequential.users.CreateUserTest;
 
@@ -40,90 +41,175 @@ public class CreateGroupWithUsers extends CompositeTest {
         return new CreateGroupWithUsers(false);
     }
 
-    @ConfigArg(required = false, desc = "Email address for created users.", defaultValue = CreateUserTest.DEFAULT_EMAIL_ADDRESS)
+    @ConfigArgSet(required = false, desc = "Email address for created users.", defaultValue = CreateUserTest.DEFAULT_EMAIL_ADDRESS)
     public void setUserEmailAddress(String emailAddress) {
         this.createFiveUsersTest.setEmailAddress(emailAddress);
     }
 
-    @ConfigArg(required = false, desc = "Password for the created users.", defaultValue = CreateUserTest.DEFAULT_PASSWORD)
+    @ConfigArgGet
+    public String getUserEmailAddress() {
+        return this.createFiveUsersTest.getEmailAddress();
+    }
+
+    @ConfigArgSet(required = false, desc = "Password for the created users.", defaultValue = CreateUserTest.DEFAULT_PASSWORD)
     public void setUserPassword(String password) {
         this.createFiveUsersTest.setPassword(password);
     }
 
-    @ConfigArg(required = false, desc = "Telephone for the created users.", defaultValue = CreateUserTest.DEFAULT_PHONE_NUMBER)
+    @ConfigArgGet
+    public String getUserPassword() {
+        return this.createFiveUsersTest.getPassword();
+    }
+
+    @ConfigArgSet(required = false, desc = "Telephone for the created users.", defaultValue = CreateUserTest.DEFAULT_PHONE_NUMBER)
     public void setUserPhoneNumber(String phoneNumber) {
         this.createFiveUsersTest.setPhoneNumber(phoneNumber);
     }
 
-    @ConfigArg(required = false, desc = "First name for the created users", defaultValue = CreateUserTest.DEFAULT_FIRST_NAME)
+    @ConfigArgGet
+    public String getUserPhoneNumber() {
+        return this.createFiveUsersTest.getPhoneNumber();
+    }
+
+    @ConfigArgSet(required = false, desc = "First name for the created users", defaultValue = CreateUserTest.DEFAULT_FIRST_NAME)
     public void setUserFirstName(String firstName) {
         this.createFiveUsersTest.setFirstName(firstName);
     }
 
-    @ConfigArg(required = false, desc = "Last name for the created users", defaultValue = CreateUserTest.DEFAULT_LAST_NAME)
+    @ConfigArgGet
+    public String getUserFirstName() {
+        return this.createFiveUsersTest.getFirstName();
+    }
+
+    @ConfigArgSet(required = false, desc = "Last name for the created users", defaultValue = CreateUserTest.DEFAULT_LAST_NAME)
     public void setUserLastName(String lastName) {
         this.createFiveUsersTest.setLastName(lastName);
     }
 
-    @ConfigArg(required = false, desc = "Job title for the created users", defaultValue = CreateUserTest.DEFAULT_JOB_TITLE)
+    @ConfigArgGet
+    public String getUserLastName() {
+        return this.createFiveUsersTest.getLastName();
+    }
+
+    @ConfigArgSet(required = false, desc = "Job title for the created users", defaultValue = CreateUserTest.DEFAULT_JOB_TITLE)
     public void setUserJobTitle(String jobTitle) {
         this.createFiveUsersTest.setJobTitle(jobTitle);
     }
 
-    @ConfigArg(required = false, desc = "Street address for the created users", defaultValue = CreateUserTest.DEFAULT_STREET)
+    @ConfigArgGet
+    public String getUserJobTitle() {
+        return this.createFiveUsersTest.getJobTitle();
+    }
+
+    @ConfigArgSet(required = false, desc = "Street address for the created users", defaultValue = CreateUserTest.DEFAULT_STREET)
     public void setUserStreet(String street) {
         this.createFiveUsersTest.setStreet(street);
     }
 
-    @ConfigArg(required = false, desc = "City address for the created users", defaultValue = CreateUserTest.DEFAULT_CITY)
+    @ConfigArgGet
+    public String getUserStreet() {
+        return this.createFiveUsersTest.getStreet();
+    }
+
+    @ConfigArgSet(required = false, desc = "City address for the created users", defaultValue = CreateUserTest.DEFAULT_CITY)
     public void setUserCity(String city) {
         this.createFiveUsersTest.setCity(city);
     }
 
-    @ConfigArg(required = false, desc = "Mobile number for the created users", defaultValue = CreateUserTest.DEFAULT_MOBILE)
+    @ConfigArgGet
+    public String getUserCity() {
+        return this.createFiveUsersTest.getCity();
+    }
+
+    @ConfigArgSet(required = false, desc = "Mobile number for the created users", defaultValue = CreateUserTest.DEFAULT_MOBILE)
     public void setUserMobile(String mobile) {
         this.createFiveUsersTest.setMobile(mobile);
     }
 
-    @ConfigArg(required = false, desc = "Postal code for the created users", defaultValue = CreateUserTest.DEFAULT_POSTAL_CODE)
+    @ConfigArgGet
+    public String setUserMobile() {
+        return this.createFiveUsersTest.getMobile();
+    }
+
+    @ConfigArgSet(required = false, desc = "Postal code for the created users", defaultValue = CreateUserTest.DEFAULT_POSTAL_CODE)
     public void setUserPostalCode(String postalCode) {
         this.createFiveUsersTest.setPostalCode(postalCode);
     }
 
-    @ConfigArg(required = false, desc = "Country for the created users", defaultValue = CreateUserTest.DEFAULT_COUNTRY)
+    @ConfigArgGet
+    public String setUserPostalCode() {
+        return this.createFiveUsersTest.getPostalCode();
+    }
+
+    @ConfigArgSet(required = false, desc = "Country for the created users", defaultValue = CreateUserTest.DEFAULT_COUNTRY)
     public void setUserCountry(String country) {
         this.createFiveUsersTest.setCountry(country);
     }
 
-    @ConfigArg(required = false, desc = "State for the created users", defaultValue = CreateUserTest.DEFAULT_STATE)
+    @ConfigArgGet
+    public String getUserCountry() {
+        return this.createFiveUsersTest.getCountry();
+    }
+
+    @ConfigArgSet(required = false, desc = "State for the created users", defaultValue = CreateUserTest.DEFAULT_STATE)
     public void setUserState(String state) {
         this.createFiveUsersTest.setState(state);
     }
 
-    @ConfigArg(required = false, desc = "Gender for the created users.", defaultValue = CreateUserTest.DEFAULT_GENDER)
+    @ConfigArgGet
+    public String getUserState() {
+        return this.createFiveUsersTest.getState();
+    }
+
+    @ConfigArgSet(required = false, desc = "Gender for the created users.", defaultValue = CreateUserTest.DEFAULT_GENDER)
     public void setUserGender(String gender) {
         this.createFiveUsersTest.setGender(gender);
     }
 
-    @ConfigArg(required = false, desc = "User description", defaultValue = CreateUserTest.DEFAULT_ABOUT_ME)
-    public void setUserAboutMe(String aboutMe) {
-        this.createFiveUsersTest.setGender(aboutMe);
+    @ConfigArgGet
+    public String getUserGender() {
+        return this.createFiveUsersTest.getGender();
     }
 
-    @ConfigArg(required = false, desc = "Group Name", defaultValue = CreateUserGroupTest.DEFAULT_GROUP_NAME)
+    @ConfigArgSet(required = false, desc = "User description", defaultValue = CreateUserTest.DEFAULT_ABOUT_ME)
+    public void setUserAboutMe(String aboutMe) {
+        this.createFiveUsersTest.setAboutMe(aboutMe);
+    }
+
+    @ConfigArgGet
+    public String getUserAboutMe() {
+        return this.createFiveUsersTest.getAboutMe();
+    }
+
+    @ConfigArgSet(required = false, desc = "Group Name", defaultValue = CreateUserGroupTest.DEFAULT_GROUP_NAME)
     public void setGroupName(String groupName) {
         this.createUserGroupTest.setGroupName(groupName);
     }
 
-    @ConfigArg(required = false, desc = "Group Description", defaultValue = CreateUserGroupTest.DEFAULT_GROUP_DESCRIPTION)
+    @ConfigArgGet
+    public String getGroupName() {
+        return this.createUserGroupTest.getGroupName();
+    }
+
+    @ConfigArgSet(required = false, desc = "Group Description", defaultValue = CreateUserGroupTest.DEFAULT_GROUP_DESCRIPTION)
     public void setGroupDescription(String description) {
         this.createUserGroupTest.setDescription(description);
     }
 
-    @ConfigArg(required = false, desc = "If this is true then some of user properties will be either incremented or randomised", defaultValue = "true")
+    @ConfigArgGet
+    public String getGroupDescription() {
+        return this.createUserGroupTest.getDescription();
+    }
+
+    @ConfigArgSet(required = false, desc = "If this is true then some of user properties will be either incremented or randomised", defaultValue = "true")
     public void setIncrement(String value) {
         createUserGroupTest.setIncrement(value);
         createFiveUsersTest.setIncrement(value);
+    }
+
+    @ConfigArgGet
+    public boolean getIncrement() {
+        return createUserGroupTest.getIncrement();
     }
 
     private static class CreateFiveUsersTest extends CompositeTest {
@@ -158,10 +244,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getEmailAddress() {
+            return ((CreateUserTest)this.getChildren().get(0)).getEmailAddress();
+        }
+
         public void setPassword(String password) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setPassword(password);
             }
+        }
+
+        public String getPassword() {
+           return ((CreateUserTest)this.getChildren().get(0)).getPassword();
         }
 
         public void setPhoneNumber(String phoneNumber) {
@@ -170,10 +264,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getPhoneNumber() {
+            return ((CreateUserTest)this.getChildren().get(0)).getPhoneNumber();
+        }
+
         public void setFirstName(String firstName) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setFirstName(firstName);
             }
+        }
+
+        public String getFirstName() {
+           return ((CreateUserTest)this.getChildren().get(0)).getFirstName();
         }
 
         public void setLastName(String lastName) {
@@ -182,10 +284,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getLastName() {
+            return ((CreateUserTest)this.getChildren().get(0)).getLastName();
+        }
+
         public void setJobTitle(String jobTitle) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setJobTitle(jobTitle);
             }
+        }
+
+        public String getJobTitle() {
+            return ((CreateUserTest)this.getChildren().get(0)).getJobTitle();
         }
 
         public void setStreet(String street) {
@@ -194,10 +304,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getStreet() {
+            return ((CreateUserTest)this.getChildren().get(0)).getStreet();
+        }
+
         public void setCity(String city) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setCity(city);
             }
+        }
+
+        public String getCity() {
+            return ((CreateUserTest)this.getChildren().get(0)).getCity();
         }
 
         public void setMobile(String mobile) {
@@ -206,10 +324,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getMobile() {
+            return ((CreateUserTest)this.getChildren().get(0)).getMobile();
+        }
+
         public void setPostalCode(String postalCode) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setPostalCode(postalCode);
             }
+        }
+
+        public String getPostalCode() {
+            return ((CreateUserTest)this.getChildren().get(0)).getPostalCode();
         }
 
         public void setCountry(String country) {
@@ -218,10 +344,18 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getCountry() {
+            return ((CreateUserTest)this.getChildren().get(0)).getCountry();
+        }
+
         public void setState(String state) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setState(state);
             }
+        }
+
+        public String getState() {
+            return ((CreateUserTest)this.getChildren().get(0)).getState();
         }
 
         public void setGender(String gender) {
@@ -230,10 +364,29 @@ public class CreateGroupWithUsers extends CompositeTest {
             }
         }
 
+        public String getGender() {
+            return ((CreateUserTest)this.getChildren().get(0)).getGender();
+        }
+
         public void setIncrement(String increment) {
             for(AbstractTest userTest : this.getChildren()) {
                 ((CreateUserTest)userTest).setIncrement(increment);
             }
         }
+
+        public boolean getIncrement() {
+            return ((CreateUserTest)this.getChildren().get(0)).getIncrement();
+        }
+
+        public void setAboutMe(String aboutMe) {
+            for(AbstractTest userTest : this.getChildren()) {
+                ((CreateUserTest)userTest).setAboutMe(aboutMe);
+            }
+        }
+
+        public String getAboutMe() {
+            return ((CreateUserTest)this.getChildren().get(0)).getAboutMe();
+        }
+
     }
 }

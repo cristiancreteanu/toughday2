@@ -4,10 +4,10 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.config.ConfigArg;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
-import com.sun.tracing.dtrace.ProviderAttributes;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
@@ -136,97 +136,172 @@ public class CreateUserTest extends SequentialTestBase {
         getDefaultClient().doPost(groupServlet, entityBuilder.build(), HttpStatus.SC_OK);
     }
 
-    @ConfigArg(required = false, desc = "Email address for created users.", defaultValue = DEFAULT_EMAIL_ADDRESS)
+    @ConfigArgSet(required = false, desc = "Email address for created users.", defaultValue = DEFAULT_EMAIL_ADDRESS)
     public CreateUserTest setEmailAddress(String emailAddress) {
         this.emailAddress = emailAddress;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Password for the created users.", defaultValue = DEFAULT_PASSWORD)
+    @ConfigArgGet
+    public String getEmailAddress() {
+        return this.emailAddress;
+    }
+
+    @ConfigArgSet(required = false, desc = "Password for the created users.", defaultValue = DEFAULT_PASSWORD)
     public CreateUserTest setPassword(String password) {
         this.password = password;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Telephone for the created users.", defaultValue = DEFAULT_PHONE_NUMBER)
+    @ConfigArgGet
+    public String getPassword() {
+        return this.password;
+    }
+
+    @ConfigArgSet(required = false, desc = "Telephone for the created users.", defaultValue = DEFAULT_PHONE_NUMBER)
     public CreateUserTest setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "First name for the created users", defaultValue = DEFAULT_FIRST_NAME)
+    @ConfigArgGet
+    public String getPhoneNumber() {
+        return this.phoneNumber;
+    }
+
+    @ConfigArgSet(required = false, desc = "First name for the created users", defaultValue = DEFAULT_FIRST_NAME)
     public CreateUserTest setFirstName(String firstName) {
         this.firstName = firstName;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Last name for the created users", defaultValue = DEFAULT_LAST_NAME)
+    @ConfigArgGet
+    public String getFirstName() {
+        return this.firstName;
+    }
+
+    @ConfigArgSet(required = false, desc = "Last name for the created users", defaultValue = DEFAULT_LAST_NAME)
     public CreateUserTest setLastName(String lastName) {
         this.lastName = lastName;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Job title for the created users", defaultValue = DEFAULT_JOB_TITLE)
+    @ConfigArgGet
+    public String getLastName() {
+        return this.lastName;
+    }
+
+    @ConfigArgSet(required = false, desc = "Job title for the created users", defaultValue = DEFAULT_JOB_TITLE)
     public CreateUserTest setJobTitle(String jobTitle) {
         this.jobTitle = jobTitle;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Street address for the created users", defaultValue = DEFAULT_STREET)
+    @ConfigArgGet
+    public String getJobTitle() {
+        return this.jobTitle;
+    }
+
+    @ConfigArgSet(required = false, desc = "Street address for the created users", defaultValue = DEFAULT_STREET)
     public CreateUserTest setStreet(String street) {
         this.street = street;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "City address for the created users", defaultValue = DEFAULT_CITY)
+    @ConfigArgGet
+    public String getStreet() {
+        return this.street;
+    }
+
+    @ConfigArgSet(required = false, desc = "City address for the created users", defaultValue = DEFAULT_CITY)
     public CreateUserTest setCity(String city) {
         this.city = city;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Mobile number for the created users", defaultValue = DEFAULT_MOBILE)
+    @ConfigArgGet
+    public String getCity() {
+        return this.city;
+    }
+
+    @ConfigArgSet(required = false, desc = "Mobile number for the created users", defaultValue = DEFAULT_MOBILE)
     public CreateUserTest setMobile(String mobile) {
         this.mobile = mobile;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Postal code for the created users", defaultValue = DEFAULT_POSTAL_CODE)
+    @ConfigArgGet
+    public String getMobile() {
+        return this.mobile;
+    }
+
+    @ConfigArgSet(required = false, desc = "Postal code for the created users", defaultValue = DEFAULT_POSTAL_CODE)
     public CreateUserTest setPostalCode(String postalCode) {
         this.postalCode = postalCode;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Country for the created users", defaultValue = DEFAULT_COUNTRY)
+    @ConfigArgGet
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    @ConfigArgSet(required = false, desc = "Country for the created users", defaultValue = DEFAULT_COUNTRY)
     public CreateUserTest setCountry(String country) {
         this.country = country;
         incrementCountry = false;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "State for the created users", defaultValue = DEFAULT_STATE)
+    @ConfigArgGet
+    public String getCountry() {
+        return this.country;
+    }
+
+    @ConfigArgSet(required = false, desc = "State for the created users", defaultValue = DEFAULT_STATE)
     public CreateUserTest setState(String state) {
         this.state = state;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Gender for the created users.", defaultValue = DEFAULT_GENDER)
+    @ConfigArgGet
+    public String getState() {
+        return this.state;
+    }
+
+    @ConfigArgSet(required = false, desc = "Gender for the created users.", defaultValue = DEFAULT_GENDER)
     public CreateUserTest setGender(String gender) {
         this.gender = gender;
         incrementGender = false;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "User description", defaultValue = DEFAULT_ABOUT_ME)
+    @ConfigArgGet
+    public String getGender() {
+        return this.gender;
+    }
+
+    @ConfigArgSet(required = false, desc = "User description", defaultValue = DEFAULT_ABOUT_ME)
     public CreateUserTest setAboutMe(String aboutMe) {
         this.aboutMe = aboutMe;
         return this;
     }
 
-    @ConfigArg(required = false, desc = "If this is true then some of user properties will be either incremented or randomised", defaultValue = "true")
+    @ConfigArgGet
+    public String getAboutMe() {
+        return this.aboutMe;
+    }
+
+    @ConfigArgSet(required = false, desc = "If this is \"true\" then some of user properties will be either incremented or randomised", defaultValue = "true")
     public CreateUserTest setIncrement(String value) {
         if (!Boolean.getBoolean(value))
             this.increment = null;
         return this;
+    }
+
+    @ConfigArgGet
+    public boolean getIncrement() {
+        return this.increment != null;
     }
 
     public CreateUserTest setIncrement(AtomicInteger increment) {
@@ -234,7 +309,7 @@ public class CreateUserTest extends SequentialTestBase {
         return this;
     }
 
-    @ConfigArg(required = false, desc = "Comma separated group paths. Newly created users will be added in these groups.")
+    @ConfigArgSet(required = false, desc = "Comma separated group paths. Newly created users will be added in these groups.")
     public CreateUserTest setGroups(String values) {
         groups.addAll(Arrays.asList(values.split(",")));
         return this;
