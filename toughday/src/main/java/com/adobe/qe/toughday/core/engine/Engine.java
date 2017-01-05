@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.core.engine;
 
+import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
@@ -147,6 +148,7 @@ public class Engine {
         try {
             switch (globalArgs.getRunModeEnum()) {
                 case DRY:
+                    System.out.println("NOTE: This is just a dry run. No test is actually executed.");
                     printConfiguration(configuration, System.out);
                     break;
                 case NORMAL:
@@ -213,11 +215,15 @@ public class Engine {
     }
 
     private void run() throws Exception {
+        LogManager.getLogger(Main.class).info("Running tests for {} seconds or until count for all tests has been reached",
+                configuration.getGlobalArgs().getDuration());
+
         LOG.info("Test execution started at: " + getCurrentDateTime());
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
                 LOG.info("Test execution finished at: " + getCurrentDateTime());
+                LogManager.getLogger(Main.class).info("Finished running tests");
             }
         });
 

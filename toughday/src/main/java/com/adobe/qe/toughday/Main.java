@@ -31,10 +31,7 @@ public class Main {
                 }
 
                 Engine engine = new Engine(configuration);
-                LOG.info("Running tests for {} seconds or until count for all tests has been reached",
-                        configuration.getGlobalArgs().getDuration());
                 engine.runTests();
-                LOG.info("Finished running tests", configuration.getGlobalArgs().getDuration());
 
                 System.exit(0);
             } catch (Throwable t) {
