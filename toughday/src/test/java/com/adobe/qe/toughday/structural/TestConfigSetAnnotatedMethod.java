@@ -9,10 +9,10 @@ import java.lang.reflect.Modifier;
 /**
  * Created by tuicu on 13/06/16.
  */
-public class TestConfigAnnotatedMethod extends TestCase {
+public class TestConfigSetAnnotatedMethod extends TestCase {
     private Method TDConfigAnnotatedMethod;
 
-    public TestConfigAnnotatedMethod(String testName, Method method) {
+    public TestConfigSetAnnotatedMethod(String testName, Method method) {
         super(testName);
         this.TDConfigAnnotatedMethod = method;
     }
