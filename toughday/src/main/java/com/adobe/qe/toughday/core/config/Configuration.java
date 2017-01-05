@@ -38,12 +38,23 @@ public class Configuration {
 
         /* TODO allow multiple predefined test suites.
          What happens with the setup step if two or more suites have setup steps? */
-        String testSuiteName = globalArgsMeta.get("suite");
+        String testSuiteName = globalArgsMeta.remove("suite");
         if (!predefinedSuites.containsKey(testSuiteName)) {
             throw new IllegalArgumentException("Unknown suite: " + testSuiteName);
         }
         return predefinedSuites.get(testSuiteName);
     }
+
+    private void checkInvalidArgs(Map<String, String> args) {
+        if(args.size() == 0) return;
+
+        for (String key : args.keySet()) {
+            LOGGER.error("Invalid property \"" + key +"\"");
+        }
+
+        throw new IllegalStateException("There are invalid properties in the configuration. Please check thoughday.log.");
+    }
+
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
@@ -55,13 +66,15 @@ public class Configuration {
 
         // Add a default publisher if none is specified
         if (configParams.getPublishers().size() == 0) {
-            configParams.addPublisher(ConsolePublisher.class.getSimpleName(), new HashMap<String, String>() {{ put("Clear", "true"); }});
+            configParams.addPublisher(ConsolePublisher.class.getSimpleName(), new HashMap<String, String>());
         }
 
         for(ConfigParams.ClassMetaObject publisherMeta : configParams.getPublishers()) {
             Publisher publisher = createObject(
                     ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
                     publisherMeta.getParameters());
+
+            checkInvalidArgs(publisherMeta.getParameters());
             this.globalArgs.addPublisher(publisher);
         }
 
@@ -83,14 +96,16 @@ public class Configuration {
             AbstractTest testObject = suite.getTest(testMeta.getName());
             setObjectProperties(testObject, testMeta.getParameters());
             if (testMeta.getParameters().containsKey("weight")) {
-                suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("weight")));
+                suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("weight")));
             }
             if (testMeta.getParameters().containsKey("timeout")) {
-                suite.replaceTimeout(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("timeout")));
+                suite.replaceTimeout(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("timeout")));
             }
             if (testMeta.getParameters().containsKey("count")) {
-                suite.replaceCount(testMeta.getName(), Integer.parseInt(testMeta.getParameters().get("count")));
+                suite.replaceCount(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("count")));
             }
+
+            checkInvalidArgs(testMeta.getParameters());
         }
 
         for (ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
@@ -105,15 +120,17 @@ public class Configuration {
 
             // defaults
             int weight = (testMeta.getParameters().containsKey("weight"))
-                    ? Integer.parseInt(testMeta.getParameters().get("weight")) : 1;
+                    ? Integer.parseInt(testMeta.getParameters().remove("weight")) : 1;
             long timeout = (testMeta.getParameters().containsKey("timeout"))
-                    ? Integer.parseInt(testMeta.getParameters().get("timeout")) : -1;
+                    ? Integer.parseInt(testMeta.getParameters().remove("timeout")) : -1;
             long counter = (testMeta.getParameters().containsKey("count"))
-                    ? Integer.parseInt(testMeta.getParameters().get("count")) : -1;
+                    ? Integer.parseInt(testMeta.getParameters().remove("count")) : -1;
 
             suite.add(test, weight, timeout, counter);
+            checkInvalidArgs(testMeta.getParameters());
         }
 
+        checkInvalidArgs(globalArgsMeta);
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
@@ -177,7 +194,7 @@ public class Configuration {
             }
 
             String property = propertyFromMethod(method.getName());
-            Object value = args.get(property);
+            Object value = args.remove(property);
             if (value == null) {
                 if (annotation.required()) {
                     throw new IllegalArgumentException("Property " + property + " is required for class " + classObject.getSimpleName());

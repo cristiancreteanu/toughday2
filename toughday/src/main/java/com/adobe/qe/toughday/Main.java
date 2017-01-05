@@ -35,6 +35,8 @@ public class Main {
 
                 System.exit(0);
             } catch (Throwable t) {
+                LOG.error("Error encountered: "
+                        + (t.getMessage() != null ? t.getMessage() : "Please check toughday.log for more information."));
                 LogManager.getLogger(Engine.class).error("Error encountered", t);
             }
         }

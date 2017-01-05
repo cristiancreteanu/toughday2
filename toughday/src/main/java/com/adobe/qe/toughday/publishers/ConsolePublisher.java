@@ -63,7 +63,7 @@ public class ConsolePublisher implements Publisher {
         this.cleaner.start();
     }
 
-    @ConfigArgSet(required = false, desc = "Whether to clear the screen before printing each stat")
+    @ConfigArgSet(required = false, defaultValue = "true",desc = "Clear the screen before printing each stat")
     public void setClear(String clearScreen) {
         this.clearScreen = Boolean.parseBoolean(clearScreen);
     }
