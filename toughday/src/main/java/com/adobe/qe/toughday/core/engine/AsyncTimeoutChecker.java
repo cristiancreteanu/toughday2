@@ -106,6 +106,8 @@ class AsyncTimeoutChecker extends AsyncEngineWorker {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             Engine.LOG.info ("Timeout thread interrupted");
+        } catch (Throwable e) {
+            Engine.LOG.error("Unexpected exception caught", e);
         }
     }
 }

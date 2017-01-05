@@ -71,6 +71,8 @@ class AsyncResultAggregator extends AsyncEngineWorker {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             Engine.LOG.error("InterruptedException(s) should not reach this point", e);
+        } catch (Throwable e) {
+            Engine.LOG.error("Unexpected exception caught", e);
         } finally {
             // signal all publishers that they are stopped.
             // any local threads inside the publishers would have to be stopped

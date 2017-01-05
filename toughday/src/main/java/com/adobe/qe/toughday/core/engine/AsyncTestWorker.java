@@ -95,7 +95,7 @@ class AsyncTestWorker extends AsyncEngineWorker {
     @Override
     public void run() {
         workerThread = Thread.currentThread();
-        Engine.LOG.info("Thread running: " + workerThread);
+        Engine.LOG.debug("Thread running: " + workerThread);
         mutex.lock();
         try {
             while (!isFinished()) {
@@ -127,6 +127,8 @@ class AsyncTestWorker extends AsyncEngineWorker {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
             Engine.LOG.error("InterruptedException(s) should not reach this point", e);
+        } catch (Throwable e) {
+            Engine.LOG.error("Unexpected exception caught", e);
         } finally {
             mutex.unlock();
         }
