@@ -11,7 +11,9 @@ import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ExecutorService;
@@ -205,7 +207,21 @@ public class Engine {
         out.println(String.format("\t%-32s %-64s", propertyName, propertyValue));
     }
 
+    private static String getCurrentDateTime() {
+        return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS z")
+                .format(Calendar.getInstance().getTime());
+    }
+
     private void run() throws Exception {
+        LOG.info("Test execution started at: " + getCurrentDateTime());
+        final Thread mainThread = Thread.currentThread();
+        Runtime.getRuntime().addShutdownHook(new Thread() {
+            public void run() {
+                LOG.info("Test execution finished at: " + getCurrentDateTime());
+            }
+        });
+
+
         // Run the setup step of the suite
         if (testSuite.getSetupStep() != null) {
             testSuite.getSetupStep().setup();
@@ -239,19 +255,22 @@ public class Engine {
             }
             resultAggregator.finishExecution();
             timeoutChecker.finishExecution();
-        }
-        // interrupt extra test threads
-        // TODO: this is suboptimal, replace with a better mechanism for notifications
-        List<Thread> threadsList = AbstractTest.getExtraThreads();
-        synchronized (threadsList) {
-            for (Thread t : threadsList) {
-                t.interrupt();
-            }
-        }
 
-        shutdownAndAwaitTermination(testsExecutorService);
-        shutdownAndAwaitTermination(engineExecutorService);
-        publishFinalResults();
+            // interrupt extra test threads
+            // TODO: this is suboptimal, replace with a better mechanism for notifications
+            List<Thread> threadsList = AbstractTest.getExtraThreads();
+            synchronized (threadsList) {
+                for (Thread t : threadsList) {
+                    t.interrupt();
+                }
+            }
+
+            shutdownAndAwaitTermination(testsExecutorService);
+            shutdownAndAwaitTermination(engineExecutorService);
+            publishFinalResults();
+
+            LOG.info("Test execution finished at: " + getCurrentDateTime());
+        }
     }
 
     /**
