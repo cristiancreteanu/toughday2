@@ -1,14 +1,11 @@
 package com.adobe.qe.toughday.tests.sequential.demo;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.core.annotations.*;
 import org.apache.sling.testing.clients.ClientException;
 
-/**
- * Created by tuicu on 07/06/16.
- */
+@Internal // <-- remove this to see the test in cli/help and to be able to run it
+@Description(desc = "Demo derived description")
 public class DerivedDemoTest extends DemoTest {
 
     public DerivedDemoTest() {

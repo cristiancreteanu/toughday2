@@ -2,14 +2,11 @@ package com.adobe.qe.toughday.tests.composite.demo;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 
-/**
- * Composite demo test.
- */
+@Internal // <-- remove this to see the test in cli/help and to be able to run it
+@Description(desc = "Demo composite description")
 public class CompositeDemo extends CompositeTest {
     DemoTest test1;
     DemoTest test2;

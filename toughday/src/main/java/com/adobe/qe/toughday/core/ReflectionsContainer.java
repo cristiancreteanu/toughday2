@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.core;
 
+import com.adobe.qe.toughday.core.annotations.Internal;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Modifier;
@@ -30,6 +31,12 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
 
+    private static boolean excludeClass(Class klass) {
+        return Modifier.isAbstract(klass.getModifiers())
+                || !Modifier.isPublic(klass.getModifiers())
+                || klass.isAnnotationPresent(Internal.class);
+    }
+
     /**
      * Constructor.
      */
@@ -39,7 +46,7 @@ public class ReflectionsContainer {
         suiteSetupClasses = new HashMap<>();
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
-            if(Modifier.isAbstract(testClass.getModifiers()) || Modifier.isPrivate(testClass.getModifiers()))
+            if(excludeClass(testClass))
                 continue;
             if(testClasses.containsKey(testClass.getSimpleName()))
                 throw new IllegalStateException("A test class with this name already exists here: "
@@ -48,7 +55,7 @@ public class ReflectionsContainer {
         }
 
         for (Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
-            if (Modifier.isAbstract(publisherClass.getModifiers()))
+            if (excludeClass(publisherClass))
                 continue;
             if (publisherClasses.containsKey(publisherClass.getSimpleName()))
                 throw new IllegalStateException("A publisher class with this name already exists here: "

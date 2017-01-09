@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential.tags;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.annotations.Internal;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -8,10 +9,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.List;
 
-/**
- * Created by tuicu on 05/11/16.
- * TODO: Make this invisible to help. It's just an utility test, should not be run by itself.
- */
+@Internal
 public class AddTagToResourceTest extends SequentialTestBase {
 
     @Override

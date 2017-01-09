@@ -1,11 +1,9 @@
 package com.adobe.qe.toughday.tests.sequential.demo;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.sling.testing.clients.ClientException;
 
@@ -15,6 +13,8 @@ import org.apache.sling.testing.clients.ClientException;
  * Since it is also a subtype of AbstractTest, it will be automatically picked up by the core
  * and can be added to the suite from the command line with --add DemoTest Property=myValue
  */
+@Internal // <-- remove this to see the test in cli/help and to be able to run it
+@Description(desc = "Demo description")
 public class DemoTest extends SequentialTestBase {
     private String property;
 
