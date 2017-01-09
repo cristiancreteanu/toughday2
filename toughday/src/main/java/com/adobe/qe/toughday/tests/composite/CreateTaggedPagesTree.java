@@ -19,8 +19,8 @@ import com.adobe.qe.toughday.tests.utils.WcmUtils;
 @Description(desc=
         "This test creates tags and pages hierarchically. Each page gets assigned two tags. " +
                 "One from the corresponding node in the tag tree and one that is the same for the whole page tree. " +
-                "Each child on each level has 10 children. " +
-                "Each author thread fills in a level in the tag tree, up to 10^level")
+                "Each child on each level has \"base\" children. " +
+                "Each author thread fills in a level in the tag tree, up to base^level")
 public class CreateTaggedPagesTree extends CompositeTest {
 
     private CreateTagTreeTest createTagTreeTest;

@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential.image;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.annotations.After;
@@ -25,9 +26,7 @@ import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Test for uploading assets.
- */
+@Description(desc = "Test for uploading assets.")
 public class UploadImageTest extends SequentialTestBase {
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;

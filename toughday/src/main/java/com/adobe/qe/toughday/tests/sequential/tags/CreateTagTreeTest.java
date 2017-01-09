@@ -21,8 +21,8 @@ import java.util.Arrays;
  */
 @Name(name="create_tag_tree")
 @Description(desc=
-        "This test creates tags hierarchically. Each child on each level has 10 children. " +
-                "Each author thread fills in a level in the tag tree, up to 10^level")
+        "This test creates tags hierarchically. Each child on each level has \"base\" children. " +
+                "Each author thread fills in a level in the tag tree, up to base^level")
 public class CreateTagTreeTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 

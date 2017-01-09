@@ -14,8 +14,8 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
  *
  */
 @Name(name="create_folder_tree")
-@Description(desc="This test creates folders hierarchically. Each child on each level has 10 children. " +
-                "Each author thread fills in a level in the folder tree, up to 10^level")
+@Description(desc="This test creates folders hierarchically. Each child on each level has \"base\" children. " +
+                "Each author thread fills in a level in the folder tree, up to base^level")
 public class CreateFolderTreeTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreatePageTreeTest.class);
 

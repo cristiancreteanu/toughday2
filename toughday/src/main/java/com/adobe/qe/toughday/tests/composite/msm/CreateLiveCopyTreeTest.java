@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.tests.composite.msm;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
@@ -10,6 +11,7 @@ import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
+@Description(desc = "This test creates pages and live copies hierarchically.")
 public class CreateLiveCopyTreeTest  extends CompositeTest {
 
     private static final String DEFAULT_SOURCE_PAGE_TITLE = "msmsrc";

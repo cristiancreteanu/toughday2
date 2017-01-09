@@ -11,9 +11,6 @@ import com.adobe.qe.toughday.tests.sequential.users.CreateUserTest;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * Created by tuicu on 30/11/16.
- */
 @Name(name = "CreateGroupWithUsers")
 @Description(desc = "At every execution creates one group, five users and adds the users to that group. " +
                 "Additionally, it creates one extra group at the beginning and all the users are added into that group as well")

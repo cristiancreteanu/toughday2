@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Name(name = "CreateUserTest")
-@Description(desc = "Creates users")
+@Description(desc = "Creates users similar to the user editor console (/libs/granite/security/content/userEditor.html)")
 public class CreateUserTest extends SequentialTestBase {
     public static final String DEFAULT_PASSWORD = "toughday";
     public static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";

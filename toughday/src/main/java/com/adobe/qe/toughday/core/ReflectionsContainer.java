@@ -39,7 +39,7 @@ public class ReflectionsContainer {
         suiteSetupClasses = new HashMap<>();
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
-            if(Modifier.isAbstract(testClass.getModifiers()))
+            if(Modifier.isAbstract(testClass.getModifiers()) || Modifier.isPrivate(testClass.getModifiers()))
                 continue;
             if(testClasses.containsKey(testClass.getSimpleName()))
                 throw new IllegalStateException("A test class with this name already exists here: "

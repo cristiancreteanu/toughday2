@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import org.apache.commons.lang3.StringUtils;
@@ -21,9 +22,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-/**
- * Test for uploading PDF assets.
- */
+@Description(desc = "Test for uploading PDF assets")
 public class UploadPDFTest extends SequentialTestBase {
 
     public static final String DEFAULT_PARENT_PATH = "/content/dam";

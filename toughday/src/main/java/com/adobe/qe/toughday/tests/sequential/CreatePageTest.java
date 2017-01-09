@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.tests.sequential;
 
+import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
@@ -11,9 +12,10 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- *
- */
+
+@Description(desc = "This test creates pages under the same parent path." +
+        " This means that as the time passes the performance will decrease, because of OAK limitations." +
+        " If you are not looking for this specific scenario, please consider using CreatePageTreeTest.")
 public class CreatePageTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreatePageTest.class);
 

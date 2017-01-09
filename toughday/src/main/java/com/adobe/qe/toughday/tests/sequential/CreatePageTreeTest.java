@@ -18,8 +18,8 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 @SuppressWarnings("Duplicates")
 @Name(name="create_pages_tree")
 @Description(desc=
-                "This test creates pages hierarchically. Each child on each level has 10 children. " +
-                "Each author thread fills in a level in the pages tree, up to 10^level")
+                "This test creates pages hierarchically. Each child on each level has \"base\" children. " +
+                "Each author thread fills in a level in the pages tree, up to base^level")
 public class CreatePageTreeTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreatePageTreeTest.class);
 

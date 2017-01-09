@@ -1,11 +1,10 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.annotations.Description;
 import org.apache.http.HttpStatus;
 
-/**
- * Test for getting the homepage.
- */
+@Description(desc = "GET the home page.")
 public class GetHomepageTest extends SequentialTestBase {
 
     @Override
