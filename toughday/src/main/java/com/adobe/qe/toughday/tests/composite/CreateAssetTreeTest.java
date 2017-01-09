@@ -9,7 +9,7 @@ import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
-@Description(desc="This test creates folders hierarchically. " +
+@Description(desc="This test creates folders with assets hierarchically. " +
         "Each child on each level has \"base\" folder children and \"base\" asset children")
 public class CreateAssetTreeTest extends CompositeTest {
 
