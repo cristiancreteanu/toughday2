@@ -21,7 +21,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
-@Description(desc = "Proof of concept for a live chart publisher")
+@Description(desc = "Proof of concept for a live chart publisher. Go to http://localhost:8080/stats.")
 public class LiveChartPublisherPOC implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(LiveChartPublisherPOC.class);
     private boolean finished = false;

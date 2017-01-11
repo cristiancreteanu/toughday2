@@ -2,14 +2,20 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Internal;
 import org.reflections.Reflections;
+import org.reflections.scanners.ResourcesScanner;
 
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
+import java.util.Set;
+import java.util.regex.Pattern;
 
 /**
  * Wrapper for the reflections library. Uses singleton.
  */
 public class ReflectionsContainer {
+    private static final Pattern toughdayContentPackagePattern = Pattern.compile("toughday_sample-.*.zip");
     private static Reflections reflections = new Reflections("com.adobe.qe");
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
@@ -30,6 +36,8 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends AbstractTest>> testClasses;
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
+
+    private String toughdayContentPackage;
 
     private static boolean excludeClass(Class klass) {
         return Modifier.isAbstract(klass.getModifiers())
@@ -72,6 +80,12 @@ public class ReflectionsContainer {
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
         }
 
+        Reflections reflections = new Reflections("", new ResourcesScanner());
+
+        Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
+        if (iterator.hasNext()) {
+            toughdayContentPackage = iterator.next();
+        }
     }
 
     /**
@@ -93,5 +107,9 @@ public class ReflectionsContainer {
      */
     public HashMap<String, Class<? extends SuiteSetup>> getSuiteSetupClasses() {
         return suiteSetupClasses;
+    }
+
+    public String getToughdayContentPackage() {
+        return toughdayContentPackage;
     }
 }

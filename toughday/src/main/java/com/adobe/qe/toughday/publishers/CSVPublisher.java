@@ -15,6 +15,8 @@ import java.util.Collection;
 
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher implements Publisher {
+    public static final String DEFAULT_FILE_PATH = "results.csv";
+
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
     private boolean finished = false;
     private boolean append = false;
@@ -22,10 +24,10 @@ public class CSVPublisher implements Publisher {
     private PrintWriter printWriter;
     private BufferedWriter writer;
 
-    private String filePath = "results.csv";
+    private String filePath = DEFAULT_FILE_PATH;
     private static String HEADER = "Name, Duration / user, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
 
-    @ConfigArgSet(required = false, desc = "The filename to write results to")
+    @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
@@ -35,7 +37,7 @@ public class CSVPublisher implements Publisher {
         return this.filePath;
     }
 
-    @ConfigArgSet(required = false, desc = "Append instead of rewrite")
+    @ConfigArgSet(required = false, desc = "Append instead of rewrite", defaultValue = "false")
     public void setAppend(String value) {
         append = Boolean.valueOf(value);
     }
