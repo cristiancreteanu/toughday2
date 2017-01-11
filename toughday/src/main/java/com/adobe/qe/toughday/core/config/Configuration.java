@@ -324,6 +324,7 @@ public class Configuration {
         public static final String DEFAULT_WAIT_TIME_STRING = "1000";
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
         private RUN_MODE runMode = RUN_MODE.NORMAL;
+        private boolean installSampleContent = true;
 
         /**
          * Constructor
@@ -393,6 +394,11 @@ public class Configuration {
             this.runMode = RUN_MODE.fromString(runMode);
         }
 
+        @ConfigArgSet(required = false, desc = "Install Toughday 2 Sample Content.", defaultValue = "true")
+        public void setInstallSampleContent(String installSampleContent) {
+            this.installSampleContent = Boolean.valueOf(installSampleContent);
+        }
+
         // Adders and getters
 
         public void addPublisher(Publisher publisher) {
@@ -455,7 +461,10 @@ public class Configuration {
         @ConfigArgGet
         public String getProtocol() { return protocol; }
 
-
+        @ConfigArgGet
+        public boolean getInstallSampleContent() {
+            return installSampleContent;
+        }
 
 
         // Helper methods
