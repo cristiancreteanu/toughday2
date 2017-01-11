@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.publishers;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Internal;
 import org.apache.http.*;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
@@ -21,6 +22,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
+@Internal
 @Description(desc = "Proof of concept for a live chart publisher. Go to http://localhost:8080/stats.")
 public class LiveChartPublisherPOC implements Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(LiveChartPublisherPOC.class);
