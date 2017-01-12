@@ -247,6 +247,18 @@ public class Engine {
                 .format(Calendar.getInstance().getTime());
     }
 
+    private void runFactorySetup(AbstractTest test) throws Exception {
+        for (AbstractTest child : test.getChildren()) {
+            runFactorySetup(child);
+        }
+        for (Method method : test.getClass().getDeclaredMethods()) {
+            if (method.getAnnotation(FactorySetup.class) != null) {
+                method.setAccessible(true);
+                method.invoke(test);
+            }
+        }
+    }
+
     private void run() throws Exception {
         LogManager.getLogger(Main.class).info("Running tests for {} seconds or until count for all tests has been reached",
                 configuration.getGlobalArgs().getDuration());
@@ -266,14 +278,9 @@ public class Engine {
             testSuite.getSetupStep().setup();
         }
 
+        //TODO move this to a better place
         for(AbstractTest test : testSuite.getTests()) {
-            //TODO move this to a better place
-            for (Method method : test.getClass().getDeclaredMethods()) {
-                if (method.getAnnotation(FactorySetup.class) != null) {
-                    method.setAccessible(true);
-                    method.invoke(test);
-                }
-            }
+            runFactorySetup(test);
         }
 
         // Create the test worker threads
