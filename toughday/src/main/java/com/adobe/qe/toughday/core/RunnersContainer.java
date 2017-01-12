@@ -32,7 +32,7 @@ public class RunnersContainer {
      */
     public void addRunner(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
-        if (!testRunners.containsKey(test.getClass())) {
+        if (!testRunners.containsKey(test)) {
             Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
             try {
                 Constructor<? extends AbstractTestRunner> constructor = runnerClass.getConstructor(Class.class);
