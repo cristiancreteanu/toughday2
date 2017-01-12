@@ -5,13 +5,17 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.reflections.Reflections;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -153,6 +157,10 @@ public class Engine {
                     break;
                 case NORMAL:
                     printConfiguration(configuration, new PrintStream(new LogStream(LOG)));
+                    //TODO? move this someplace else?
+                    if(globalArgs.getInstallSampleContent()) {
+                        installToughdayContentPackage(globalArgs);
+                    }
                     run();
                     break;
             }
@@ -176,6 +184,30 @@ public class Engine {
             printObject(configuration.getTestSuite(), out, publisher);
         }
         out.println("#########################################################");
+    }
+
+    public static void installToughdayContentPackage(Configuration.GlobalArgs globalArgs) throws Exception {
+        URI uri = new URIBuilder()
+                .setScheme(globalArgs.getProtocol())
+                .setHost(globalArgs.getHost())
+                .setPort(globalArgs.getPort())
+                .build();
+
+        PackageManagerClient packageManagerClient = new PackageManagerClient(uri,
+                globalArgs.getUser(),
+                globalArgs.getPassword());
+
+        String tdContentPackageGroup = "com.adobe.qe.toughday";
+        String tdContentPackageName = ReflectionsContainer.getInstance().getToughdayContentPackage();
+
+        //Upload and install test content package
+        if(packageManagerClient.isPackageCreated(tdContentPackageName, tdContentPackageGroup)) {
+            packageManagerClient.deletePackage(tdContentPackageName, tdContentPackageGroup);
+        }
+
+        packageManagerClient
+                .uploadPackage(Engine.class.getClassLoader().getResourceAsStream(tdContentPackageName), tdContentPackageName);
+        packageManagerClient.installPackage(tdContentPackageName, tdContentPackageGroup);
     }
 
     public static void printObject(TestSuite testSuite, PrintStream out, Object obj) throws InvocationTargetException, IllegalAccessException {
