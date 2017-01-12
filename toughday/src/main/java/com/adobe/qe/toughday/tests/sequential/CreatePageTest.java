@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -36,8 +37,8 @@ public class CreatePageTest extends SequentialTestBase {
 
     public static final AtomicInteger nextNumber = new AtomicInteger(0);
     public static final String CMD_CREATE_PAGE = "createPage";
-    public static final String DEFAULT_PARENT_PATH = "/content/geometrixx/en";
-    public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
+    public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_SITE;
+    public static final String DEFAULT_TEMPLATE = SampleContent.TOUGHDAY_TEMPLATE;
 
     @Override
     public void test() throws Exception {
@@ -94,6 +95,5 @@ public class CreatePageTest extends SequentialTestBase {
     public String getTemplate() {
         return this.template;
     }
-
 
 }

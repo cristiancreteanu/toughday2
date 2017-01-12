@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTest;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
@@ -32,7 +33,7 @@ public class UploadImageTest extends SequentialTestBase {
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
     private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
     private String mimeType = AuthoringTest.DEFAULT_MIME_TYPE; //TODO do we really need this?
-    private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
+    private String parentPath = SampleContent.TOUGHDAY_DAM_FOLDER;
 
     public static ThreadLocal<File> lastCreated = new ThreadLocal<>();
     public static Random rnd = new Random();
@@ -126,7 +127,7 @@ public class UploadImageTest extends SequentialTestBase {
         return this.mimeType;
     }
 
-    @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH, desc = "The path where the image is uploaded")
+    @ConfigArgSet(required = false, defaultValue = SampleContent.TOUGHDAY_DAM_FOLDER, desc = "The path where the image is uploaded")
     public void setParentPath(String parentPath) {
         this.parentPath = parentPath;
     }

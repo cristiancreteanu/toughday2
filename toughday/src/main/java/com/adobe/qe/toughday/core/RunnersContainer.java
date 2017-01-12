@@ -32,13 +32,6 @@ public class RunnersContainer {
      */
     public void addRunner(AbstractTest test)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
-        //TODO move this to a better place
-        for(Method method : test.getClass().getDeclaredMethods()) {
-            if (method.getAnnotation(FactorySetup.class) != null) {
-                method.setAccessible(true);
-                method.invoke(test);
-            }
-        }
         if (!testRunners.containsKey(test.getClass())) {
             Class<? extends AbstractTestRunner> runnerClass = test.getTestRunnerClass();
             try {

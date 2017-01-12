@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.core.*;
+import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import org.apache.commons.lang3.StringUtils;
@@ -264,6 +265,17 @@ public class Engine {
         if (testSuite.getSetupStep() != null) {
             testSuite.getSetupStep().setup();
         }
+
+        for(AbstractTest test : testSuite.getTests()) {
+            //TODO move this to a better place
+            for (Method method : test.getClass().getDeclaredMethods()) {
+                if (method.getAnnotation(FactorySetup.class) != null) {
+                    method.setAccessible(true);
+                    method.invoke(test);
+                }
+            }
+        }
+
         // Create the test worker threads
         List<AsyncTestWorker> testWorkers = new ArrayList<>();
         for (int i = 0; i < globalArgs.getConcurrency(); i++) {

@@ -36,8 +36,6 @@ public class AuthoringTreeTest extends CompositeTest {
             this.addChild(uploadImageTest);
 
             this.setPageTitle(DEFAULT_PAGE_TITLE);
-            this.setPageTemplate(WcmUtils.DEFAULT_TEMPLATE);
-            this.setParentPath(WcmUtils.DEFAULT_PARENT_PATH);
             this.setImageName(DEFAULT_ASSET_NAME);
             this.setMimeType(DEFAULT_MIME_TYPE);
             this.setResourcePath(DEFAULT_RESOURCE_PATH);

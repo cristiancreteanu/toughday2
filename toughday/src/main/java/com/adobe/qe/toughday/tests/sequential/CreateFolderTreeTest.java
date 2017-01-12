@@ -3,6 +3,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -21,7 +22,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
 
     private static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     private static final String UNSTRUCTURED_RESOURCE_TYPE = "nt:unstructured";
-    public static final String DEFAULT_PARENT_PATH = "/content/dam";
+    public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
     public static final String DEFAULT_TITLE = "toughday";
 
     // needed for synchronizing

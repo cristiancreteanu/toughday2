@@ -18,6 +18,7 @@
  ******************************************************************************/
 package com.adobe.qe.toughday.tests.utils;
 
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;
@@ -29,8 +30,8 @@ public class WcmUtils {
     public static final String CMD_CREATE_LIVECOPY = "createLiveCopy";
     public static final String CMD_ROLLOUT = "rollout";
 
-    public static final String DEFAULT_PARENT_PATH = "/content/geometrixx/en";
-    public static final String DEFAULT_TEMPLATE = "/apps/geometrixx/templates/contentpage";
+    public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_SITE;
+    public static final String DEFAULT_TEMPLATE = SampleContent.TOUGHDAY_TEMPLATE;
 
     public static SlingHttpResponse createPage(SlingClient client, String parentPath, String title, String template, int... expectedStatus)
             throws ClientException {

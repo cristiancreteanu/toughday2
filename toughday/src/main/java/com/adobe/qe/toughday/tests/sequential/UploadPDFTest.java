@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -25,7 +26,7 @@ import java.util.UUID;
 @Description(desc = "Test for uploading PDF assets")
 public class UploadPDFTest extends SequentialTestBase {
 
-    public static final String DEFAULT_PARENT_PATH = "/content/dam";
+    public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
     public static final String PDF_CONTENT_TYPE = "application/pdf";
     public static final String DEFAULT_PDF_NAME = "toughday_pdf_asset";
     private static final String DEFAULT_PDF_PATH = "document.pdf";

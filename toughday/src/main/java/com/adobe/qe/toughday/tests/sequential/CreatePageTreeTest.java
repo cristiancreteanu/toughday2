@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
@@ -11,6 +12,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
+
+import java.util.UUID;
 
 /**
  *
@@ -25,8 +28,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     private final TreePhaser phaser;
 
-    public String rootParentPath = rootNodePath;
-    private String template = WcmUtils.DEFAULT_TEMPLATE;
+    public String rootParentPath = SampleContent.TOUGHDAY_SITE;
+    private String template = SampleContent.TOUGHDAY_TEMPLATE;
     private String title = AuthoringTreeTest.DEFAULT_PAGE_TITLE;
 
     private Integer nextChild;
@@ -47,8 +50,14 @@ public class CreatePageTreeTest extends SequentialTestBase {
     }
 
     @FactorySetup
-    private void setupContent() throws Exception {
-        this.prepareContent();
+    private void setupContent() {
+        String isolatedFolder = "toughday" + UUID.randomUUID();
+        try {
+            getDefaultClient().createFolder(isolatedFolder, isolatedFolder, rootParentPath);
+            rootParentPath = rootParentPath + "/" + isolatedFolder;
+        } catch (Exception e) {
+            LOG.debug("Could not create isolated folder for running " + getFullName());
+        }
     }
 
     @Before
@@ -133,11 +142,10 @@ public class CreatePageTreeTest extends SequentialTestBase {
         return this.title;
     }
 
-    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_PARENT_PATH,
+    @ConfigArgSet(required = false, defaultValue = SampleContent.TOUGHDAY_SITE,
             desc = "The path prefix for all pages.")
     public AbstractTest setParentPath(String parentPath) {
         this.rootParentPath = StringUtils.stripEnd(parentPath, "/");
-        System.out.println("Root parent path is now: " + parentPath);
         return this;
     }
 
@@ -146,7 +154,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
         return this.rootParentPath;
     }
 
-    @ConfigArgSet(required = false, defaultValue = WcmUtils.DEFAULT_TEMPLATE)
+    @ConfigArgSet(required = false, defaultValue = SampleContent.TOUGHDAY_TEMPLATE, desc = "Template for all the pages created.")
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;
