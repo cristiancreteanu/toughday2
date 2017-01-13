@@ -159,18 +159,25 @@ public class CliParser implements ConfigurationParser {
         printExtraHelp();
     }
 
-    public void printExtraHelp() {
+    public void printTestClasses() {
         System.out.println();
         System.out.println("Available test classes:");
         for (Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
             printClass(testClass, false);
         }
+    }
 
+    public void printPublisherClasses() {
         System.out.println();
         System.out.println("Available publisher classes:");
         for (Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
             printClass(publisherClass, false);
         }
+    }
+
+    public void printExtraHelp() {
+        printTestClasses();
+        printPublisherClasses();
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
@@ -180,7 +187,13 @@ public class CliParser implements ConfigurationParser {
         } else if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
             printHelp();
             return true;
-        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
+        } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_tests")) {
+            printTestClasses();
+            return true;
+        } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_publish")) {
+            printPublisherClasses();
+            return true;
+        }else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
                 printClass(testClass, true);
@@ -208,6 +221,8 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Usage: java -jar toughday.jar [--help | --help_full] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help.");
         System.out.println("Use '--help_full' to print full help.");
+        System.out.println("Use '--help_tests' to print all the test classes.");
+        System.out.println("Use '--help_publish' to print all the publisher classes.");
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
         System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
 
