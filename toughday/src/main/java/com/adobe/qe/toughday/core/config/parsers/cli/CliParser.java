@@ -219,7 +219,7 @@ public class CliParser implements ConfigurationParser {
     }
 
     public void printShortHelp(boolean printSuitesTests) {
-        System.out.println("Usage: java -jar toughday.jar [--help | --help_full] [<global arguments> | <actions>]");
+        System.out.println("Usage: java -jar toughday.jar [--help | --help_full | --help_tests | --help_publish] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help.");
         System.out.println("Use '--help_full' to print full help.");
         System.out.println("Use '--help_tests' to print all the test classes.");
