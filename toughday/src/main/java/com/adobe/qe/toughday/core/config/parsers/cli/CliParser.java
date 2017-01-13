@@ -21,7 +21,7 @@ public class CliParser implements ConfigurationParser {
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
-    private static List<String> parserArgs = new ArrayList<>();
+    public final static List<String> parserArgs = new ArrayList<>();
 
     static {
         for (Method method : globalArgMethods) {

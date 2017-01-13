@@ -45,7 +45,18 @@ public class Configuration {
         return predefinedSuites.get(testSuiteName);
     }
 
-    private void checkInvalidArgs(Map<String, String> args) {
+    private void checkInvalidArgs(Map<String, String> args, List<String>... whitelisted) {
+        Map<String, String> argsCopy = new HashMap<>();
+        argsCopy.putAll(args);
+        args = argsCopy;
+
+        for(int i = 0; i < whitelisted.length; i++) {
+            List<String> whitelist = whitelisted[i];
+            for(String whitelistedArg : whitelist) {
+                args.remove(whitelistedArg);
+            }
+        }
+
         if(args.size() == 0) return;
 
         for (String key : args.keySet()) {
@@ -130,7 +141,7 @@ public class Configuration {
             checkInvalidArgs(testMeta.getParameters());
         }
 
-        checkInvalidArgs(globalArgsMeta);
+        checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
