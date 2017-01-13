@@ -193,7 +193,7 @@ public class CliParser implements ConfigurationParser {
         } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_publish")) {
             printPublisherClasses();
             return true;
-        }else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
+        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
                 printClass(testClass, true);
@@ -302,7 +302,7 @@ public class CliParser implements ConfigurationParser {
                 }
             }
             if(AbstractTest.class.isAssignableFrom(klass)) {
-                printClassProperty("weight", true, "1", "The weight of this test");
+                printClassProperty("weight", false, "1", "The weight of this test");
                 printClassProperty("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
                         "Time in milliseconds after which the test is interrupted");
                 printClassProperty("count", false, "none", "The number of times this test should run");
