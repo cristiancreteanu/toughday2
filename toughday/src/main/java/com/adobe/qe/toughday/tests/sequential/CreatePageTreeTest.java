@@ -19,7 +19,6 @@ import java.util.UUID;
  *
  */
 @SuppressWarnings("Duplicates")
-@Name(name="create_pages_tree")
 @Description(desc=
                 "This test creates pages hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the pages tree, up to base^level")

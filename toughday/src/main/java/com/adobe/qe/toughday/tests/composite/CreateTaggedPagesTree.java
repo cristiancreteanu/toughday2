@@ -15,7 +15,6 @@ import com.adobe.qe.toughday.tests.utils.WcmUtils;
 /**
  * Created by tuicu on 05/11/16.
  */
-@Name(name="CreateTaggedPagesTree")
 @Description(desc=
         "This test creates tags and pages hierarchically. Each page gets assigned two tags. " +
                 "One from the corresponding node in the tag tree and one that is the same for the whole page tree. " +
