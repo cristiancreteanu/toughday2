@@ -102,6 +102,25 @@ public class Configuration {
             suite.remove(testName);
         }
 
+
+        for (ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
+            AbstractTest test = createObject(
+                    ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
+                    testMeta.getParameters());
+
+            // defaults
+            int weight = (testMeta.getParameters().containsKey("weight"))
+                    ? Integer.parseInt(testMeta.getParameters().remove("weight")) : 1;
+            long timeout = (testMeta.getParameters().containsKey("timeout"))
+                    ? Integer.parseInt(testMeta.getParameters().remove("timeout")) : -1;
+            long counter = (testMeta.getParameters().containsKey("count"))
+                    ? Integer.parseInt(testMeta.getParameters().remove("count")) : -1;
+
+            suite.add(test, weight, timeout, counter);
+            checkInvalidArgs(testMeta.getParameters());
+        }
+
+
         // Add and configure tests to the suite
         for(ConfigParams.NamedMetaObject testMeta : configParams.getTestsToConfig()) {
             AbstractTest testObject = suite.getTest(testMeta.getName());
@@ -116,28 +135,6 @@ public class Configuration {
                 suite.replaceCount(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("count")));
             }
 
-            checkInvalidArgs(testMeta.getParameters());
-        }
-
-        for (ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
-            String testName = testMeta.getParameters().get("name");
-            if (suite.contains(testName)) {
-                throw new IllegalArgumentException("Suite already contains a test named: " + testName);
-            }
-
-            AbstractTest test = createObject(
-                    ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
-                    testMeta.getParameters());
-
-            // defaults
-            int weight = (testMeta.getParameters().containsKey("weight"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("weight")) : 1;
-            long timeout = (testMeta.getParameters().containsKey("timeout"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("timeout")) : -1;
-            long counter = (testMeta.getParameters().containsKey("count"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("count")) : -1;
-
-            suite.add(test, weight, timeout, counter);
             checkInvalidArgs(testMeta.getParameters());
         }
 

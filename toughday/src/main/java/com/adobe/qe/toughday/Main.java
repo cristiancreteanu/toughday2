@@ -26,6 +26,8 @@ public class Main {
                     configuration = new Configuration(args);
                 } catch (IllegalArgumentException e) {
                     LOG.error("Bad configuration: {}", e.getMessage());
+                    System.out.println();
+                    System.out.println();
                     cliParser.printShortHelp();
                     System.exit(1);
                 }

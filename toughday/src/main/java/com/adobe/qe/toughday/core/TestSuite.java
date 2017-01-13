@@ -35,6 +35,11 @@ public class TestSuite {
          */
         @Override
         public Integer put(AbstractTest test, Integer weight) {
+            if (nameMap.containsKey(test.getName())) {
+                throw new IllegalArgumentException("Suite already contains a test named: \"" + test.getName() + "\". " +
+                        "Please provide a different name using the \"name\" property.");
+            }
+
             nameMap.put(test.getName(), test);
             Integer previous = super.put(test, weight);
             totalWeight += -(previous != null ? previous : 0) + weight;
