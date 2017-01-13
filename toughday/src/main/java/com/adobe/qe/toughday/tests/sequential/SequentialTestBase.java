@@ -17,8 +17,6 @@ import java.util.UUID;
  */
 public abstract class SequentialTestBase extends AbstractTest {
     private static final List<AbstractTest> noChildren = new ArrayList<>();
-    public final String rootNode = "toughday" + UUID.randomUUID();
-    public final String rootNodePath ="/content/" + rootNode;
     private SlingClient defaultClient;
 
 
@@ -45,12 +43,6 @@ public abstract class SequentialTestBase extends AbstractTest {
                         getGlobalArgs().getPassword());
         }
         return defaultClient;
-    }
-
-    protected void prepareContent() throws Exception {
-        if (!getDefaultClient().exists(rootNodePath)) {
-            getDefaultClient().createFolder(rootNode, rootNode, "/content");
-        }
     }
 
     public abstract void test() throws Exception;

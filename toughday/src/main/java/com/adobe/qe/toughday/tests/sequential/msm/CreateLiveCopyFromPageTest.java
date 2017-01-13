@@ -4,10 +4,13 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.logging.log4j.Logger;
+
+import java.util.UUID;
 
 
 @Name(name = "create_lc")
@@ -17,14 +20,13 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     public static final String SOURCE_PAGE_NAME = "create_lc_source";
     public static final String DESTINATION_PAGE_NAME = "create_lc_dest";
-    public final String defaultSourceRootPage = rootNodePath + "/" + SOURCE_PAGE_NAME;
+    public static  final String DEFAULT_SOURCE_ROOT_PAGE = "/content/toughday/language-master/en/toughday";
 
 
-    public final String defaultDestinationRootPage = rootNodePath + "/" + DESTINATION_PAGE_NAME;
+    public static final String DEFAULT_DESTINATION_ROOT_PAGE = SampleContent.TOUGHDAY_SITE;
     public static final String DEFAULT_PAGE_TITLE = "lc";
 
     private final TreePhaser phaser;
-    private String template = WcmUtils.DEFAULT_TEMPLATE;
 
     private String title;
     private String sourcePage;
@@ -37,8 +39,8 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     public CreateLiveCopyFromPageTest() {
         this.phaser = new TreePhaser();
-        this.sourcePage = defaultSourceRootPage;
-        this.destinationRoot = defaultDestinationRootPage;
+        this.sourcePage = DEFAULT_SOURCE_ROOT_PAGE;
+        this.destinationRoot = DEFAULT_DESTINATION_ROOT_PAGE;
         this.title = DEFAULT_PAGE_TITLE;
     }
 
@@ -51,12 +53,12 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     @FactorySetup
     private void setup() throws Exception {
-        this.prepareContent();
-        if (!getDefaultClient().exists(defaultDestinationRootPage)) {
-            WcmUtils.createPage(getDefaultClient(), rootNodePath, DESTINATION_PAGE_NAME, template, 200, 201);
-        }
-        if (!getDefaultClient().exists(defaultSourceRootPage)) {
-            WcmUtils.createPage(getDefaultClient(), rootNodePath, SOURCE_PAGE_NAME, template, 200, 201);
+        String isolatedFolder = "toughday_lc" + UUID.randomUUID();
+        try {
+            getDefaultClient().createFolder(isolatedFolder, isolatedFolder, destinationRoot);
+            destinationRoot = destinationRoot + "/" + isolatedFolder;
+        } catch (Exception e) {
+            LOG.debug("Could not create isolated folder for running " + getFullName());
         }
     }
 
@@ -122,7 +124,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         return new CreateLiveCopyFromPageTest(phaser, title, sourcePage, destinationRoot);
     }
 
-    @ConfigArgSet(required = false, desc = "The source page for live copies")
+    @ConfigArgSet(required = false, desc = "The source page for live copies", defaultValue = DEFAULT_SOURCE_ROOT_PAGE)
     public AbstractTest setSourcePage(String page) {
         this.sourcePage = page;
         return this;
@@ -133,7 +135,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         return this.sourcePage;
     }
 
-    @ConfigArgSet(required = false, desc = "Default root for live copies")
+    @ConfigArgSet(required = false, desc = "Default root for live copies", defaultValue = DEFAULT_DESTINATION_ROOT_PAGE)
     public AbstractTest setDestinationRoot(String page) {
         this.destinationRoot = page;
         return this;
@@ -144,7 +146,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         return this.destinationRoot;
     }
 
-    @ConfigArgSet(required = false, desc = "Title for livecopies")
+    @ConfigArgSet(required = false, desc = "Title for livecopies", defaultValue = DEFAULT_PAGE_TITLE)
     public AbstractTest setTitle(String title) {
         this.title = title;
         return this;
