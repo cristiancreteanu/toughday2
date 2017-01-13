@@ -75,3 +75,7 @@ JIRA versions
 -------------
 * Following the development versioning of the artifacts
 * We currently have versions _1.0.0_ and _1.0.0-beta_
+ 
+Branching
+---------
+* We will do NO proactive branching and will avoid having more than one long-lived branch
