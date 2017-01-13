@@ -140,10 +140,11 @@ public class CliParser implements ConfigurationParser {
      */
     private String getSuiteSetupDescription() {
         String suiteSetupDesc = "Setup step for the test suite, where \"val\" can be: ";
+        String suiteSetupList = new String();
         for(Class<? extends SuiteSetup> suiteSetupClass : ReflectionsContainer.getInstance().getSuiteSetupClasses().values()) {
-            suiteSetupDesc += " " + suiteSetupClass.getSimpleName();
+            suiteSetupList += " " + suiteSetupClass.getSimpleName();
         }
-        return (suiteSetupDesc.isEmpty() ? "(none)" : suiteSetupDesc);
+        return suiteSetupDesc  + (suiteSetupList.isEmpty() ? "(none)" : suiteSetupList);
     }
 
 
