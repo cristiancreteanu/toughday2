@@ -38,7 +38,7 @@ public class CreateAssetTreeTest extends CompositeTest {
 
     @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the assets. Internally, this is incremented")
-    public AbstractTest setFolderTitle(String title) {
+    public CreateAssetTreeTest setFolderTitle(String title) {
         createFolderTreeTest.setTitle(title);
         return this;
     }
@@ -50,7 +50,7 @@ public class CreateAssetTreeTest extends CompositeTest {
 
     @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
             desc = "The title of the folders. Internally, this is incremented")
-    public AbstractTest setAssetTitle(String title) {
+    public CreateAssetTreeTest setAssetTitle(String title) {
         uploadImageTest.setFileName(title);
         return this;
     }
@@ -62,7 +62,7 @@ public class CreateAssetTreeTest extends CompositeTest {
 
     @ConfigArgSet(required = false, defaultValue = CreateFolderTreeTest.DEFAULT_PARENT_PATH,
             desc = "The path prefix for the asset tree.")
-    public AbstractTest setParentPath(String parentPath) {
+    public CreateAssetTreeTest setParentPath(String parentPath) {
         createFolderTreeTest.setParentPath(parentPath);
         return this;
     }
@@ -80,11 +80,11 @@ public class CreateAssetTreeTest extends CompositeTest {
 
     @ConfigArgGet
     public String getAssetResourcePath() {
-        return this.getAssetResourcePath();
+        return uploadImageTest.getResourcePath();
     }
 
     @ConfigArgSet(required = false, defaultValue = TreePhaser.DEFAULT_BASE)
-    public AbstractTest setBase(String base) {
+    public CreateAssetTreeTest setBase(String base) {
         createFolderTreeTest.setBase(base);
         return this;
     }

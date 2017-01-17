@@ -3,8 +3,12 @@ package com.adobe.qe.toughday.core.config;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
+import com.adobe.qe.toughday.tests.composite.CreateAssetTreeTest;
+import com.adobe.qe.toughday.tests.composite.msm.CreateLiveCopyTreeTest;
 import com.adobe.qe.toughday.tests.sequential.GetHomepageTest;
 import com.adobe.qe.toughday.tests.sequential.GetTest;
+import com.adobe.qe.toughday.tests.sequential.image.DeleteImageTest;
+import com.adobe.qe.toughday.tests.sequential.search.QueryBuilderTest;
 
 import java.util.HashMap;
 
@@ -35,6 +39,23 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                                 "\"delete asset\", \"delete page\" steps. " +
                                 "The pages are deleted.")
         );
+        put("toughday", new TestSuite()
+                        .add(new CreateLiveCopyTreeTest()
+                                .setBase(String.valueOf(5))
+                                .setSourcePageTitle("IAmAPage")
+                                .setName("CreateLiveCopy"), 3)
+                        .add(new CreateAssetTreeTest()
+                                .setAssetTitle("IAmAnAsset")
+                                .setFolderTitle("IAmAFolder")
+                                //.setBase(String.valueOf(3))
+                                .setName("UploadAsset"), 2)
+                        .add(new DeleteImageTest()
+                                .setName("DeleteAsset"),  2)
+                        .add(new QueryBuilderTest()
+                                .setQuery("type=nt:unstructured&group.1_path=/libs&orderby=@jcr:score&orderby.sort=desc")
+                                .setName("Query"), 1)
+                        .add(new GetHomepageTest()
+                                .setName("GetHomepage"), 2));
     }
 
     public TestSuite getDefaultSuite() {

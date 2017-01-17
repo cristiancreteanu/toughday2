@@ -323,7 +323,7 @@ public class Configuration {
         public static final String DEFAULT_PROTOCOL = "http";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
 
-        public static final String DEFAULT_TIMEOUT_STRING = "3m"; // 3 minutes
+        public static final String DEFAULT_TIMEOUT_STRING = "180"; // 3 minutes
         public static final long DEFAULT_TIMEOUT = 3 * 60 * 1000l; // 5 minutes
 
         public static final String DEFAULT_CONCURRENCY_STRING = "30";
@@ -388,7 +388,7 @@ public class Configuration {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArgSet(required = false, desc ="How long a test runs before it is interrupted and marked as failed",
+        @ConfigArgSet(required = false, desc ="How long a test runs before it is interrupted and marked as failed (in seconds)",
                 defaultValue = DEFAULT_TIMEOUT_STRING, order = 7)
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;

@@ -30,8 +30,9 @@ public class QueryBuilderTest extends SequentialTestBase {
     }
 
     @ConfigArgSet(required = false, desc = "Query to be executed by the Query Builder servlet", defaultValue = DEFAULT_QUERY)
-    public void setQuery(String query) {
+    public QueryBuilderTest setQuery(String query) {
         this.query = query;
+        return this;
     }
 
     @ConfigArgGet

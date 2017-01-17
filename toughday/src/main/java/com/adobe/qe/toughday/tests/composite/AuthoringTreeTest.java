@@ -10,7 +10,7 @@ import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
-@Description(desc = "Authoring test. Steps: create page, upload asset, delete page, delete asset.")
+@Description(desc = "Authoring test. Steps: create page, upload asset.")
 public class AuthoringTreeTest extends CompositeTest {
     public static final String DEFAULT_PAGE_TITLE = "toughday_tree_title";
     public static final String DEFAULT_ASSET_NAME = "toughday_png_asset";
