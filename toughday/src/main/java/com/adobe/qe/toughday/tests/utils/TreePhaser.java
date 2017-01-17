@@ -71,6 +71,7 @@ public class TreePhaser extends Phaser {
     }
 
     public void setBase(int base) {
+        this.maxChildrenPerLevel = base;
         this.base = base;
     }
 
@@ -96,7 +97,7 @@ public class TreePhaser extends Phaser {
         return computeParentPath(nextChild, level, base, title, "/");
     }
 
-    public static String computeNodeName(int nextChild, int BASE, String title) {
-        return title + Integer.toString(nextChild % BASE, BASE);
+    public static String computeNodeName(int nextChild, int base, String title) {
+        return title + Integer.toString(nextChild % base, base);
     }
 }
