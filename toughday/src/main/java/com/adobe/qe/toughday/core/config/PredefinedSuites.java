@@ -47,7 +47,7 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                         .add(new CreateAssetTreeTest()
                                 .setAssetTitle("IAmAnAsset")
                                 .setFolderTitle("IAmAFolder")
-                                //.setBase(String.valueOf(3))
+                                .setBase(String.valueOf(3))
                                 .setName("UploadAsset"), 2)
                         .add(new DeleteImageTest()
                                 .setName("DeleteAsset"),  2)
