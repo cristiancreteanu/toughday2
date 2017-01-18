@@ -350,49 +350,49 @@ public class Configuration {
 
         // Global config args
 
-        @ConfigArgSet(required = true, order = 1)
+        @ConfigArgSet(required = true, desc = "The host name/ip which will be targeted", order = 1)
         public void setHost(String host) {
             this.host = host;
         }
 
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_PORT_STRING, order = 2)
+        @ConfigArgSet(required = false, desc = "The port of the host", defaultValue = DEFAULT_PORT_STRING, order = 2)
         public void setPort(String port) {
             this.port = Integer.parseInt(port);
         }
 
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_USER, order = 3)
+        @ConfigArgSet(required = false, desc = "User name for the instance", defaultValue = DEFAULT_USER, order = 3)
         public void setUser(String user) {
             this.user = user;
         }
 
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_PASSWORD, order = 4)
+        @ConfigArgSet(required = false, desc = "Password for the given user", defaultValue = DEFAULT_PASSWORD, order = 4)
         public void setPassword(String password) {
             this.password = password;
         }
 
-        @ConfigArgSet(required = false, desc = "Number of concurrent users", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
+        @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
         public void setConcurrency(String concurrencyString) {
             this.concurrency = Integer.parseInt(concurrencyString);
         }
 
-        @ConfigArgSet(required = false, desc = "How long to run toughday", defaultValue = DEFAULT_DURATION, order = 6)
+        @ConfigArgSet(required = false, desc = "How long the tests will run. Can be expressed in s(econds), m(inutes), h(ours), and/or d(ays). Example: 1h30m.", defaultValue = DEFAULT_DURATION, order = 6)
         public void setDuration(String durationString) {
             this.duration = parseDurationToSeconds(durationString);
         }
 
-        @ConfigArgSet(required = false, desc = "wait time between two consecutive test runs for a user in milliseconds",
+        @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
                 defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
         public void setWaitTime(String waitTime) {
             this.waitTime = Integer.parseInt(waitTime);
         }
 
-        @ConfigArgSet(required = false, desc ="How long a test runs before it is interrupted and marked as failed (in seconds)",
+        @ConfigArgSet(required = false, desc ="How long a test will run before it will be interrupted and marked as failed. Expressed in seconds",
                 defaultValue = DEFAULT_TIMEOUT_STRING, order = 7)
         public void setTimeout(String timeout) {
             this.timeout = Integer.parseInt(timeout) * 1000;
         }
 
-        @ConfigArgSet(required = false, desc = "What protocol to use", defaultValue = DEFAULT_PROTOCOL)
+        @ConfigArgSet(required = false, desc = "What type of protocol to use for the host", defaultValue = DEFAULT_PROTOCOL)
         public void setProtocol(String protocol) { this.protocol = protocol; }
 
         @ConfigArgSet(required = false, desc = "Run mode for test execution", defaultValue = RUN_MODE.NORMAL_VALUE)
@@ -400,7 +400,7 @@ public class Configuration {
             this.runMode = RUN_MODE.fromString(runMode);
         }
 
-        @ConfigArgSet(required = false, desc = "Install Toughday 2 Sample Content.", defaultValue = "true")
+        @ConfigArgSet(required = false, desc = "Install ToughDay 2 Sample Content.", defaultValue = "true")
         public void setInstallSampleContent(String installSampleContent) {
             this.installSampleContent = Boolean.valueOf(installSampleContent);
         }
