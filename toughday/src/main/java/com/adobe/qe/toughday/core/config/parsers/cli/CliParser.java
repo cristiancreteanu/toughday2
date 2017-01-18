@@ -182,10 +182,7 @@ public class CliParser implements ConfigurationParser {
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
-        if (cmdLineArgs.length == 0) {
-            printShortHelp();
-            return true;
-        } else if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
+        if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
             printHelp();
             return true;
         } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_tests")) {

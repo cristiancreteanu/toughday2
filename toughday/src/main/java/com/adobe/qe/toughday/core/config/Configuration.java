@@ -205,7 +205,7 @@ public class Configuration {
             Object value = args.remove(property);
             if (value == null) {
                 if (annotation.required()) {
-                    throw new IllegalArgumentException("Property " + property + " is required for class " + classObject.getSimpleName());
+                    throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
                 }
                 else {
                     //will use default value
@@ -318,7 +318,6 @@ public class Configuration {
         public static final String DEFAULT_DURATION = "1d";
         public static final String DEFAULT_USER = "admin";
         public static final String DEFAULT_PASSWORD = "admin";
-        public static final String DEFAULT_HOST = "localhost";
         public static final String DEFAULT_PORT_STRING = "4502";
         public static final String DEFAULT_PROTOCOL = "http";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
@@ -339,7 +338,6 @@ public class Configuration {
          */
         public GlobalArgs() {
             this.publishers = new ArrayList<>();
-            this.host = DEFAULT_HOST;
             this.port = DEFAULT_PORT;
             this.user = DEFAULT_USER;
             this.password = DEFAULT_PASSWORD;
@@ -352,7 +350,7 @@ public class Configuration {
 
         // Global config args
 
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_HOST, order = 1)
+        @ConfigArgSet(required = true, order = 1)
         public void setHost(String host) {
             this.host = host;
         }
