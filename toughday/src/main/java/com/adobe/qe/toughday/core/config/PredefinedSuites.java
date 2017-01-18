@@ -17,7 +17,7 @@ import java.util.HashMap;
  * objects will change the same suite and it will result in unexpected behaviour.
  */
 public class PredefinedSuites extends HashMap<String, TestSuite> {
-    public static final String DEFAULT_SUITE_NAME = "get_tests";
+    public static final String DEFAULT_SUITE_NAME = "toughday";
 
     public PredefinedSuites() {
         put("get_tests", new TestSuite()
