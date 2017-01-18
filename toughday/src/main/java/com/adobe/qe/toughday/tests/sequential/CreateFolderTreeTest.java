@@ -18,7 +18,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 @Description(desc="This test creates folders hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the folder tree, up to base^level")
 public class CreateFolderTreeTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreatePageTreeTest.class);
+    public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 
     private static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     private static final String UNSTRUCTURED_RESOURCE_TYPE = "nt:unstructured";
