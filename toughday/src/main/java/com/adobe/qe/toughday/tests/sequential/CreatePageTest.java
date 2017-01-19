@@ -15,7 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 @Description(desc = "This test creates pages under the same parent path." +
-        " This means that as the time passes the performance will decrease, because of OAK limitations." +
+        " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreatePageTreeTest.")
 public class CreatePageTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreatePageTest.class);

@@ -27,7 +27,9 @@ import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-@Description(desc = "Test for uploading assets.")
+@Description(desc = "Test for uploading assets under the same path."  +
+        " Due to OAK limitations, performance will decrease over time." +
+        " If you are not looking for this specific scenario, please consider using CreateAssetTreeTest.")
 public class UploadImageTest extends SequentialTestBase {
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;

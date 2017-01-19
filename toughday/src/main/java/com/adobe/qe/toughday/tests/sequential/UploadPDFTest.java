@@ -23,7 +23,9 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
-@Description(desc = "Test for uploading PDF assets")
+@Description(desc = "Test for uploading PDF assets under the same path." +
+        "Due to OAK limitations, performance will decrease over time." +
+        "If you are not looking for this specific scenario, please consider using CreatePDFTreeTest.\"")
 public class UploadPDFTest extends SequentialTestBase {
 
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
