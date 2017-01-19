@@ -55,7 +55,10 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                                 .setQuery("type=nt:unstructured&group.1_path=/libs&orderby=@jcr:score&orderby.sort=desc")
                                 .setName("Query"), 1)
                         .add(new GetHomepageTest()
-                                .setName("GetHomepage"), 2));
+                                .setName("GetHomepage"), 2)
+                        .setDescription("A heavy duty suite of AEM use cases. " +
+                                "It performs operations like: search, upload assets, delete assets, create pages, live copies and folders and gets the home page. " +
+                                "It has a proportion of 70% writes vs 30% reads."));
     }
 
     public TestSuite getDefaultSuite() {
