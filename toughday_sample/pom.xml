@@ -39,7 +39,7 @@
     <artifactId>toughday_sample</artifactId>
     <packaging>content-package</packaging>
     <name>ToughDay Sample Content</name>
-    <version>0.1.0-SNAPSHOT</version>
+    <version>0.1.0-beta</version>
 
     <!-- ====================================================================== -->
     <!-- S C M  D E F I N I T I O N                                             -->
@@ -48,7 +48,7 @@
         <connection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</connection>
         <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</developerConnection>
         <url>https://git.corp.adobe.com/QE/toughday2/tree/master/toughday_sample</url>
-        <tag>HEAD</tag>
+        <tag>toughday_sample-0.1.0-beta</tag>
     </scm>
 
     <properties>
