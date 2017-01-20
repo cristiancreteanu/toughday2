@@ -3,7 +3,7 @@
     <groupId>com.adobe.qe</groupId>
     <artifactId>toughday2</artifactId>
     <packaging>jar</packaging>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <name>toughday2</name>
 
     <scm>
