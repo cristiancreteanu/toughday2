@@ -6,26 +6,27 @@
 	<packaging>pom</packaging>
 	<version>0.1.0-SNAPSHOT</version>
 
+	<scm>
+		<connection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</connection>
+		<developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</developerConnection>
+		<url>https://git.corp.adobe.com/QE/toughday2/</url>
+		<tag>HEAD</tag>
+	</scm>
+
 	<distributionManagement>
-   		<repository>
-     			<id>${releaseRepository-Id}</id>
-     			<name>${releaseRepository-Name}</name>
-     			<url>${releaseRepository-URL}</url>
-   		</repository>
-   		<snapshotRepository>
-     			<id>${snapshotRepository-Id}</id>
-     			<name>${snapshotRepository-Name}</name>
-     			<url>${snapshotRepository-URL}</url>
-     			<uniqueVersion>false</uniqueVersion>
-   		</snapshotRepository>
+		<repository>
+			<id>${releaseRepository-Id}</id>
+			<name>${releaseRepository-Name}</name>
+			<url>${releaseRepository-URL}</url>
+		</repository>
+		<snapshotRepository>
+			<id>${snapshotRepository-Id}</id>
+			<name>${snapshotRepository-Name}</name>
+			<url>${snapshotRepository-URL}</url>
+			<uniqueVersion>false</uniqueVersion>
+		</snapshotRepository>
 	</distributionManagement>
 
-    	<scm>
-        	<connection>scm:git:git@git.corp.adobe.com:QE/toughday2</connection>
-        	<developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2</developerConnection>
-        	<url>https://git.corp.adobe.com/QE/toughday2</url>
-        	<tag>HEAD</tag>
-    	</scm>
 
 	<modules>
 		<module>toughday_sample</module>
