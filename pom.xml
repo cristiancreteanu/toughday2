@@ -4,8 +4,21 @@
 	<groupId>com.adobe.qe</groupId>
 	<artifactId>toughday2.reactor</artifactId>
 	<packaging>pom</packaging>
-	<version>0.1.0-SNAPSHOT</version>
+	<version>0.1.1-SNAPSHOT</version>
 
+	<distributionManagement>
+   		<repository>
+     			<id>${releaseRepository-Id}</id>
+     			<name>${releaseRepository-Name}</name>
+     			<url>${releaseRepository-URL}</url>
+   		</repository>
+   		<snapshotRepository>
+     			<id>${snapshotRepository-Id}</id>
+     			<name>${snapshotRepository-Name}</name>
+     			<url>${snapshotRepository-URL}</url>
+     			<uniqueVersion>false</uniqueVersion>
+   		</snapshotRepository>
+	</distributionManagement>
 
     	<scm>
         	<connection>scm:git:git@git.corp.adobe.com:QE/toughday2</connection>
