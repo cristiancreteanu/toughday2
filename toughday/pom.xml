@@ -6,6 +6,10 @@
     <version>0.1.0-SNAPSHOT</version>
     <name>toughday2</name>
 
+    <properties>
+        <sample.path>../toughday_sample/target</sample.path>
+    </properties>
+
     <scm>
         <connection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</connection>
         <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</developerConnection>
@@ -34,6 +38,9 @@
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
                     <version>3.0-r1585899</version>
+                    <configuration>
+                        <arguments> -Dsample.path=../../../${sample.path} </arguments>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -53,7 +60,7 @@
                             <overwrite>true</overwrite>
                             <resources>
                                 <resource>
-                                    <directory>../toughday_sample/target</directory>
+                                    <directory>${sample.path}</directory>
                                     <includes>
                                         <include>toughday_sample-*.zip</include>
                                     </includes>
