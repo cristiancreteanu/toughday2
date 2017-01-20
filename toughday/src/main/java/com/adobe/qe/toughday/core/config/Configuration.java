@@ -332,6 +332,7 @@ public class Configuration {
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
         private RUN_MODE runMode = RUN_MODE.NORMAL;
         private boolean installSampleContent = true;
+        private String contextPath;
 
         /**
          * Constructor
@@ -405,6 +406,11 @@ public class Configuration {
             this.installSampleContent = Boolean.valueOf(installSampleContent);
         }
 
+        @ConfigArgSet(required = false, desc = "Context path.")
+        public void setContextPath(String contextPath) {
+            this.contextPath = contextPath;
+        }
+
         // Adders and getters
 
         public void addPublisher(Publisher publisher) {
@@ -471,6 +477,9 @@ public class Configuration {
         public boolean getInstallSampleContent() {
             return installSampleContent;
         }
+
+        @ConfigArgGet
+        public String getContextPath() { return this.contextPath; }
 
 
         // Helper methods

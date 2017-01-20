@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
+import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
@@ -188,15 +189,7 @@ public class Engine {
     }
 
     public static void installToughdayContentPackage(Configuration.GlobalArgs globalArgs) throws Exception {
-        URI uri = new URIBuilder()
-                .setScheme(globalArgs.getProtocol())
-                .setHost(globalArgs.getHost())
-                .setPort(globalArgs.getPort())
-                .build();
-
-        PackageManagerClient packageManagerClient = new PackageManagerClient(uri,
-                globalArgs.getUser(),
-                globalArgs.getPassword());
+        PackageManagerClient packageManagerClient = SequentialTestBase.createClient(globalArgs).adaptTo(PackageManagerClient.class);
 
         String tdContentPackageGroup = "com.adobe.qe.toughday";
         String tdContentPackageName = ReflectionsContainer.getInstance().getToughdayContentPackage();
@@ -206,12 +199,13 @@ public class Engine {
             packageManagerClient.deletePackage(tdContentPackageName, tdContentPackageGroup);
         }
 
-        packageManagerClient
-                .uploadPackage(Engine.class.getClassLoader().getResourceAsStream(tdContentPackageName), tdContentPackageName);
+        packageManagerClient.uploadPackage(
+                Engine.class.getClassLoader().getResourceAsStream(tdContentPackageName), tdContentPackageName);
         packageManagerClient.installPackage(tdContentPackageName, tdContentPackageGroup);
     }
 
-    public static void printObject(TestSuite testSuite, PrintStream out, Object obj) throws InvocationTargetException, IllegalAccessException {
+    public static void printObject(TestSuite testSuite, PrintStream out, Object obj)
+            throws InvocationTargetException, IllegalAccessException {
         Class objectClass = obj.getClass();
         out.println("- Configuration for object of class " + objectClass.getSimpleName());
         out.println(String.format("\t%-32s %-64s", "Property", "Value"));

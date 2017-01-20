@@ -159,7 +159,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      */
     public static Logger createLogger(Class<?> clazz) {
 
-        String name = clazz.getSimpleName();
+            String name = clazz.getSimpleName();
         if (clazz.isAnnotationPresent(Name.class)) {
             Name d = clazz.getAnnotation(Name.class);
             name = d.name();
