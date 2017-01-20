@@ -188,13 +188,16 @@ public class Engine {
     }
 
     public static void installToughdayContentPackage(Configuration.GlobalArgs globalArgs) throws Exception {
-        URI uri = new URIBuilder()
+        URIBuilder uri = new URIBuilder()
                 .setScheme(globalArgs.getProtocol())
                 .setHost(globalArgs.getHost())
-                .setPort(globalArgs.getPort())
-                .build();
+                .setPort(globalArgs.getPort());
 
-        PackageManagerClient packageManagerClient = new PackageManagerClient(uri,
+        if(globalArgs.getContextPath() != null) {
+            uri.setPath(globalArgs.getContextPath());
+        }
+
+        PackageManagerClient packageManagerClient = new PackageManagerClient(uri.build(),
                 globalArgs.getUser(),
                 globalArgs.getPassword());
 

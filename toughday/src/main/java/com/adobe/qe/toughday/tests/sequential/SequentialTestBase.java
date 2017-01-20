@@ -32,13 +32,16 @@ public abstract class SequentialTestBase extends AbstractTest {
 
     public SlingClient getDefaultClient() throws Exception {
         if (defaultClient == null) {
-            URI uri = new URIBuilder()
+            URIBuilder uri = new URIBuilder()
                     .setScheme(getGlobalArgs().getProtocol())
                     .setHost(getGlobalArgs().getHost())
-                    .setPort(getGlobalArgs().getPort())
-                    .build();
+                    .setPort(getGlobalArgs().getPort());
 
-            defaultClient = new SlingClient(uri,
+            if(getGlobalArgs().getContextPath() != null) {
+                uri.setPath(getGlobalArgs().getContextPath());
+            }
+
+            defaultClient = new SlingClient(uri.build(),
                         getGlobalArgs().getUser(),
                         getGlobalArgs().getPassword());
         }
