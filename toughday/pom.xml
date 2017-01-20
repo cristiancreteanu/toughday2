@@ -9,8 +9,8 @@
 
     <scm>
         <connection>scm:git:git@git.corp.adobe.com:QE/toughday2</connection>
-        <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2</developerConnection>
-        <url>https://git.corp.adobe.com/QE/toughday2</url>
+        <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2/toughday</developerConnection>
+        <url>https://git.corp.adobe.com/QE/toughday2/toughday</url>
         <tag>HEAD</tag>
     </scm>
 
