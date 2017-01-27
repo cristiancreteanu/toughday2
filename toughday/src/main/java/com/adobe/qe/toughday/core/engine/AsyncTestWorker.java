@@ -19,7 +19,10 @@
 package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.core.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+import java.security.acl.LastOwnerException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -30,6 +33,8 @@ import java.util.concurrent.locks.ReentrantLock;
  * Async worker for running tests. There will be GlobalArgs.Concurrency test workers.
  */
 class AsyncTestWorker extends AsyncEngineWorker {
+    private static final Logger LOG = LogManager.getLogger(AsyncTestWorker.class);
+
     private final Engine engine;
     private RunMap localRunMap;
     private HashMap<UUID, AbstractTest> localTests;
@@ -99,9 +104,10 @@ class AsyncTestWorker extends AsyncEngineWorker {
         mutex.lock();
         try {
             while (!isFinished()) {
-                currentTest = Engine.getNextTest(this.testSuite, engine.getGlobalRunMap());
+                currentTest = Engine.getNextTest(this.testSuite, engine.getGlobalRunMap(), engine.getEngineSync());
                 // if no test available, finish
                 if (null == currentTest) {
+                    LOG.info("Thread " + workerThread + " died! :(");
                     this.finishExecution();
                     continue;
                 }

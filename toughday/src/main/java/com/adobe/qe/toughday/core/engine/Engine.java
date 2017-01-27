@@ -7,17 +7,13 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.utils.URIBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.reflections.Reflections;
 
 import java.io.OutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -26,6 +22,9 @@ import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Engine for running a test suite.
@@ -43,6 +42,7 @@ public class Engine {
     private ExecutorService testsExecutorService;
     private ExecutorService engineExecutorService;
     private RunMap globalRunMap;
+    private EngineSync engineSync = new EngineSync();
 
     /**
      * Constructor
@@ -336,31 +336,118 @@ public class Engine {
         }
     }
 
+    private static class EngineSync {
+        private Lock lock = new ReentrantLock();
+        private AtomicInteger readThreads = new AtomicInteger(0);
+        private ManualResetEvent event = new ManualResetEvent();
+
+        public void subscribe() throws InterruptedException {
+            event.waitOne();
+            readThreads.incrementAndGet();
+        }
+
+        public void holdSubscribeAndAwaitExisting() {
+            event.reset();
+            while (readThreads.get() != 1) {}
+        }
+
+        public boolean tryLock() {
+            return lock.tryLock();
+        }
+
+        public void unlockAndAllowSubscribe() {
+            lock.unlock();
+            event.set();
+        }
+
+        public void unsubscribe() {
+            readThreads.decrementAndGet();
+        }
+
+        private static class ManualResetEvent {
+            private final Object monitor = new Object();
+            private volatile boolean open = false;
+
+            public ManualResetEvent(boolean open) {
+                this.open = open;
+            }
+
+            public ManualResetEvent() {
+                this(true);
+            }
+
+            public void waitOne() throws InterruptedException {
+                synchronized (monitor) {
+                    while (open == false) {
+                        monitor.wait();
+                    }
+                }
+            }
+
+            public void set() {//open
+                synchronized (monitor) {
+                    if(!open) {
+                        open = true;
+                        monitor.notifyAll();
+                    }
+                }
+            }
+
+            public void reset() {//closed
+                open = false;
+            }
+        }
+    }
+
+
+    public EngineSync getEngineSync() {
+        return engineSync;
+    }
 
     /**
      * Method for getting the next weighted random test form the test suite
      * TODO: optimize
      */
-    protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap) {
-        int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
-        AbstractTest selectedTest = null;
-        for (AbstractTest test : testSuite.getTests()) {
-            int testWeight = testSuite.getWeightMap().get(test);
-            boolean selectTest = (randomNumber < testWeight);
+    protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap, EngineSync engineSync) throws InterruptedException {
 
-            // Approximation based on how many times the test has been run globally
-            long totalRuns = globalRunMap.getRecord(test).getTotalRuns();
-            if (null != testSuite.getCount(test)) {
-                selectTest &= totalRuns < testSuite.getCount(test);
+        //If we didn't find the next test we start looking for it assuming that not all counts are done
+        while (testSuite.getTests().size() != 0) {
+            try {
+                engineSync.subscribe();
+                int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
+                for (AbstractTest test : testSuite.getTests()) {
+                    int testWeight = testSuite.getWeightMap().get(test);
+
+                    long testRuns = globalRunMap.getRecord(test).getTotalRuns();
+                    Long maxRuns   = testSuite.getCount(test);
+
+                    //If max runs was exceeded for a test
+                    if (null != maxRuns && testRuns > maxRuns) {
+                        //Try to acquire the lock for removing the test from the suite
+                        if(!engineSync.tryLock()) break;
+                        try {
+                            //Don't allow any threads to subscribe and wait for all subscribed threads to unsubscribe
+                            engineSync.holdSubscribeAndAwaitExisting();
+                            //Remove test from suite
+                            testSuite.remove(test);
+                        } finally {
+                            //Release lock and allow subscribers
+                            engineSync.unlockAndAllowSubscribe();
+
+                            //Start looking for the test from the beginning as the total weight changed
+                            break;
+                        }
+                    }
+                    if (randomNumber < testWeight) {
+                        return test;
+                    }
+                    randomNumber = randomNumber - testWeight;
+                }
+            } finally {
+                engineSync.unsubscribe();
             }
-            if (selectTest) {
-                selectedTest = test;
-                break;
-            }
-            randomNumber = randomNumber - testWeight;
         }
-
-        return selectedTest;
+        return null;
     }
 
     private static void logGlobal(String message) {
