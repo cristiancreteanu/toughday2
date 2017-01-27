@@ -242,7 +242,7 @@ public class CliParser implements ConfigurationParser {
                     parserArgHelp.name() + "=val", parserArgHelp.defaultValue(), parserArgHelp.description());
         }
 
-        System.out.printf("\t%-32s\t %s\r\n", "--suitesetup=val", getSuiteSetupDescription());
+        //System.out.printf("\t%-32s\t %s\r\n", "--suitesetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
                 "where \"val\" can be one predefined suite.");
 
