@@ -409,11 +409,9 @@ public class Engine {
      * TODO: optimize
      */
     protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap, EngineSync engineSync) throws InterruptedException {
-        boolean notAllCountsAreDone = true;
 
         //If we didn't find the next test we start looking for it assuming that not all counts are done
-        while (notAllCountsAreDone) {
-            notAllCountsAreDone = false;
+        while (testSuite.getTests().size() != 0) {
             try {
                 engineSync.subscribe();
                 int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
@@ -439,8 +437,6 @@ public class Engine {
                             //Start looking for the test from the beginning as the total weight changed
                             break;
                         }
-                    } else {
-                        notAllCountsAreDone = true;
                     }
                     if (randomNumber < testWeight) {
                         return test;
