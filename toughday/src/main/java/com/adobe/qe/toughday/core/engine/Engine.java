@@ -189,6 +189,7 @@ public class Engine {
     }
 
     public static void installToughdayContentPackage(Configuration.GlobalArgs globalArgs) throws Exception {
+        logGlobal("Installing ToughDay 2 Content Package...");
         PackageManagerClient packageManagerClient = SequentialTestBase.createClient(globalArgs).adaptTo(PackageManagerClient.class);
 
         String tdContentPackageGroup = "com.adobe.qe.toughday";
@@ -202,6 +203,7 @@ public class Engine {
         packageManagerClient.uploadPackage(
                 Engine.class.getClassLoader().getResourceAsStream(tdContentPackageName), tdContentPackageName);
         packageManagerClient.installPackage(tdContentPackageName, tdContentPackageGroup);
+        logGlobal("Finished installing ToughDay 2 Content Package.");
     }
 
     public static void printObject(TestSuite testSuite, PrintStream out, Object obj)
@@ -254,15 +256,14 @@ public class Engine {
     }
 
     private void run() throws Exception {
-        LogManager.getLogger(Main.class).info("Running tests for {} seconds or until count for all tests has been reached",
-                configuration.getGlobalArgs().getDuration());
+        logGlobal(String.format("Running tests for %s seconds or until count for all tests has been reached",
+                configuration.getGlobalArgs().getDuration()));
 
-        LOG.info("Test execution started at: " + getCurrentDateTime());
+        logGlobal("Test execution started at: " + getCurrentDateTime());
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                LOG.info("Test execution finished at: " + getCurrentDateTime());
-                LogManager.getLogger(Main.class).info("Finished running tests");
+                logGlobal("Test execution finished at: " + getCurrentDateTime());
             }
         });
 
@@ -358,6 +359,11 @@ public class Engine {
         }
 
         return selectedTest;
+    }
+
+    private static void logGlobal(String message) {
+        LOG.info(message);
+        LogManager.getLogger(Main.class).info(message);
     }
 
     /**
