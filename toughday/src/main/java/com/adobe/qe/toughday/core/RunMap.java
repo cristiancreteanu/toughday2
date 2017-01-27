@@ -49,6 +49,13 @@ public class RunMap {
         }
     }
 
+    //TODO refactor this
+    public void reinitStartTimes() {
+        for (TestEntry entry : runMap.values()) {
+            entry.reinitStartTime();
+        }
+    }
+
     public RunMap newInstance() {
         return new RunMap(threads, runMap.keySet());
     }
@@ -140,7 +147,7 @@ public class RunMap {
          */
         public TestEntry(AbstractTest test) {
             this.test = test;
-            this.startNanoTime = System.nanoTime();
+            reinitStartTime();
             init();
         }
 
@@ -172,6 +179,12 @@ public class RunMap {
                 durationDistribution.put(intDuration, 0L);
             }
             durationDistribution.put(intDuration, durationDistribution.get(intDuration) + 1);
+        }
+
+        //TODO refactor this?
+        public synchronized void reinitStartTime() {
+            this.startNanoTime = System.nanoTime();
+            this.lastNanoTime = System.nanoTime();
         }
 
         @Override

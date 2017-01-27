@@ -278,6 +278,8 @@ public class Engine {
             runFactorySetup(test);
         }
 
+        globalRunMap.reinitStartTimes();
+
         // Create the test worker threads
         List<AsyncTestWorker> testWorkers = new ArrayList<>();
         for (int i = 0; i < globalArgs.getConcurrency(); i++) {
