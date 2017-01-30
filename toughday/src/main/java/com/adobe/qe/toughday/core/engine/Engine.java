@@ -24,7 +24,9 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Engine for running a test suite.
@@ -42,7 +44,7 @@ public class Engine {
     private ExecutorService testsExecutorService;
     private ExecutorService engineExecutorService;
     private RunMap globalRunMap;
-    private final EngineSync engineSync = new EngineSync();
+    private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
 
     /**
      * Constructor
@@ -336,75 +338,9 @@ public class Engine {
         }
     }
 
-    private static class EngineSync {
-        private final Lock lock = new ReentrantLock();
-        private final AtomicInteger readThreads = new AtomicInteger(0);
-        private final ManualResetEvent event = new ManualResetEvent();
-
-        public void subscribe() throws InterruptedException {
-            synchronized (event.getMonitor()) {
-                event.waitOne();
-                readThreads.incrementAndGet();
-            }
-        }
-
-        public void holdSubscribeAndAwaitExisting() {
-            event.reset();
-            while (readThreads.get() != 1) {}
-        }
-
-        public boolean tryLock() {
-            return lock.tryLock();
-        }
-
-        public void unlockAndAllowSubscribe() {
-            lock.unlock();
-            event.set();
-        }
-
-        public void unsubscribe() {
-            readThreads.decrementAndGet();
-        }
-
-        private static class ManualResetEvent {
-            private final Object monitor = new Object();
-            private volatile boolean open = false;
-
-            public ManualResetEvent(boolean open) {
-                this.open = open;
-            }
-
-            public ManualResetEvent() {
-                this(true);
-            }
-
-            public void waitOne() throws InterruptedException {
-                synchronized (monitor) {
-                    while (open == false) {
-                        monitor.wait();
-                    }
-                }
-            }
-
-            public void set() {//open
-                synchronized (monitor) {
-                    if(!open) {
-                        open = true;
-                        monitor.notifyAll();
-                    }
-                }
-            }
-
-            public void reset() {//closed
-                open = false;
-            }
-
-            public Object getMonitor() { return  monitor; }
-        }
-    }
 
 
-    public EngineSync getEngineSync() {
+    public ReentrantReadWriteLock getEngineSync() {
         return engineSync;
     }
 
@@ -412,12 +348,11 @@ public class Engine {
      * Method for getting the next weighted random test form the test suite
      * TODO: optimize
      */
-    protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap, EngineSync engineSync) throws InterruptedException {
-
+    protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap, ReentrantReadWriteLock engineSync) throws InterruptedException {
         //If we didn't find the next test we start looking for it assuming that not all counts are done
         while (testSuite.getTests().size() != 0) {
+            engineSync.readLock().lock();
             try {
-                engineSync.subscribe();
                 int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
                 for (AbstractTest test : testSuite.getTests()) {
                     int testWeight = testSuite.getWeightMap().get(test);
@@ -427,22 +362,18 @@ public class Engine {
 
                     //If max runs was exceeded for a test
                     if (null != maxRuns && testRuns > maxRuns) {
-                        boolean lockAquired = false;
                         //Try to acquire the lock for removing the test from the suite
+                        engineSync.readLock().unlock();
+                        engineSync.writeLock().lock();
                         try {
-                            lockAquired = engineSync.tryLock();
-                            if(!lockAquired) { break; }
-                            //Don't allow any threads to subscribe and wait for all subscribed threads to unsubscribe
-                            engineSync.holdSubscribeAndAwaitExisting();
+                            if(!testSuite.contains(test.getName())) { break; }
                             //Remove test from suite
                             testSuite.remove(test);
                             //Start looking for the test from the beginning as the total weight changed
                             break;
                         } finally {
-                            if (lockAquired) {
-                                //Release lock and allow subscribers
-                                engineSync.unlockAndAllowSubscribe();
-                            }
+                            engineSync.writeLock().unlock();
+                            engineSync.readLock().lock();
                         }
                     }
                     if (randomNumber < testWeight) {
@@ -451,7 +382,7 @@ public class Engine {
                     randomNumber = randomNumber - testWeight;
                 }
             } finally {
-                engineSync.unsubscribe();
+                engineSync.readLock().unlock();
             }
         }
         return null;
