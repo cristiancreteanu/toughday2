@@ -42,7 +42,7 @@ public class Engine {
     private ExecutorService testsExecutorService;
     private ExecutorService engineExecutorService;
     private RunMap globalRunMap;
-    private EngineSync engineSync = new EngineSync();
+    private final EngineSync engineSync = new EngineSync();
 
     /**
      * Constructor
@@ -337,13 +337,15 @@ public class Engine {
     }
 
     private static class EngineSync {
-        private Lock lock = new ReentrantLock();
-        private AtomicInteger readThreads = new AtomicInteger(0);
-        private ManualResetEvent event = new ManualResetEvent();
+        private final Lock lock = new ReentrantLock();
+        private final AtomicInteger readThreads = new AtomicInteger(0);
+        private final ManualResetEvent event = new ManualResetEvent();
 
         public void subscribe() throws InterruptedException {
-            event.waitOne();
-            readThreads.incrementAndGet();
+            synchronized (event.getMonitor()) {
+                event.waitOne();
+                readThreads.incrementAndGet();
+            }
         }
 
         public void holdSubscribeAndAwaitExisting() {
@@ -396,6 +398,8 @@ public class Engine {
             public void reset() {//closed
                 open = false;
             }
+
+            public Object getMonitor() { return  monitor; }
         }
     }
 
