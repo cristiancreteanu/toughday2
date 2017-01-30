@@ -423,19 +423,22 @@ public class Engine {
 
                     //If max runs was exceeded for a test
                     if (null != maxRuns && testRuns > maxRuns) {
+                        boolean lockAquired = false;
                         //Try to acquire the lock for removing the test from the suite
-                        if(!engineSync.tryLock()) break;
                         try {
+                            lockAquired = engineSync.tryLock();
+                            if(!lockAquired) { break; }
                             //Don't allow any threads to subscribe and wait for all subscribed threads to unsubscribe
                             engineSync.holdSubscribeAndAwaitExisting();
                             //Remove test from suite
                             testSuite.remove(test);
-                        } finally {
-                            //Release lock and allow subscribers
-                            engineSync.unlockAndAllowSubscribe();
-
                             //Start looking for the test from the beginning as the total weight changed
                             break;
+                        } finally {
+                            if (lockAquired) {
+                                //Release lock and allow subscribers
+                                engineSync.unlockAndAllowSubscribe();
+                            }
                         }
                     }
                     if (randomNumber < testWeight) {
