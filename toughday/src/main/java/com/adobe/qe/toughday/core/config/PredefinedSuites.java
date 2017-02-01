@@ -58,7 +58,7 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                                 .setName("GetHomepage"), 75)
                         .setDescription("A heavy duty suite of AEM use cases. " +
                                 "It performs operations like: search, upload assets, delete assets, create pages, live copies and folders and gets the home page. " +
-                                "It has a proportion of 70% writes vs 30% reads."));
+                                "It has a proportion of 15% writes vs 85% reads."));
     }
 
     public TestSuite getDefaultSuite() {
