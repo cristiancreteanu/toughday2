@@ -325,10 +325,10 @@ public class Configuration {
         public static final String DEFAULT_TIMEOUT_STRING = "180"; // 3 minutes
         public static final long DEFAULT_TIMEOUT = 3 * 60 * 1000l; // 5 minutes
 
-        public static final String DEFAULT_CONCURRENCY_STRING = "30";
+        public static final String DEFAULT_CONCURRENCY_STRING = "200";
         public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
 
-        public static final String DEFAULT_WAIT_TIME_STRING = "1000";
+        public static final String DEFAULT_WAIT_TIME_STRING = "300";
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
         private RUN_MODE runMode = RUN_MODE.NORMAL;
         private boolean installSampleContent = true;
