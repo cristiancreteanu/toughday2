@@ -265,7 +265,8 @@ public class RunMap {
             long totalRuns = 0;
             synchronized (other) {
                 this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
-                this.totalRuns += totalRuns = other.totalRuns;
+                totalRuns = other.totalRuns;
+                this.totalRuns += other.totalRuns;
                 this.totalDuration += other.totalDuration;
                 this.failRuns += other.failRuns;
                 this.minDuration = Math.min(this.minDuration, other.minDuration);

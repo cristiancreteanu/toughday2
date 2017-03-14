@@ -6,7 +6,9 @@ import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 
 import java.lang.reflect.Modifier;
-import java.util.*;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.regex.Pattern;
 
 /**

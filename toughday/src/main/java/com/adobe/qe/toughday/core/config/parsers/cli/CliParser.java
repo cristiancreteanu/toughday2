@@ -6,7 +6,6 @@ import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
-import javassist.runtime.Desc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
