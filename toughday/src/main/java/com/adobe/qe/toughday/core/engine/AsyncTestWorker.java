@@ -104,7 +104,7 @@ class AsyncTestWorker extends AsyncEngineWorker {
         mutex.lock();
         try {
             while (!isFinished()) {
-                currentTest = Engine.getNextTest(this.testSuite, engine.getGlobalRunMap(), engine.getEngineSync());
+                currentTest = Engine.getNextTest(this.testSuite, engine.getCounts(), engine.getEngineSync());
                 // if no test available, finish
                 if (null == currentTest) {
                     LOG.info("Thread " + workerThread + " died! :(");

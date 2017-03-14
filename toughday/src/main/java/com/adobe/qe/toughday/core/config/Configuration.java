@@ -333,6 +333,8 @@ public class Configuration {
         private RUN_MODE runMode = RUN_MODE.NORMAL;
         private boolean installSampleContent = true;
         private String contextPath;
+        private String publishMode = "simple";
+        private long interval = 5;
 
         /**
          * Constructor
@@ -411,6 +413,12 @@ public class Configuration {
             this.contextPath = contextPath;
         }
 
+        @ConfigArgSet(required = false, desc = "Publish mode for outputing results", defaultValue = "simple")
+        public void setPublishMode(String publishMode) { this.publishMode = publishMode; }
+
+        @ConfigArgSet(required = false, defaultValue = "5s", desc = "Set the publishing interval. Can be expressed in s(econds), m(inutes), h(ours). Example: 1m30s. (Available only when publishmode=intervals)")
+        public void setInterval(String interval) { this.interval = parseDurationToSeconds(interval); }
+
         // Adders and getters
 
         public void addPublisher(Publisher publisher) {
@@ -480,6 +488,12 @@ public class Configuration {
 
         @ConfigArgGet
         public String getContextPath() { return this.contextPath; }
+
+        @ConfigArgGet
+        public String getPublishMode() { return this.publishMode; }
+
+        @ConfigArgGet
+        public long getInterval() { return this.interval; }
 
 
         // Helper methods

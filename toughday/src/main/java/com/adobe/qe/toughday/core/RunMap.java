@@ -43,9 +43,19 @@ public class RunMap {
         }
     }
 
-    public void aggregateAndReinitialize (RunMap other) {
+    public Map<AbstractTest, Long> aggregateAndReinitialize (RunMap other) {
+        Map<AbstractTest, Long> counts = new HashMap<>();
         for (Map.Entry<AbstractTest, TestEntry> entry : other.runMap.entrySet()) {
-            this.runMap.get(entry.getKey()).aggregateAndReinitialize(entry.getValue());
+            long count = this.runMap.get(entry.getKey()).aggregateAndReinitialize(entry.getValue());
+            counts.put(entry.getKey(), count);
+        }
+        return counts;
+    }
+
+    public synchronized void reinitialize() {
+        for (TestEntry testEntry : runMap.values()) {
+            testEntry.init();
+            testEntry.reinitStartTime();
         }
     }
 
@@ -251,10 +261,11 @@ public class RunMap {
             return -1;
         }
 
-        public synchronized void aggregateAndReinitialize(TestEntry other) {
+        public synchronized long aggregateAndReinitialize(TestEntry other) {
+            long totalRuns = 0;
             synchronized (other) {
                 this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
-                this.totalRuns += other.totalRuns;
+                this.totalRuns += totalRuns = other.totalRuns;
                 this.totalDuration += other.totalDuration;
                 this.failRuns += other.failRuns;
                 this.minDuration = Math.min(this.minDuration, other.minDuration);
@@ -273,6 +284,7 @@ public class RunMap {
                 }
                 other.init();
             }
+            return totalRuns;
         }
     }
 }

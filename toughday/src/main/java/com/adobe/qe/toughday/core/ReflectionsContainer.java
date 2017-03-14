@@ -1,14 +1,12 @@
 package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Internal;
+import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -36,6 +34,7 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends AbstractTest>> testClasses;
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
+    private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
 
     private String toughdayContentPackage;
 
@@ -52,6 +51,7 @@ public class ReflectionsContainer {
         testClasses = new HashMap<>();
         publisherClasses = new HashMap<>();
         suiteSetupClasses = new HashMap<>();
+        publishModeClasses = new HashMap<>();
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
@@ -78,6 +78,16 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A suite class with this name already exists here: "
                         + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
+        }
+
+        for (Class<? extends PublishMode> publishModeClass : reflections.getSubTypesOf(PublishMode.class)) {
+            if(excludeClass(publishModeClass)) continue;
+            String identifier = publishModeClass.getSimpleName().toLowerCase();
+            if(publishModeClasses.containsKey(identifier)) {
+                throw new IllegalStateException("A publish mode class with this name already exists here: "
+                        + publishModeClasses.get(identifier).getName());
+            }
+            publishModeClasses.put(identifier, publishModeClass);
         }
 
         Reflections reflections = new Reflections("", new ResourcesScanner());
@@ -108,6 +118,11 @@ public class ReflectionsContainer {
     public HashMap<String, Class<? extends SuiteSetup>> getSuiteSetupClasses() {
         return suiteSetupClasses;
     }
+
+    /**
+     * Getter for the map of PublishMode classes
+     */
+    public Map<String, Class<? extends PublishMode>> getPublishModeClasses() { return publishModeClasses; }
 
     public String getToughdayContentPackage() {
         return toughdayContentPackage;
