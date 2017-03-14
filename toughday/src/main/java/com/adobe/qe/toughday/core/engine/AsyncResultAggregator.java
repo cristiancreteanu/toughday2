@@ -18,10 +18,13 @@
  ******************************************************************************/
 package com.adobe.qe.toughday.core.engine;
 
+import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Worker for aggregating and publishing benchmarks.
@@ -49,7 +52,12 @@ class AsyncResultAggregator extends AsyncEngineWorker {
                 finished = false;
             }
             RunMap localRunMap = worker.getLocalRunMap();
-            engine.getGlobalRunMap().aggregateAndReinitialize(localRunMap);
+            Map<AbstractTest, Long> counts = engine.getPublishMode().aggregateAndReinitialize(localRunMap);
+
+            Map<AbstractTest, AtomicLong> globalCounts = engine.getCounts();
+            for(Map.Entry<AbstractTest, Long> entry : counts.entrySet()) {
+                globalCounts.get(entry.getKey()).addAndGet(entry.getValue());
+            }
         }
         return finished;
     }
@@ -66,7 +74,7 @@ class AsyncResultAggregator extends AsyncEngineWorker {
                 if (testsFinished) {
                     this.finishExecution();
                 }
-                publishIntermediateResults();
+                engine.getPublishMode().publishIntermediateResults();
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
@@ -79,15 +87,6 @@ class AsyncResultAggregator extends AsyncEngineWorker {
             stopPublishers();
         }
         aggregateResults();
-    }
-
-    /**
-     * Method for publishing intermediate results.
-     */
-    public void publishIntermediateResults() {
-        for(Publisher publisher : engine.getGlobalArgs().getPublishers()) {
-            publisher.publishIntermediate(engine.getGlobalRunMap().getTestStatistics());
-        }
     }
 
     private void stopPublishers() {

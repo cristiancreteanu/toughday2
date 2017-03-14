@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
+import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -15,17 +16,11 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantLock;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
@@ -33,7 +28,7 @@ import java.util.concurrent.locks.ReentrantReadWriteLock;
  */
 public class Engine {
     protected static final Logger LOG = LogManager.getLogger(Engine.class);
-    protected static final int RESULT_AGGREATION_DELAY = 1000; //in ms
+    public static final int RESULT_AGGREATION_DELAY = 1000; //in 1 Second
     protected static final int WAIT_TERMINATION_FACTOR = 30;
     protected static final double TIMEOUT_CHECK_FACTOR = 0.03;
     protected static Random _rnd = new Random();
@@ -43,8 +38,9 @@ public class Engine {
     private Configuration.GlobalArgs globalArgs;
     private ExecutorService testsExecutorService;
     private ExecutorService engineExecutorService;
-    private RunMap globalRunMap;
+    private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
+    private PublishMode publishMode;
 
     /**
      * Constructor
@@ -62,26 +58,38 @@ public class Engine {
         this.testsExecutorService = Executors.newFixedThreadPool(globalArgs.getConcurrency());
         this.engineExecutorService = Executors.newFixedThreadPool(2);
 
-        this.globalRunMap = new RunMap(globalArgs.getConcurrency());
+        Class<? extends PublishMode> publishModeClass =
+                ReflectionsContainer.getInstance()
+                    .getPublishModeClasses()
+                    .get(globalArgs.getPublishMode());
+
+        if(publishModeClass == null) {
+            throw new IllegalStateException("A publish mode with the identifier \"" + globalArgs.getPublishMode() + "\" does not exist");
+        }
+
+        publishMode = publishModeClass
+                .getConstructor(Engine.class)
+                .newInstance(this);
+
         for(AbstractTest test : testSuite.getTests()) {
             add(test);
         }
     }
 
     /**
-     * Returns the Global Run map object
-     * @return
-     */
-    protected RunMap getGlobalRunMap() {
-        return globalRunMap;
-    }
-
-    /**
      * Returns the global args
      * @return
      */
-    protected Configuration.GlobalArgs getGlobalArgs() {
+    public Configuration.GlobalArgs getGlobalArgs() {
         return globalArgs;
+    }
+
+    public Map<AbstractTest, AtomicLong> getCounts() {
+        return counts;
+    }
+
+    public PublishMode getPublishMode() {
+        return publishMode;
     }
 
     /**
@@ -101,7 +109,8 @@ public class Engine {
     }
 
     private Engine addToRunMap(AbstractTest test) {
-        globalRunMap.addTest(test);
+        publishMode.getGlobalRunMap().addTest(test);
+        counts.put(test, new AtomicLong(0));
         if(test.includeChildren()) {
             for (AbstractTest child : test.getChildren()) {
                 addToRunMap(child);
@@ -280,12 +289,12 @@ public class Engine {
             runFactorySetup(test);
         }
 
-        globalRunMap.reinitStartTimes();
+        publishMode.getGlobalRunMap().reinitStartTimes();
 
         // Create the test worker threads
         List<AsyncTestWorker> testWorkers = new ArrayList<>();
         for (int i = 0; i < globalArgs.getConcurrency(); i++) {
-            AsyncTestWorker runner = new AsyncTestWorker(this, testSuite, globalRunMap.newInstance());
+            AsyncTestWorker runner = new AsyncTestWorker(this, testSuite, publishMode.getGlobalRunMap().newInstance());
             testWorkers.add(runner);
             testsExecutorService.execute(runner);
         }
@@ -323,21 +332,11 @@ public class Engine {
 
             shutdownAndAwaitTermination(testsExecutorService);
             shutdownAndAwaitTermination(engineExecutorService);
-            publishFinalResults();
+            publishMode.publishFinalResults();
 
             LOG.info("Test execution finished at: " + getCurrentDateTime());
         }
     }
-
-    /**
-     * Publish final results.
-     */
-    private void publishFinalResults() {
-        for (Publisher publisher : globalArgs.getPublishers()) {
-            publisher.publishFinal(globalRunMap.getTestStatistics());
-        }
-    }
-
 
 
     public ReentrantReadWriteLock getEngineSync() {
@@ -348,7 +347,7 @@ public class Engine {
      * Method for getting the next weighted random test form the test suite
      * TODO: optimize
      */
-    protected static AbstractTest getNextTest(TestSuite testSuite, RunMap globalRunMap, ReentrantReadWriteLock engineSync) throws InterruptedException {
+    protected static AbstractTest getNextTest(TestSuite testSuite, Map<AbstractTest, AtomicLong> counts, ReentrantReadWriteLock engineSync) throws InterruptedException {
         //If we didn't find the next test we start looking for it assuming that not all counts are done
         while (testSuite.getTests().size() != 0) {
             engineSync.readLock().lock();
@@ -357,7 +356,7 @@ public class Engine {
                 for (AbstractTest test : testSuite.getTests()) {
                     int testWeight = testSuite.getWeightMap().get(test);
 
-                    long testRuns = globalRunMap.getRecord(test).getTotalRuns();
+                    long testRuns = counts.get(test).get();
                     Long maxRuns   = testSuite.getCount(test);
 
                     //If max runs was exceeded for a test
