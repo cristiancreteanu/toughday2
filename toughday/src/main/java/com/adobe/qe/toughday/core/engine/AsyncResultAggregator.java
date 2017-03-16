@@ -29,7 +29,7 @@ import java.util.concurrent.atomic.AtomicLong;
 /**
  * Worker for aggregating and publishing benchmarks.
  */
-class AsyncResultAggregator extends AsyncEngineWorker {
+public class AsyncResultAggregator extends AsyncEngineWorker {
     private final Engine engine;
     private List<AsyncTestWorker> testWorkers;
 

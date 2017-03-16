@@ -27,7 +27,7 @@ import java.util.List;
  * Worker for checking timeout and interrupting test worker threads when timeout is exceeded.
  * It uses Thread.interrupt for letting workers know the
  */
-class AsyncTimeoutChecker extends AsyncEngineWorker {
+public class AsyncTimeoutChecker extends AsyncEngineWorker {
     private Engine engine;
     private final Thread mainThread;
     private List<AsyncTestWorker> testWorkers;

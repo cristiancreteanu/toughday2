@@ -5,7 +5,10 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
+import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
+import com.sun.org.apache.regexp.internal.RE;
+import com.sun.org.apache.regexp.internal.ReaderCharacterIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -248,8 +251,9 @@ public class CliParser implements ConfigurationParser {
                 "where \"val\" can be one predefined suite.");
 
         System.out.println("\r\nAvailable run modes:");
-        for(Configuration.RUN_MODE run_mode : Configuration.RUN_MODE.values()) {
-            System.out.printf("\t%-71s %s\r\n", run_mode.value(), run_mode.description());
+        for(Map.Entry<String, Class<? extends RunMode>> runMode : ReflectionsContainer.getInstance().getRunModeClasses().entrySet()) {
+            Description description = runMode.getValue().getAnnotation(Description.class);
+            System.out.printf("\t%-71s %s\r\n", runMode.getKey(), description != null ? description.desc() : "");
         }
 
         System.out.println("\r\nAvailable publish modes:");

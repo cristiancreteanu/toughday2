@@ -263,43 +263,6 @@ public class Configuration {
         String description();
     }
 
-    //TODO when implementing constant troughput refactor into individual classes.
-    public enum RUN_MODE implements RunMode {
-        DRY {
-            @Override
-            public String value() {
-                return DRY_VALUE;
-            }
-
-            @Override
-            public String description() {
-                return "Prints the resulting configuration. Does not run any test.";
-            }
-        }, NORMAL {
-            @Override
-            public String value() {
-                return NORMAL_VALUE;
-            }
-            @Override
-            public String description() {
-                return "Runs tests normally.";
-            }
-        };
-
-        public static RUN_MODE fromString(String runModeString) {
-            for (RUN_MODE runMode : RUN_MODE.values()) {
-                if(runMode.value().equals(runModeString)) {
-                    return runMode;
-                }
-            }
-
-            throw new IllegalArgumentException("Invalid run mode \"" + runModeString + "\"");
-        }
-
-        public static final String DRY_VALUE = "dry";
-        public static final String NORMAL_VALUE = "normal";
-    }
-
     /**
      * Class for global arguments.
      */
@@ -330,9 +293,9 @@ public class Configuration {
 
         public static final String DEFAULT_WAIT_TIME_STRING = "300";
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
-        private RUN_MODE runMode = RUN_MODE.NORMAL;
         private boolean installSampleContent = true;
         private String contextPath;
+        private String runMode = "normal";
         private String publishMode = "simple";
         private long interval = 5;
 
@@ -398,9 +361,9 @@ public class Configuration {
         @ConfigArgSet(required = false, desc = "What type of protocol to use for the host", defaultValue = DEFAULT_PROTOCOL)
         public void setProtocol(String protocol) { this.protocol = protocol; }
 
-        @ConfigArgSet(required = false, desc = "Run mode for test execution", defaultValue = RUN_MODE.NORMAL_VALUE)
+        @ConfigArgSet(required = false, desc = "Run mode for test execution", defaultValue = "normal")
         public void setRunMode(String runMode) {
-            this.runMode = RUN_MODE.fromString(runMode);
+            this.runMode = runMode;
         }
 
         @ConfigArgSet(required = false, desc = "Install ToughDay 2 Sample Content.", defaultValue = "true")
@@ -427,10 +390,6 @@ public class Configuration {
 
         @ConfigArgGet
         public String getRunMode() {
-            return runMode.value();
-        }
-
-        public RUN_MODE getRunModeEnum() {
             return runMode;
         }
 

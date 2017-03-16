@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.annotations.FactorySetup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
+import com.adobe.qe.toughday.core.engine.runmodes.Dry;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -34,13 +35,12 @@ public class Engine {
     protected static Random _rnd = new Random();
 
     private final Configuration configuration;
-    private TestSuite testSuite;
     private Configuration.GlobalArgs globalArgs;
-    private ExecutorService testsExecutorService;
-    private ExecutorService engineExecutorService;
+    private ExecutorService engineExecutorService = Executors.newFixedThreadPool(2);
     private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private PublishMode publishMode;
+    private RunMode runMode;
 
     /**
      * Constructor
@@ -53,10 +53,7 @@ public class Engine {
     public Engine(Configuration configuration)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.configuration = configuration;
-        this.testSuite = configuration.getTestSuite();
         this.globalArgs = configuration.getGlobalArgs();
-        this.testsExecutorService = Executors.newFixedThreadPool(globalArgs.getConcurrency());
-        this.engineExecutorService = Executors.newFixedThreadPool(2);
 
         Class<? extends PublishMode> publishModeClass =
                 ReflectionsContainer.getInstance()
@@ -66,12 +63,21 @@ public class Engine {
         if(publishModeClass == null) {
             throw new IllegalStateException("A publish mode with the identifier \"" + globalArgs.getPublishMode() + "\" does not exist");
         }
-
         publishMode = publishModeClass
                 .getConstructor(Engine.class)
                 .newInstance(this);
 
-        for(AbstractTest test : testSuite.getTests()) {
+        Class<? extends RunMode> runModeClass =
+                ReflectionsContainer.getInstance()
+                        .getRunModeClasses()
+                        .get(globalArgs.getRunMode());
+
+        if(runModeClass == null) {
+            throw  new IllegalStateException("A run mode with the identifier \"" + globalArgs.getRunMode() + "\" does not exist");
+        }
+        runMode = runModeClass.newInstance();
+
+        for(AbstractTest test : configuration.getTestSuite().getTests()) {
             add(test);
         }
     }
@@ -80,6 +86,11 @@ public class Engine {
      * Returns the global args
      * @return
      */
+
+    public RunMap getGlobalRunMap() { return publishMode.getGlobalRunMap(); }
+
+    public Configuration getConfiguration() { return configuration; }
+
     public Configuration.GlobalArgs getGlobalArgs() {
         return globalArgs;
     }
@@ -163,20 +174,7 @@ public class Engine {
      */
     public void runTests() {
         try {
-            switch (globalArgs.getRunModeEnum()) {
-                case DRY:
-                    System.out.println("NOTE: This is just a dry run. No test is actually executed.");
-                    printConfiguration(configuration, System.out);
-                    break;
-                case NORMAL:
-                    printConfiguration(configuration, new PrintStream(new LogStream(LOG)));
-                    //TODO? move this someplace else?
-                    if(globalArgs.getInstallSampleContent()) {
-                        installToughdayContentPackage(globalArgs);
-                    }
-                    run();
-                    break;
-            }
+            run();
         } catch (Exception e) {
             LOG.error("Failure in tests execution ", e);
         }
@@ -249,12 +247,12 @@ public class Engine {
         out.println(String.format("\t%-32s %-64s", propertyName, propertyValue));
     }
 
-    private static String getCurrentDateTime() {
+    public static String getCurrentDateTime() {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS z")
                 .format(Calendar.getInstance().getTime());
     }
 
-    private void runFactorySetup(AbstractTest test) throws Exception {
+    public static void runFactorySetup(AbstractTest test) throws Exception {
         for (AbstractTest child : test.getChildren()) {
             runFactorySetup(child);
         }
@@ -267,17 +265,22 @@ public class Engine {
     }
 
     private void run() throws Exception {
-        logGlobal(String.format("Running tests for %s seconds or until count for all tests has been reached",
+        if(globalArgs.getInstallSampleContent() && !runMode.isDryRun()) {
+            printConfiguration(configuration, new PrintStream(new LogStream(LOG)));
+            installToughdayContentPackage(globalArgs);
+        }
+
+        Engine.logGlobal(String.format("Running tests for %s seconds or until count for all tests has been reached",
                 configuration.getGlobalArgs().getDuration()));
 
-        logGlobal("Test execution started at: " + getCurrentDateTime());
+        Engine.logGlobal("Test execution started at: " + Engine.getCurrentDateTime());
         final Thread mainThread = Thread.currentThread();
         Runtime.getRuntime().addShutdownHook(new Thread() {
             public void run() {
-                logGlobal("Test execution finished at: " + getCurrentDateTime());
+                Engine.logGlobal("Test execution finished at: " + Engine.getCurrentDateTime());
             }
         });
-
+        TestSuite testSuite = configuration.getTestSuite();
 
         // Run the setup step of the suite
         if (testSuite.getSetupStep() != null) {
@@ -291,22 +294,17 @@ public class Engine {
 
         publishMode.getGlobalRunMap().reinitStartTimes();
 
-        // Create the test worker threads
-        List<AsyncTestWorker> testWorkers = new ArrayList<>();
-        for (int i = 0; i < globalArgs.getConcurrency(); i++) {
-            AsyncTestWorker runner = new AsyncTestWorker(this, testSuite, publishMode.getGlobalRunMap().newInstance());
-            testWorkers.add(runner);
-            testsExecutorService.execute(runner);
-        }
+        List<AsyncTestWorker> testWorkers = runMode.runTests(this);
+        if (runMode.isDryRun())
+            return;
 
         // Create the result aggregator thread
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, testWorkers);
         engineExecutorService.execute(resultAggregator);
 
-        // create the timeout chekcer thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, testSuite, testWorkers, Thread.currentThread());
+        // create the timeout checker thread
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), testWorkers, Thread.currentThread());
         engineExecutorService.execute(timeoutChecker);
-
         // This thread sleeps until the duration
         try {
             Thread.sleep(globalArgs.getDuration() * 1000L);
@@ -330,12 +328,13 @@ public class Engine {
                 }
             }
 
-            shutdownAndAwaitTermination(testsExecutorService);
+            shutdownAndAwaitTermination(runMode.getExecutorService());
             shutdownAndAwaitTermination(engineExecutorService);
             publishMode.publishFinalResults();
 
             LOG.info("Test execution finished at: " + getCurrentDateTime());
         }
+
     }
 
 
@@ -387,7 +386,7 @@ public class Engine {
         return null;
     }
 
-    private static void logGlobal(String message) {
+    public static void logGlobal(String message) {
         LOG.info(message);
         LogManager.getLogger(Main.class).info(message);
     }

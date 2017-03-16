@@ -32,7 +32,7 @@ import java.util.concurrent.locks.ReentrantLock;
 /**
  * Async worker for running tests. There will be GlobalArgs.Concurrency test workers.
  */
-class AsyncTestWorker extends AsyncEngineWorker {
+public class AsyncTestWorker extends AsyncEngineWorker {
     private static final Logger LOG = LogManager.getLogger(AsyncTestWorker.class);
 
     private final Engine engine;
