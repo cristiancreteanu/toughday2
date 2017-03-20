@@ -1,6 +1,8 @@
 package com.adobe.qe.toughday.core.engine;
 
-import java.util.List;
+import com.adobe.qe.toughday.core.RunMap;
+
+import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
 /**
@@ -8,6 +10,13 @@ import java.util.concurrent.ExecutorService;
  */
 public interface RunMode {
     boolean isDryRun();
-    List<AsyncTestWorker> runTests(Engine engine) throws Exception;
+    RunContext runTests(Engine engine) throws Exception;
+    void finishExecution();
     ExecutorService getExecutorService();
+
+    interface RunContext {
+        Collection<AsyncTestWorker> getTestWorkers();
+        Collection<RunMap> getRunMaps();
+        boolean runIsFinished();
+    }
 }

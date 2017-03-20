@@ -294,16 +294,16 @@ public class Engine {
 
         publishMode.getGlobalRunMap().reinitStartTimes();
 
-        List<AsyncTestWorker> testWorkers = runMode.runTests(this);
+        RunMode.RunContext context = runMode.runTests(this);
         if (runMode.isDryRun())
             return;
 
         // Create the result aggregator thread
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, testWorkers);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, context);
         engineExecutorService.execute(resultAggregator);
 
         // create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), testWorkers, Thread.currentThread());
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), context, Thread.currentThread());
         engineExecutorService.execute(timeoutChecker);
         // This thread sleeps until the duration
         try {
@@ -313,9 +313,7 @@ public class Engine {
         }
         // Then close all threads
         finally {
-            for (AsyncTestWorker run : testWorkers) {
-                run.finishExecution();
-            }
+            runMode.finishExecution();
             resultAggregator.finishExecution();
             timeoutChecker.finishExecution();
 
@@ -346,7 +344,7 @@ public class Engine {
      * Method for getting the next weighted random test form the test suite
      * TODO: optimize
      */
-    protected static AbstractTest getNextTest(TestSuite testSuite, Map<AbstractTest, AtomicLong> counts, ReentrantReadWriteLock engineSync) throws InterruptedException {
+    public static AbstractTest getNextTest(TestSuite testSuite, Map<AbstractTest, AtomicLong> counts, ReentrantReadWriteLock engineSync) throws InterruptedException {
         //If we didn't find the next test we start looking for it assuming that not all counts are done
         while (testSuite.getTests().size() != 0) {
             engineSync.readLock().lock();

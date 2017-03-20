@@ -258,11 +258,6 @@ public class Configuration {
         return new CliParser();
     }
 
-    public interface RunMode {
-        String value();
-        String description();
-    }
-
     /**
      * Class for global arguments.
      */
@@ -298,6 +293,7 @@ public class Configuration {
         private String runMode = "normal";
         private String publishMode = "simple";
         private long interval = 5;
+        private int load = 50;
 
         /**
          * Constructor
@@ -382,6 +378,9 @@ public class Configuration {
         @ConfigArgSet(required = false, defaultValue = "5s", desc = "Set the publishing interval. Can be expressed in s(econds), m(inutes), h(ours). Example: 1m30s. (Available only when publishmode=intervals)")
         public void setInterval(String interval) { this.interval = parseDurationToSeconds(interval); }
 
+        @ConfigArgSet(required = false, defaultValue = "50", desc = "Set the load, in requests per second for the \"constantload\" runmode.  (Available only when runmode=constantload)")
+        public void setLoad(String load) { this.load = Integer.parseInt(load); }
+
         // Adders and getters
 
         public void addPublisher(Publisher publisher) {
@@ -453,6 +452,9 @@ public class Configuration {
 
         @ConfigArgGet
         public long getInterval() { return this.interval; }
+
+        @ConfigArgGet
+        public int getLoad() { return this.load; }
 
 
         // Helper methods
