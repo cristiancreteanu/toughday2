@@ -135,7 +135,8 @@ public class ConstantLoad implements RunMode {
                     Thread.sleep(1000);
                 }
             } catch (InterruptedException e) {
-                //TODO
+                finishExecution();
+                LOG.warn("Constant load scheduler thread was interrupted.");
             }
         }
     }
