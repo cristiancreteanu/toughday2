@@ -112,7 +112,7 @@ public class TestSuite {
     public TestSuite add(AbstractTest test, int weight, long timeout, long count) {
         add(test, weight);
         if (timeout >= 0) {
-            timeoutMap.put(test, timeout);
+            timeoutMap.put(test, timeout * 1000);
         }
         if (count >= 0) {
             counterMap.put(test, count);
