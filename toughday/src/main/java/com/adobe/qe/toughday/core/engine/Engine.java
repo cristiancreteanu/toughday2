@@ -247,12 +247,15 @@ public class Engine {
         out.println(String.format("\t%-32s %-64s", propertyName, propertyValue));
     }
 
+    /**
+     * Returns the current Date and Time in a String format.
+     */
     public static String getCurrentDateTime() {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS z")
                 .format(Calendar.getInstance().getTime());
     }
 
-    public static void runFactorySetup(AbstractTest test) throws Exception {
+    private void runFactorySetup(AbstractTest test) throws Exception {
         for (AbstractTest child : test.getChildren()) {
             runFactorySetup(child);
         }

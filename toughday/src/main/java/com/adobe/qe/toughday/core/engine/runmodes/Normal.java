@@ -47,7 +47,7 @@ public class Normal implements RunMode {
             }
 
             @Override
-            public boolean runIsFinished() {
+            public boolean isRunFinished() {
                 for(AsyncTestWorker testWorker : testWorkers) {
                     if (!testWorker.isFinished())
                         return false;

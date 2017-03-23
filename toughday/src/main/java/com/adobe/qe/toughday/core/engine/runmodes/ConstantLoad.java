@@ -54,7 +54,7 @@ public class ConstantLoad implements RunMode {
             }
 
             @Override
-            public boolean runIsFinished() {
+            public boolean isRunFinished() {
                 return scheduler.isFinished();
             }
         };

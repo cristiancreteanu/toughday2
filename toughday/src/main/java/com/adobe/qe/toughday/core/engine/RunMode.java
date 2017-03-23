@@ -17,6 +17,6 @@ public interface RunMode {
     interface RunContext {
         Collection<AsyncTestWorker> getTestWorkers();
         Collection<RunMap> getRunMaps();
-        boolean runIsFinished();
+        boolean isRunFinished();
     }
 }

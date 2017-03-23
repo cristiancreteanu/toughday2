@@ -23,7 +23,6 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -58,7 +57,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
             }
         }
-        return context.runIsFinished();
+        return context.isRunFinished();
     }
 
     /**
