@@ -21,28 +21,28 @@ package com.adobe.qe.toughday.core.engine;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.TestSuite;
 
-import java.util.List;
+import java.util.Collection;
 
 /**
  * Worker for checking timeout and interrupting test worker threads when timeout is exceeded.
  * It uses Thread.interrupt for letting workers know the
  */
-class AsyncTimeoutChecker extends AsyncEngineWorker {
+public class AsyncTimeoutChecker extends AsyncEngineWorker {
     private Engine engine;
     private final Thread mainThread;
-    private List<AsyncTestWorker> testWorkers;
+    private RunMode.RunContext context;
     private long minTimeout;
     private TestSuite testSuite;
 
     /**
      * Constructor.
      * @param testSuite
-     * @param testWorkers list of test workers from this engine.
+     * @param context list of test workers from this engine.
      */
-    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, List<AsyncTestWorker> testWorkers, Thread mainThread) {
+    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, RunMode.RunContext context, Thread mainThread) {
         this.engine = engine;
         this.mainThread = mainThread;
-        this.testWorkers = testWorkers;
+        this.context = context;
         this.testSuite = testSuite;
         minTimeout = engine.getGlobalArgs().getTimeout();
         for(AbstractTest test : testSuite.getTests()) {
@@ -91,14 +91,13 @@ class AsyncTimeoutChecker extends AsyncEngineWorker {
         try {
             while(!isFinished()) {
                 Thread.sleep(Math.round(Math.ceil(minTimeout * Engine.TIMEOUT_CHECK_FACTOR)));
-                boolean testsFinished = true;
-                for (AsyncTestWorker worker : testWorkers) {
-                    interruptWorkerIfTimeout(worker);
-                    if (!worker.isFinished()) {
-                        testsFinished = false;
+                Collection<AsyncTestWorker> testWorkers = context.getTestWorkers();
+                synchronized (testWorkers) {
+                    for (AsyncTestWorker worker : testWorkers) {
+                        interruptWorkerIfTimeout(worker);
                     }
                 }
-                if (testsFinished) {
+                if (context.isRunFinished()) {
                     this.finishExecution();
                     mainThread.interrupt();
                 }

@@ -22,44 +22,42 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 
-import java.util.List;
+import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Worker for aggregating and publishing benchmarks.
  */
-class AsyncResultAggregator extends AsyncEngineWorker {
+public class AsyncResultAggregator extends AsyncEngineWorker {
     private final Engine engine;
-    private List<AsyncTestWorker> testWorkers;
+    private RunMode.RunContext context;
 
     /**
      * Constructor.
-     * @param testWorkers list of test workers from this engine.
+     * @param context list of test workers from this engine.
      */
-    public AsyncResultAggregator(Engine engine, List<AsyncTestWorker> testWorkers) {
+    public AsyncResultAggregator(Engine engine, RunMode.RunContext context) {
         this.engine = engine;
-        this.testWorkers = testWorkers;
+        this.context = context;
     }
 
     /**
      * Method aggregating results.
      */
     private boolean aggregateResults() {
-        boolean finished = true;
-        for(AsyncTestWorker worker : testWorkers) {
-            if (!worker.isFinished()) {
-                finished = false;
-            }
-            RunMap localRunMap = worker.getLocalRunMap();
-            Map<AbstractTest, Long> counts = engine.getPublishMode().aggregateAndReinitialize(localRunMap);
+        Collection<RunMap> localRunMaps = context.getRunMaps();
+        synchronized (localRunMaps) {
+            for (RunMap localRunMap : localRunMaps) {
+                Map<AbstractTest, Long> counts = engine.getPublishMode().aggregateAndReinitialize(localRunMap);
 
-            Map<AbstractTest, AtomicLong> globalCounts = engine.getCounts();
-            for(Map.Entry<AbstractTest, Long> entry : counts.entrySet()) {
-                globalCounts.get(entry.getKey()).addAndGet(entry.getValue());
+                Map<AbstractTest, AtomicLong> globalCounts = engine.getCounts();
+                for (Map.Entry<AbstractTest, Long> entry : counts.entrySet()) {
+                    globalCounts.get(entry.getKey()).addAndGet(entry.getValue());
+                }
             }
         }
-        return finished;
+        return context.isRunFinished();
     }
 
     /**

@@ -21,7 +21,7 @@ package com.adobe.qe.toughday.core.engine;
 /**
  * Base class for all async workers in engine.
  */
-abstract class AsyncEngineWorker implements Runnable {
+public abstract class AsyncEngineWorker implements Runnable {
     private boolean finish = false;
 
     /**

@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Internal;
+import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
@@ -37,6 +38,7 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
     private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
+    private HashMap<String, Class<? extends RunMode>> runModeClasses;
 
     private String toughdayContentPackage;
 
@@ -54,6 +56,8 @@ public class ReflectionsContainer {
         publisherClasses = new HashMap<>();
         suiteSetupClasses = new HashMap<>();
         publishModeClasses = new HashMap<>();
+        runModeClasses = new HashMap<>();
+
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
@@ -92,6 +96,16 @@ public class ReflectionsContainer {
             publishModeClasses.put(identifier, publishModeClass);
         }
 
+        for(Class<? extends RunMode> runModeClass : reflections.getSubTypesOf(RunMode.class)) {
+            if(excludeClass(runModeClass)) continue;
+            String identifier = runModeClass.getSimpleName().toLowerCase();
+            if(runModeClasses.containsKey(identifier)) {
+                throw new IllegalStateException("A run mode class with this name already exists here: " +
+                        runModeClasses.get(identifier).getName());
+            }
+            runModeClasses.put(identifier, runModeClass);
+        }
+
         Reflections reflections = new Reflections("", new ResourcesScanner());
 
         Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
@@ -128,5 +142,9 @@ public class ReflectionsContainer {
 
     public String getToughdayContentPackage() {
         return toughdayContentPackage;
+    }
+
+    public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
+        return runModeClasses;
     }
 }
