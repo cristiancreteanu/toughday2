@@ -2,7 +2,7 @@ package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.core.*;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
+import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
@@ -253,16 +253,27 @@ public class Engine {
         return new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS z")
                 .format(Calendar.getInstance().getTime());
     }
-
-    private void runFactorySetup(AbstractTest test) throws Exception {
+    
+    //TODO find a place in the AbstractTestRunner for this. The problem is that we need to invoke it at a specific time.
+    public static void runFactorySetup(AbstractTest test) throws Exception {
         for (AbstractTest child : test.getChildren()) {
             runFactorySetup(child);
         }
-        for (Method method : test.getClass().getDeclaredMethods()) {
-            if (method.getAnnotation(FactorySetup.class) != null) {
-                method.setAccessible(true);
-                method.invoke(test);
+
+        LinkedList<Method> setupMethods = new LinkedList<>();
+        Class currentClass = test.getClass();
+        while(!currentClass.getName().equals(AbstractTest.class.getName())) {
+            for (Method method : currentClass.getDeclaredMethods()) {
+                if (method.getAnnotation(Setup.class) != null) {
+                    setupMethods.addFirst(method);
+                }
             }
+            currentClass = currentClass.getSuperclass();
+        }
+        for(Method setupMethod : setupMethods) {
+            setupMethod.setAccessible(true);
+            setupMethod.invoke(test);
+            setupMethod.setAccessible(false);
         }
     }
 
@@ -284,7 +295,7 @@ public class Engine {
             testSuite.getSetupStep().setup();
         }
 
-        //TODO move this to a better place
+        //TODO move this to a better place while keeping in mind to preserve the execution order.
         for(AbstractTest test : testSuite.getTests()) {
             runFactorySetup(test);
         }

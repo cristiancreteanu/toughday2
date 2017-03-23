@@ -51,7 +51,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         this.title = title;
     }
 
-    @FactorySetup
+    @Setup
     private void setup() throws Exception {
         String isolatedFolder = "toughday_lc" + UUID.randomUUID();
         try {

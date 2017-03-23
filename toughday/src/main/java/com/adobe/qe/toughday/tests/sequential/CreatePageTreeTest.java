@@ -48,7 +48,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
         this.title = title;
     }
 
-    @FactorySetup
+    @Setup
     private void setupContent() {
         String isolatedFolder = "toughday" + UUID.randomUUID();
         try {

@@ -54,7 +54,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
         this.extra_tag = extra_tag;
     }
 
-    @FactorySetup
+    @Setup
     private void setup() {
         try {
             String isolatedNameSpace = namespace + "_" + RandomStringUtils.randomAlphanumeric(5);

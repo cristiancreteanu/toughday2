@@ -2,7 +2,7 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.core.annotations.CloneSetup;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,15 +14,15 @@ import java.util.LinkedList;
 
 /**
  * Base class of all runners. For each test only one runner will be instantiated by the Engine and placed into the
- * RunnersContainer. In this way it is ensured that the Setup method is executed only once, even though the test is
+ * RunnersContainer. In this way it is ensured that the CloneSetup method is executed only once, even though the test is
  * replicated for each thread. Aside from setup step execution, this class is not thread safe. Any other required
  * synchronization must be implemented by subtypes, but it could affect the throughput of the executed tests. Ideally
  * runners should have no state.
- * TODO: investigate what happens if there are multiple engines. Since they use the same container, Setup will not work correctly
+ * TODO: investigate what happens if there are multiple engines. Since they use the same container, CloneSetup will not work correctly
  */
 public abstract class AbstractTestRunner<T extends AbstractTest> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTestRunner.class);
-    private volatile boolean setupExecuted;
+    private volatile boolean cloneSetupExecuted;
     private Method[] setupMethods;
     private Method[] beforeMethods;
     private Method[] afterMethods;
@@ -33,7 +33,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * TODO: throw exceptions if not valid methods.
      */
     public AbstractTestRunner(Class<? extends AbstractTest> testClass) {
-        setupExecuted = true;
+        cloneSetupExecuted = true;
         LinkedList<Method> setupMethodList = new LinkedList<>();
         LinkedList<Method> beforeMethodList = new LinkedList<>();
         LinkedList<Method> afterMethodList = new LinkedList<>();
@@ -44,11 +44,11 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
             //System.out.println(currentClass.getName()); // ?
             for (Method method : currentClass.getDeclaredMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {
-                    if (annotation.annotationType() == Setup.class) {
-                        if (validateMethod(method, Setup.class)) {
+                    if (annotation.annotationType() == CloneSetup.class) {
+                        if (validateMethod(method, CloneSetup.class)) {
                             setupMethodList.addFirst(method);
                             method.setAccessible(true);
-                            setupExecuted = false;
+                            cloneSetupExecuted = false;
                         }
                     } else if (annotation.annotationType() == Before.class) {
                         if (validateMethod(method, Before.class)) {
@@ -81,15 +81,15 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * The setup is guaranteed to be executed once even if the test is replicated(cloned) for multiple threads.
      * @param testObject
      */
-    protected void executeSetup(AbstractTest testObject) {
-        /* The synchronized block, the second if and the assignation of the variable setupExecuted only after
+    protected void executeCloneSetup(AbstractTest testObject) {
+        /* The synchronized block, the second if and the assignation of the variable cloneSetupExecuted only after
         the call of the method, are to ensure that the setup is executed exactly once, even if this runner is used
         by multiple threads. The first if is to ensure that no bottleneck occurs due to synchronization. */
-        if (!setupExecuted) {
+        if (!cloneSetupExecuted) {
             synchronized (this) {
-                if (!setupExecuted) {
-                    executeMethods(testObject, setupMethods, Setup.class);
-                    setupExecuted = true;
+                if (!cloneSetupExecuted) {
+                    executeMethods(testObject, setupMethods, CloneSetup.class);
+                    cloneSetupExecuted = true;
                 }
             }
         }
@@ -124,7 +124,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @throws ChildTestFailedException propagated exception if the test object is part of a composite test.
      */
     public void runTest(AbstractTest testObject, RunMap runMap) throws ChildTestFailedException {
-        executeSetup(testObject);
+        executeCloneSetup(testObject);
         executeBefore(testObject);
 
         ChildTestFailedException exception = null;

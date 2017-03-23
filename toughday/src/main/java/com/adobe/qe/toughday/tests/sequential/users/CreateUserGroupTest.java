@@ -3,7 +3,7 @@ package com.adobe.qe.toughday.tests.sequential.users;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.FactorySetup;
+import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
@@ -42,7 +42,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
         this.increment = increment;
     }
 
-    @FactorySetup
+    @Setup
     private void setup() {
         try {
             extraGroup = createGroup(getDefaultClient(), id, groupName, description);

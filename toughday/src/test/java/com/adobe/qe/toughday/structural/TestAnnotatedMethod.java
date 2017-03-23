@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.structural;
 
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
+import com.adobe.qe.toughday.core.annotations.CloneSetup;
 import com.adobe.qe.toughday.core.annotations.Setup;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -23,6 +24,7 @@ public class TestAnnotatedMethod extends TestCase {
     public static boolean hasAnnotation(Method method) {
         return method.getAnnotation(Before.class) != null
                 || method.getAnnotation(After.class) != null
+                || method.getAnnotation(CloneSetup.class) != null
                 || method.getAnnotation(Setup.class) != null;
     }
 

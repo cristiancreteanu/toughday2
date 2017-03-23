@@ -49,8 +49,8 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         this.title = title;
     }
 
-    @FactorySetup
-    public void setup() {
+    @Setup
+    private void setup() {
         try {
             String isolatedRoot = "tree_" + RandomStringUtils.randomAlphanumeric(5);
             createFolder(isolatedRoot, rootParentPath + "/");
