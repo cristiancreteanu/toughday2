@@ -15,7 +15,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 @Description(desc = "Publisher for writing at standard output.")
-public class ConsolePublisher implements Publisher {
+public class ConsolePublisher extends Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(ConsolePublisher.class);
     private boolean begun = false;
     private boolean finished = false;

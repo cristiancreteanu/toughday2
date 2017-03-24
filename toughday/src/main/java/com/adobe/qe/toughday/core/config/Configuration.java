@@ -14,10 +14,7 @@ import org.apache.logging.log4j.Logger;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 
 /**
@@ -97,12 +94,6 @@ public class Configuration {
             this.suite = predefinedSuites.getDefaultSuite();
         }
 
-        // Exclude tests
-        for (String testName : configParams.getTestsToExclude()) {
-            suite.remove(testName);
-        }
-
-
         for (ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
             AbstractTest test = createObject(
                     ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
@@ -122,20 +113,38 @@ public class Configuration {
 
 
         // Add and configure tests to the suite
-        for(ConfigParams.NamedMetaObject testMeta : configParams.getTestsToConfig()) {
-            AbstractTest testObject = suite.getTest(testMeta.getName());
-            setObjectProperties(testObject, testMeta.getParameters());
-            if (testMeta.getParameters().containsKey("weight")) {
-                suite.replaceWeight(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("weight")));
-            }
-            if (testMeta.getParameters().containsKey("timeout")) {
-                suite.replaceTimeout(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("timeout")));
-            }
-            if (testMeta.getParameters().containsKey("count")) {
-                suite.replaceCount(testMeta.getName(), Integer.parseInt(testMeta.getParameters().remove("count")));
+        for(ConfigParams.NamedMetaObject itemMeta : configParams.getItemsToConfig()) {
+            if (suite.contains(itemMeta.getName())) {
+                AbstractTest testObject = suite.getTest(itemMeta.getName());
+                setObjectProperties(testObject, itemMeta.getParameters());
+                if (itemMeta.getParameters().containsKey("weight")) {
+                    suite.replaceWeight(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("weight")));
+                }
+                if (itemMeta.getParameters().containsKey("timeout")) {
+                    suite.replaceTimeout(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("timeout")));
+                }
+                if (itemMeta.getParameters().containsKey("count")) {
+                    suite.replaceCount(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("count")));
+                }
+            } else if (globalArgs.containsPublisher(itemMeta.getName())) {
+                Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
+                setObjectProperties(publisherObject, itemMeta.getParameters());
+            } else {
+                throw new IllegalStateException("No test or publisher found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
             }
 
-            checkInvalidArgs(testMeta.getParameters());
+            checkInvalidArgs(itemMeta.getParameters());
+        }
+
+        // Exclude tests and publishers
+        for (String itemName : configParams.getItemsToExclude()) {
+            if(suite.contains(itemName)) {
+                suite.remove(itemName);
+            } else if (globalArgs.containsPublisher(itemName)) {
+                globalArgs.removePublisher(itemName);
+            } else  {
+                throw new IllegalStateException("No test or publisher found with name \"" + itemName + "\", so we can't exclude it.");
+            }
         }
 
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
@@ -269,7 +278,7 @@ public class Configuration {
         private int concurrency;
         private long waitTime;
         private long duration;
-        private List<Publisher> publishers;
+        private Map<String, Publisher> publishers;
         private long timeout;
         private String protocol;
 
@@ -299,7 +308,7 @@ public class Configuration {
          * Constructor
          */
         public GlobalArgs() {
-            this.publishers = new ArrayList<>();
+            this.publishers = new HashMap<>();
             this.port = DEFAULT_PORT;
             this.user = DEFAULT_USER;
             this.password = DEFAULT_PASSWORD;
@@ -384,7 +393,29 @@ public class Configuration {
         // Adders and getters
 
         public void addPublisher(Publisher publisher) {
-            publishers.add(publisher);
+            if (publishers.containsKey(publisher.getName())) {
+                throw new IllegalStateException("There is already a publisher named \"" + publisher.getName() + "\"." +
+                        "Please provide a different name using the \"name\" property.");
+            }
+            publishers.put(publisher.getName(), publisher);
+        }
+
+        public Publisher getPublisher(String publisherName) {
+            if (!publishers.containsKey(publisherName)) {
+                throw new IllegalStateException("Could not find a publisher with the name \"" + publisherName + "\" to configure it.");
+            }
+            return publishers.get(publisherName);
+        }
+
+        public boolean containsPublisher(String publisherName) {
+            return publishers.containsKey(publisherName);
+        }
+
+        public void removePublisher(String publisherName) {
+            Publisher publisher = publishers.remove(publisherName);
+            if (publisher == null) {
+                throw new IllegalStateException("Could not exclude publisher \"" + publisherName + "\", because there was no publisher configured with that name");
+            }
         }
 
         @ConfigArgGet
@@ -407,8 +438,8 @@ public class Configuration {
             return duration;
         }
 
-        public List<Publisher> getPublishers() {
-            return publishers;
+        public Collection<Publisher> getPublishers() {
+            return publishers.values();
         }
 
         @ConfigArgGet

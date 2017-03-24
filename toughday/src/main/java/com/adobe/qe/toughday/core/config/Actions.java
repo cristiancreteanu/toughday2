@@ -43,17 +43,17 @@ public enum Actions implements ConfigAction {
 
         @Override
         public void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo) {
-            configParams.configTest(identifier, metaInfo);
+            configParams.configItem(identifier, metaInfo);
         }
 
         @Override
         public String actionParams() {
-            return "TestName property1=val property2=val";
+            return "TestName/PublisherName property1=val property2=val";
         }
 
         @Override
         public String actionDescription() {
-            return "Override parameters for a test from config file or a predefined suite";
+            return "Override parameters for a test/publisher from config file or a predefined suite";
         }
     },
     EXCLUDE {
@@ -68,21 +68,17 @@ public enum Actions implements ConfigAction {
                 throw new IllegalArgumentException("--exclude cannot have properties for identifier: " + identifier);
             }
 
-            if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
-                //TODO exclude publishers
-            } else {
-                configParams.excludeTest(identifier);
-            }
+            configParams.exclude(identifier);
         }
 
         @Override
         public String actionParams() {
-            return "TestName";
+            return "TestName/PublisherName";
         }
 
         @Override
         public String actionDescription() {
-            return "Exclude a test from config file or a predefined suite";
+            return "Exclude a test/publisher from config file or a predefined suite";
         }
     };
 
