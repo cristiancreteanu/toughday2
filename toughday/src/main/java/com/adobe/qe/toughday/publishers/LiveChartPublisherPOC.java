@@ -24,7 +24,7 @@ import java.util.concurrent.TimeUnit;
 
 @Internal
 @Description(desc = "Proof of concept for a live chart publisher. Go to http://localhost:8080/stats.")
-public class LiveChartPublisherPOC implements Publisher {
+public class LiveChartPublisherPOC extends Publisher {
     private static final Logger LOG = LoggerFactory.getLogger(LiveChartPublisherPOC.class);
     private boolean finished = false;
 

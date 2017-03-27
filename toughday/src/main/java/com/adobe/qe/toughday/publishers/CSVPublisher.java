@@ -14,7 +14,7 @@ import java.io.PrintWriter;
 import java.util.Collection;
 
 @Description(desc = "Publish statistics to a csv file")
-public class CSVPublisher implements Publisher {
+public class CSVPublisher extends Publisher {
     public static final String DEFAULT_FILE_PATH = "results.csv";
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);

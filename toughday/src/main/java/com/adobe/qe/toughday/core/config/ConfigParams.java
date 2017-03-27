@@ -51,8 +51,8 @@ public class ConfigParams {
     private Map<String, String> globalParams = new HashMap<>();
     private List<ClassMetaObject> testsToAdd = new ArrayList<>();
     private List<ClassMetaObject> publishers = new ArrayList<>();
-    private List<NamedMetaObject> testsToConfig = new ArrayList<>();
-    private List<String> testsToExclude = new ArrayList<>();
+    private List<NamedMetaObject> itemsToConfig = new ArrayList<>();
+    private List<String> itemsToExclude = new ArrayList<>();
 
     public void setGlobalParams(Map<String, String> globalParams) {
         this.globalParams = globalParams;
@@ -62,12 +62,12 @@ public class ConfigParams {
         testsToAdd.add(new ClassMetaObject(testClassName, params));
     }
 
-    public void configTest(String testName, Map<String, String> params) {
-        testsToConfig.add(new NamedMetaObject(testName, params));
+    public void configItem(String testName, Map<String, String> params) {
+        itemsToConfig.add(new NamedMetaObject(testName, params));
     }
 
-    public void excludeTest(String testName) {
-        testsToExclude.add(testName);
+    public void exclude(String testName) {
+        itemsToExclude.add(testName);
     }
 
     public void addPublisher(String publisherClassName, Map<String, String> params) {
@@ -82,10 +82,10 @@ public class ConfigParams {
         return testsToAdd;
     }
 
-    public List<String> getTestsToExclude() { return testsToExclude; }
+    public List<String> getItemsToExclude() { return itemsToExclude; }
 
-    public List<NamedMetaObject> getTestsToConfig() {
-        return testsToConfig;
+    public List<NamedMetaObject> getItemsToConfig() {
+        return itemsToConfig;
     }
 
     public List<ClassMetaObject> getPublishers() {
@@ -95,8 +95,8 @@ public class ConfigParams {
     public void merge(ConfigParams other) {
         globalParams.putAll(other.getGlobalParams());
         testsToAdd.addAll(other.getTestsToAdd());
-        testsToExclude.addAll(other.getTestsToExclude());
-        testsToConfig.addAll(other.getTestsToConfig());
+        itemsToExclude.addAll(other.getItemsToExclude());
+        itemsToConfig.addAll(other.getItemsToConfig());
         publishers.addAll(other.getPublishers());
     }
 }
