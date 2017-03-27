@@ -7,8 +7,6 @@ import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
-import com.sun.org.apache.regexp.internal.RE;
-import com.sun.org.apache.regexp.internal.ReaderCharacterIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

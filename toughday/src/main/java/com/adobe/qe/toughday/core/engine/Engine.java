@@ -303,8 +303,8 @@ public class Engine {
         TestSuite testSuite = configuration.getTestSuite();
 
         // Run the setup step of the suite
-        if (testSuite.getSetupStep() != null) {
-            testSuite.getSetupStep().setup();
+        for (SuiteSetup setupStep : testSuite.getSetupStep()) {
+            setupStep.setup();
         }
 
         //TODO move this to a better place while keeping in mind to preserve the execution order.

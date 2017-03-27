@@ -38,11 +38,16 @@ public class Configuration {
 
         /* TODO allow multiple predefined test suites.
          What happens with the setup step if two or more suites have setup steps? */
-        String testSuiteName = globalArgsMeta.remove("suite");
-        if (!predefinedSuites.containsKey(testSuiteName)) {
-            throw new IllegalArgumentException("Unknown suite: " + testSuiteName);
+
+        TestSuite testSuite = new TestSuite();
+        String[] testSuiteNames = globalArgsMeta.remove("suite").split(",");
+        for (String testSuiteName : testSuiteNames) {
+            if (!predefinedSuites.containsKey(testSuiteName)) {
+                throw new IllegalArgumentException("Unknown suite: " + testSuiteName);
+            }
+            testSuite.addAll(predefinedSuites.get(testSuiteName));
         }
-        return predefinedSuites.get(testSuiteName);
+        return testSuite;
     }
 
     private void checkInvalidArgs(Map<String, String> args, List<String>... whitelisted) {
