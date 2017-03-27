@@ -6,23 +6,38 @@ import java.util.*;
  * Map for storing benchmarks. Thread safe for benchmarking operations. Not thread safe for  adding and removing tests.
  */
 public class RunMap {
+    /*
+        The map should remain unordered (hash map) for faster access, that is why we are using a second
+        data structure - list - to keep the order of the tests in output, just for the global run map.
+        For now this is an internal implementation detail, we don't need to expose this unless
+        a future run mode would require it.
+     */
     private Map<AbstractTest, TestEntry> runMap;
+    private List<TestEntry> orderedTests;
+    private boolean keepTestsOrdered = false;
     private int threads;
 
     public RunMap (int threads) {
         this.threads = threads;
         runMap = new HashMap<>();
+        orderedTests = new ArrayList<>();
+        this.keepTestsOrdered = true;
     }
 
     private RunMap (int threads, Collection<AbstractTest> tests) {
         this(threads);
+        this.keepTestsOrdered = false;
         for (AbstractTest test : tests) {
             runMap.put(test, new TestEntry(test));
         }
     }
 
     public void addTest (AbstractTest test) {
-        runMap.put(test, new TestEntry(test));
+        TestEntry entry = new TestEntry(test);
+        runMap.put(test, entry);
+        if(keepTestsOrdered) {
+            orderedTests.add(entry);
+        }
     }
 
     public TestEntry getRecord(AbstractTest test) {
@@ -64,6 +79,10 @@ public class RunMap {
         for (TestEntry entry : runMap.values()) {
             entry.reinitStartTime();
         }
+    }
+
+    public Collection<? extends TestStatistics> getTestStatistics() {
+        return keepTestsOrdered ? orderedTests : runMap.values();
     }
 
     public RunMap newInstance() {
@@ -118,10 +137,6 @@ public class RunMap {
         long getMedianDuration();
 
         long getFailRuns();
-    }
-
-    public Collection<? extends TestStatistics> getTestStatistics() {
-        return runMap.values();
     }
 
 
