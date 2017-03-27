@@ -294,6 +294,12 @@ public class Engine {
                 Engine.logGlobal("Test execution finished at: " + Engine.getCurrentDateTime());
             }
         });
+
+        if (runMode.isDryRun()) {
+            runMode.runTests(this);
+            return;
+        }
+        
         TestSuite testSuite = configuration.getTestSuite();
 
         // Run the setup step of the suite
@@ -309,8 +315,6 @@ public class Engine {
         publishMode.getGlobalRunMap().reinitStartTimes();
 
         RunMode.RunContext context = runMode.runTests(this);
-        if (runMode.isDryRun())
-            return;
 
         // Create the result aggregator thread
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, context);
