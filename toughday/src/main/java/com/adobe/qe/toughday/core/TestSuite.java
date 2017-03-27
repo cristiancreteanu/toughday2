@@ -4,16 +4,13 @@ import com.adobe.qe.toughday.core.config.ConfigArgSet;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
 
 /**
  * Test suite class.
  */
 public class TestSuite {
-    private SuiteSetup setupStep;
+    private List<SuiteSetup> setupStep;
     private WeightMap weightMap;
     private HashMap<AbstractTest, Long> timeoutMap;
     private HashMap<AbstractTest, Long> counterMap;
@@ -88,6 +85,7 @@ public class TestSuite {
         weightMap = new WeightMap();
         timeoutMap = new HashMap<>();
         counterMap = new HashMap<>();
+        setupStep = new ArrayList<>();
     }
 
     /**
@@ -163,12 +161,14 @@ public class TestSuite {
     public TestSuite addAll(TestSuite testSuite) {
         this.weightMap.putAll(testSuite.weightMap);
         this.timeoutMap.putAll(testSuite.timeoutMap);
+        this.counterMap.putAll(testSuite.counterMap);
+        this.setupStep.addAll(testSuite.setupStep);
         return this;
     }
 
     /**
      * Setter for the setup step, as seen from the configuration.
-     * @param setupStepClassName
+     * @param setupStepClassNames a list with suite setup names separated by commas
      * @return this object. (builder pattern)
      * @throws ClassNotFoundException caused by reflection
      * @throws NoSuchMethodException caused by reflection
@@ -177,22 +177,25 @@ public class TestSuite {
      * @throws InstantiationException caused by reflection
      */
     @ConfigArgSet(required = false)
-    public TestSuite setSuiteSetup(String setupStepClassName)
+    public TestSuite setSuiteSetup(String setupStepClassNames)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
+        String[] suiteSetups = setupStepClassNames.split(",");
 
-        Class<? extends SuiteSetup> setupStepClass = null;
-        setupStepClass = ReflectionsContainer.getInstance().getSuiteSetupClasses().get(setupStepClassName);
+        for (String setupStepClassName : suiteSetups) {
+            Class<? extends SuiteSetup> setupStepClass = null;
+            setupStepClass = ReflectionsContainer.getInstance().getSuiteSetupClasses().get(setupStepClassName);
 
-        if (setupStepClass == null) {
-            throw new ClassNotFoundException("Could not find class " + setupStepClassName + " for suite setup step");
+            if (setupStepClass == null) {
+                throw new ClassNotFoundException("Could not find class " + setupStepClassName + " for suite setup step");
+            }
+            withSetupStep(setupStepClass);
         }
-        setSetupStep(setupStepClass);
         return this;
     }
 
     /**
-     * Overload of setSetupStep.
+     * Overload of withSetupStep.
      * @param setupStepClass
      * @return this object. (builder pattern)
      * @throws ClassNotFoundException caused by reflection
@@ -201,21 +204,21 @@ public class TestSuite {
      * @throws InvocationTargetException caused by reflection
      * @throws InstantiationException caused by reflection
      */
-    public TestSuite setSetupStep(Class<? extends SuiteSetup> setupStepClass)
+    public TestSuite withSetupStep(Class<? extends SuiteSetup> setupStepClass)
             throws ClassNotFoundException, NoSuchMethodException, IllegalAccessException,
             InvocationTargetException, InstantiationException {
         Constructor constructor = setupStepClass.getConstructor(null);
-        this.setupStep = (SuiteSetup) constructor.newInstance();
+        withSetupStep((SuiteSetup) constructor.newInstance());
         return this;
     }
 
     /**
-     * Overload of setSetupStep.
+     * Overload of withSetupStep.
      * @param setupStep
      * @return
      */
-    public TestSuite setSetupStep(SuiteSetup setupStep) {
-        this.setupStep = setupStep;
+    public TestSuite withSetupStep(SuiteSetup setupStep) {
+        this.setupStep.add(setupStep);
         return this;
     }
 
@@ -241,7 +244,7 @@ public class TestSuite {
      * Getter for the setup step.
      * @return a SetupStep object if configured, null otherwise.
      */
-    public SuiteSetup getSetupStep() {
+    public List<SuiteSetup> getSetupStep() {
         return setupStep;
     }
 
