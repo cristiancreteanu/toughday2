@@ -181,6 +181,7 @@ public class RunMap {
          * @param e
          */
         public synchronized void recordFail(Exception e) {
+            lastNanoTime = System.nanoTime();
             if (!failsMap.containsKey(e.getClass())) {
                 failsMap.put(e.getClass(), 0L);
             }
