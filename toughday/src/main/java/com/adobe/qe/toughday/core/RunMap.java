@@ -1,11 +1,14 @@
 package com.adobe.qe.toughday.core;
 
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
  * Map for storing benchmarks. Thread safe for benchmarking operations. Not thread safe for  adding and removing tests.
  */
 public class RunMap {
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
     /*
         The map should remain unordered (hash map) for faster access, that is why we are using a second
         data structure - list - to keep the order of the tests in output, just for the global run map.
@@ -101,6 +104,11 @@ public class RunMap {
         AbstractTest getTest();
 
         /**
+         * Get the timestamp of the last execution of this test.
+         */
+        String getTimestamp();
+
+        /**
          * Get total number of seconds that all the threads have spent in the test
          * @return
          */
@@ -145,6 +153,7 @@ public class RunMap {
      */
     public class TestEntry implements TestStatistics {
         public static final double ONE_BILLION_D = 1000 * 1000 * 1000.0d;
+        private static final long ONE_MILION = 1000000;
         private AbstractTest test;
         private double totalDuration;
         private long totalRuns;
@@ -155,6 +164,7 @@ public class RunMap {
         private Map<Class<? extends Exception>, Long> failsMap;
         private long startNanoTime;
         private long lastNanoTime;
+        private long startMillisTime;
 
         private void init() {
             totalDuration = 0;
@@ -211,11 +221,17 @@ public class RunMap {
         public synchronized void reinitStartTime() {
             this.startNanoTime = System.nanoTime();
             this.lastNanoTime = System.nanoTime();
+            this.startMillisTime = System.currentTimeMillis();
         }
 
         @Override
         public AbstractTest getTest() {
             return test;
+        }
+
+        @Override
+        public String getTimestamp() {
+            return TIME_STAMP_FORMAT.format(new Date(startMillisTime + ((lastNanoTime - startNanoTime) / ONE_MILION)));
         }
 
         @Override

@@ -25,7 +25,7 @@ public class CSVPublisher extends Publisher {
     private BufferedWriter writer;
 
     private String filePath = DEFAULT_FILE_PATH;
-    private static String HEADER = "Name, Duration / user, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
+    private static String HEADER = "Name, Timestamp, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -75,7 +75,7 @@ public class CSVPublisher extends Publisher {
 
             for (RunMap.TestStatistics statistics : testStatistics) {
                 writer.write(statistics.getTest().getFullName() + ", " +
-                        statistics.getDurationPerUser() + ", " +
+                        statistics.getTimestamp() + ", " +
                         statistics.getTotalRuns() + ", " +
                         statistics.getFailRuns() + ", " +
                         statistics.getMinDuration() + ", " +

@@ -91,7 +91,7 @@ public class ConsolePublisher extends Publisher {
             double minDuration = (statistics.getMinDuration()  == Double.MAX_VALUE) ? 0 : statistics.getMinDuration();
             System.out.printf("%-35.35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n",
                     statistics.getTest().getFullName(),
-                    "Duration / user: " + getFriendlyDuration((long)statistics.getDurationPerUser()),
+                    "Timestamp: " + statistics.getTimestamp(),
                     "Runs:     " + String.format("%d", statistics.getTotalRuns()),
                     "Fails:    " + String.format("%d", statistics.getFailRuns()),
                     SPACE,
