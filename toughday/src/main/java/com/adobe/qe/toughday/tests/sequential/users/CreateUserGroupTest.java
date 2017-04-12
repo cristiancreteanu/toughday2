@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
@@ -20,6 +21,7 @@ import org.w3c.dom.Document;
 import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Tag(tags = { "author" })
 @Description(desc = "Create groups of users. Similar to group editor console (/libs/granite/security/content/groupEditor.html)")
 public class CreateUserGroupTest extends SequentialTestBase {
     private String id;

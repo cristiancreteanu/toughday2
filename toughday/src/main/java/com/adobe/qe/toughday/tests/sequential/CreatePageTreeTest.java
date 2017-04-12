@@ -15,9 +15,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.UUID;
 
-/**
- *
- */
+@Tag(tags = { "author" })
 @SuppressWarnings("Duplicates")
 @Description(desc=
                 "This test creates pages hierarchically. Each child on each level has \"base\" children. " +

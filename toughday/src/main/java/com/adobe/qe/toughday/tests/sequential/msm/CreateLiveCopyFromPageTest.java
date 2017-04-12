@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 
-
+@Tag(tags = { "author" })
 @Name(name = "create_lc")
 @Description(desc = "Creates live copies from pages")
 public class CreateLiveCopyFromPageTest extends SequentialTestBase {

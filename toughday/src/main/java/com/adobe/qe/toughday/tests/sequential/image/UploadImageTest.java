@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.tests.sequential.image;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.annotations.After;
@@ -27,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Tag(tags = { "author" })
 @Description(desc = "Test for uploading assets under the same path."  +
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreateAssetTreeTest.")

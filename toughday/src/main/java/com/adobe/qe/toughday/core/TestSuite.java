@@ -15,6 +15,7 @@ public class TestSuite {
     private HashMap<AbstractTest, Long> timeoutMap;
     private HashMap<AbstractTest, Long> counterMap;
     private String description = "";
+    private List<String> tags = new ArrayList<>();
 
 
     /**
@@ -239,6 +240,42 @@ public class TestSuite {
     public String getDescription() {
         return description;
     }
+
+    /**
+     * Method for adding a tag
+     * @param tag
+     * @return
+     */
+    public TestSuite addTag(String tag) {
+        this.tags.add(tag);
+        return this;
+    }
+
+    /**
+     * Method for adding tags
+     * @param tags
+     * @return
+     */
+    public TestSuite addTags(Collection<String> tags) {
+        this.tags.addAll(tags);
+        return this;
+    }
+
+    /**
+     * Method for adding tags
+     * @param tags
+     * @return
+     */
+    public TestSuite addTags(String[] tags) {
+        this.tags.addAll(Arrays.asList(tags));
+        return this;
+    }
+
+    /**
+     * Getter for the tags
+     * @return
+     */
+    public List<String> getTags() { return tags; }
 
     /**
      * Getter for the setup step.

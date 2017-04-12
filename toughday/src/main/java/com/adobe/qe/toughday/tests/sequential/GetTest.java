@@ -2,10 +2,12 @@ package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import org.apache.http.HttpStatus;
 
+@Tag(tags = { "author", "publish" })
 @Description(desc = "GET a specific page.")
 public class GetTest extends SequentialTestBase {
     public static final String DEFAULT_PATH = "/crx/de";

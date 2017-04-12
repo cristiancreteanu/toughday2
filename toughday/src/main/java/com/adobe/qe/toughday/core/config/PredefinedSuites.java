@@ -27,17 +27,20 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                         .add(new GetTest().setPath("/assets.html").setName("Get /assets.html"), 5)
                         // maybe more here?
                         .setDescription("Executes GET requests on common paths")
+                        .addTag("author")
         );
         put("tree_authoring", new TestSuite()
                         .add(new AuthoringTreeTest().setName("Tree Authoring"), 2)
                         .setDescription("A full authoring test with \"create hierarchical pages\", \"upload asset\", " +
                                 "\"delete asset\". The pages are not deleted.")
+                        .addTag("author")
         );
         put("authoring", new TestSuite()
                         .add(new AuthoringTest().setName("Authoring"), 2)
                         .setDescription("A full authoring test with \"create page\", \"upload asset\", " +
                                 "\"delete asset\", \"delete page\" steps. " +
                                 "The pages are deleted.")
+                        .addTag("author")
         );
         put("toughday", new TestSuite()
                         .add(new CreateLiveCopyTreeTest()
@@ -58,7 +61,9 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                                 .setName("GetHomepage"), 75)
                         .setDescription("A heavy duty suite of AEM use cases. " +
                                 "It performs operations like: search, upload assets, delete assets, create pages, live copies and folders and gets the home page. " +
-                                "It has a proportion of 15% writes vs 85% reads."));
+                                "It has a proportion of 15% writes vs 85% reads.")
+                        .addTag("author")
+        );
     }
 
     public TestSuite getDefaultSuite() {

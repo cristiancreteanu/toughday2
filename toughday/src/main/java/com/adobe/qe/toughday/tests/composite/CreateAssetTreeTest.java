@@ -3,12 +3,14 @@ package com.adobe.qe.toughday.tests.composite;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
+@Tag(tags = { "author" })
 @Description(desc="This test creates folders with assets hierarchically. " +
         "Each child on each level has \"base\" folder children and \"base\" asset children")
 public class CreateAssetTreeTest extends CompositeTest {

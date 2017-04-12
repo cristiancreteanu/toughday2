@@ -16,6 +16,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.Arrays;
 
+@Tag(tags = { "author" })
 @Name(name="create_tag_tree")
 @Description(desc=
         "This test creates tags hierarchically. Each child on each level has \"base\" children. " +

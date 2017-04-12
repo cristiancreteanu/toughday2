@@ -3,10 +3,13 @@ package com.adobe.qe.toughday.core.config.parsers.cli;
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
+import com.google.common.base.Joiner;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -19,6 +22,12 @@ import java.util.*;
  */
 public class CliParser implements ConfigurationParser {
     private static final Logger LOGGER = LogManager.getLogger(CliParser.class);
+
+    private static final String HELP_HEADER_FORMAT_WITH_TAGS = "   %-40s %-40s   %s";
+    private static final String HELP_HEADER_FORMAT_NO_TAGS = "   %-40s   %s";
+    private static final String TEST_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Class", "Tags", "Description");
+    private static final String PUBLISH_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_NO_TAGS, "Class", "Description");
+    private static final String SUITE_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Suite", "Tags", "Description");
 
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
@@ -50,6 +59,58 @@ public class CliParser implements ConfigurationParser {
                     }
                 }
             }
+        }
+    }
+
+    interface TestFilter {
+        Collection<Class<? extends AbstractTest>> filterTests(Collection<Class<? extends AbstractTest>> testClasses);
+    }
+
+    interface SuiteFilter {
+        Map<String, TestSuite> filterSuites(Map<String, TestSuite> testSuites);
+    }
+
+    private static class TagFilter implements TestFilter, SuiteFilter {
+        private String tag;
+
+        public TagFilter(String tag) {
+            this.tag = tag;
+        }
+
+        @Override
+        public Collection<Class<? extends AbstractTest>> filterTests(Collection<Class<? extends AbstractTest>> testClasses) {
+            Collection<Class<? extends AbstractTest>> filteredTestClasses = new ArrayList<>();
+            for (Class<? extends AbstractTest> testClass : testClasses) {
+                if(!testClass.isAnnotationPresent(Tag.class))
+                    continue;
+
+                if(Arrays.asList(testClass.getAnnotation(Tag.class).tags()).contains(this.tag))
+                    filteredTestClasses.add(testClass);
+            }
+            return filteredTestClasses;
+        }
+
+        @Override
+        public Map<String, TestSuite> filterSuites(Map<String, TestSuite> testSuites) {
+            Map<String, TestSuite> filteredTestSuites = new HashMap<>();
+            for (Map.Entry<String, TestSuite> entry : testSuites.entrySet()) {
+                if (entry.getValue().getTags().contains(this.tag)) {
+                    filteredTestSuites.put(entry.getKey(), entry.getValue());
+                }
+            }
+            return filteredTestSuites;
+        }
+    }
+
+    private static class AllowAllFilter implements TestFilter, SuiteFilter {
+        @Override
+        public Map<String, TestSuite> filterSuites(Map<String, TestSuite> testSuites) {
+            return testSuites;
+        }
+
+        @Override
+        public Collection<Class<? extends AbstractTest>> filterTests(Collection<Class<? extends AbstractTest>> testClasses) {
+            return testClasses;
         }
     }
 
@@ -162,24 +223,26 @@ public class CliParser implements ConfigurationParser {
         printExtraHelp();
     }
 
-    public void printTestClasses() {
+    public static void printTestClasses(TestFilter filter) {
         System.out.println();
         System.out.println("Available test classes:");
-        for (Class<? extends AbstractTest> testClass : ReflectionsContainer.getInstance().getTestClasses().values()){
-            printClass(testClass, false);
+        System.out.println(TEST_CLASS_HELP_HEADER);
+        for (Class<? extends AbstractTest> testClass : filter.filterTests(ReflectionsContainer.getInstance().getTestClasses().values())){
+            printClass(testClass, false, true);
         }
     }
 
-    public void printPublisherClasses() {
+    public static void printPublisherClasses() {
         System.out.println();
         System.out.println("Available publisher classes:");
+        System.out.println(PUBLISH_CLASS_HELP_HEADER);
         for (Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
-            printClass(publisherClass, false);
+            printClass(publisherClass, false, false);
         }
     }
 
-    public void printExtraHelp() {
-        printTestClasses();
+    public static void printExtraHelp() {
+        printTestClasses(new AllowAllFilter());
         printPublisherClasses();
     }
 
@@ -188,7 +251,7 @@ public class CliParser implements ConfigurationParser {
             printHelp();
             return true;
         } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_tests")) {
-            printTestClasses();
+            printTestClasses(new AllowAllFilter());
             return true;
         } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_publish")) {
             printPublisherClasses();
@@ -196,12 +259,17 @@ public class CliParser implements ConfigurationParser {
         } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
-                printClass(testClass, true);
+                System.out.println(TEST_CLASS_HELP_HEADER);
+                printClass(testClass, true, true);
             } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
-                printClass(publisherClass, true);
+                System.out.println(PUBLISH_CLASS_HELP_HEADER);
+                printClass(publisherClass, true, false);
             } else if (cmdLineArgs[1].startsWith("--suite=")) {
+                System.out.println(SUITE_HELP_HEADER);
                 printTestSuite(new PredefinedSuites(), cmdLineArgs[1].split("=")[1], true, true);
+            } else if (cmdLineArgs[1].startsWith("--tag=")) {
+                printTagHelp(cmdLineArgs[1].split("=")[1]);
             } else {
                 System.out.println("Could not find any test or publisher \"" + cmdLineArgs[1] + "\"");
             }
@@ -225,6 +293,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Use '--help_publish' to print all the publisher classes.");
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
         System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
+        System.out.println("Use '--help --tag=$Tag' to find all items that have a the specified tag");
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
@@ -265,11 +334,18 @@ public class CliParser implements ConfigurationParser {
             System.out.printf("\t--%-71s %s\r\n", action.value() + " " + action.actionParams(), action.actionDescription());
         }
 
-        PredefinedSuites predefinedSuites = new PredefinedSuites();
-        System.out.println("\r\nPredefined suites");
-        for (String testSuiteName : predefinedSuites.keySet()) {
-            printTestSuite(predefinedSuites, testSuiteName, printSuitesTests, false);
+        printTestSuites(new AllowAllFilter(), printSuitesTests);
+    }
+
+    private static void printTagHelp(String tag) {
+        if(StringUtils.isEmpty(tag)) {
+            throw new IllegalArgumentException("Tag was empty");
         }
+
+        TagFilter tagFilter = new TagFilter(tag);
+        printTestSuites(tagFilter, false);
+
+        printTestClasses(tagFilter);
     }
 
     public void printShortHelp() {
@@ -283,9 +359,10 @@ public class CliParser implements ConfigurationParser {
                 description));
     }
 
-    private static void printClass(Class klass, boolean printProperties) {
+    private static void printClass(Class klass, boolean printProperties, boolean printTags) {
         String name = klass.getSimpleName();
         String desc = "";
+        String tags = "";
         if (klass.isAnnotationPresent(Name.class)) {
             Name d = (Name) klass.getAnnotation(Name.class);
             name = name + " [" + d.name() + "]";
@@ -295,8 +372,19 @@ public class CliParser implements ConfigurationParser {
             desc = d.desc();
         }
 
-        System.out.println(String.format(" - %-40s - %s", name, desc));
+        if (klass.isAnnotationPresent(Tag.class)) {
+            Tag tag = (Tag) klass.getAnnotation(Tag.class);
+            tags = Joiner.on(", ").join(tag.tags());
+        }
+
+        if(!printTags) {
+            System.out.println(String.format(" - %-40s - %s", name, desc));
+        } else {
+            System.out.println(String.format(" - %-40s %-40s - %s", name, tags, desc));
+        }
+
         if (printProperties) {
+            System.out.println();
             System.out.println(String.format("\t%-32s %-64s %-32s", "Property", "Default", "Description"));
             for (Method method : klass.getMethods()) {
                 if (method.getAnnotation(ConfigArgSet.class) != null) {
@@ -316,13 +404,23 @@ public class CliParser implements ConfigurationParser {
         }
     }
 
+    private static void printTestSuites(SuiteFilter filter, boolean withTests) {
+        PredefinedSuites predefinedSuites = new PredefinedSuites();
+        System.out.println("\r\nPredefined suites");
+        System.out.println(SUITE_HELP_HEADER);
+        for (String testSuiteName : filter.filterSuites(predefinedSuites).keySet()) {
+            printTestSuite(predefinedSuites, testSuiteName, withTests, false);
+        }
+    }
+
     private static void printTestSuite(PredefinedSuites predefinedSuites, String testSuiteName, boolean withTests, boolean withTestProperties) {
         TestSuite testSuite = predefinedSuites.get(testSuiteName);
         if(testSuite == null) {
             System.out.println("Cannot find a test predefined test suite named " + testSuiteName);
             return;
         }
-        System.out.printf(" - %-32s\t %-32s\r\n", testSuiteName, testSuite.getDescription());
+
+        System.out.println(String.format(" - %-40s %-40s - %s", testSuiteName, Joiner.on(", ").join(testSuite.getTags()), testSuite.getDescription()));
         if (withTests) {
             for (AbstractTest test : testSuite.getTests()) {
                 System.out.printf("\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");

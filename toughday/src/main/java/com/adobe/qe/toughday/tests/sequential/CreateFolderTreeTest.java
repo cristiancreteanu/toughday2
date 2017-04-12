@@ -5,15 +5,14 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
+import junit.framework.Assert;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
-/**
- *
- */
+@Tag(tags = { "author" })
 @Name(name="create_folder_tree")
 @Description(desc="This test creates folders hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the folder tree, up to base^level")

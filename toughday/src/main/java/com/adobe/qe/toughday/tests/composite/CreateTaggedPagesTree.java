@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.*;
@@ -12,9 +13,7 @@ import com.adobe.qe.toughday.tests.sequential.tags.CreateTagTreeTest;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 
-/**
- * Created by tuicu on 05/11/16.
- */
+@Tag(tags = { "author" })
 @Description(desc=
         "This test creates tags and pages hierarchically. Each page gets assigned two tags. " +
                 "One from the corresponding node in the tag tree and one that is the same for the whole page tree. " +

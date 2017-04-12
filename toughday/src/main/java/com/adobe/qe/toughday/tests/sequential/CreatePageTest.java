@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
@@ -13,7 +14,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-
+@Tag(tags = { "author" })
 @Description(desc = "This test creates pages under the same parent path." +
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreatePageTreeTest.")

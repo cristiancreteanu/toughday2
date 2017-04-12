@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
@@ -17,6 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Tag(tags = { "author" })
 @Description(desc = "Creates users similar to the user editor console (/libs/granite/security/content/userEditor.html)")
 public class CreateUserTest extends SequentialTestBase {
     public static final String DEFAULT_PASSWORD = "toughday";

@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
@@ -11,6 +12,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
+@Tag(tags = { "author" })
 @Description(desc = "Test for deleting pages.")
 public class DeletePageTest extends SequentialTestBase {
     private static final String CMD_DELETE_PAGE = "deletePage";

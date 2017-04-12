@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.samplecontent.SampleContent;
@@ -23,6 +24,7 @@ import java.io.*;
 import java.nio.charset.Charset;
 import java.util.UUID;
 
+@Tag(tags = { "author" })
 @Description(desc = "Test for uploading PDF assets under the same path." +
         "Due to OAK limitations, performance will decrease over time." +
         "If you are not looking for this specific scenario, please consider using CreatePDFTreeTest.")

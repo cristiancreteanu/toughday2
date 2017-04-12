@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.composite;
 
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
@@ -11,6 +12,7 @@ import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import org.apache.logging.log4j.Logger;
 
+@Tag(tags = { "author" })
 @Description(desc = "Authoring test. Steps: create page, upload asset, delete page, delete asset.")
 public class AuthoringTest extends CompositeTest {
     public static final String DEFAULT_PAGE_TITLE = "toughday_title";
