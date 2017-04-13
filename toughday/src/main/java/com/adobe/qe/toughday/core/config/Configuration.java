@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
+import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -77,9 +78,10 @@ public class Configuration {
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
 
-        // Add a default publisher if none is specified
+        // Add a default publishers if none is specified
         if (configParams.getPublishers().size() == 0) {
             configParams.addPublisher(ConsolePublisher.class.getSimpleName(), new HashMap<String, String>());
+            configParams.addPublisher(CSVPublisher.class.getSimpleName(), new HashMap<String, String>() {{ put("append", "true"); }});
         }
 
         for(ConfigParams.ClassMetaObject publisherMeta : configParams.getPublishers()) {
