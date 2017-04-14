@@ -9,8 +9,11 @@ import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.apache.logging.log4j.core.config.LoggerConfig;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -77,6 +80,7 @@ public class Configuration {
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
+        applyLogLevel(globalArgs.getLogLevel());
 
         // Add a default publishers if none is specified
         if (configParams.getPublishers().size() == 0) {
@@ -158,6 +162,16 @@ public class Configuration {
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
+    }
+
+    private void applyLogLevel(Level level) {
+        LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+        for (LoggerConfig loggerConfig : config.getLoggers().values()) {
+            loggerConfig.setLevel(level);
+        }
+        System.setProperty("toughday.log.level", level.name());
+        ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
     }
 
     private ConfigParams collectConfigurations(String[] cmdLineArgs) {
@@ -304,12 +318,17 @@ public class Configuration {
 
         public static final String DEFAULT_WAIT_TIME_STRING = "300";
         public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
+
+        public static final String DEFAULT_LOG_LEVEL_STRING = "INFO";
+        public static final Level DEFAULT_LOG_LEVEL = Level.valueOf(DEFAULT_LOG_LEVEL_STRING);
+
         private boolean installSampleContent = true;
         private String contextPath;
         private String runMode = "normal";
         private String publishMode = "simple";
         private long interval = 5;
         private int load = 50;
+        private Level logLevel;
 
         /**
          * Constructor
@@ -396,6 +415,11 @@ public class Configuration {
 
         @ConfigArgSet(required = false, defaultValue = "50", desc = "Set the load, in requests per second for the \"constantload\" runmode.  (Available only when runmode=constantload)")
         public void setLoad(String load) { this.load = Integer.parseInt(load); }
+
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_LOG_LEVEL_STRING, desc = "Log level for ToughDay Engine")
+        public void setLogLevel(String logLevel) {
+            this.logLevel = Level.valueOf(logLevel);
+        }
 
         // Adders and getters
 
@@ -493,6 +517,11 @@ public class Configuration {
 
         @ConfigArgGet
         public int getLoad() { return this.load; }
+
+        @ConfigArgGet
+        public Level getLogLevel() {
+            return logLevel;
+        }
 
 
         // Helper methods
