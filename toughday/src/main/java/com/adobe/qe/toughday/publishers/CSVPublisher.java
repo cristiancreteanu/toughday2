@@ -16,11 +16,17 @@ import java.util.Collection;
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher extends Publisher {
     public static final String DEFAULT_FILE_PATH = "results.csv";
+    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %f, %f, %d, %f, %f, %f";
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
+
+
     private boolean finished = false;
     private boolean append = false;
     private boolean created = false;
+    private int precision = 6;
+    private String FORMAT = getFormat(precision);
+
     private PrintWriter printWriter;
     private BufferedWriter writer;
 
@@ -45,6 +51,19 @@ public class CSVPublisher extends Publisher {
     @ConfigArgGet
     public boolean getAppend() {
         return append;
+    }
+
+    @ConfigArgSet(required = false, desc = "Precision for doubles and floats", defaultValue = "6")
+    public void setPrecision(String precision) {
+        this.precision = Integer.parseInt(precision);
+        if (this.precision < 0 || this.precision > 12) {
+            throw new IllegalArgumentException("Precision is not in range.");
+        }
+        FORMAT = getFormat(this.precision);
+    }
+
+    private static String getFormat(int precision) {
+        return INITIAL_FORMAT.replace("f", "." + precision + "f");
     }
 
     @Override
@@ -74,16 +93,17 @@ public class CSVPublisher extends Publisher {
             }
 
             for (RunMap.TestStatistics statistics : testStatistics) {
-                writer.write(statistics.getTest().getFullName() + ", " +
-                        statistics.getTimestamp() + ", " +
-                        statistics.getTotalRuns() + ", " +
-                        statistics.getFailRuns() + ", " +
-                        statistics.getMinDuration() + ", " +
-                        statistics.getMaxDuration() + ", " +
-                        statistics.getMedianDuration() + ", " +
-                        statistics.getAverageDuration() + ", " +
-                        statistics.getRealThroughput() + ", " +
-                        statistics.getExecutionThroughput());
+                writer.write(String.format(FORMAT,
+                        statistics.getTest().getFullName(),
+                        statistics.getTimestamp(),
+                        statistics.getTotalRuns(),
+                        statistics.getFailRuns(),
+                        statistics.getMinDuration(),
+                        statistics.getMaxDuration(),
+                        statistics.getMedianDuration(),
+                        statistics.getAverageDuration(),
+                        statistics.getRealThroughput(),
+                        statistics.getExecutionThroughput()));
                 writer.newLine();
             }
             writer.flush();
