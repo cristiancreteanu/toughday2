@@ -12,6 +12,7 @@ import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Logger;
 import org.apache.sling.commons.html.impl.HtmlParserImpl;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;
@@ -24,6 +25,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Tag(tags = { "author" })
 @Description(desc = "Create groups of users. Similar to group editor console (/libs/granite/security/content/groupEditor.html)")
 public class CreateUserGroupTest extends SequentialTestBase {
+    public static final Logger LOG = createLogger(CreateUserGroupTest.class);
+
     private String id;
     private String groupName = DEFAULT_GROUP_NAME;
     private String description = DEFAULT_GROUP_DESCRIPTION;
@@ -66,9 +69,19 @@ public class CreateUserGroupTest extends SequentialTestBase {
             groupName += increment.getAndIncrement();
         }
 
-        String groupPath = createGroup(getDefaultClient(), id, groupName, description);
+        try {
+            LOG.debug("{}: Trying to create user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
 
-        communicate("groups", extraGroup != null ? Arrays.asList(extraGroup, groupPath) : Arrays.asList(groupPath));
+            String groupPath = createGroup(getDefaultClient(), id, groupName, description);
+            communicate("groups", extraGroup != null ? Arrays.asList(extraGroup, groupPath) : Arrays.asList(groupPath));
+        } catch (Throwable e) {
+            LOG.warn("{}: Failed to create user group={}{}", Thread.currentThread().getName(), groupName, id);
+            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+
+            throw e;
+        }
+
+        LOG.debug("{}: Successfully created user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
     }
 
     /**

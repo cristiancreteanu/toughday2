@@ -53,7 +53,18 @@ public class CreatePageTest extends SequentialTestBase {
                 .addParameter("title", nextTitle)
                 .addParameter("template", template);
 
-        getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+        try {
+            LOG.debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, title, template);
+
+            getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+        } catch (Throwable e) {
+            LOG.warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, title, template);
+            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+
+            throw e;
+        }
+
+        LOG.debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, title, template);
     }
 
     @Override

@@ -79,12 +79,16 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     @Override
     public void test() throws Exception {
         try {
+            LOG.debug("{}: Trying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+
             createLC();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we're just count them.
-            LOG.warn("Failed to create page {} ({})", destinationPage, e.getMessage());
+            LOG.warn("{}: Failed to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+
             throw e;
         }
     }
@@ -96,22 +100,21 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
 
     @After
     private void after() {
-        if (LOG.isDebugEnabled()) LOG.debug("In after() tid={}", Thread.currentThread().getId());
         // make sure the page was created
         for (int i=0; i<5; i++) {
             try {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.destinationPage + nodeName)) {
+                    LOG.debug("{}: Successfully created live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
                     break;
                 } else {
-                    if (LOG.isDebugEnabled()) LOG.debug("Retrying to create LC tid={} nextChild={} phase={} path={}\n",
-                            Thread.currentThread().getId(), nextChild, phaser.getLevel(),
-                            destinationPage + nodeName);
+                    LOG.debug("{}: Retrying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
                     createLC();
                 }
-            } catch (Exception e) {
-                LOG.warn("In after(): Failed to create LC {}{}", destinationPage, nodeName);
+            } catch (Throwable e) {
+                LOG.warn("{}: Failed to create after retry live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+                LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
             }
         }
 

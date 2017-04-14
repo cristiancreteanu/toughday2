@@ -60,8 +60,19 @@ public class RolloutTest extends SequentialTestBase {
 
     @Override
     public void test() throws Exception {
-        WcmUtils.rolloutPage(getDefaultClient(), type, background,
-                new String[]{sourcePage}, null, new String[] {destinationPage}, 200);
+        try {
+            LOG.debug("{}: Trying to rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
+
+            WcmUtils.rolloutPage(getDefaultClient(), type, background,
+                    new String[]{sourcePage}, null, new String[]{destinationPage}, 200);
+        } catch (Throwable e) {
+            LOG.warn("{}: Failed to rollout page={}{}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
+            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+
+            throw e;
+        }
+
+        LOG.debug("{}: Successfully rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
     }
 
     @Override

@@ -45,6 +45,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
             Name d = getClass().getAnnotation(Name.class);
             this.name = d.name();
         }
+
     }
 
     public static List<Thread> getExtraThreads() {

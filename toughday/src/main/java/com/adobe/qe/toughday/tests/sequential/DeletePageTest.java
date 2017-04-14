@@ -6,7 +6,9 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
+import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Tag(tags = { "author" })
 @Description(desc = "Test for deleting pages.")
 public class DeletePageTest extends SequentialTestBase {
+    public static Logger LOG = createLogger(DeletePageTest.class);
+
     private static final String CMD_DELETE_PAGE = "deletePage";
     private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
     private String title = AuthoringTest.DEFAULT_PAGE_TITLE;
@@ -46,7 +50,19 @@ public class DeletePageTest extends SequentialTestBase {
                 .addParameter("shallow", Boolean.toString(false))
                 .addParameter("path", parentPath + nextTitle);
 
-        getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+        try {
+            LOG.debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+
+            getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+
+        } catch (Throwable e) {
+            LOG.warn("{}: Failed to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+
+            throw e;
+        }
+
+        LOG.warn("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
     }
 
 

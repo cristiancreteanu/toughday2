@@ -11,6 +11,7 @@ import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.ThreadContext;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.UUID;
@@ -52,7 +53,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
         try {
             getDefaultClient().createFolder(isolatedFolder, isolatedFolder, rootParentPath);
             rootParentPath = rootParentPath + "/" + isolatedFolder;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.debug("Could not create isolated folder for running " + getFullName());
         }
     }
@@ -72,36 +73,35 @@ public class CreatePageTreeTest extends SequentialTestBase {
     @Override
     public void test() throws Exception {
         try {
+            LOG.debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
             createPage();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we're just count them.
-            LOG.warn("Failed to create page {}{} ({})", parentPath, nodeName, e.getMessage());
+            LOG.warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
+            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
             throw e;
         }
-        if (LOG.isDebugEnabled()) LOG.debug("tid=%{} nextChild={} level={} path={}",
-                Thread.currentThread().getId(), nextChild, phaser.getLevel(), parentPath + nodeName);
     }
 
     @After
     private void after() {
-        if (LOG.isDebugEnabled()) LOG.debug("In after() tid={}", Thread.currentThread().getId());
         // make sure the page was created
         for (int i=0; i<5; i++) {
             try {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
+                    LOG.debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
                     break;
                 } else {
-                    if (LOG.isDebugEnabled()) LOG.debug("Retrying to create page tid={} nextChild={} phase={} path={}\n",
-                            Thread.currentThread().getId(), nextChild, phaser.getLevel(),
-                            parentPath + nodeName);
+                    LOG.debug("{}: Retrying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
                     createPage();
                 }
-            } catch (Exception e) {
-                LOG.warn("In after(): Failed to create page {}{}", parentPath, nodeName);
+            } catch (Throwable e) {
+                LOG.warn("{}: Failed to create after retry page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template, e.getMessage());
+                LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
             }
         }
 

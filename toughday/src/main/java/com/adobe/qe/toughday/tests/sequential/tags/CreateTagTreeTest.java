@@ -90,34 +90,35 @@ public class CreateTagTreeTest extends SequentialTestBase {
     @Override
     public void test() throws Exception {
         try {
+            LOG.debug("{}: Trying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
             createTag();
         } catch (Exception e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we just count them.
-            LOG.warn("Failed to create tag {}{} ({})", parentPath, nodeName, e.getMessage());
+            LOG.warn("{}: Failed to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
             throw e;
         }
     }
 
     @After
     private void after() {
-        if (LOG.isDebugEnabled()) LOG.debug("In after() tid={}", Thread.currentThread().getId());
         // make sure the page was created
         for (int i=0; i<5; i++) {
             try {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
+                    LOG.debug("{}: Successfully created tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                     break;
                 } else {
-                    if (LOG.isDebugEnabled()) LOG.debug("Retrying to create tag tid={} nextChild={} phase={} path={}\n",
-                            Thread.currentThread().getId(), nextChild, phaser.getLevel(),
-                            parentPath + nodeName);
+                    LOG.debug("{}: Retrying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                     createTag();
                 }
             } catch (Exception e) {
-                LOG.warn("In after(): Failed to create tag {}{}", parentPath, nodeName);
+                LOG.warn("{}: Failed to create after retry tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+                LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
             }
         }
 
