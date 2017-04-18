@@ -11,7 +11,7 @@ public abstract class PublishMode {
     protected RunMap globalRunMap;
 
     public PublishMode(Engine engine) {
-        this.globalRunMap = new RunMap(engine.getGlobalArgs().getConcurrency());
+        this.globalRunMap = new RunMap();
         this.engine = engine;
     }
 

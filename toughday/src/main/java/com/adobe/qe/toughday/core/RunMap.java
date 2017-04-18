@@ -1,5 +1,7 @@
 package com.adobe.qe.toughday.core;
 
+import org.HdrHistogram.SynchronizedHistogram;
+
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -18,17 +20,15 @@ public class RunMap {
     private Map<AbstractTest, TestEntry> runMap;
     private List<TestEntry> orderedTests;
     private boolean keepTestsOrdered = false;
-    private int threads;
 
-    public RunMap (int threads) {
-        this.threads = threads;
+    public RunMap () {
         runMap = new HashMap<>();
         orderedTests = new ArrayList<>();
         this.keepTestsOrdered = true;
     }
 
-    private RunMap (int threads, Collection<AbstractTest> tests) {
-        this(threads);
+    private RunMap (Collection<AbstractTest> tests) {
+        this();
         this.keepTestsOrdered = false;
         for (AbstractTest test : tests) {
             runMap.put(test, new TestEntry(test));
@@ -89,7 +89,7 @@ public class RunMap {
     }
 
     public RunMap newInstance() {
-        return new RunMap(threads, runMap.keySet());
+        return new RunMap(runMap.keySet());
     }
 
     /**
@@ -127,24 +127,32 @@ public class RunMap {
          */
         double getRealThroughput();
 
-        /**
+        /* TODO figure out how to compute this when the number of threads is not fixed
          * Get the execution throughput.
          * Calculated as follows: <code>number of parallel users / average duration</code>
          * @return
-         */
-        double getExecutionThroughput();
 
-        double getMinDuration();
+        double getExecutionThroughput();*/
 
-        double getMaxDuration();
+        long getMinDuration();
+
+        long getMaxDuration();
 
         double getAverageDuration();
-
-        double getDurationPerUser();
 
         long getMedianDuration();
 
         long getFailRuns();
+
+        long get90Percentile();
+
+        long get99Percentile();
+
+        long get999Percentile();
+
+        long getValueAtPercentile(double percentile);
+
+        double getStandardDeviation();
     }
 
 
@@ -156,24 +164,18 @@ public class RunMap {
         private static final long ONE_MILION = 1000000;
         private AbstractTest test;
         private double totalDuration;
-        private long totalRuns;
-        private double minDuration;
-        private double maxDuration;
         private long failRuns;
-        private Map<Long, Long> durationDistribution;
         private Map<Class<? extends Exception>, Long> failsMap;
         private long startNanoTime;
         private long lastNanoTime;
         private long startMillisTime;
+        private SynchronizedHistogram histogram;
 
         private void init() {
             totalDuration = 0;
-            totalRuns = 0;
             failRuns = 0;
-            durationDistribution = new HashMap<>();
+            histogram.reset();
             failsMap = new HashMap<>();
-            minDuration = Double.MAX_VALUE;
-            maxDuration = Double.MIN_VALUE;
         }
 
         /**
@@ -182,6 +184,7 @@ public class RunMap {
          */
         public TestEntry(AbstractTest test) {
             this.test = test;
+            histogram = new SynchronizedHistogram(3600000L /* 1h */, 3);
             reinitStartTime();
             init();
         }
@@ -205,16 +208,9 @@ public class RunMap {
          * @param duration
          */
         public synchronized void recordRun(double duration) {
+            histogram.recordValue((long) duration);
             lastNanoTime = System.nanoTime();
-            totalRuns++;
             totalDuration += duration;
-            minDuration = Math.min(minDuration, duration);
-            maxDuration = Math.max(maxDuration, duration);
-            Long intDuration = ((Double) duration).longValue();
-            if (!durationDistribution.containsKey(intDuration)) {
-                durationDistribution.put(intDuration, 0L);
-            }
-            durationDistribution.put(intDuration, durationDistribution.get(intDuration) + 1);
         }
 
         //TODO refactor this?
@@ -241,32 +237,33 @@ public class RunMap {
 
         @Override
         public long getTotalRuns() {
-            return totalRuns;
+            return histogram.getTotalCount();
         }
 
         @Override
         public double getRealThroughput() {
-            return ((double) totalRuns * ONE_BILLION_D) / (lastNanoTime - startNanoTime);
+            return ((double) histogram.getTotalCount() * ONE_BILLION_D) / (lastNanoTime - startNanoTime);
         }
 
+        /*
         @Override
         public double getExecutionThroughput() {
             return 1000 * threads / (getAverageDuration() + test.getGlobalArgs().getWaitTime());
+        }*/
+
+        @Override
+        public long getMinDuration() {
+            return histogram.getMinValue();
         }
 
         @Override
-        public double getMinDuration() {
-            return minDuration;
-        }
-
-        @Override
-        public double getMaxDuration() {
-            return maxDuration;
+        public long getMaxDuration() {
+            return histogram.getMaxValue();
         }
 
         @Override
         public double getAverageDuration() {
-            return totalDuration / totalRuns;
+            return histogram.getMean();
         }
 
         @Override
@@ -275,46 +272,48 @@ public class RunMap {
         }
 
         @Override
-        public double getDurationPerUser() {
-            return totalDuration / threads;
+        public long get90Percentile() {
+            return histogram.getValueAtPercentile(90);
         }
 
         @Override
+        public long get99Percentile() {
+            return histogram.getValueAtPercentile(99);
+        }
+
+        @Override
+        public long get999Percentile() {
+            return histogram.getValueAtPercentile(99.9);
+        }
+
+        @Override
+        public long getValueAtPercentile(double percentile) {
+            return histogram.getValueAtPercentile(percentile);
+        }
+
+        @Override
+        public double getStandardDeviation() {
+            return histogram.getStdDeviation();
+        }
+
+        /* TODO delete if we don't find a use case, or figure out how to compute it when the number of threads is not fixed
+        public double getDurationPerUser() {
+            return totalDuration / threads;
+        }*/
+
+        @Override
         public long getMedianDuration() {
-            Long[] keys = durationDistribution.keySet().toArray(new Long[0]);
-            Arrays.sort(keys);
-            long pos = totalRuns / 2;
-            for (Long key : keys) {
-                if (pos < durationDistribution.get(key)) {
-                    return key;
-                }
-                pos -= durationDistribution.get(key);
-            }
-            return -1;
+            return histogram.getValueAtPercentile(50);
         }
 
         public synchronized long aggregateAndReinitialize(TestEntry other) {
             long totalRuns = 0;
             synchronized (other) {
+                totalRuns = other.histogram.getTotalCount();
+                this.histogram.add(other.histogram);
                 this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
-                totalRuns = other.totalRuns;
-                this.totalRuns += other.totalRuns;
                 this.totalDuration += other.totalDuration;
                 this.failRuns += other.failRuns;
-                this.minDuration = Math.min(this.minDuration, other.minDuration);
-                this.maxDuration = Math.max(this.maxDuration, other.maxDuration);
-                for (Map.Entry<Long, Long> entry : other.durationDistribution.entrySet()) {
-                    if (!this.durationDistribution.containsKey(entry.getKey())) {
-                        this.durationDistribution.put(entry.getKey(), 0L);
-                    }
-                    this.durationDistribution.put(entry.getKey(), this.durationDistribution.get(entry.getKey()) + entry.getValue());
-                }
-                for (Map.Entry<Class<? extends Exception>, Long> entry : other.failsMap.entrySet()) {
-                    if (!this.failsMap.containsKey(entry.getKey())) {
-                        this.failsMap.put(entry.getKey(), 0L);
-                    }
-                    this.failsMap.put(entry.getKey(), this.failsMap.get(entry.getKey()) + entry.getValue());
-                }
                 other.init();
             }
             return totalRuns;

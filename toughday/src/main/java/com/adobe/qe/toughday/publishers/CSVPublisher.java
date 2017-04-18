@@ -16,7 +16,7 @@ import java.util.Collection;
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher extends Publisher {
     public static final String DEFAULT_FILE_PATH = "results.csv";
-    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %f, %f, %d, %f, %f, %f";
+    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %d, %d, %d, %f, %f, %d, %d, %d, %f";
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
 
@@ -31,7 +31,7 @@ public class CSVPublisher extends Publisher {
     private BufferedWriter writer;
 
     private String filePath = DEFAULT_FILE_PATH;
-    private static String HEADER = "Name, Timestamp, Runs, Fails, Min, Max, Median, Average, Real Throughput, Requests Throughput";
+    private static String HEADER = "Name, Timestamp, Runs, Fails, Min, Max, Median, Average, Std Dev, 90 p, 99 p, 99.9 p, Real Throughput";
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -102,8 +102,11 @@ public class CSVPublisher extends Publisher {
                         statistics.getMaxDuration(),
                         statistics.getMedianDuration(),
                         statistics.getAverageDuration(),
-                        statistics.getRealThroughput(),
-                        statistics.getExecutionThroughput()));
+                        statistics.getStandardDeviation(),
+                        statistics.get90Percentile(),
+                        statistics.get99Percentile(),
+                        statistics.get999Percentile(),
+                        statistics.getRealThroughput()));
                 writer.newLine();
             }
             writer.flush();

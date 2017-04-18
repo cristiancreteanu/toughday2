@@ -79,7 +79,7 @@ public class ConsolePublisher extends Publisher {
 
         // "clear" screen
         if (begun && clearScreen) {
-            for (int i=0; i < (nrStats * 4) + 2 + extraLines.get(); i++ ) {
+            for (int i=0; i < (nrStats * 5) + 2 + extraLines.get(); i++ ) {
                 System.out.print("\33[1A\33[2K");
             }
         }
@@ -88,20 +88,23 @@ public class ConsolePublisher extends Publisher {
         final String SPACE = " ";
         System.out.println();
         for (RunMap.TestStatistics statistics : testStatistics) {
-            double minDuration = (statistics.getMinDuration()  == Double.MAX_VALUE) ? 0 : statistics.getMinDuration();
-            System.out.printf("%-35.35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n%35s | %-28s | %-25s | %-25s |\r\n",
+            System.out.printf("%-35.35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n",
                     statistics.getTest().getFullName(),
-                    "Timestamp: " + statistics.getTimestamp(),
-                    "Runs:     " + String.format("%d", statistics.getTotalRuns()),
-                    "Fails:    " + String.format("%d", statistics.getFailRuns()),
+                    "Timestamp:  " + statistics.getTimestamp(),
+                    "Runs:       " + String.format("%d", statistics.getTotalRuns()),
+                    "Fails:      " + String.format("%d", statistics.getFailRuns()),
                     SPACE,
-                    "Min:      " + String.format("%d", (long) minDuration) + " ms",
-                    "Max:      " + String.format("%d", (long) statistics.getMaxDuration()) + " ms",
-                    "Median:   " + String.format("%d", (long) statistics.getMedianDuration()) + " ms",
-                    " ",
-                    "Average:  " + String.format("%.1f", statistics.getAverageDuration()) + " ms",
-                    "Real TP:  " + String.format("%.1f", statistics.getRealThroughput()) + " rps",
-                    "Reqs TP:  " + String.format("%.1f", statistics.getExecutionThroughput()) + " rps"
+                    "Average:    " + String.format("%.1f", statistics.getAverageDuration()) + " ms",
+                    "Median:     " + String.format("%d", (long) statistics.getMedianDuration()) + " ms",
+                    "Std Dev:    " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
+                    SPACE,
+                    "90 p:       " + String.format("%d", statistics.get90Percentile()) + " ms",
+                    "99 p:       " + String.format("%d", statistics.get99Percentile()) + " ms",
+                    "99.9 p:     " + String.format("%d", statistics.get999Percentile()) + " ms",
+                    SPACE,
+                    "Min:        " + String.format("%d", (long) statistics.getMinDuration()) + " ms",
+                    "Max:        " + String.format("%d", (long) statistics.getMaxDuration()) + " ms",
+                    "Real TP:    " + String.format("%.1f", statistics.getRealThroughput()) + " rps"
             );
             System.out.println();
         }
