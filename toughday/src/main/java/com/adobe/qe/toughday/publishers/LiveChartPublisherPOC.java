@@ -111,16 +111,16 @@ class JsonHandler implements HttpRequestHandler  {
         for (RunMap.TestStatistics stat : statistics) {
             Map<String, Double> testStat = new HashMap<String, Double>();
 
-            testStat.put("duration", stat.getDurationPerUser());
+            //testStat.put("duration", stat.getDurationPerUser());
             testStat.put("total_duration", stat.getTotalDuration());
             testStat.put("runs", (double) stat.getTotalRuns());
             testStat.put("failures", (double) stat.getFailRuns());
             testStat.put("avg", stat.getAverageDuration());
             testStat.put("median", (double) stat.getMedianDuration());
-            testStat.put("min", stat.getMinDuration());
-            testStat.put("max", stat.getMaxDuration());
+            testStat.put("min", (double) stat.getMinDuration());
+            testStat.put("max", (double) stat.getMaxDuration());
             testStat.put("real_tp", stat.getRealThroughput());
-            testStat.put("tp", stat.getExecutionThroughput());
+            //testStat.put("tp", stat.getExecutionThroughput());
 
             testsMap.put(stat.getTest().getFullName(), testStat);
         }

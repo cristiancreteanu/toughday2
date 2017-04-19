@@ -66,13 +66,24 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
     @Override
     public void run() {
         try {
+            long elapsed = 0;
             while (!isFinished()) {
-                Thread.sleep(Engine.RESULT_AGGREATION_DELAY);
+
+                long sleepMillis = Engine.RESULT_AGGREATION_DELAY - elapsed;
+                if(sleepMillis > 0) {
+                    Thread.sleep(sleepMillis);
+                } else {
+                    Engine.LOG.warn("Publishers are taking more than 1 second to complete." +
+                            " This may affect the results that you are seeing.");
+                }
+
+                long start = System.nanoTime();
                 boolean testsFinished = aggregateResults();
                 if (testsFinished) {
                     this.finishExecution();
                 }
                 engine.getPublishMode().publishIntermediateResults();
+                elapsed = (System.nanoTime() - start) / 1000000l;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

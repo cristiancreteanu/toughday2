@@ -10,7 +10,7 @@ public class Intervals extends Simple {
 
     public Intervals(Engine engine) {
         super(engine);
-        this.delta = engine.getGlobalArgs().getInterval() / Engine.RESULT_AGGREATION_DELAY;
+        this.delta = engine.getGlobalArgs().getInterval() * 1000 / Engine.RESULT_AGGREATION_DELAY - 1;
     }
 
     @Override
