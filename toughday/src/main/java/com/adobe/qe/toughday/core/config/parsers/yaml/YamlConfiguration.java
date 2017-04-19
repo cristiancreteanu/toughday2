@@ -22,8 +22,8 @@ public class YamlConfiguration {
         }
     }
 
-    public void setPublishers(List<YamlRestrictedAction> publishers) {
-        for(YamlRestrictedAction yamlAction : publishers) {
+    public void setPublishers(List<YamlAction> publishers) {
+        for(YamlAction yamlAction : publishers) {
             yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
         }
     }
