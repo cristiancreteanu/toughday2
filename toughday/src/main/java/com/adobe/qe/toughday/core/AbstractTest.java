@@ -12,6 +12,7 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
+import org.apache.logging.log4j.core.appender.SyslogAppender;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
@@ -166,6 +167,8 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
             name = d.name();
         }
 
+        Level logLevel = System.getProperty("toughday.log.level") != null ? Level.valueOf(System.getProperty("toughday.log.level")) : Level.INFO;
+
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
         Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", null, config,
@@ -176,7 +179,8 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         config.addAppender(appender);
         AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
         AppenderRef[] refs = new AppenderRef[] {ref};
-        LoggerConfig loggerConfig = LoggerConfig.createLogger("false", Level.INFO, clazz.getName(), "true", refs, null, config, null);
+        LoggerConfig loggerConfig =
+                LoggerConfig.createLogger("false", logLevel, clazz.getName(), "true", refs, null, config, null);
         loggerConfig.addAppender(appender, null, null);
         config.addLogger(clazz.getName(), loggerConfig);
         ctx.updateLoggers();
