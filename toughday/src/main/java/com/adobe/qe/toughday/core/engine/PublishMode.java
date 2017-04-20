@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.core.engine.publishmodes;
+package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.RunMap;
@@ -10,9 +10,8 @@ public abstract class PublishMode {
     protected Engine engine;
     protected RunMap globalRunMap;
 
-    public PublishMode(Engine engine) {
+    public PublishMode() {
         this.globalRunMap = new RunMap();
-        this.engine = engine;
     }
 
     public RunMap getGlobalRunMap() {
@@ -21,6 +20,10 @@ public abstract class PublishMode {
 
     public Map<AbstractTest, Long> aggregateAndReinitialize(RunMap runMap) {
         return globalRunMap.aggregateAndReinitialize(runMap);
+    }
+
+    public void setEngine(Engine engine) {
+        this.engine = engine;
     }
 
     public abstract void publishIntermediateResults();

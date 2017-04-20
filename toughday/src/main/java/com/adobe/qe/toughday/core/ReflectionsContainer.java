@@ -2,7 +2,7 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Internal;
 import com.adobe.qe.toughday.core.engine.RunMode;
-import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
+import com.adobe.qe.toughday.core.engine.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 

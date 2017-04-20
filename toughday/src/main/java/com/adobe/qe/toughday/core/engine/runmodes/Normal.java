@@ -2,6 +2,8 @@ package com.adobe.qe.toughday.core.engine.runmodes;
 
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.core.engine.*;
 
@@ -11,13 +13,39 @@ import java.util.concurrent.Executors;
 
 @Description(desc = "Runs tests normally.")
 public class Normal implements RunMode {
+
+    public static final String DEFAULT_CONCURRENCY_STRING = "200";
+    public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
+
+    public static final String DEFAULT_WAIT_TIME_STRING = "300";
+    public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
+
     private ExecutorService testsExecutorService;
     private List<AsyncTestWorker> testWorkers = new ArrayList<>();
     private List<RunMap> runMaps = new ArrayList<RunMap>();
 
-    @Override
-    public boolean isDryRun() {
-        return false;
+    private int concurrency = DEFAULT_CONCURRENCY;
+    private long waitTime = DEFAULT_WAIT_TIME;
+
+    @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
+    public void setConcurrency(String concurrencyString) {
+        this.concurrency = Integer.parseInt(concurrencyString);
+    }
+
+    @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
+            defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
+    public void setWaitTime(String waitTime) {
+        this.waitTime = Integer.parseInt(waitTime);
+    }
+
+    @ConfigArgGet
+    public int getConcurrency() {
+        return concurrency;
+    }
+
+    @ConfigArgGet
+    public long getWaitTime() {
+        return waitTime;
     }
 
     @Override
@@ -25,10 +53,10 @@ public class Normal implements RunMode {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         Configuration.GlobalArgs globalArgs = configuration.getGlobalArgs();
-        testsExecutorService = Executors.newFixedThreadPool(globalArgs.getConcurrency());
+        testsExecutorService = Executors.newFixedThreadPool(concurrency);
 
         // Create the test worker threads
-        for (int i = 0; i < configuration.getGlobalArgs().getConcurrency(); i++) {
+        for (int i = 0; i < concurrency; i++) {
             AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
             testWorkers.add(testWorker);
             runMaps.add(testWorker.getLocalRunMap());
@@ -127,7 +155,7 @@ public class Normal implements RunMode {
                     }
                     mutex.lock();
                     Thread.interrupted();
-                    Thread.sleep(engine.getGlobalArgs().getWaitTime());
+                    Thread.sleep(waitTime);
                 }
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
