@@ -16,6 +16,14 @@ public class YamlConfiguration {
         this.configParams.setGlobalParams(globals);
     }
 
+    public void setPublishmode(Map<String, String> publishModeProperties) {
+        configParams.setPublishModeParams(publishModeProperties);
+    }
+
+    public void setRunmode(Map<String, String> runmode) {
+        configParams.setRunModeParams(runmode);
+    }
+
     public void setTests(List<YamlAction> tests) {
         for(YamlAction yamlAction : tests) {
             yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());

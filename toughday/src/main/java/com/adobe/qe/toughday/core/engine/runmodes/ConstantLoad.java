@@ -2,6 +2,8 @@ package com.adobe.qe.toughday.core.engine.runmodes;
 
 import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.config.ConfigArgGet;
+import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.engine.AsyncEngineWorker;
 import com.adobe.qe.toughday.core.engine.AsyncTestWorker;
 import com.adobe.qe.toughday.core.engine.Engine;
@@ -20,23 +22,27 @@ import java.util.concurrent.Executors;
 @Description(desc = "Generates a constant load of test executions, regardless of their execution time.")
 public class ConstantLoad implements RunMode {
     private static final Logger LOG = LoggerFactory.getLogger(ConstantLoad.class);
-    private int load;
+
+    private static final String DEFAULT_LOAD_STRING = "50";
+    private static final int DEFAULT_LOAD = Integer.getInteger(DEFAULT_LOAD_STRING);
+
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private Collection<AsyncTestWorker> testWorkers = Collections.synchronizedSet(new HashSet<AsyncTestWorker>());
     private AsyncTestWorkerScheduler scheduler;
     private ArrayList<RunMap> runMaps;
+    private int load = DEFAULT_LOAD;
 
-    @Override
-    public boolean isDryRun() {
-        return false;
-    }
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
+    public void setLoad(String load) { this.load = Integer.parseInt(load); }
+
+    @ConfigArgGet
+    public int getLoad() { return this.load; }
 
     @Override
     public RunContext runTests(Engine engine) throws Exception {
         this.scheduler = new AsyncTestWorkerScheduler(engine);
         executorService.execute(scheduler);
         runMaps = new ArrayList<>(load);
-        load = engine.getGlobalArgs().getLoad();
 
         for(int i = 0; i < load; i++) {
             runMaps.add(engine.getGlobalRunMap().newInstance());

@@ -6,6 +6,8 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
+import com.adobe.qe.toughday.core.engine.RunMode;
+import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
@@ -27,9 +29,13 @@ import java.util.*;
 public class Configuration {
     private static final Logger LOGGER =  LogManager.getLogger(Configuration.class);
 
+    private static final String DEFAULT_RUN_MODE = "normal";
+    private static final String DEFAULT_PUBLISH_MODE = "simple";
 
     private GlobalArgs globalArgs;
     private TestSuite suite;
+    private RunMode runMode;
+    private PublishMode publishMode;
     PredefinedSuites predefinedSuites = new PredefinedSuites();
 
     private TestSuite getTestSuite(Map<String, String> globalArgsMeta)
@@ -81,6 +87,9 @@ public class Configuration {
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
+
+        this.runMode = getRunMode(configParams);
+        this.publishMode = getPublishMode(configParams);
 
         // Add a default publishers if none is specified
         if (configParams.getPublishers().size() == 0) {
@@ -164,6 +173,41 @@ public class Configuration {
         }
     }
 
+    private RunMode getRunMode(ConfigParams configParams)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Map<String, String> runModeParams = configParams.getRunModeParams();
+        if(runModeParams.size() != 0 && !runModeParams.containsKey("type")) {
+            throw new IllegalStateException("The Run mode doesn't have a type");
+        }
+
+
+        String type = runModeParams.size() != 0 ? runModeParams.get("type") : DEFAULT_RUN_MODE;
+        Class<? extends RunMode> runModeClass = ReflectionsContainer.getInstance().getRunModeClasses().get(type);
+
+        if(runModeClass == null) {
+            throw new IllegalStateException("A run mode with type \"" + type + "\" does not exist");
+        }
+
+        return  createObject(runModeClass,  runModeParams);
+    }
+
+    private PublishMode getPublishMode(ConfigParams configParams)
+            throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        Map<String, String> publishModeParams = configParams.getPublishModeParams();
+        if(publishModeParams.size() != 0 && !publishModeParams.containsKey("type")) {
+            throw new IllegalStateException("The Publish mode doesn't have a type");
+        }
+
+        String type = publishModeParams.size() != 0 ? publishModeParams.get("type") : DEFAULT_PUBLISH_MODE;
+        Class<? extends PublishMode> publishModeClass = ReflectionsContainer.getInstance().getPublishModeClasses().get(type);
+
+        if(publishModeClass == null) {
+            throw new IllegalStateException("A publish mode with type \"" + type + "\" does not exist");
+        }
+
+        return  createObject(publishModeClass,  publishModeParams);
+    }
+
     private void applyLogLevel(Level level) {
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
@@ -202,6 +246,22 @@ public class Configuration {
      */
     public GlobalArgs getGlobalArgs() {
         return globalArgs;
+    }
+
+    /**
+     * Getter for the run mode
+     * @return
+     */
+    public RunMode getRunMode() {
+        return runMode;
+    }
+
+    /**
+     * Getter for the publish mode
+     * @return
+     */
+    public PublishMode getPublishMode() {
+        return publishMode;
     }
 
     /**
@@ -296,8 +356,6 @@ public class Configuration {
         private int port;
         private String user;
         private String password;
-        private int concurrency;
-        private long waitTime;
         private long duration;
         private Map<String, Publisher> publishers;
         private long timeout;
@@ -313,22 +371,15 @@ public class Configuration {
         public static final String DEFAULT_TIMEOUT_STRING = "180"; // 3 minutes
         public static final long DEFAULT_TIMEOUT = 3 * 60 * 1000l; // 5 minutes
 
-        public static final String DEFAULT_CONCURRENCY_STRING = "200";
-        public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
-
-        public static final String DEFAULT_WAIT_TIME_STRING = "300";
-        public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
-
         public static final String DEFAULT_LOG_LEVEL_STRING = "INFO";
         public static final Level DEFAULT_LOG_LEVEL = Level.valueOf(DEFAULT_LOG_LEVEL_STRING);
 
+        public static final String DEFAULT_DRY_RUN = "false";
+
         private boolean installSampleContent = true;
         private String contextPath;
-        private String runMode = "normal";
-        private String publishMode = "simple";
-        private long interval = 5;
-        private int load = 50;
-        private Level logLevel;
+        private Level logLevel = DEFAULT_LOG_LEVEL;
+        private boolean dryRun = Boolean.parseBoolean(DEFAULT_DRY_RUN);
 
         /**
          * Constructor
@@ -340,8 +391,6 @@ public class Configuration {
             this.password = DEFAULT_PASSWORD;
             this.duration = parseDurationToSeconds(DEFAULT_DURATION);
             this.timeout = DEFAULT_TIMEOUT;
-            this.waitTime = DEFAULT_WAIT_TIME;
-            this.concurrency = DEFAULT_CONCURRENCY;
             this.protocol = DEFAULT_PROTOCOL;
         }
 
@@ -367,20 +416,9 @@ public class Configuration {
             this.password = password;
         }
 
-        @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
-        public void setConcurrency(String concurrencyString) {
-            this.concurrency = Integer.parseInt(concurrencyString);
-        }
-
         @ConfigArgSet(required = false, desc = "How long the tests will run. Can be expressed in s(econds), m(inutes), h(ours), and/or d(ays). Example: 1h30m.", defaultValue = DEFAULT_DURATION, order = 6)
         public void setDuration(String durationString) {
             this.duration = parseDurationToSeconds(durationString);
-        }
-
-        @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
-                defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
-        public void setWaitTime(String waitTime) {
-            this.waitTime = Integer.parseInt(waitTime);
         }
 
         @ConfigArgSet(required = false, desc ="How long a test will run before it will be interrupted and marked as failed. Expressed in seconds",
@@ -392,11 +430,6 @@ public class Configuration {
         @ConfigArgSet(required = false, desc = "What type of protocol to use for the host", defaultValue = DEFAULT_PROTOCOL)
         public void setProtocol(String protocol) { this.protocol = protocol; }
 
-        @ConfigArgSet(required = false, desc = "Run mode for test execution", defaultValue = "normal")
-        public void setRunMode(String runMode) {
-            this.runMode = runMode;
-        }
-
         @ConfigArgSet(required = false, desc = "Install ToughDay 2 Sample Content.", defaultValue = "true")
         public void setInstallSampleContent(String installSampleContent) {
             this.installSampleContent = Boolean.valueOf(installSampleContent);
@@ -407,19 +440,16 @@ public class Configuration {
             this.contextPath = contextPath;
         }
 
-        @ConfigArgSet(required = false, desc = "Publish mode for outputing results", defaultValue = "simple")
-        public void setPublishMode(String publishMode) { this.publishMode = publishMode; }
-
-        @ConfigArgSet(required = false, defaultValue = "5s", desc = "Set the publishing interval. Can be expressed in s(econds), m(inutes), h(ours). Example: 1m30s. (Available only when publishmode=intervals)")
-        public void setInterval(String interval) { this.interval = parseDurationToSeconds(interval); }
-
-        @ConfigArgSet(required = false, defaultValue = "50", desc = "Set the load, in requests per second for the \"constantload\" runmode.  (Available only when runmode=constantload)")
-        public void setLoad(String load) { this.load = Integer.parseInt(load); }
-
         @ConfigArgSet(required = false, defaultValue = DEFAULT_LOG_LEVEL_STRING, desc = "Log level for ToughDay Engine")
         public void setLogLevel(String logLevel) {
             this.logLevel = Level.valueOf(logLevel);
         }
+
+        @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any test.")
+        public void setDryRun(String dryRun) {
+            this.dryRun = Boolean.valueOf(dryRun);
+        }
+
 
         // Adders and getters
 
@@ -447,21 +477,6 @@ public class Configuration {
             if (publisher == null) {
                 throw new IllegalStateException("Could not exclude publisher \"" + publisherName + "\", because there was no publisher configured with that name");
             }
-        }
-
-        @ConfigArgGet
-        public String getRunMode() {
-            return runMode;
-        }
-
-        @ConfigArgGet
-        public int getConcurrency() {
-            return concurrency;
-        }
-
-        @ConfigArgGet
-        public long getWaitTime() {
-            return waitTime;
         }
 
         @ConfigArgGet
@@ -510,17 +525,13 @@ public class Configuration {
         public String getContextPath() { return this.contextPath; }
 
         @ConfigArgGet
-        public String getPublishMode() { return this.publishMode; }
-
-        @ConfigArgGet
-        public long getInterval() { return this.interval; }
-
-        @ConfigArgGet
-        public int getLoad() { return this.load; }
-
-        @ConfigArgGet
         public Level getLogLevel() {
             return logLevel;
+        }
+
+        @ConfigArgGet
+        public boolean getDryRun() {
+            return dryRun;
         }
 
 
@@ -541,7 +552,12 @@ public class Configuration {
             return factor;
         }
 
-        private static long parseDurationToSeconds(String duration) {
+        /**
+         * Parses a duration specified as string and converts it to seconds.
+         * @param duration a duration in d(ays), h(ours), m(inutes), s(econds). Ex. 1d12h30m30s
+         * @return number of seconds for the respective duration.
+         */
+        public static long parseDurationToSeconds(String duration) {
             long finalDuration = 0l;
             long intermDuration = 0l;
 

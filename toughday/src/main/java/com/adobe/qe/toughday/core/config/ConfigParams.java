@@ -49,6 +49,8 @@ public class ConfigParams {
     }
 
     private Map<String, String> globalParams = new HashMap<>();
+    private Map<String, String> publishModeParams = new HashMap<>();
+    private Map<String, String> runModeParams = new HashMap<>();
     private List<ClassMetaObject> testsToAdd = new ArrayList<>();
     private List<ClassMetaObject> publishers = new ArrayList<>();
     private List<NamedMetaObject> itemsToConfig = new ArrayList<>();
@@ -56,6 +58,14 @@ public class ConfigParams {
 
     public void setGlobalParams(Map<String, String> globalParams) {
         this.globalParams = globalParams;
+    }
+
+    public void setPublishModeParams(Map<String, String> publishModeParams) {
+        this.publishModeParams = publishModeParams;
+    }
+
+    public void setRunModeParams(Map<String, String> runModeParams) {
+        this.runModeParams = runModeParams;
     }
 
     public void addTest(String testClassName, Map<String, String> params) {
@@ -78,6 +88,10 @@ public class ConfigParams {
         return globalParams;
     }
 
+    public Map<String, String> getPublishModeParams() { return publishModeParams; }
+
+    public Map<String, String> getRunModeParams() { return runModeParams; }
+
     public List<ClassMetaObject> getTestsToAdd() {
         return testsToAdd;
     }
@@ -98,5 +112,13 @@ public class ConfigParams {
         itemsToExclude.addAll(other.getItemsToExclude());
         itemsToConfig.addAll(other.getItemsToConfig());
         publishers.addAll(other.getPublishers());
+
+        if(other.runModeParams.containsKey("type"))
+            this.runModeParams.clear();
+        this.runModeParams.putAll(other.runModeParams);
+
+        if(other.publishModeParams.containsKey("type"))
+            this.publishModeParams.clear();
+        this.publishModeParams.putAll(other.publishModeParams);
     }
 }

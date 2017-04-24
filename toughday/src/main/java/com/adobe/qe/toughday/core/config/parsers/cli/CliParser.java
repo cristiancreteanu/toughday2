@@ -7,7 +7,7 @@ import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
-import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
+import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -140,6 +140,15 @@ public class CliParser implements ConfigurationParser {
         return new String[] {prop, val};
     }
 
+    private HashMap<String, String> parseObjectProperties(int startIndex, String[] cmdLineArgs) {
+        HashMap<String, String> args = new HashMap<>();
+        for (int j = startIndex; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
+            parseAndAddProperty(cmdLineArgs[j], args);
+        }
+
+        return args;
+    }
+
     /**
      * Implementation of parser interface
      * @param cmdLineArgs command line arguments
@@ -149,11 +158,21 @@ public class CliParser implements ConfigurationParser {
         HashMap<String, String> globalArgs = new HashMap<>();
         ConfigParams configParams = new ConfigParams();
 
-        // Global parameters
-        for (String arg : cmdLineArgs) {
-            if (arg.startsWith("--")) {
-                arg = arg.substring(2);
-                if (!Actions.isAction(arg)) {
+        // action parameters
+        for (int i = 0; i < cmdLineArgs.length; i++) {
+            if (cmdLineArgs[i].startsWith("--")) {
+                String arg = cmdLineArgs[i].substring(2);
+                if(Actions.isAction(arg)) {
+                    Actions action = Actions.fromString(arg);
+                    String identifier = cmdLineArgs[i + 1];
+                    HashMap<String, String> args = parseObjectProperties(i+2, cmdLineArgs);
+
+                    action.apply(configParams, identifier, args);
+                } else if (arg.equals("publishmode")) {
+                    configParams.setPublishModeParams(parseObjectProperties(i+1, cmdLineArgs));
+                } else if (arg.equals("runmode")) {
+                    configParams.setRunModeParams(parseObjectProperties(i+1, cmdLineArgs));
+                } else {
                     String[] res = parseProperty(arg);
                     String key = res[0];
                     String val = res[1];
@@ -175,25 +194,6 @@ public class CliParser implements ConfigurationParser {
             }
         }
         configParams.setGlobalParams(globalArgs);
-
-
-        // action parameters
-        for (int i = 0; i < cmdLineArgs.length; i++) {
-            if (cmdLineArgs[i].startsWith("--")) {
-                String actionString = cmdLineArgs[i].substring(2);
-                if(Actions.isAction(actionString)) {
-                    Actions action = Actions.fromString(actionString);
-                    String identifier = cmdLineArgs[i + 1];
-                    HashMap<String, String> args = new HashMap<>();
-                    for (int j = i + 2; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
-                        parseAndAddProperty(cmdLineArgs[j], args);
-                        i = j;
-                    }
-
-                    action.apply(configParams, identifier, args);
-                }
-            }
-        }
 
         return configParams;
     }
@@ -228,7 +228,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Available test classes:");
         System.out.println(TEST_CLASS_HELP_HEADER);
         for (Class<? extends AbstractTest> testClass : filter.filterTests(ReflectionsContainer.getInstance().getTestClasses().values())){
-            printClass(testClass, false, true);
+            printClass(testClass, false, true, false);
         }
     }
 
@@ -237,7 +237,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Available publisher classes:");
         System.out.println(PUBLISH_CLASS_HELP_HEADER);
         for (Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
-            printClass(publisherClass, false, false);
+            printClass(publisherClass, false, false, false);
         }
     }
 
@@ -260,11 +260,11 @@ public class CliParser implements ConfigurationParser {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
                 System.out.println(TEST_CLASS_HELP_HEADER);
-                printClass(testClass, true, true);
+                printClass(testClass, true, true, false);
             } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
                 System.out.println(PUBLISH_CLASS_HELP_HEADER);
-                printClass(publisherClass, true, false);
+                printClass(publisherClass, true, false, false);
             } else if (cmdLineArgs[1].startsWith("--suite=")) {
                 System.out.println(SUITE_HELP_HEADER);
                 printTestSuite(new PredefinedSuites(), cmdLineArgs[1].split("=")[1], true, true);
@@ -274,6 +274,22 @@ public class CliParser implements ConfigurationParser {
                 System.out.println("Could not find any test or publisher \"" + cmdLineArgs[1] + "\"");
             }
             return true;
+        } else if (cmdLineArgs.length == 3 && cmdLineArgs[0].equals("--help")) {
+            if (cmdLineArgs[1].equals("--runmode")) {
+                String[] tmp = cmdLineArgs[2].split("=");
+                if(!tmp[0].equals("type"))
+                    throw new IllegalArgumentException("Cannot print information about a run mode if no type is specified");
+
+                printClass(ReflectionsContainer.getInstance().getRunModeClasses().get(tmp[1]), true, false, true);
+                return true;
+            } else if (cmdLineArgs[1].equals("--publishmode")) {
+                String[] tmp = cmdLineArgs[2].split("=");
+                if(!tmp[0].equals("type"))
+                    throw new IllegalArgumentException("Cannot print information about a publish mode if no type is specified");
+
+                printClass(ReflectionsContainer.getInstance().getPublishModeClasses().get(tmp[1]), true, false, true);
+                return true;
+            }
         }
 
         for (String cmdLineArg : cmdLineArgs) {
@@ -359,8 +375,8 @@ public class CliParser implements ConfigurationParser {
                 description));
     }
 
-    private static void printClass(Class klass, boolean printProperties, boolean printTags) {
-        String name = klass.getSimpleName();
+    private static void printClass(Class klass, boolean printProperties, boolean printTags, boolean lowerCaseClass) {
+        String name = lowerCaseClass ? klass.getSimpleName().toLowerCase() : klass.getSimpleName();
         String desc = "";
         String tags = "";
         if (klass.isAnnotationPresent(Name.class)) {

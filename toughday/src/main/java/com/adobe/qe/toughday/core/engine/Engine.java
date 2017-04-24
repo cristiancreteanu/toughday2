@@ -5,8 +5,6 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
-import com.adobe.qe.toughday.core.engine.publishmodes.PublishMode;
-import com.adobe.qe.toughday.core.engine.runmodes.Dry;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -54,28 +52,11 @@ public class Engine {
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.configuration = configuration;
         this.globalArgs = configuration.getGlobalArgs();
+        this.runMode = configuration.getRunMode();
+        this.publishMode = configuration.getPublishMode();
 
-        Class<? extends PublishMode> publishModeClass =
-                ReflectionsContainer.getInstance()
-                    .getPublishModeClasses()
-                    .get(globalArgs.getPublishMode());
-
-        if(publishModeClass == null) {
-            throw new IllegalStateException("A publish mode with the identifier \"" + globalArgs.getPublishMode() + "\" does not exist");
-        }
-        publishMode = publishModeClass
-                .getConstructor(Engine.class)
-                .newInstance(this);
-
-        Class<? extends RunMode> runModeClass =
-                ReflectionsContainer.getInstance()
-                        .getRunModeClasses()
-                        .get(globalArgs.getRunMode());
-
-        if(runModeClass == null) {
-            throw  new IllegalStateException("A run mode with the identifier \"" + globalArgs.getRunMode() + "\" does not exist");
-        }
-        runMode = runModeClass.newInstance();
+        //TODO find a better way to do this
+        publishMode.setEngine(this);
 
         for(AbstractTest test : configuration.getTestSuite().getTests()) {
             add(test);
@@ -185,6 +166,12 @@ public class Engine {
         out.println("Global configuration:");
         printObject(configuration.getTestSuite(), out, configuration.getGlobalArgs());
 
+        out.println("Run mode configuration: ");
+        printObject(configuration.getTestSuite(), out, configuration.getRunMode());
+
+        out.println("Publish mode configuration: ");
+        printObject(configuration.getTestSuite(), out, configuration.getPublishMode());
+
         out.println("Tests:");
         for(AbstractTest test : configuration.getTestSuite().getTests()) {
             printObject(configuration.getTestSuite(), out, test);
@@ -279,7 +266,7 @@ public class Engine {
     }
 
     private void run() throws Exception {
-        if(globalArgs.getInstallSampleContent() && !runMode.isDryRun()) {
+        if(globalArgs.getInstallSampleContent() && !globalArgs.getDryRun()) {
             printConfiguration(configuration, new PrintStream(new LogStream(LOG)));
             installToughdayContentPackage(globalArgs);
         }
@@ -295,8 +282,9 @@ public class Engine {
             }
         });
 
-        if (runMode.isDryRun()) {
-            runMode.runTests(this);
+        if (globalArgs.getDryRun()) {
+            System.out.println("NOTE: This is just a dry run. No test is actually executed.");
+            printConfiguration(this.getConfiguration(), System.out);
             return;
         }
         
