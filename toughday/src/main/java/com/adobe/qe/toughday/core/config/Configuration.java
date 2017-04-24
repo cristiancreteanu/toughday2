@@ -176,15 +176,17 @@ public class Configuration {
     private RunMode getRunMode(ConfigParams configParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Map<String, String> runModeParams = configParams.getRunModeParams();
-        if(runModeParams.size() != 0 && !runModeParams.containsKey("type"))
+        if(runModeParams.size() != 0 && !runModeParams.containsKey("type")) {
             throw new IllegalStateException("The Run mode doesn't have a type");
+        }
 
 
         String type = runModeParams.size() != 0 ? runModeParams.get("type") : DEFAULT_RUN_MODE;
         Class<? extends RunMode> runModeClass = ReflectionsContainer.getInstance().getRunModeClasses().get(type);
 
-        if(runModeClass == null)
-            throw  new IllegalStateException("A run mode with type \"" + type + "\" does not exist");
+        if(runModeClass == null) {
+            throw new IllegalStateException("A run mode with type \"" + type + "\" does not exist");
+        }
 
         return  createObject(runModeClass,  runModeParams);
     }
@@ -192,15 +194,16 @@ public class Configuration {
     private PublishMode getPublishMode(ConfigParams configParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         Map<String, String> publishModeParams = configParams.getPublishModeParams();
-        if(publishModeParams.size() != 0 && !publishModeParams.containsKey("type"))
+        if(publishModeParams.size() != 0 && !publishModeParams.containsKey("type")) {
             throw new IllegalStateException("The Publish mode doesn't have a type");
-
+        }
 
         String type = publishModeParams.size() != 0 ? publishModeParams.get("type") : DEFAULT_PUBLISH_MODE;
         Class<? extends PublishMode> publishModeClass = ReflectionsContainer.getInstance().getPublishModeClasses().get(type);
 
-        if(publishModeClass == null)
+        if(publishModeClass == null) {
             throw new IllegalStateException("A publish mode with type \"" + type + "\" does not exist");
+        }
 
         return  createObject(publishModeClass,  publishModeParams);
     }
@@ -549,6 +552,11 @@ public class Configuration {
             return factor;
         }
 
+        /**
+         * Parses a duration specified as string and converts it to seconds.
+         * @param duration a duration in d(ays), h(ours), m(inutes), s(econds). Ex. 1d12h30m30s
+         * @return number of seconds for the respective duration.
+         */
         public static long parseDurationToSeconds(String duration) {
             long finalDuration = 0l;
             long intermDuration = 0l;
