@@ -96,15 +96,15 @@ public class ConsolePublisher extends Publisher {
                     SPACE,
                     "Average:    " + String.format("%.1f", statistics.getAverageDuration()) + " ms",
                     "Median:     " + String.format("%d", (long) statistics.getMedianDuration()) + " ms",
-                    "Std Dev:    " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
+                    "StdDev:     " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
                     SPACE,
-                    "90 p:       " + String.format("%d", statistics.get90Percentile()) + " ms",
-                    "99 p:       " + String.format("%d", statistics.get99Percentile()) + " ms",
-                    "99.9 p:     " + String.format("%d", statistics.get999Percentile()) + " ms",
+                    "90p:        " + String.format("%d", statistics.get90Percentile()) + " ms",
+                    "99p:        " + String.format("%d", statistics.get99Percentile()) + " ms",
+                    "99.9p:      " + String.format("%d", statistics.get999Percentile()) + " ms",
                     SPACE,
                     "Min:        " + String.format("%d", (long) statistics.getMinDuration()) + " ms",
                     "Max:        " + String.format("%d", (long) statistics.getMaxDuration()) + " ms",
-                    "Real TP:    " + String.format("%.1f", statistics.getRealThroughput()) + " rps"
+                    "RealTP:     " + String.format("%.1f", statistics.getRealThroughput()) + " rps"
             );
             System.out.println();
         }
