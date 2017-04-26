@@ -323,6 +323,8 @@ public class Engine {
             resultAggregator.finishExecution();
             timeoutChecker.finishExecution();
 
+            Thread.sleep(5000);
+
             // interrupt extra test threads
             // TODO: this is suboptimal, replace with a better mechanism for notifications
             List<Thread> threadsList = AbstractTest.getExtraThreads();
