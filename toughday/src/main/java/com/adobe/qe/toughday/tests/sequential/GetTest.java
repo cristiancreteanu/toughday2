@@ -49,7 +49,7 @@ public class GetTest extends SequentialTestBase {
             throw e;
         }
 
-        LOG.warn("{}: Successfully did GET path={}", Thread.currentThread().getName(), path);
+        LOG.debug("{}: Successfully did GET path={}", Thread.currentThread().getName(), path);
     }
 
     @Override
