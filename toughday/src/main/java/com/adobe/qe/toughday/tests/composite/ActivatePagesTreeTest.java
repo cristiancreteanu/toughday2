@@ -12,13 +12,13 @@ import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 @Description(desc = "This test creates pages hierarchically and activates them. Each child on each level has \"base\" children. " +
         "Each author thread fills in a level in the pages tree, up to base^level")
-public class ActivatePagesTree extends CompositeTest {
+public class ActivatePagesTreeTest extends CompositeTest {
     private CreatePageTreeTest createPageTreeTest;
     private PublishPageTest publishPageTest;
 
-    public ActivatePagesTree() { this(true); }
+    public ActivatePagesTreeTest() { this(true); }
 
-    public ActivatePagesTree(boolean createChildren) {
+    public ActivatePagesTreeTest(boolean createChildren) {
         if(createChildren) {
             createPageTreeTest = new CreatePageTreeTest();
             publishPageTest = new PublishPageTest();
@@ -30,7 +30,7 @@ public class ActivatePagesTree extends CompositeTest {
 
     @Override
     public AbstractTest newInstance() {
-        return new ActivatePagesTree(false);
+        return new ActivatePagesTreeTest(false);
     }
 
     @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,

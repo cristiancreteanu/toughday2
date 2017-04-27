@@ -42,6 +42,13 @@ public class PredefinedSuites extends HashMap<String, TestSuite> {
                                 "The pages are deleted.")
                         .addTag("author")
         );
+        put("publish", new TestSuite()
+                        .add(new GetHomepageTest(), 1)
+                        .add(new GetTest().setPath("/").setName("Get1"), 1)
+                        .add(new GetTest().setPath("/").setName("Get2"), 1)
+                        .addTag("publish")
+                        .setDescription("Publish suite")
+        );
         put("toughday", new TestSuite()
                         .add(new CreateLiveCopyTreeTest()
                                 .setBase(String.valueOf(5))
