@@ -44,6 +44,13 @@ public class TestSuite {
             return previous;
         }
 
+        @Override
+        public void putAll(Map<? extends AbstractTest, ? extends Integer> other) {
+            for(Map.Entry<? extends AbstractTest, ? extends Integer> entry : other.entrySet()) {
+                this.put(entry.getKey(), entry.getValue());
+            }
+        }
+
         /**
          * Removes the test from the map.
          * @param test
@@ -160,7 +167,7 @@ public class TestSuite {
      * @return a SetupStep object if configured, null otherwise.
      */
     public TestSuite addAll(TestSuite testSuite) {
-        this.weightMap.putAll(testSuite.weightMap);
+        this.weightMap.putAll(testSuite.getWeightMap());
         this.timeoutMap.putAll(testSuite.timeoutMap);
         this.counterMap.putAll(testSuite.counterMap);
         this.setupStep.addAll(testSuite.setupStep);
