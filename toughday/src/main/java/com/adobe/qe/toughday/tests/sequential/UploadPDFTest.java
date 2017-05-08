@@ -87,17 +87,17 @@ public class UploadPDFTest extends SequentialTestBase {
         String currentParentPath = StringUtils.stripEnd(getCommunication("parentPath", parentPath), "/");
 
         try {
-            LOG.debug("{}: Trying to upload pdf={}{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
+            LOG.debug("{}: Trying to upload pdf={}/{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
 
             getDefaultClient().doPost(currentParentPath + ".createasset.html", multiPartEntity.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to upload pdf={}{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
+            LOG.warn("{}: Failed to upload pdf={}/{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
             LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully uploaded pdf={}{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
+        LOG.debug("{}: Successfully uploaded pdf={}/{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
     }
 
     @After
