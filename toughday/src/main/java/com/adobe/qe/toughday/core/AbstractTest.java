@@ -172,7 +172,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
         Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", null, config,
-                null, null, false, false, null, null);
+                null, null, true, false, null, null);
         Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s.log", name),
                 "true", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
         appender.start();
