@@ -320,8 +320,8 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Use '--help --runmode/publishmode type=$Mode' to find information about a run/publish mode");
 
         System.out.println("\r\nExamples: \r\n");
-        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
-        System.out.println("\t java -jar toughday.jar --suite=tree_authoring --config AuthoringTreeTest pagetemplate=/apps/my/mytemplate");
+        System.out.println("\t java -jar toughday.jar --host=localhost --port=4502");
+        System.out.println("\t java -jar toughday.jar --runmode type=normal concurrency=20 --host=localhost --port=4502");
 
         System.out.println("\r\nGlobal arguments:");
 
@@ -341,16 +341,16 @@ public class CliParser implements ConfigurationParser {
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
                 "where \"val\" can be one predefined suite.");
 
-        System.out.println("\r\nAvailable run modes:");
+        System.out.println("\r\nAvailable run modes (--runmode):");
         for(Map.Entry<String, Class<? extends RunMode>> runMode : ReflectionsContainer.getInstance().getRunModeClasses().entrySet()) {
             Description description = runMode.getValue().getAnnotation(Description.class);
-            System.out.printf("\t%-71s %s\r\n", runMode.getKey(), description != null ? description.desc() : "");
+            System.out.printf("\ttype=%-71s %s\r\n", runMode.getKey(), description != null ? description.desc() : "");
         }
 
-        System.out.println("\r\nAvailable publish modes:");
+        System.out.println("\r\nAvailable publish modes (--publishmode):");
         for(Map.Entry<String, Class<? extends PublishMode>> publishMode : ReflectionsContainer.getInstance().getPublishModeClasses().entrySet()) {
             Description description = publishMode.getValue().getAnnotation(Description.class);
-            System.out.printf("\t%-71s %s\r\n", publishMode.getKey(), description != null ? description.desc() : "");
+            System.out.printf("\ttype=%-71s %s\r\n", publishMode.getKey(), description != null ? description.desc() : "");
         }
 
         System.out.println("\r\nAvailable actions:");
