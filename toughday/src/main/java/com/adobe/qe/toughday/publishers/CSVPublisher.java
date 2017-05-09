@@ -31,7 +31,7 @@ public class CSVPublisher extends Publisher {
     private BufferedWriter writer;
 
     private String filePath = DEFAULT_FILE_PATH;
-    private static String HEADER = "Name, Timestamp, Runs, Fails, Min, Max, Median, Average, StdDev, 90p, 99p, 99.9p, RealTP";
+    private static String HEADER = "Name, Timestamp, Passed, Failed, Min, Max, Median, Average, StdDev, 90p, 99p, 99.9p, RealTP";
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
