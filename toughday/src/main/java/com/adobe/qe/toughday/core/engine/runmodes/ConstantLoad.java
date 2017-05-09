@@ -24,7 +24,7 @@ public class ConstantLoad implements RunMode {
     private static final Logger LOG = LoggerFactory.getLogger(ConstantLoad.class);
 
     private static final String DEFAULT_LOAD_STRING = "50";
-    private static final int DEFAULT_LOAD = Integer.getInteger(DEFAULT_LOAD_STRING);
+    private static final int DEFAULT_LOAD = Integer.parseInt(DEFAULT_LOAD_STRING);
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private Collection<AsyncTestWorker> testWorkers = Collections.synchronizedSet(new HashSet<AsyncTestWorker>());
