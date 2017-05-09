@@ -310,7 +310,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
         System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
         System.out.println("Use '--help --tag=$Tag' to find all items that have a the specified tag");
-        System.out.println("Use '--help --runmode/publishmode type=mode' to find information about a run/publish mode");
+        System.out.println("Use '--help --runmode/publishmode type=$Mode' to find information about a run/publish mode");
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --suite=tree_authoring --host=localhost --port=4502");
