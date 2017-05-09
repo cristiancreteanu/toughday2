@@ -19,16 +19,14 @@
 package com.adobe.qe.toughday.tests.sequential.msm;
 
 import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.annotations.Tag;
+import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.logging.log4j.Logger;
 
+@Internal
 @Tag(tags = { "author" })
 @Name(name = "rollout_source")
 @Description(desc = "Rollout the source page/ blueprint")
