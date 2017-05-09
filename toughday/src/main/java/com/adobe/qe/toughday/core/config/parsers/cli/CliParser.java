@@ -279,15 +279,22 @@ public class CliParser implements ConfigurationParser {
                 String[] tmp = cmdLineArgs[2].split("=");
                 if(!tmp[0].equals("type"))
                     throw new IllegalArgumentException("Cannot print information about a run mode if no type is specified");
-
-                printClass(ReflectionsContainer.getInstance().getRunModeClasses().get(tmp[1]), true, false, true);
+                Class klass = ReflectionsContainer.getInstance().getRunModeClasses().get(tmp[1]);
+                if(klass == null) {
+                    throw new IllegalArgumentException("No run mode found with type: \"" + tmp[1] + "\"");
+                }
+                printClass(klass, true, false, true);
                 return true;
             } else if (cmdLineArgs[1].equals("--publishmode")) {
                 String[] tmp = cmdLineArgs[2].split("=");
                 if(!tmp[0].equals("type"))
                     throw new IllegalArgumentException("Cannot print information about a publish mode if no type is specified");
 
-                printClass(ReflectionsContainer.getInstance().getPublishModeClasses().get(tmp[1]), true, false, true);
+                Class klass = ReflectionsContainer.getInstance().getPublishModeClasses().get(tmp[1]);
+                if(klass == null) {
+                    throw new IllegalArgumentException("No publish mode found with type: \"" + tmp[1] + "\"");
+                }
+                printClass(klass, true, false, true);
                 return true;
             }
         }
