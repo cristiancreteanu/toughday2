@@ -40,13 +40,13 @@ public class ConstantLoad implements RunMode {
 
     @Override
     public RunContext runTests(Engine engine) throws Exception {
-        this.scheduler = new AsyncTestWorkerScheduler(engine);
-        executorService.execute(scheduler);
         runMaps = new ArrayList<>(load);
-
         for(int i = 0; i < load; i++) {
             runMaps.add(engine.getGlobalRunMap().newInstance());
         }
+
+        this.scheduler = new AsyncTestWorkerScheduler(engine);
+        executorService.execute(scheduler);
 
         return new RunContext() {
             @Override
