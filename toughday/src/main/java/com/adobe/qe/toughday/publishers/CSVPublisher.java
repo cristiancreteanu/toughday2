@@ -22,7 +22,7 @@ public class CSVPublisher extends Publisher {
 
 
     private boolean finished = false;
-    private boolean append = false;
+    private boolean append = true;
     private boolean created = false;
     private int precision = 6;
     private String FORMAT = getFormat(precision);
@@ -43,7 +43,7 @@ public class CSVPublisher extends Publisher {
         return this.filePath;
     }
 
-    @ConfigArgSet(required = false, desc = "Append instead of rewrite", defaultValue = "false")
+    @ConfigArgSet(required = false, desc = "Append instead of rewrite", defaultValue = "true")
     public void setAppend(String value) {
         append = Boolean.valueOf(value);
     }

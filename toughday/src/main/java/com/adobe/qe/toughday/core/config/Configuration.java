@@ -445,7 +445,7 @@ public class Configuration {
             this.logLevel = Level.valueOf(logLevel);
         }
 
-        @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any test.")
+        @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any tests.")
         public void setDryRun(String dryRun) {
             this.dryRun = Boolean.valueOf(dryRun);
         }

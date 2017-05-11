@@ -339,7 +339,7 @@ public class CliParser implements ConfigurationParser {
 
         //System.out.printf("\t%-32s\t %s\r\n", "--suitesetup=val", getSuiteSetupDescription());
         System.out.printf("\t%-32s\t %s\r\n", "--suite=val",
-                "where \"val\" can be one predefined suite.");
+                "Default: toughday - Where \"val\" can be one or a list (separated by commas) of the predefined suites");
 
         System.out.println("\r\nAvailable run modes (--runmode):");
         for(Map.Entry<String, Class<? extends RunMode>> runMode : ReflectionsContainer.getInstance().getRunModeClasses().entrySet()) {
