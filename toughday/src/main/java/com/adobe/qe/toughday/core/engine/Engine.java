@@ -323,7 +323,10 @@ public class Engine {
             resultAggregator.finishExecution();
             timeoutChecker.finishExecution();
 
-            Thread.sleep(5000);
+            try {
+                Thread.sleep(5000);
+            } catch (InterruptedException e)
+            {}
 
             // interrupt extra test threads
             // TODO: this is suboptimal, replace with a better mechanism for notifications
@@ -337,8 +340,6 @@ public class Engine {
             shutdownAndAwaitTermination(runMode.getExecutorService());
             shutdownAndAwaitTermination(engineExecutorService);
             publishMode.publishFinalResults();
-
-            LOG.info("Test execution finished at: " + getCurrentDateTime());
         }
 
     }
