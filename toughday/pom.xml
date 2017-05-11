@@ -39,10 +39,9 @@
                     <artifactId>maven-release-plugin</artifactId>
                     <version>2.5.3</version>
                     <configuration>
-                        <useReleaseProfile>false</useReleaseProfile>
-                        <scmCommentPrefix>[maven-scm] :</scmCommentPrefix>
-                        <preparationGoals>clean install</preparationGoals>
-                        <goals>deploy</goals>
+                        <checkModificationExcludes>
+                            <checkModificationExclude>dependency-reduced-pom.xml</checkModificationExclude>
+                        </checkModificationExcludes>
                     </configuration>
                 </plugin>
             </plugins>
