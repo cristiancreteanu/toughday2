@@ -43,6 +43,9 @@
                             <checkModificationExclude>dependency-reduced-pom.xml</checkModificationExclude>
                             <checkModificationExclude>target/dependency-reduced-pom.xml</checkModificationExclude>
                         </checkModificationExcludes>
+                        <localCheckout>true</localCheckout>
+                        <releaseProfiles>release</releaseProfiles>
+                        <arguments>-Dsample.path=${sample.path} </arguments>
                     </configuration>
                 </plugin>
             </plugins>
