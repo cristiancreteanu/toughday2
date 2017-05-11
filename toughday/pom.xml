@@ -3,7 +3,7 @@
     <groupId>com.adobe.qe</groupId>
     <artifactId>toughday2</artifactId>
     <packaging>jar</packaging>
-    <version>0.2.0</version>
+    <version>0.2.1-SNAPSHOT</version>
     <name>toughday2</name>
 
     <properties>
@@ -14,7 +14,7 @@
         <connection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</connection>
         <developerConnection>scm:git:git@git.corp.adobe.com:QE/toughday2.git</developerConnection>
         <url>https://git.corp.adobe.com/QE/toughday2/tree/master/toughday</url>
-        <tag>toughday2-0.2.0</tag>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
