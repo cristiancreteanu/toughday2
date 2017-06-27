@@ -83,6 +83,7 @@ public class ConstantLoad implements RunMode {
         @Override
         public void run() {
             mutex.lock();
+            lastTestStart = System.nanoTime();
             workerThread = Thread.currentThread();
             currentTest = test;
             mutex.unlock();

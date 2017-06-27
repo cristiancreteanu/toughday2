@@ -40,7 +40,6 @@ public class GetTest extends SequentialTestBase {
     public void test() throws Exception {
         try {
             LOG.debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
-
             getDefaultClient().doGet(path, HttpStatus.SC_OK);
         } catch (Throwable e) {
             LOG.warn("{}: Failed to GET path={}", Thread.currentThread().getName(), path);
