@@ -18,6 +18,7 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -32,6 +33,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     private Configuration.GlobalArgs globalArgs;
     protected File workspace;
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     /**
      * Constructor.
@@ -168,12 +170,12 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         }
 
         Level logLevel = System.getProperty("toughday.log.level") != null ? Level.valueOf(System.getProperty("toughday.log.level")) : Level.INFO;
-
+        final String timestamp = TIME_STAMP_FORMAT.format(new Date());
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
-        Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss} %-5p %c{1}:%L - %m%n", null, config,
+        Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %c{1}:%L - %m%n", null, config,
                 null, null, true, false, null, null);
-        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s.log", name),
+        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s_%s.log", name, timestamp),
                 "true", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
         appender.start();
         config.addAppender(appender);
