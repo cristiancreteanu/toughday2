@@ -33,7 +33,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     private Configuration.GlobalArgs globalArgs;
     protected File workspace;
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
     /**
      * Constructor.
