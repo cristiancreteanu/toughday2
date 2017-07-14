@@ -42,7 +42,7 @@ public class CreatePDFTreeTest extends CompositeTest {
     }
 
     @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
-            desc = "The title of the PDF. Internally, this is incremented")
+            desc = "The title of the folders. Internally, this is incremented")
     public AbstractTest setFolderTitle(String title) {
         createFolderTreeTest.setTitle(title);
         return this;
@@ -54,7 +54,7 @@ public class CreatePDFTreeTest extends CompositeTest {
     }
 
     @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
-            desc = "The title of the folders. Internally, this is incremented")
+            desc = "The title of the PDF. Internally, this is incremented")
     public AbstractTest setPDFTitle(String title) {
         uploadPDFTest.setFileName(title);
         return this;
