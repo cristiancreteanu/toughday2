@@ -166,7 +166,6 @@ public class CliParser implements ConfigurationParser {
                     Actions action = Actions.fromString(arg);
                     String identifier = cmdLineArgs[i + 1];
                     HashMap<String, String> args = parseObjectProperties(i+2, cmdLineArgs);
-
                     action.apply(configParams, identifier, args);
                 } else if (arg.equals("publishmode")) {
                     configParams.setPublishModeParams(parseObjectProperties(i+1, cmdLineArgs));

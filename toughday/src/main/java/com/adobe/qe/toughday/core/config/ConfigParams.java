@@ -1,5 +1,7 @@
 package com.adobe.qe.toughday.core.config;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,6 +53,7 @@ public class ConfigParams {
     private Map<String, String> globalParams = new HashMap<>();
     private Map<String, String> publishModeParams = new HashMap<>();
     private Map<String, String> runModeParams = new HashMap<>();
+    List<NamedMetaObject> itemsToAdd = new ArrayList<>();
     private List<ClassMetaObject> testsToAdd = new ArrayList<>();
     private List<ClassMetaObject> publishers = new ArrayList<>();
     private List<NamedMetaObject> itemsToConfig = new ArrayList<>();
@@ -74,6 +77,10 @@ public class ConfigParams {
 
     public void configItem(String testName, Map<String, String> params) {
         itemsToConfig.add(new NamedMetaObject(testName, params));
+    }
+
+    public void addItem(String itemName, Map<String, String> params) {
+        itemsToAdd.add(new NamedMetaObject(itemName, params));
     }
 
     public void exclude(String testName) {
@@ -106,9 +113,12 @@ public class ConfigParams {
         return publishers;
     }
 
+    public List<NamedMetaObject> getItemsToAdd() { return itemsToAdd;};
+
     public void merge(ConfigParams other) {
         globalParams.putAll(other.getGlobalParams());
         testsToAdd.addAll(other.getTestsToAdd());
+        itemsToAdd.addAll(other.getItemsToAdd());
         itemsToExclude.addAll(other.getItemsToExclude());
         itemsToConfig.addAll(other.getItemsToConfig());
         publishers.addAll(other.getPublishers());

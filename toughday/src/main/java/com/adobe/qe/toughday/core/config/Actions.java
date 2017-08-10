@@ -16,13 +16,15 @@ public enum Actions implements ConfigAction {
 
         @Override
         public void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo) {
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(identifier)) {
+            /*if (ReflectionsContainer.getInstance().getTestClasses().containsKey(identifier)) {
                 configParams.addTest(identifier, metaInfo);
             } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(identifier)) {
                 configParams.addPublisher(identifier, metaInfo);
             } else {
                 throw new IllegalArgumentException("Unknown publisher or test class: " + identifier);
-            }
+            } */
+
+            configParams.addItem(identifier, metaInfo);
         }
 
         @Override
