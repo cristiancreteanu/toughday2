@@ -5,11 +5,12 @@ import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
+import org.reflections.scanners.SubTypesScanner;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.net.URL;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -17,7 +18,7 @@ import java.util.regex.Pattern;
  */
 public class ReflectionsContainer {
     private static final Pattern toughdayContentPackagePattern = Pattern.compile("toughday_sample-.*.zip");
-    private static Reflections reflections = new Reflections("com.adobe.qe");
+    private static Reflections reflections = new MyReflections();
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
     /**
@@ -25,6 +26,39 @@ public class ReflectionsContainer {
      */
     public static ReflectionsContainer getInstance() {
         return instance;
+    }
+
+    public static class MyReflections extends Reflections {
+        public MyReflections(Object... params) {
+            super(params);
+        }
+
+        @Override
+        public Reflections merge(Reflections other) {
+            super.merge(other);
+            this.configuration.getScanners().addAll(other.getConfiguration().getScanners());
+            this.configuration.getUrls().addAll(other.getConfiguration().getUrls());
+            try {
+                Field field = this.configuration.getClass().getDeclaredField("classLoaders");
+                field.setAccessible(true);
+                ClassLoader[] classLoaders = (ClassLoader[]) field.get(this.configuration);
+                ArrayList<ClassLoader> all = new ArrayList<>();
+                if(classLoaders != null) {
+                    all.addAll(Arrays.asList(classLoaders));
+                }
+                classLoaders = (ClassLoader[]) field.get(other.getConfiguration());
+                if(classLoaders != null) {
+                    all.addAll(Arrays.asList(classLoaders));
+                }
+
+                field.set(this.configuration, all.toArray(new ClassLoader[0]));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            scan();
+            expandSuperTypes();
+            return this;
+        }
     }
 
     /**
@@ -51,13 +85,25 @@ public class ReflectionsContainer {
     /**
      * Constructor.
      */
+
     private ReflectionsContainer() {
+
+        updateContainerContent();
+
+        Reflections reflections = new Reflections("", new ResourcesScanner());
+        Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
+        if (iterator.hasNext()) {
+            toughdayContentPackage = iterator.next();
+        }
+    }
+
+    private void updateContainerContent() {
+
         testClasses = new HashMap<>();
         publisherClasses = new HashMap<>();
         suiteSetupClasses = new HashMap<>();
         publishModeClasses = new HashMap<>();
         runModeClasses = new HashMap<>();
-
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
@@ -105,14 +151,8 @@ public class ReflectionsContainer {
             }
             runModeClasses.put(identifier, runModeClass);
         }
-
-        Reflections reflections = new Reflections("", new ResourcesScanner());
-
-        Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
-        if (iterator.hasNext()) {
-            toughdayContentPackage = iterator.next();
-        }
     }
+
 
     /**
      * Getter for the map of test classes.
@@ -146,5 +186,11 @@ public class ReflectionsContainer {
 
     public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
         return runModeClasses;
+    }
+
+    public void merge(Reflections reflections) {
+
+        this.reflections.merge(reflections);
+        updateContainerContent();
     }
 }

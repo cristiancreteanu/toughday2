@@ -15,6 +15,7 @@ public class Main {
     private static final Logger LOG = LogManager.getLogger(Main.class);
 
     public static void main (String[] args) {
+
         CliParser cliParser = new CliParser();
         System.out.println();
         if (cliParser.printHelp(args)) {

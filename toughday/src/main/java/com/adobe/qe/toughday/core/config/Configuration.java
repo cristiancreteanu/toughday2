@@ -18,6 +18,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -103,8 +104,6 @@ public class Configuration {
             className = className.replaceAll("/",".");
             System.out.println("class name : " + className);
             try {
-                //SequentialTestBase test = (SequentialTestBase) classLoader.loadClass(className).newInstance();
-                //test.test();
                 classLoader.loadClass(className);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -113,7 +112,6 @@ public class Configuration {
 
 
     }
-
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
@@ -142,6 +140,13 @@ public class Configuration {
                 }
 
             }
+        }
+
+        Reflections reflections = new Reflections(classLoaders);
+        ReflectionsContainer.getInstance().merge(reflections);
+
+        for (Class<? extends AbstractTest> testInstance : ReflectionsContainer.getInstance().getTestClasses().values()) {
+            System.out.println(testInstance.getSimpleName());
         }
 
         this.runMode = getRunMode(configParams);
