@@ -71,10 +71,6 @@ public class ConfigParams {
         this.runModeParams = runModeParams;
     }
 
-    public void addTest(String testClassName, Map<String, String> params) {
-        testsToAdd.add(new ClassMetaObject(testClassName, params));
-    }
-
     public void configItem(String testName, Map<String, String> params) {
         itemsToConfig.add(new NamedMetaObject(testName, params));
     }

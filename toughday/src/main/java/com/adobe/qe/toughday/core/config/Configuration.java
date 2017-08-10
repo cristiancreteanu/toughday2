@@ -360,12 +360,14 @@ public class Configuration {
         private Map<String, Publisher> publishers;
         private long timeout;
         private String protocol;
+        private String extensions;
 
         public static final String DEFAULT_DURATION = "1d";
         public static final String DEFAULT_USER = "admin";
         public static final String DEFAULT_PASSWORD = "admin";
         public static final String DEFAULT_PORT_STRING = "4502";
         public static final String DEFAULT_PROTOCOL = "http";
+        public static final String DEFAULT_EXTENSIONS = "";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
 
         public static final String DEFAULT_TIMEOUT_STRING = "180"; // 3 minutes
@@ -448,6 +450,11 @@ public class Configuration {
         @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any tests.")
         public void setDryRun(String dryRun) {
             this.dryRun = Boolean.valueOf(dryRun);
+        }
+
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_EXTENSIONS, desc = "Jar file to be loaded.")
+        public void setExtensions(String extensions) {
+            this.extensions = extensions;
         }
 
 
@@ -534,6 +541,10 @@ public class Configuration {
             return dryRun;
         }
 
+        @ConfigArgGet
+        public String getExtensions() {
+            return extensions;
+        }
 
         // Helper methods
 
