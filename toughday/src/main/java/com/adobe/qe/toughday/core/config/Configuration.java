@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.core.config;
 
+import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
@@ -10,6 +11,7 @@ import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
+import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -17,10 +19,16 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
 
 
 /**
@@ -32,6 +40,7 @@ public class Configuration {
     private static final String DEFAULT_RUN_MODE = "normal";
     private static final String DEFAULT_PUBLISH_MODE = "simple";
 
+    private List<ClassLoader> classLoaders;
     private GlobalArgs globalArgs;
     private TestSuite suite;
     private RunMode runMode;
@@ -78,6 +87,33 @@ public class Configuration {
         throw new IllegalStateException("There are invalid properties in the configuration. Please check thoughday.log.");
     }
 
+    private void processJarFile(JarFile jarFile, String pathToJarFile) throws MalformedURLException {
+        Enumeration<JarEntry> jarContent = jarFile.entries();
+        URL[] urls = {new URL("jar:file:" + pathToJarFile + "!/")};
+        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
+        classLoaders.add(classLoader);
+
+        while (jarContent.hasMoreElements()) {
+            JarEntry jarEntry = jarContent.nextElement();
+            if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
+                continue;
+            }
+
+            String className = jarEntry.getName().replace(".class","");
+            className = className.replaceAll("/",".");
+            System.out.println("class name : " + className);
+            try {
+                //SequentialTestBase test = (SequentialTestBase) classLoader.loadClass(className).newInstance();
+                //test.test();
+                classLoader.loadClass(className);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+
+    }
+
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
@@ -87,6 +123,26 @@ public class Configuration {
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
+
+        classLoaders = new ArrayList<>();
+        if (globalArgs.extensions.compareTo("") != 0) {
+            String[] jarFilesPaths = globalArgs.getExtensions().split(",");
+            JarFile jarFile = null;
+
+            for (String pathToJarFile : jarFilesPaths) {
+                try {
+                    jarFile = new JarFile(pathToJarFile);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                try {
+                    processJarFile(jarFile, pathToJarFile);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
 
         this.runMode = getRunMode(configParams);
         this.publishMode = getPublishMode(configParams);
@@ -394,6 +450,7 @@ public class Configuration {
             this.duration = parseDurationToSeconds(DEFAULT_DURATION);
             this.timeout = DEFAULT_TIMEOUT;
             this.protocol = DEFAULT_PROTOCOL;
+            this.extensions = DEFAULT_EXTENSIONS;
         }
 
         // Global config args
