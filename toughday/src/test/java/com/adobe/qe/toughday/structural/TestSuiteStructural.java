@@ -7,7 +7,6 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 

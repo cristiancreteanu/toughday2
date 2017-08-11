@@ -11,8 +11,6 @@ import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
-import org.apache.commons.lang3.ClassPathUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -116,7 +114,6 @@ public class Configuration {
                 }
                 String className = jarEntry.getName().replace(".class","");
                 className = className.replaceAll("/",".");
-                System.out.println("class name : " + className);
 
                 if (newClasses.containsKey(className)) {
                     throw new IllegalStateException("A class named " + className + " already exists in the jar file named " + newClasses.get(className));

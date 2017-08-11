@@ -61,6 +61,7 @@ public class ReflectionsContainer {
         publishModeClasses = new HashMap<>();
         runModeClasses = new HashMap<>();
 
+
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
                 continue;
@@ -145,7 +146,9 @@ public class ReflectionsContainer {
     }
 
     public boolean containsClass(String className) {
-        return testClasses.containsKey(className) || publisherClasses.containsKey(className);
+        return testClasses.containsKey(className) || publisherClasses.containsKey(className)
+                || publishModeClasses.containsKey(className) || runModeClasses.containsKey(className)
+                || suiteSetupClasses.containsKey(className);
     }
 
     /**
@@ -154,7 +157,6 @@ public class ReflectionsContainer {
      */
 
     public void merge(Reflections reflections) {
-
         this.reflections = reflections;
         updateContainerContent();
     }

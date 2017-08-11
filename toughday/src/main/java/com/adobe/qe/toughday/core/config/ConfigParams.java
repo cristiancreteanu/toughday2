@@ -1,7 +1,5 @@
 package com.adobe.qe.toughday.core.config;
 
-import org.apache.commons.lang3.ArrayUtils;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
