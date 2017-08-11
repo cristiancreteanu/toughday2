@@ -12,6 +12,7 @@ import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import org.apache.commons.lang3.ClassPathUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -41,7 +42,6 @@ public class Configuration {
     private static final String DEFAULT_RUN_MODE = "normal";
     private static final String DEFAULT_PUBLISH_MODE = "simple";
 
-    private List<ClassLoader> classLoaders;
     private GlobalArgs globalArgs;
     private TestSuite suite;
     private RunMode runMode;
@@ -88,13 +88,59 @@ public class Configuration {
         throw new IllegalStateException("There are invalid properties in the configuration. Please check thoughday.log.");
     }
 
-    private void processJarFile(JarFile jarFile, String pathToJarFile) throws MalformedURLException {
-        Enumeration<JarEntry> jarContent = jarFile.entries();
-        URL[] urls = {new URL("jar:file:" + pathToJarFile + "!/")};
-        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
-        classLoaders.add(classLoader);
+    private URL[] formJarURLs(List<String> pathsToJars) {
+        List<URL> urls = new ArrayList<>();
+        for (String path : pathsToJars) {
+            try {
+                urls.add(new URL("jar:file:" + path + "!/"));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
 
-        while (jarContent.hasMoreElements()) {
+        return urls.toArray(new URL[0]);
+    }
+
+    private void processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
+        //Enumeration<JarEntry> jarContent = jarFile.entries();
+        //URL[] urls = {new URL("jar:file:" + pathToJarFile + "!/")};
+        //URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
+        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Thread.currentThread().getContextClassLoader());
+        Thread.currentThread().setContextClassLoader(classLoader);
+        Map<String, String> newClasses = new HashMap<>();
+        //Set<String> newClasses = new HashSet<>();
+        //classLoaders.add(classLoader);
+
+        for (JarFile jar : jarFiles) {
+            Enumeration<JarEntry> jarContent = jar.entries();
+            while (jarContent.hasMoreElements()) {
+                JarEntry jarEntry = jarContent.nextElement();
+                if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
+                    continue;
+                }
+                String className = jarEntry.getName().replace(".class","");
+                className = className.replaceAll("/",".");
+                System.out.println("class name : " + className);
+
+                if (newClasses.containsKey(className)) {
+                    throw new IllegalStateException("A class named " + className + " already exists in the jar file named " + newClasses.get(className));
+                } else if (ReflectionsContainer.getInstance().containsClass(className)) {
+                    throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
+                } else {
+                    newClasses.put(className, jar.getName());
+                }
+
+                try {
+                    Thread.currentThread().getContextClassLoader().loadClass(className);
+                    //System.out.println("Class succesfully loaded.<3");
+                    //classLoader.loadClass(className);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+       /* while (jarContent.hasMoreElements()) {
             JarEntry jarEntry = jarContent.nextElement();
             if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
                 continue;
@@ -104,12 +150,14 @@ public class Configuration {
             className = className.replaceAll("/",".");
             System.out.println("class name : " + className);
             try {
-                classLoader.loadClass(className);
+                //Thread.currentThread().setContextClassLoader(classLoader);
+                Thread.currentThread().getContextClassLoader().loadClass(className);
+                System.out.println("Class succesfully loaded.<3");
+                //classLoader.loadClass(className);
             } catch (Exception e) {
                 e.printStackTrace();
             }
-        }
-
+        }*/
 
     }
 
@@ -118,80 +166,84 @@ public class Configuration {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
+        List<JarFile> jarFiles = new ArrayList<>();
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
 
-        classLoaders = new ArrayList<>();
         if (globalArgs.extensions.compareTo("") != 0) {
             String[] jarFilesPaths = globalArgs.getExtensions().split(",");
-            JarFile jarFile = null;
-
             for (String pathToJarFile : jarFilesPaths) {
                 try {
-                    jarFile = new JarFile(pathToJarFile);
+                    JarFile jarFile = new JarFile(pathToJarFile);
+                    jarFiles.add(jarFile);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
-                try {
-                    processJarFile(jarFile, pathToJarFile);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-
             }
         }
 
-        Reflections reflections = new Reflections(classLoaders);
-        ReflectionsContainer.getInstance().merge(reflections);
-
-        for (Class<? extends AbstractTest> testInstance : ReflectionsContainer.getInstance().getTestClasses().values()) {
-            System.out.println(testInstance.getSimpleName());
+        try {
+            processJarFiles(jarFiles, formJarURLs(Arrays.asList(globalArgs.extensions.split(","))));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
         }
+
+        Reflections reflections = new Reflections();
+        ReflectionsContainer.getInstance().merge(reflections);
 
         this.runMode = getRunMode(configParams);
         this.publishMode = getPublishMode(configParams);
+        suite = getTestSuite(globalArgsMeta);
 
-        // Add a default publishers if none is specified
-        if (configParams.getPublishers().size() == 0) {
-            configParams.addPublisher(ConsolePublisher.class.getSimpleName(), new HashMap<String, String>());
-            configParams.addPublisher(CSVPublisher.class.getSimpleName(), new HashMap<String, String>() {{ put("append", "true"); }});
+        boolean foundAPublisher = false;
+        boolean foundATest = false;
+
+        // add tests and publishers
+        for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
+            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
+                foundATest = true;
+                AbstractTest test = createObject(
+                        ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()),
+                        itemToAdd.getParameters());
+
+                // defaults
+                int weight = (itemToAdd.getParameters().containsKey("weight"))
+                        ? Integer.parseInt(itemToAdd.getParameters().remove("weight")) : 1;
+                long timeout = (itemToAdd.getParameters().containsKey("timeout"))
+                        ? Integer.parseInt(itemToAdd.getParameters().remove("timeout")) : -1;
+                long counter = (itemToAdd.getParameters().containsKey("count"))
+                        ? Integer.parseInt(itemToAdd.getParameters().remove("count")) : -1;
+
+                suite.add(test, weight, timeout, counter);
+                checkInvalidArgs(itemToAdd.getParameters());
+            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemToAdd.getClassName())) {
+                foundAPublisher = true;
+                Publisher publisher = createObject(
+                        ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName()),
+                        itemToAdd.getParameters());
+
+                checkInvalidArgs(itemToAdd.getParameters());
+                this.globalArgs.addPublisher(publisher);
+            } else {
+                throw new IllegalArgumentException("Unknown publisher or test class: " + itemToAdd.getClassName());
+            }
         }
 
-        for(ConfigParams.ClassMetaObject publisherMeta : configParams.getPublishers()) {
-            Publisher publisher = createObject(
-                    ReflectionsContainer.getInstance().getPublisherClasses().get(publisherMeta.getClassName()),
-                    publisherMeta.getParameters());
-
-            checkInvalidArgs(publisherMeta.getParameters());
+        // Add a default publishers if none is specified
+        if (!foundAPublisher) {
+            Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, String>());
+            this.globalArgs.addPublisher(publisher);
+            publisher = createObject(CSVPublisher.class, new HashMap<String, String>() {{ put("append", "true"); }});
             this.globalArgs.addPublisher(publisher);
         }
 
-        suite = getTestSuite(globalArgsMeta);
-
-        if ( (suite.getTests().size() == 0) && (configParams.getTestsToAdd().size() == 0) ) {
+        // Add a default suite of tests if no test is added or no predefined suite is choosen.
+        if ( (suite.getTests().size() == 0) && (!foundATest) ) {
             // Replace the empty suite with the default predefined suite if no test has been configured,
             // either by selecting a suite or manually using --add
             this.suite = predefinedSuites.getDefaultSuite();
         }
-
-        for (ConfigParams.ClassMetaObject testMeta : configParams.getTestsToAdd()) {
-            AbstractTest test = createObject(
-                    ReflectionsContainer.getInstance().getTestClasses().get(testMeta.getClassName()),
-                    testMeta.getParameters());
-
-            // defaults
-            int weight = (testMeta.getParameters().containsKey("weight"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("weight")) : 1;
-            long timeout = (testMeta.getParameters().containsKey("timeout"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("timeout")) : -1;
-            long counter = (testMeta.getParameters().containsKey("count"))
-                    ? Integer.parseInt(testMeta.getParameters().remove("count")) : -1;
-
-            suite.add(test, weight, timeout, counter);
-            checkInvalidArgs(testMeta.getParameters());
-        }
-
 
         // Add and configure tests to the suite
         for(ConfigParams.NamedMetaObject itemMeta : configParams.getItemsToConfig()) {

@@ -6,7 +6,6 @@ import com.adobe.qe.toughday.core.engine.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.SubTypesScanner;
-
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URL;
@@ -18,7 +17,8 @@ import java.util.regex.Pattern;
  */
 public class ReflectionsContainer {
     private static final Pattern toughdayContentPackagePattern = Pattern.compile("toughday_sample-.*.zip");
-    private static Reflections reflections = new MyReflections();
+    //private static Reflections reflections = new MyReflections();
+    private static Reflections reflections = new Reflections("com.adobe.qe");
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
     /**
@@ -28,7 +28,7 @@ public class ReflectionsContainer {
         return instance;
     }
 
-    public static class MyReflections extends Reflections {
+    /*public static class MyReflections extends Reflections {
         public MyReflections(Object... params) {
             super(params);
         }
@@ -36,8 +36,8 @@ public class ReflectionsContainer {
         @Override
         public Reflections merge(Reflections other) {
             super.merge(other);
-            this.configuration.getScanners().addAll(other.getConfiguration().getScanners());
-            this.configuration.getUrls().addAll(other.getConfiguration().getUrls());
+            //this.configuration.getScanners().addAll(other.getConfiguration().getScanners());
+            //this.configuration.getUrls().addAll(other.getConfiguration().getUrls());
             try {
                 Field field = this.configuration.getClass().getDeclaredField("classLoaders");
                 field.setAccessible(true);
@@ -55,11 +55,11 @@ public class ReflectionsContainer {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            scan();
-            expandSuperTypes();
+            //scan();
+            //expandSuperTypes();
             return this;
         }
-    }
+    } */
 
     /**
      * Getter for the underlining instance of the Reflections object.
@@ -187,6 +187,15 @@ public class ReflectionsContainer {
     public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
         return runModeClasses;
     }
+
+    public boolean containsClass(String className) {
+        return testClasses.containsKey(className) || publisherClasses.containsKey(className);
+    }
+
+    /**
+     * This method makes the Reflections instance aware about the new classes dynamically loaded from the jar files.
+     * @param reflections
+     */
 
     public void merge(Reflections reflections) {
 
