@@ -33,6 +33,14 @@ public class CliParser implements ConfigurationParser {
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
     public final static List<String> parserArgs = new ArrayList<>();
+    public static final List<String> availableHelpOptions = Collections.unmodifiableList(
+            new ArrayList<String>() {{
+                add("--help");
+                add("--help_full");
+                add("--help_tests");
+                add("--help_publish");
+            }});
+    public static boolean helpRequired = false;
 
     static {
         for (Method method : globalArgMethods) {
@@ -155,6 +163,13 @@ public class CliParser implements ConfigurationParser {
      * @return a populated ConfigParams object
      */
     public ConfigParams parse(String[] cmdLineArgs) {
+
+        for (String argument : cmdLineArgs) {
+            if (availableHelpOptions.contains(argument)) {
+                helpRequired = true;
+                break;
+            }
+        }
         HashMap<String, String> globalArgs = new HashMap<>();
         ConfigParams configParams = new ConfigParams();
 
@@ -185,7 +200,7 @@ public class CliParser implements ConfigurationParser {
                     }
                     if (!found && !parserArgs.contains(key)
                             && !key.equals("suite")  && !key.equals("suitesetup")
-                            && !key.equals("help")) {
+                            && !key.contains("help")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                     }
                     globalArgs.put(key, val);
@@ -244,16 +259,16 @@ public class CliParser implements ConfigurationParser {
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
-        if (cmdLineArgs.length == 1 && cmdLineArgs[0].equals("--help_full")) {
+        if (cmdLineArgs[0].equals("--help_full")) {
             printHelp();
             return true;
-        } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_tests")) {
+        } else if (cmdLineArgs[0].equals("--help_tests") && ((cmdLineArgs.length == 1) || Configuration.newClassesAlert) ) {
             printTestClasses(new AllowAllFilter());
             return true;
-        } else if (cmdLineArgs.length ==1 && cmdLineArgs[0].equals("--help_publish")) {
+        } else if (cmdLineArgs[0].equals("--help_publish") && ((cmdLineArgs.length == 1) || Configuration.newClassesAlert) ) {
             printPublisherClasses();
             return true;
-        } else if (cmdLineArgs.length == 2 && cmdLineArgs[0].equals("--help")) {
+        } else if ( (cmdLineArgs[0].equals("--help") && ((cmdLineArgs.length == 2) || Configuration.newClassesAlert)) ) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
                 System.out.println(TEST_CLASS_HELP_HEADER);
@@ -271,7 +286,7 @@ public class CliParser implements ConfigurationParser {
                 System.out.println("Could not find any test or publisher \"" + cmdLineArgs[1] + "\"");
             }
             return true;
-        } else if (cmdLineArgs.length == 3 && cmdLineArgs[0].equals("--help")) {
+        } else if (cmdLineArgs[0].equals("--help") && (cmdLineArgs.length == 3 || Configuration.newClassesAlert)) {
             if (cmdLineArgs[1].equals("--runmode")) {
                 String[] tmp = cmdLineArgs[2].split("=");
                 if(!tmp[0].equals("type"))

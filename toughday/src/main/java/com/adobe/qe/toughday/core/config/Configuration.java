@@ -45,6 +45,9 @@ public class Configuration {
     private RunMode runMode;
     private PublishMode publishMode;
     private List<ClassLoader> classLoaders;
+
+    public static boolean newClassesAlert = false;
+
     PredefinedSuites predefinedSuites = new PredefinedSuites();
 
     private TestSuite getTestSuite(Map<String, String> globalArgsMeta)
@@ -121,6 +124,7 @@ public class Configuration {
                     throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
                 } else {
                     newClasses.put(className, jar.getName());
+                    newClassesAlert = true;
                 }
 
                 try {
@@ -253,7 +257,9 @@ public class Configuration {
             }
         }
 
-        checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
+        if (!CliParser.helpRequired) {
+            checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
+        }
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
@@ -380,7 +386,7 @@ public class Configuration {
             String property = propertyFromMethod(method.getName());
             Object value = args.remove(property);
             if (value == null) {
-                if (annotation.required()) {
+                if (annotation.required() && !CliParser.helpRequired) {
                     throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
                 }
                 else {
