@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Internal;
+import com.adobe.qe.toughday.metrics.ResultInfo;
 import org.apache.http.*;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
@@ -16,10 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 @Internal
@@ -67,13 +65,13 @@ public class LiveChartPublisherPOC extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        publish(testStatistics);
+    public void publishIntermediate(Map<String, List<ResultInfo>> requiredResults) {
+        publish(requiredResults);
     }
 
     @Override
-    public void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        publish(testStatistics);
+    public void publishFinal(Map<String, List<ResultInfo>> requiredResults) {
+        publish(requiredResults);
     }
 
     @Override
@@ -81,8 +79,8 @@ public class LiveChartPublisherPOC extends Publisher {
         this.finished = true;
     }
 
-    public void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        this.statistics = testStatistics;
+    public void publish(Map<String, List<ResultInfo>> requiredResults) {
+
     }
 }
 

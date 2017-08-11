@@ -2,8 +2,9 @@ package com.adobe.qe.toughday.core.engine;
 
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.RunMap;
-import com.adobe.qe.toughday.core.engine.Engine;
+import com.adobe.qe.toughday.metrics.ResultInfo;
 
+import java.util.List;
 import java.util.Map;
 
 public abstract class PublishMode {
@@ -26,7 +27,7 @@ public abstract class PublishMode {
         this.engine = engine;
     }
 
-    public abstract void publishIntermediateResults();
+    public abstract void publishIntermediateResults(Map<String, List<ResultInfo>> testsResults);
 
-    public abstract void publishFinalResults();
+    public abstract void publishFinalResults(Map<String, List<ResultInfo>> testsResults);
 }

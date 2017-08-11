@@ -1,37 +1,35 @@
 package com.adobe.qe.toughday.publishers;
 
 import com.adobe.qe.toughday.core.Publisher;
-import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.metrics.ResultInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.Collection;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher extends Publisher {
     public static final String DEFAULT_FILE_PATH = "results.csv";
-    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %d, %d, %d, %d, %f, %f, %d, %d, %d, %f";
+    private static String header = "";
+    private static String headerFormat = "";
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
-
 
     private boolean finished = false;
     private boolean append = true;
     private boolean created = false;
-    private int precision = 6;
-    private String FORMAT = getFormat(precision);
 
     private PrintWriter printWriter;
     private BufferedWriter writer;
-
     private String filePath = DEFAULT_FILE_PATH;
-    private static String HEADER = "Name, Timestamp, Passed, Failed, Skipped, Min, Max, Median, Average, StdDev, 90p, 99p, 99.9p, RealTP";
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -53,27 +51,17 @@ public class CSVPublisher extends Publisher {
         return append;
     }
 
-    @ConfigArgSet(required = false, desc = "Precision for doubles and floats", defaultValue = "6")
-    public void setPrecision(String precision) {
-        this.precision = Integer.parseInt(precision);
-        if (this.precision < 0 || this.precision > 12) {
-            throw new IllegalArgumentException("Precision is not in range.");
+    @Override
+    public void publishIntermediate(Map<String, List<ResultInfo>> testsResults) {
+        if (header.compareTo("") == 0) {
+            createHeaderFormat(testsResults.values().iterator().next());
         }
-        FORMAT = getFormat(this.precision);
-    }
-
-    private static String getFormat(int precision) {
-        return INITIAL_FORMAT.replace("f", "." + precision + "f");
+        publish(testsResults);
     }
 
     @Override
-    public void publishIntermediate(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        publish(testStatistics);
-    }
-
-    @Override
-    public void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        publish(testStatistics);
+    public void publishFinal(Map<String, List<ResultInfo>> testsResults) {
+        publish(testsResults);
     }
 
     @Override
@@ -81,35 +69,41 @@ public class CSVPublisher extends Publisher {
         this.finished = true;
     }
 
-    public void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {
+    private String createHeaderFormat(List<ResultInfo> resultInfoList) {
+
+        for (ResultInfo resultInfo : resultInfoList) {
+            header += resultInfo.getName() + ", ";
+            headerFormat += resultInfo.getFormat() + ", ";
+        }
+
+        //remove last two characters
+        header = header.substring(0, header.length() - 2);
+        headerFormat = headerFormat.substring(0, headerFormat.length() - 2);
+
+        return headerFormat;
+    }
+
+    public void publish(Map<String, List<ResultInfo>> testsResults) {
         try {
             if(!created || !append) {
                 printWriter = new PrintWriter(filePath);
                 created = true;
                 writer = new BufferedWriter(printWriter);
-                writer.write(HEADER);
+                writer.write(header);
                 writer.newLine();
                 writer.flush();
             }
+            for (String test : testsResults.keySet()) {
+                List<Object> results = new ArrayList<>();
+                List<ResultInfo> testResultInfos = testsResults.get(test);
+                for (ResultInfo resultInfo : testResultInfos) {
+                    results.add(resultInfo.getValue());
+                }
 
-            for (RunMap.TestStatistics statistics : testStatistics) {
-                writer.write(String.format(FORMAT,
-                        statistics.getTest().getFullName(),
-                        statistics.getTimestamp(),
-                        statistics.getTotalRuns(),
-                        statistics.getFailRuns(),
-                        statistics.getSkippedRuns(),
-                        statistics.getMinDuration(),
-                        statistics.getMaxDuration(),
-                        statistics.getMedianDuration(),
-                        statistics.getAverageDuration(),
-                        statistics.getStandardDeviation(),
-                        statistics.get90Percentile(),
-                        statistics.get99Percentile(),
-                        statistics.get999Percentile(),
-                        statistics.getRealThroughput()));
+                writer.write(String.format(headerFormat, results.toArray()));
                 writer.newLine();
             }
+
             writer.flush();
             printWriter.flush();
 

@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.metrics.Metric;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;
@@ -51,6 +52,22 @@ public class TestSuiteStructural extends TestCase {
                 }
             }
         }
+
+        for (Class TDMetricClass : ReflectionsContainer.getSubTypesOf(Metric.class)) {
+            suite.addTest(new TestConstructor("test", TDMetricClass));
+            for (Method method : TDMetricClass.getDeclaredMethods()) {
+                if(method.getAnnotation(ConfigArgSet.class) != null) {
+                    suite.addTest(new TestConfigSetAnnotatedMethod("testModifier", method));
+                    suite.addTest(new TestConfigSetAnnotatedMethod("testArguments", method));
+                }
+                if(method.getAnnotation(ConfigArgGet.class) != null) {
+                    suite.addTest(new TestConfigGetAnnotatedMethod("testModifier", method));
+                    suite.addTest(new TestConfigGetAnnotatedMethod("testArguments", method));
+                }
+            }
+
+        }
+
         return suite;
     }
 }

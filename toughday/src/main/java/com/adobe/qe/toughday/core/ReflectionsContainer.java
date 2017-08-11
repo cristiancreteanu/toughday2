@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.core;
 import com.adobe.qe.toughday.core.annotations.Internal;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
+import com.adobe.qe.toughday.metrics.Metric;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
 import java.lang.reflect.Modifier;
@@ -29,6 +30,7 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
     private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
     private HashMap<String, Class<? extends RunMode>> runModeClasses;
+    private HashMap<String, Class<? extends Metric>> metricClasses;
     private Set<String> classRegister;
 
     private String toughdayContentPackage;
@@ -61,8 +63,8 @@ public class ReflectionsContainer {
         suiteSetupClasses = new HashMap<>();
         publishModeClasses = new HashMap<>();
         runModeClasses = new HashMap<>();
+        metricClasses = new HashMap<>();
         classRegister = new HashSet<>();
-
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
@@ -115,17 +117,29 @@ public class ReflectionsContainer {
             addToClassRegister(identifier);
             runModeClasses.put(identifier, runModeClass);
         }
-    }
 
+        for (Class<? extends Metric> metricClass : reflections.getSubTypesOf(Metric.class)) {
+            if (excludeClass(metricClass)) { continue; }
+            String identifier = metricClass.getSimpleName();
+            if (metricClasses.containsKey(identifier)) {
+                throw new IllegalStateException("A metric class with this name already exists here: " +
+                        metricClasses.get(identifier).getName());
+            }
+
+            addToClassRegister(identifier);
+            metricClasses.put(identifier, metricClass);
+        }
+
+    }
 
     // Two classes with different types should not be allowed to have the same name.
     private void addToClassRegister(String classIdentifier) {
         if (!classRegister.contains(classIdentifier)) {
             classRegister.add(classIdentifier);
-        } else
+        } else {
             throw new IllegalArgumentException("A class with this name already exists. Please provide a different name for your class.");
+        }
     }
-
 
     /**
      * Getter for the map of test classes.
@@ -166,8 +180,14 @@ public class ReflectionsContainer {
     }
 
     /**
+     * Getter for the map of Metric classes.
+     */
+    public HashMap<String, Class<? extends Metric>> getMetricClasses() { return metricClasses; }
+
+    /**
      *  Checks if the Reflection Container contains a class with the given name.
      */
+
     public boolean containsClass(String className) {
         return classRegister.contains(className);
     }
@@ -185,5 +205,4 @@ public class ReflectionsContainer {
     public static <T> Set<Class<? extends T>> getSubTypesOf(final Class<T> type) {
        return reflections.getSubTypesOf(type);
     }
-
 }

@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.*;
 import com.adobe.qe.toughday.core.annotations.Setup;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.Configuration;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -181,6 +182,12 @@ public class Engine {
         for(Publisher publisher : configuration.getGlobalArgs().getPublishers()) {
             printObject(configuration.getTestSuite(), out, publisher);
         }
+
+        out.println("Metrics:");
+        for (Metric metric : configuration.getGlobalArgs().getMetrics()) {
+            printObject(configuration.getTestSuite(), out, metric);
+        }
+
         out.println("#########################################################");
     }
 
@@ -339,7 +346,7 @@ public class Engine {
 
             shutdownAndAwaitTermination(runMode.getExecutorService());
             shutdownAndAwaitTermination(engineExecutorService);
-            publishMode.publishFinalResults();
+            publishMode.publishFinalResults(resultAggregator.filterResults());
         }
 
     }

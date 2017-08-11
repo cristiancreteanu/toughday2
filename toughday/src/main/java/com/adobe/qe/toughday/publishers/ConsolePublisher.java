@@ -1,15 +1,17 @@
 package com.adobe.qe.toughday.publishers;
 
-import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.metrics.ResultInfo;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -23,7 +25,6 @@ public class ConsolePublisher extends Publisher {
     private final CleanerThread cleaner;
     private Scanner sc;
     private AtomicInteger extraLines;
-
 
     class CleanerThread extends Thread {
 
@@ -73,10 +74,17 @@ public class ConsolePublisher extends Publisher {
         return this.clearScreen;
     }
 
-    // publish results method, called periodically
-    private void publish(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        int nrStats = testStatistics.size();
+    private void alignMetrics() {
+        System.out.printf("\r\n");
+        System.out.printf("%-35s", " ");
+    }
 
+    // publish results method, called periodically
+    private void publish(Map<String, List<ResultInfo>> testsResults) {
+        int nrStats = testsResults.values().iterator().next().size();
+        final int METRIC_LENGTH = 12;
+        final int METRICS_PER_LINE_LIMIT = 3;
+        final String FORMAT = "%-35s | ";
         // "clear" screen
         if (begun && clearScreen) {
             for (int i=0; i < (nrStats * 5) + 2 + extraLines.get(); i++ ) {
@@ -84,50 +92,45 @@ public class ConsolePublisher extends Publisher {
             }
         }
 
-        // print stats
-        final String SPACE = " ";
-        System.out.println();
-        for (RunMap.TestStatistics statistics : testStatistics) {
-            System.out.printf("%-35.35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%-35s",
-                    statistics.getTest().getFullName(),
-                    "Timestamp:  " + statistics.getTimestamp(),
-                    "Passed:     " + String.format("%d", statistics.getTotalRuns()),
-                    "Failed:     " + String.format("%d", statistics.getFailRuns()),
-                    SPACE,
-                    "Skipped:    " + String.format("%d", statistics.getSkippedRuns()),
-                    "Average:    " + String.format("%.1f", statistics.getAverageDuration()) + " ms",
-                    "Median:     " + String.format("%d", (long) statistics.getMedianDuration()) + " ms",
-                    SPACE,
-                    "StdDev:     " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
-                    "90p:        " + String.format("%d", statistics.get90Percentile()) + " ms",
-                    "99p:        " + String.format("%d", statistics.get99Percentile()) + " ms",
-                    SPACE,
-                    "99.9p:      " + String.format("%d", statistics.get999Percentile()) + " ms",
-                    "Min:        " + String.format("%d", (long) statistics.getMinDuration()) + " ms",
-                    "Max:        " + String.format("%d", (long) statistics.getMaxDuration()) + " ms",
-                    SPACE,
-                    "RealTP:     " + String.format("%.1f", statistics.getRealThroughput()) + " rps"
-            );
+        for (String testName : testsResults.keySet()) {
+            System.out.printf("%-35.35s", testName);
+            List<ResultInfo> metrics = testsResults.get(testName);
+            metrics.remove(0);
+            int metricsPerLineCounter = 0;
+
+            for (ResultInfo resultInfo : metrics) {
+                String metricIdentifier = resultInfo.getName();
+                String padding = StringUtils.repeat(' ', METRIC_LENGTH - metricIdentifier.length());
+                String resultFormat = resultInfo.getFormat();
+                String unitOfMeasure = resultInfo.getUnitOfMeasure();
+
+                System.out.printf(FORMAT, metricIdentifier + ":" + padding +
+                        String.format(resultFormat, resultInfo.getValue()) + " " + unitOfMeasure);
+                metricsPerLineCounter++;
+
+                if (metricsPerLineCounter == METRICS_PER_LINE_LIMIT) {
+                    alignMetrics();
+                    metricsPerLineCounter = 0;
+                }
+            }
+
+            System.out.println();
             System.out.println();
         }
-        System.out.println();
-        begun = true;
 
-
-        extraLines.set(0);
     }
 
     @Override
-    public void publishIntermediate(Collection<? extends RunMap.TestStatistics> testStatistics) {
-        publish(testStatistics);
+    public void publishIntermediate(Map<String, List<ResultInfo>> testsResults) {
+        publish(testsResults);
     }
 
     @Override
-    public void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics) {
+    public void publishFinal(Map<String, List<ResultInfo>> testsResults) {
         System.out.println("********************************************************************");
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
-        publish(testStatistics);
+        publish(testsResults);
     }
 
     @Override
