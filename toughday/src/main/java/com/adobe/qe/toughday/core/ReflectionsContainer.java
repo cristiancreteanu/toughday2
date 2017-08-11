@@ -5,10 +5,7 @@ import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-import org.reflections.scanners.SubTypesScanner;
-import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
 
@@ -17,7 +14,6 @@ import java.util.regex.Pattern;
  */
 public class ReflectionsContainer {
     private static final Pattern toughdayContentPackagePattern = Pattern.compile("toughday_sample-.*.zip");
-    //private static Reflections reflections = new MyReflections();
     private static Reflections reflections = new Reflections("com.adobe.qe");
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
@@ -26,46 +22,6 @@ public class ReflectionsContainer {
      */
     public static ReflectionsContainer getInstance() {
         return instance;
-    }
-
-    /*public static class MyReflections extends Reflections {
-        public MyReflections(Object... params) {
-            super(params);
-        }
-
-        @Override
-        public Reflections merge(Reflections other) {
-            super.merge(other);
-            //this.configuration.getScanners().addAll(other.getConfiguration().getScanners());
-            //this.configuration.getUrls().addAll(other.getConfiguration().getUrls());
-            try {
-                Field field = this.configuration.getClass().getDeclaredField("classLoaders");
-                field.setAccessible(true);
-                ClassLoader[] classLoaders = (ClassLoader[]) field.get(this.configuration);
-                ArrayList<ClassLoader> all = new ArrayList<>();
-                if(classLoaders != null) {
-                    all.addAll(Arrays.asList(classLoaders));
-                }
-                classLoaders = (ClassLoader[]) field.get(other.getConfiguration());
-                if(classLoaders != null) {
-                    all.addAll(Arrays.asList(classLoaders));
-                }
-
-                field.set(this.configuration, all.toArray(new ClassLoader[0]));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            //scan();
-            //expandSuperTypes();
-            return this;
-        }
-    } */
-
-    /**
-     * Getter for the underlining instance of the Reflections object.
-     */
-    public static Reflections getReflections() {
-        return reflections;
     }
 
     private HashMap<String, Class<? extends AbstractTest>> testClasses;
@@ -199,7 +155,12 @@ public class ReflectionsContainer {
 
     public void merge(Reflections reflections) {
 
-        this.reflections.merge(reflections);
+        this.reflections = reflections;
         updateContainerContent();
     }
+
+    public static <T> Set<Class<? extends T>> getSubTypesOf(final Class<T> type) {
+       return reflections.getSubTypesOf(type);
+    }
+
 }

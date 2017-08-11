@@ -46,6 +46,7 @@ public class Configuration {
     private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
+    private List<ClassLoader> classLoaders;
     PredefinedSuites predefinedSuites = new PredefinedSuites();
 
     private TestSuite getTestSuite(Map<String, String> globalArgsMeta)
@@ -102,14 +103,9 @@ public class Configuration {
     }
 
     private void processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
-        //Enumeration<JarEntry> jarContent = jarFile.entries();
-        //URL[] urls = {new URL("jar:file:" + pathToJarFile + "!/")};
-        //URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
-        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Thread.currentThread().getContextClassLoader());
-        Thread.currentThread().setContextClassLoader(classLoader);
+        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
         Map<String, String> newClasses = new HashMap<>();
-        //Set<String> newClasses = new HashSet<>();
-        //classLoaders.add(classLoader);
+        classLoaders.add(classLoader);
 
         for (JarFile jar : jarFiles) {
             Enumeration<JarEntry> jarContent = jar.entries();
@@ -131,33 +127,12 @@ public class Configuration {
                 }
 
                 try {
-                    Thread.currentThread().getContextClassLoader().loadClass(className);
-                    //System.out.println("Class succesfully loaded.<3");
-                    //classLoader.loadClass(className);
+                    classLoader.loadClass(className);
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
             }
         }
-
-       /* while (jarContent.hasMoreElements()) {
-            JarEntry jarEntry = jarContent.nextElement();
-            if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
-                continue;
-            }
-
-            String className = jarEntry.getName().replace(".class","");
-            className = className.replaceAll("/",".");
-            System.out.println("class name : " + className);
-            try {
-                //Thread.currentThread().setContextClassLoader(classLoader);
-                Thread.currentThread().getContextClassLoader().loadClass(className);
-                System.out.println("Class succesfully loaded.<3");
-                //classLoader.loadClass(className);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }*/
 
     }
 
@@ -167,6 +142,7 @@ public class Configuration {
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
         List<JarFile> jarFiles = new ArrayList<>();
+        classLoaders = new ArrayList<>();
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
@@ -189,7 +165,7 @@ public class Configuration {
             e.printStackTrace();
         }
 
-        Reflections reflections = new Reflections();
+        Reflections reflections = new Reflections(classLoaders);
         ReflectionsContainer.getInstance().merge(reflections);
 
         this.runMode = getRunMode(configParams);
@@ -566,7 +542,7 @@ public class Configuration {
             this.dryRun = Boolean.valueOf(dryRun);
         }
 
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_EXTENSIONS, desc = "Jar file to be loaded.")
+        @ConfigArgSet(required = false, defaultValue = DEFAULT_EXTENSIONS, desc = "Jar files to be loaded.")
         public void setExtensions(String extensions) {
             this.extensions = extensions;
         }

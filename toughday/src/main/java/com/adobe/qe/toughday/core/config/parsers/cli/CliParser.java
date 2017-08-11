@@ -47,7 +47,7 @@ public class CliParser implements ConfigurationParser {
             }
         }
 
-        for (Class parserClass : ReflectionsContainer.getReflections().getSubTypesOf(ConfigurationParser.class)) {
+        for (Class parserClass : ReflectionsContainer.getSubTypesOf(ConfigurationParser.class)) {
             for (Field field : parserClass.getDeclaredFields()) {
                 if(field.getType().isAssignableFrom(ParserArgHelp.class)) {
                     try {
@@ -208,8 +208,6 @@ public class CliParser implements ConfigurationParser {
         }
         return suiteSetupDesc  + (suiteSetupList.isEmpty() ? "(none)" : suiteSetupList);
     }
-
-
 
     /**
      * Method for printing the help message
