@@ -259,16 +259,16 @@ public class CliParser implements ConfigurationParser {
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
-        if (cmdLineArgs[0].equals("--help_full") && ((cmdLineArgs.length == 1) || Configuration.newClassesAlert)) {
+        if (cmdLineArgs[0].equals("--help_full") && ((cmdLineArgs.length == 1) || Configuration.extensionsFlag)) {
             printHelp();
             return true;
-        } else if (cmdLineArgs[0].equals("--help_tests") && ((cmdLineArgs.length == 1) || Configuration.newClassesAlert) ) {
+        } else if (cmdLineArgs[0].equals("--help_tests") && ((cmdLineArgs.length == 1) || Configuration.extensionsFlag) ) {
             printTestClasses(new AllowAllFilter());
             return true;
-        } else if (cmdLineArgs[0].equals("--help_publish") && ((cmdLineArgs.length == 1) || Configuration.newClassesAlert) ) {
+        } else if (cmdLineArgs[0].equals("--help_publish") && ((cmdLineArgs.length == 1) || Configuration.extensionsFlag) ) {
             printPublisherClasses();
             return true;
-        } else if ( (cmdLineArgs[0].equals("--help") && ((cmdLineArgs.length == 2) || (cmdLineArgs.length == 3 && Configuration.newClassesAlert) )) ) {
+        } else if ( (cmdLineArgs[0].equals("--help") && ((cmdLineArgs.length == 2) || (cmdLineArgs.length == 3 && Configuration.extensionsFlag) )) ) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
                 System.out.println(TEST_CLASS_HELP_HEADER);
@@ -286,7 +286,7 @@ public class CliParser implements ConfigurationParser {
                 System.out.println("Could not find any test or publisher \"" + cmdLineArgs[1] + "\"");
             }
             return true;
-        } else if (cmdLineArgs[0].equals("--help") && (cmdLineArgs.length == 3 || (cmdLineArgs.length == 4 && Configuration.newClassesAlert))) {
+        } else if (cmdLineArgs[0].equals("--help") && (cmdLineArgs.length == 3 || (cmdLineArgs.length == 4 && Configuration.extensionsFlag))) {
             if (cmdLineArgs[1].equals("--runmode")) {
                 String[] tmp = cmdLineArgs[2].split("=");
                 if(!tmp[0].equals("type"))

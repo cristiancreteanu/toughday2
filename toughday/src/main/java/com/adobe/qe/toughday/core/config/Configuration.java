@@ -39,7 +39,7 @@ public class Configuration {
 
     private static final String DEFAULT_RUN_MODE = "normal";
     private static final String DEFAULT_PUBLISH_MODE = "simple";
-    public static boolean newClassesAlert = false;
+    public static boolean extensionsFlag = false;
     PredefinedSuites predefinedSuites = new PredefinedSuites();
     private GlobalArgs globalArgs;
     private TestSuite suite;
@@ -327,7 +327,7 @@ public class Configuration {
                     throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
                 } else {
                     newClasses.put(className, jar.getName());
-                    newClassesAlert = true;
+                    extensionsFlag = true;
                 }
 
                 try {
