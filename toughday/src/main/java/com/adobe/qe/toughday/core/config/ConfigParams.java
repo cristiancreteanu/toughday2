@@ -97,7 +97,14 @@ public class ConfigParams {
     public List<ClassMetaObject> getItemsToAdd() { return itemsToAdd;};
 
     public void merge(ConfigParams other) {
+        String currentExtensions = "";
+        if (globalParams.containsKey("extensions")) {
+            currentExtensions = globalParams.get("extensions");
+        }
         globalParams.putAll(other.getGlobalParams());
+        if (!currentExtensions.equals("")) {
+            globalParams.put("extensions", globalParams.get("extensions") + "," + currentExtensions);
+        }
         itemsToAdd.addAll(other.getItemsToAdd());
         itemsToExclude.addAll(other.getItemsToExclude());
         itemsToConfig.addAll(other.getItemsToConfig());

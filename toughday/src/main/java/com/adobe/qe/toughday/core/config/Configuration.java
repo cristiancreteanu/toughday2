@@ -39,7 +39,6 @@ public class Configuration {
 
     private static final String DEFAULT_RUN_MODE = "normal";
     private static final String DEFAULT_PUBLISH_MODE = "simple";
-    public static boolean extensionsFlag = false;
     PredefinedSuites predefinedSuites = new PredefinedSuites();
     private GlobalArgs globalArgs;
     private TestSuite suite;
@@ -55,11 +54,9 @@ public class Configuration {
         List<JarFile> jarFiles = new ArrayList<>();
         classLoaders = new ArrayList<>();
 
-        this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
-        applyLogLevel(globalArgs.getLogLevel());
-
-        if (globalArgs.extensions.compareTo("") != 0) {
-            String[] jarFilesPaths = globalArgs.getExtensions().split(",");
+        if (globalArgsMeta.containsKey("extensions") && !globalArgsMeta.get("extensions").equals("")) {
+            String extensionsCopy = globalArgsMeta.get("extensions");
+            String[] jarFilesPaths = extensionsCopy.split(",");
             for (String pathToJarFile : jarFilesPaths) {
                 try {
                     JarFile jarFile = new JarFile(pathToJarFile);
@@ -68,28 +65,31 @@ public class Configuration {
                     e.printStackTrace();
                 }
             }
+
+            try {
+                processJarFiles(jarFiles, formJarURLs(Arrays.asList(extensionsCopy.split(","))));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+
+            Reflections reflections = new Reflections(classLoaders);
+            ReflectionsContainer.getInstance().merge(reflections);
         }
 
-        try {
-            processJarFiles(jarFiles, formJarURLs(Arrays.asList(globalArgs.extensions.split(","))));
-        } catch (MalformedURLException e) {
-            e.printStackTrace();
+        if (CliParser.helpRequired) {
+            return;
         }
 
-        Reflections reflections = new Reflections(classLoaders);
-        ReflectionsContainer.getInstance().merge(reflections);
+        this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
+        applyLogLevel(globalArgs.getLogLevel());
 
         this.runMode = getRunMode(configParams);
         this.publishMode = getPublishMode(configParams);
         suite = getTestSuite(globalArgsMeta);
 
-        boolean foundAPublisher = false;
-        boolean foundATest = false;
-
         // add tests and publishers
         for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
-                foundATest = true;
                 AbstractTest test = createObject(
                         ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
@@ -105,7 +105,6 @@ public class Configuration {
                 suite.add(test, weight, timeout, counter);
                 checkInvalidArgs(itemToAdd.getParameters());
             } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemToAdd.getClassName())) {
-                foundAPublisher = true;
                 Publisher publisher = createObject(
                         ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
@@ -118,7 +117,7 @@ public class Configuration {
         }
 
         // Add a default publishers if none is specified
-        if (!foundAPublisher) {
+        if (globalArgs.getPublishers().size() == 0) {
             Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, String>());
             this.globalArgs.addPublisher(publisher);
             publisher = createObject(CSVPublisher.class, new HashMap<String, String>() {{
@@ -128,7 +127,7 @@ public class Configuration {
         }
 
         // Add a default suite of tests if no test is added or no predefined suite is choosen.
-        if ((suite.getTests().size() == 0) && (!foundATest)) {
+        if ((suite.getTests().size() == 0) ) {
             // Replace the empty suite with the default predefined suite if no test has been configured,
             // either by selecting a suite or manually using --add
             this.suite = predefinedSuites.getDefaultSuite();
@@ -209,7 +208,7 @@ public class Configuration {
             String property = propertyFromMethod(method.getName());
             Object value = args.remove(property);
             if (value == null) {
-                if (annotation.required() && !CliParser.helpRequired) {
+                if (annotation.required()) {
                     throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
                 } else {
                     //will use default value
@@ -327,7 +326,6 @@ public class Configuration {
                     throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
                 } else {
                     newClasses.put(className, jar.getName());
-                    extensionsFlag = true;
                 }
 
                 try {
