@@ -54,6 +54,7 @@ public class Configuration {
         List<JarFile> jarFiles = new ArrayList<>();
         classLoaders = new ArrayList<>();
 
+        // create a jar file for each extension argument received
         if (globalArgsMeta.containsKey("extensions") && !globalArgsMeta.get("extensions").equals("")) {
             String extensionsCopy = globalArgsMeta.get("extensions");
             String[] jarFilesPaths = extensionsCopy.split(",");
@@ -72,6 +73,7 @@ public class Configuration {
                 e.printStackTrace();
             }
 
+            // make reflection container aware of the new dynamically loaded classes
             Reflections reflections = new Reflections(classLoaders);
             ReflectionsContainer.getInstance().merge(reflections);
         }
@@ -305,6 +307,8 @@ public class Configuration {
         return urls.toArray(new URL[0]);
     }
 
+    // loads all the classes from the extension jar files using a new class loader.
+
     private void processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
         URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
         Map<String, String> newClasses = new HashMap<>();
@@ -320,6 +324,7 @@ public class Configuration {
                 String className = jarEntry.getName().replace(".class", "");
                 className = className.replaceAll("/", ".");
 
+                // check if a class with this name already exists
                 if (newClasses.containsKey(className)) {
                     throw new IllegalStateException("A class named " + className + " already exists in the jar file named " + newClasses.get(className));
                 } else if (ReflectionsContainer.getInstance().containsClass(className)) {
@@ -328,6 +333,7 @@ public class Configuration {
                     newClasses.put(className, jar.getName());
                 }
 
+                // load class
                 try {
                     classLoader.loadClass(className);
                 } catch (Exception e) {

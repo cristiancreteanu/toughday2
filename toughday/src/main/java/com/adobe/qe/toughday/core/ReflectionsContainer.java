@@ -133,7 +133,7 @@ public class ReflectionsContainer {
     }
 
     /**
-     * Getter for the map of PublishMode classes
+     * Getter for the map of PublishMode classes.
      */
     public Map<String, Class<? extends PublishMode>> getPublishModeClasses() { return publishModeClasses; }
 
@@ -141,10 +141,17 @@ public class ReflectionsContainer {
         return toughdayContentPackage;
     }
 
+    /**
+     * Getter for the map of RunMode classes.
+     */
+
     public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
         return runModeClasses;
     }
 
+    /**
+     *  Checks if the Reflection Container contains a class with the given name.
+     */
     public boolean containsClass(String className) {
         return testClasses.containsKey(className) || publisherClasses.containsKey(className)
                 || publishModeClasses.containsKey(className) || runModeClasses.containsKey(className)
