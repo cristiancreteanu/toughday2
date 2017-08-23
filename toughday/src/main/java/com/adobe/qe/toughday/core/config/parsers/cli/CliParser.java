@@ -274,11 +274,8 @@ public class CliParser implements ConfigurationParser {
                 printTagHelp(cmdLineArgs[1].split("=")[1]);
             } else if (cmdLineArgs[1].equals("--runmode")) {
                 if (cmdLineArgs.length < 3) {
-                    System.out.println("Wrong help command format.");
-                    printShortHelp();
-                    return true;
+                    throw new IllegalArgumentException("Wrong help command format.");
                 }
-
                 String[] tmp = cmdLineArgs[2].split("=");
                 if(!tmp[0].equals("type"))
                     throw new IllegalArgumentException("Cannot print information about a run mode if no type is specified");
@@ -290,9 +287,7 @@ public class CliParser implements ConfigurationParser {
                 return true;
             } else if (cmdLineArgs[1].equals("--publishmode")) {
                 if (cmdLineArgs.length < 3) {
-                    System.out.println("Wrong help command format.");
-                    printShortHelp();
-                    return true;
+                    throw new IllegalArgumentException("Wrong help command format.");
                 }
 
                 String[] tmp = cmdLineArgs[2].split("=");
