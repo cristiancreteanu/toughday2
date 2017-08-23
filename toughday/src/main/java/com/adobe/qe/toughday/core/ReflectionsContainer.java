@@ -29,6 +29,7 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
     private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
     private HashMap<String, Class<? extends RunMode>> runModeClasses;
+    private Set<String> classRegister;
 
     private String toughdayContentPackage;
 
@@ -60,6 +61,7 @@ public class ReflectionsContainer {
         suiteSetupClasses = new HashMap<>();
         publishModeClasses = new HashMap<>();
         runModeClasses = new HashMap<>();
+        classRegister = new HashSet<>();
 
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
@@ -69,6 +71,7 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A test class with this name already exists here: "
                         + testClasses.get(testClass.getSimpleName()).getName());
             testClasses.put(testClass.getSimpleName(), testClass);
+            classRegister.add(testClass.getSimpleName());
         }
 
         for (Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
@@ -78,6 +81,7 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A publisher class with this name already exists here: "
                         + publisherClasses.get(publisherClass.getSimpleName()).getName());
             publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
+            classRegister.add(publisherClass.getSimpleName());
         }
 
         for (Class<? extends SuiteSetup> suiteSetupClass : reflections.getSubTypesOf(SuiteSetup.class)) {
@@ -87,6 +91,7 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A suite class with this name already exists here: "
                         + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
+            classRegister.add(suiteSetupClass.getSimpleName());
         }
 
         for (Class<? extends PublishMode> publishModeClass : reflections.getSubTypesOf(PublishMode.class)) {
@@ -97,6 +102,7 @@ public class ReflectionsContainer {
                         + publishModeClasses.get(identifier).getName());
             }
             publishModeClasses.put(identifier, publishModeClass);
+            classRegister.add(identifier);
         }
 
         for(Class<? extends RunMode> runModeClass : reflections.getSubTypesOf(RunMode.class)) {
@@ -107,7 +113,10 @@ public class ReflectionsContainer {
                         runModeClasses.get(identifier).getName());
             }
             runModeClasses.put(identifier, runModeClass);
+            classRegister.add(identifier);
         }
+
+
     }
 
 
@@ -153,9 +162,7 @@ public class ReflectionsContainer {
      *  Checks if the Reflection Container contains a class with the given name.
      */
     public boolean containsClass(String className) {
-        return testClasses.containsKey(className) || publisherClasses.containsKey(className)
-                || publishModeClasses.containsKey(className) || runModeClasses.containsKey(className)
-                || suiteSetupClasses.containsKey(className);
+        return classRegister.contains(className);
     }
 
     /**

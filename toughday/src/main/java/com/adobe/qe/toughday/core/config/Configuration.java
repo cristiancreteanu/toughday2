@@ -1,14 +1,14 @@
 package com.adobe.qe.toughday.core.config;
 
 import com.adobe.qe.toughday.Main;
-import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
+import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
-import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
+import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
@@ -30,7 +30,6 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-
 /**
  * An object that has all that configurations parsed and objects instantiated.
  */
@@ -44,40 +43,128 @@ public class Configuration {
     private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
-    private List<ClassLoader> classLoaders;
+
+    private void handleExtensions(ConfigParams configParams) {
+
+        List<String> extensionList = new ArrayList<>();
+        List<ConfigParams.ClassMetaObject> itemsToAddCopy = new ArrayList<>(configParams.getItemsToAdd());
+        List<String> itemsToExcludeCopy = new ArrayList<>(configParams.getItemsToExclude());
+
+        // look for extension jar files that should be loaded.
+        for (ConfigParams.ClassMetaObject itemToAdd : itemsToAddCopy) {
+            if (itemToAdd.getClassName().endsWith(".jar")) {
+                configParams.getItemsToAdd().remove(itemToAdd);
+                extensionList.add(itemToAdd.getClassName());
+            }
+        }
+
+        // look for extension jar files that should be excluded.
+        for (String itemToExclude : itemsToExcludeCopy) {
+            if (itemToExclude.endsWith(".jar")) {
+                configParams.getItemsToExclude().remove(itemToExclude);
+                if (!extensionList.contains(itemToExclude)) {
+                    throw new IllegalStateException("No extension found with name \"" + itemToExclude + "\", so we can't exclude it.");
+                }
+                extensionList.remove(itemToExclude);
+            }
+        }
+
+        List<JarFile> jarFiles = createJarFiles(extensionList);
+        URLClassLoader classLoader = null;
+        try {
+            classLoader = processJarFiles(jarFiles, formJarURLs(extensionList));
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
+        Reflections reflections = new Reflections(classLoader);
+
+        // make reflection container aware of the new dynamically loaded classes
+        ReflectionsContainer.getInstance().merge(reflections);
+    }
+
+    /**
+     *  Creates a jar file for each extension file that should be loaded.
+     * @param extensionList A list of names representing the jar files that should be loaded.
+     */
+    private List<JarFile> createJarFiles(List<String> extensionList) {
+        List<JarFile> jarFiles = new ArrayList<>();
+        for (String extensionFileName : extensionList) {
+            try {
+                JarFile jarFile = new JarFile(extensionFileName);
+                jarFiles.add(jarFile);
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Unable to find " + extensionFileName + " file.");
+            }
+        }
+
+        return jarFiles;
+    }
+
+    /**
+     *  Creates an URL for each jar file, using its filename.
+     * @param extensionsFileNames
+     * @return
+     */
+    private URL[] formJarURLs(List<String> extensionsFileNames) {
+        List<URL> urls = new ArrayList<>();
+        for (String filename : extensionsFileNames) {
+            try {
+                urls.add(new URL("jar:file:" + filename + "!/"));
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return urls.toArray(new URL[0]);
+    }
+
+    // loads all classes from the extension jar files using a new class loader.
+
+    private URLClassLoader processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
+        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
+        Map<String, String> newClasses = new HashMap<>();
+
+        for (JarFile jar : jarFiles) {
+            Enumeration<JarEntry> jarContent = jar.entries();
+            while (jarContent.hasMoreElements()) {
+                JarEntry jarEntry = jarContent.nextElement();
+                if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
+                    continue;
+                }
+                String className = jarEntry.getName().replace(".class", "");
+                className = className.replaceAll("/", ".");
+
+                // check if a class with this name already exists
+                if (newClasses.containsKey(className)) {
+                    throw new IllegalStateException("A class named " + className + " already exists in the jar file named " + newClasses.get(className));
+                } else if (ReflectionsContainer.getInstance().containsClass(className)) {
+                    throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
+                } else {
+                    newClasses.put(className, jar.getName());
+                }
+
+                // load class
+                try {
+                    classLoader.loadClass(className);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+        return classLoader;
+    }
+
 
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
 
+        // we should load extensions before any configuration object is created.
+        handleExtensions(configParams);
+
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
-        List<JarFile> jarFiles = new ArrayList<>();
-        classLoaders = new ArrayList<>();
-
-        // create a jar file for each extension argument received
-        if (globalArgsMeta.containsKey("extensions") && !globalArgsMeta.get("extensions").equals("")) {
-            String extensionsCopy = globalArgsMeta.get("extensions");
-            String[] jarFilesPaths = extensionsCopy.split(",");
-            for (String pathToJarFile : jarFilesPaths) {
-                try {
-                    JarFile jarFile = new JarFile(pathToJarFile);
-                    jarFiles.add(jarFile);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            try {
-                processJarFiles(jarFiles, formJarURLs(Arrays.asList(extensionsCopy.split(","))));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-
-            // make reflection container aware of the new dynamically loaded classes
-            Reflections reflections = new Reflections(classLoaders);
-            ReflectionsContainer.getInstance().merge(reflections);
-        }
-
         if (CliParser.helpRequired) {
             return;
         }
@@ -170,9 +257,8 @@ public class Configuration {
             }
         }
 
-        if (!CliParser.helpRequired) {
-            checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
-        }
+        checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
+
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
@@ -294,55 +380,6 @@ public class Configuration {
         throw new IllegalStateException("There are invalid properties in the configuration. Please check thoughday.log.");
     }
 
-    private URL[] formJarURLs(List<String> pathsToJars) {
-        List<URL> urls = new ArrayList<>();
-        for (String path : pathsToJars) {
-            try {
-                urls.add(new URL("jar:file:" + path + "!/"));
-            } catch (MalformedURLException e) {
-                e.printStackTrace();
-            }
-        }
-
-        return urls.toArray(new URL[0]);
-    }
-
-    // loads all the classes from the extension jar files using a new class loader.
-
-    private void processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
-        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
-        Map<String, String> newClasses = new HashMap<>();
-        classLoaders.add(classLoader);
-
-        for (JarFile jar : jarFiles) {
-            Enumeration<JarEntry> jarContent = jar.entries();
-            while (jarContent.hasMoreElements()) {
-                JarEntry jarEntry = jarContent.nextElement();
-                if (jarEntry.isDirectory() || !(jarEntry.getName().endsWith(".class"))) {
-                    continue;
-                }
-                String className = jarEntry.getName().replace(".class", "");
-                className = className.replaceAll("/", ".");
-
-                // check if a class with this name already exists
-                if (newClasses.containsKey(className)) {
-                    throw new IllegalStateException("A class named " + className + " already exists in the jar file named " + newClasses.get(className));
-                } else if (ReflectionsContainer.getInstance().containsClass(className)) {
-                    throw new IllegalStateException("A class named " + className + " already exists in toughday default package.");
-                } else {
-                    newClasses.put(className, jar.getName());
-                }
-
-                // load class
-                try {
-                    classLoader.loadClass(className);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-    }
 
     private RunMode getRunMode(ConfigParams configParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
@@ -460,7 +497,6 @@ public class Configuration {
         public static final String DEFAULT_PASSWORD = "admin";
         public static final String DEFAULT_PORT_STRING = "4502";
         public static final String DEFAULT_PROTOCOL = "http";
-        public static final String DEFAULT_EXTENSIONS = "";
         public static final int DEFAULT_PORT = Integer.parseInt(DEFAULT_PORT_STRING);
         public static final String DEFAULT_TIMEOUT_STRING = "180"; // 3 minutes
         public static final long DEFAULT_TIMEOUT = 3 * 60 * 1000l; // 5 minutes
@@ -475,7 +511,6 @@ public class Configuration {
         private Map<String, Publisher> publishers;
         private long timeout;
         private String protocol;
-        private String extensions;
         private boolean installSampleContent = true;
         private String contextPath;
         private Level logLevel = DEFAULT_LOG_LEVEL;
@@ -492,7 +527,6 @@ public class Configuration {
             this.duration = parseDurationToSeconds(DEFAULT_DURATION);
             this.timeout = DEFAULT_TIMEOUT;
             this.protocol = DEFAULT_PROTOCOL;
-            this.extensions = DEFAULT_EXTENSIONS;
         }
 
         // Global config args
@@ -680,18 +714,6 @@ public class Configuration {
         @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any tests.")
         public void setDryRun(String dryRun) {
             this.dryRun = Boolean.valueOf(dryRun);
-        }
-
-        // Helper methods
-
-        @ConfigArgGet
-        public String getExtensions() {
-            return extensions;
-        }
-
-        @ConfigArgSet(required = false, defaultValue = DEFAULT_EXTENSIONS, desc = "Jar files to be loaded.")
-        public void setExtensions(String extensions) {
-            this.extensions = extensions;
         }
     }
 }
