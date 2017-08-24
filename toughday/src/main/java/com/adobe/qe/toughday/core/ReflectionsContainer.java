@@ -70,8 +70,8 @@ public class ReflectionsContainer {
             if(testClasses.containsKey(testClass.getSimpleName()))
                 throw new IllegalStateException("A test class with this name already exists here: "
                         + testClasses.get(testClass.getSimpleName()).getName());
+            addToClassRegister(testClass.getSimpleName());
             testClasses.put(testClass.getSimpleName(), testClass);
-            classRegister.add(testClass.getSimpleName());
         }
 
         for (Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
@@ -80,8 +80,8 @@ public class ReflectionsContainer {
             if (publisherClasses.containsKey(publisherClass.getSimpleName()))
                 throw new IllegalStateException("A publisher class with this name already exists here: "
                         + publisherClasses.get(publisherClass.getSimpleName()).getName());
+            addToClassRegister(publisherClass.getSimpleName());
             publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
-            classRegister.add(publisherClass.getSimpleName());
         }
 
         for (Class<? extends SuiteSetup> suiteSetupClass : reflections.getSubTypesOf(SuiteSetup.class)) {
@@ -90,8 +90,8 @@ public class ReflectionsContainer {
             if (suiteSetupClasses.containsKey(suiteSetupClass.getSimpleName()))
                 throw new IllegalStateException("A suite class with this name already exists here: "
                         + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
+            addToClassRegister(suiteSetupClass.getSimpleName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
-            classRegister.add(suiteSetupClass.getSimpleName());
         }
 
         for (Class<? extends PublishMode> publishModeClass : reflections.getSubTypesOf(PublishMode.class)) {
@@ -101,8 +101,8 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A publish mode class with this name already exists here: "
                         + publishModeClasses.get(identifier).getName());
             }
+            addToClassRegister(identifier);
             publishModeClasses.put(identifier, publishModeClass);
-            classRegister.add(identifier);
         }
 
         for(Class<? extends RunMode> runModeClass : reflections.getSubTypesOf(RunMode.class)) {
@@ -112,11 +112,18 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A run mode class with this name already exists here: " +
                         runModeClasses.get(identifier).getName());
             }
+            addToClassRegister(identifier);
             runModeClasses.put(identifier, runModeClass);
-            classRegister.add(identifier);
         }
+    }
 
 
+    // Two classes with different types should not be allowed to have the same name.
+    private void addToClassRegister(String classIdentifier) {
+        if (!classRegister.contains(classIdentifier)) {
+            classRegister.add(classIdentifier);
+        } else
+            throw new IllegalArgumentException("A class with this name already exists. Please provide a different name for your class.");
     }
 
 

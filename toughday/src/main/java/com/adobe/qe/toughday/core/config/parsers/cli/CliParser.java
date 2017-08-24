@@ -33,7 +33,19 @@ public class CliParser implements ConfigurationParser {
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
     public final static List<String> parserArgs = new ArrayList<>();
-    public static boolean helpRequired = false;
+
+    public static final List<String> availableHelpOptions = Collections.unmodifiableList(
+            new ArrayList<String>() {{
+                add("help");
+                add("help_full");
+                add("help_tests");
+                add("help_publish");
+            }});
+
+    public static final List<String> helpOptionsParameters = Collections.unmodifiableList(
+            new ArrayList<String>() {{
+                add("tag");
+            }});
 
     static {
         for (Method method : globalArgMethods) {
@@ -185,20 +197,15 @@ public class CliParser implements ConfigurationParser {
                             break;
                         }
                     }
-                    if (key.contains("help")) {
-                        helpRequired = true;
-                        continue;
-                    } else if (!found && !parserArgs.contains(key)
+                   if (!found && !parserArgs.contains(key) && !availableHelpOptions.contains(key) && !helpOptionsParameters.contains("tag")
                             && !key.equals("suite")  && !key.equals("suitesetup")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
-                    }
-
+                   }
                     globalArgs.put(key, val);
                 }
             }
         }
         configParams.setGlobalParams(globalArgs);
-
         return configParams;
     }
 
@@ -319,12 +326,13 @@ public class CliParser implements ConfigurationParser {
     public void printShortHelp(boolean printSuitesTests) {
         System.out.println("Usage: java -jar toughday.jar [--help | --help_full | --help_tests | --help_publish] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help.");
-        System.out.println("Use '--help_full' to print full help.");
+        System.out.println("Use '--help_full [--add/exclude extension.jar]' to print full help.");
         System.out.println("Use '--help_tests' to print all the test classes.");
         System.out.println("Use '--help_publish' to print all the publisher classes.");
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
         System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
         System.out.println("Use '--help --tag=$Tag' to find all items that have a the specified tag");
+        System.out.println("The above options can also be used with [--add/exclude extension.jar]");
         System.out.println("Use '--help --runmode/publishmode type=$Mode' to find information about a run/publish mode");
 
         System.out.println("\r\nExamples: \r\n");

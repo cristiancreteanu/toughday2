@@ -21,12 +21,12 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "TestClass/PublisherClass property1=val property2=val";
+            return "ExtensionFile | TestClass/PublisherClass property1=val property2=val";
         }
 
         @Override
         public String actionDescription() {
-            return "Add a test to the suite or a publisher";
+            return "Add an extension or a test to the suite or a publisher";
         }
     },
     CONFIG {
@@ -67,12 +67,12 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "TestName/PublisherName";
+            return "TestName/PublisherName/ExtensionFile";
         }
 
         @Override
         public String actionDescription() {
-            return "Exclude a test/publisher from config file or a predefined suite";
+            return "Exclude a test/publisher/extension from config file or a predefined suite";
         }
     };
 

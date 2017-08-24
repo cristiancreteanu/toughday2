@@ -165,9 +165,11 @@ public class Configuration {
         handleExtensions(configParams);
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
-        if (CliParser.helpRequired) {
-            return;
-        }
+       for (String helpOption : CliParser.availableHelpOptions) {
+           if (globalArgsMeta.containsKey(helpOption)) {
+               return;
+           }
+       }
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
@@ -559,6 +561,11 @@ public class Configuration {
         public static long parseDurationToSeconds(String duration) {
             long finalDuration = 0l;
             long intermDuration = 0l;
+
+            //if time unit is not specified, consider it seconds by default.
+            if (duration.matches("^[0-9]+$")) {
+                duration = duration + "s";
+            }
 
             for (char c : duration.toCharArray()) {
                 if (Character.isDigit(c)) {
