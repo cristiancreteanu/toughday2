@@ -197,7 +197,7 @@ public class CliParser implements ConfigurationParser {
                             break;
                         }
                     }
-                   if (!found && !parserArgs.contains(key) && !availableHelpOptions.contains(key) && !helpOptionsParameters.contains("tag")
+                   if (!found && !parserArgs.contains(key) && !availableHelpOptions.contains(key) && !helpOptionsParameters.contains(key)
                             && !key.equals("suite")  && !key.equals("suitesetup")) {
                         throw new IllegalArgumentException("Unrecognized argument --" + key);
                    }
@@ -326,18 +326,19 @@ public class CliParser implements ConfigurationParser {
     public void printShortHelp(boolean printSuitesTests) {
         System.out.println("Usage: java -jar toughday.jar [--help | --help_full | --help_tests | --help_publish] [<global arguments> | <actions>]");
         System.out.println("Running the jar with no parameters or '--help' prints the help.");
-        System.out.println("Use '--help_full [--add/exclude extension.jar]' to print full help.");
+        System.out.println("Use '--help_full' to print full help.");
         System.out.println("Use '--help_tests' to print all the test classes.");
         System.out.println("Use '--help_publish' to print all the publisher classes.");
         System.out.println("Use '--help $TestClass/$PublisherClass' to view all configurable properties for that test/publisher");
-        System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
         System.out.println("Use '--help --tag=$Tag' to find all items that have a the specified tag");
         System.out.println("The above options can also be used with [--add/exclude extension.jar]");
+        System.out.println("Use '--help --suite=$SuiteName' to find information about a test suite");
         System.out.println("Use '--help --runmode/publishmode type=$Mode' to find information about a run/publish mode");
 
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --host=localhost --port=4502");
         System.out.println("\t java -jar toughday.jar --runmode type=normal concurrency=20 --host=localhost --port=4502");
+        System.out.println("\t java -jar toughday.jar --host=localhost --add extension.jar --add extensionTest");
 
         System.out.println("\r\nGlobal arguments:");
 

@@ -165,11 +165,11 @@ public class Configuration {
         handleExtensions(configParams);
 
         Map<String, String> globalArgsMeta = configParams.getGlobalParams();
-       for (String helpOption : CliParser.availableHelpOptions) {
+        for (String helpOption : CliParser.availableHelpOptions) {
            if (globalArgsMeta.containsKey(helpOption)) {
                return;
            }
-       }
+        }
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
         applyLogLevel(globalArgs.getLogLevel());
