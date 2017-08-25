@@ -5,8 +5,8 @@ import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.SkippedTestException;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
-import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.ClientException;
@@ -33,7 +33,7 @@ public class DeletePageTest extends SequentialTestBase {
         this.title = title;
     }
 
-    protected String getNextTitle() {
+    protected String getNextTitle() throws SkippedTestException {
         return CreatePageTest.lastCreated.get();
     }
 
@@ -41,7 +41,7 @@ public class DeletePageTest extends SequentialTestBase {
     public void test() throws Exception {
         String nextTitle = getNextTitle();
         if (nextTitle == null) {
-            throw new ClientException("No page created (by CreatePageTest). Marking as fail.");
+            throw new SkippedTestException(new ClientException("No page created (by CreatePageTest). Marking as skipped."));
         }
 
         FormEntityBuilder feb = FormEntityBuilder.create()

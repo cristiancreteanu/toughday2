@@ -90,7 +90,7 @@ public class ConstantLoad implements RunMode {
             try {
                 AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(test);
                 runner.runTest(test, runMap);
-            } catch (ChildTestFailedException e) {
+            } catch (SkippedTestException | ChildTestFailedException e) {
                 LOG.warn("Exceptions from tests should not reach this point", e);
             }
             mutex.lock();

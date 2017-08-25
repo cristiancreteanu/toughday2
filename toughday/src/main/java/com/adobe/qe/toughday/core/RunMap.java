@@ -61,6 +61,13 @@ public class RunMap {
         }
     }
 
+    public void recordSkipped(AbstractTest test, SkippedTestException e) {
+        TestEntry entry = runMap.get(test);
+        if (entry != null) {
+            runMap.get(test).recordSkipped(e);
+        }
+    }
+
     public Map<AbstractTest, Long> aggregateAndReinitialize (RunMap other) {
         Map<AbstractTest, Long> counts = new HashMap<>();
         for (Map.Entry<AbstractTest, TestEntry> entry : other.runMap.entrySet()) {
@@ -144,6 +151,8 @@ public class RunMap {
 
         long getFailRuns();
 
+        long getSkippedRuns();
+
         long get90Percentile();
 
         long get99Percentile();
@@ -165,6 +174,7 @@ public class RunMap {
         private AbstractTest test;
         private double totalDuration;
         private long failRuns;
+        private long skippedRuns;
         private Map<Class<? extends Exception>, Long> failsMap;
         private long startNanoTime;
         private long lastNanoTime;
@@ -174,6 +184,7 @@ public class RunMap {
         private void init() {
             totalDuration = 0;
             failRuns = 0;
+            skippedRuns = 0;
             histogram.reset();
             failsMap = new HashMap<>();
         }
@@ -187,6 +198,15 @@ public class RunMap {
             histogram = new SynchronizedHistogram(3600000L /* 1h */, 3);
             reinitStartTime();
             init();
+        }
+
+        /**
+         * Mark a skipped run
+         * @param e
+         */
+        public synchronized void recordSkipped(SkippedTestException e) {
+            lastNanoTime = System.nanoTime();
+            skippedRuns++;
         }
 
         /**
@@ -272,6 +292,11 @@ public class RunMap {
         }
 
         @Override
+        public long getSkippedRuns() {
+            return skippedRuns;
+        }
+
+        @Override
         public long get90Percentile() {
             return histogram.getValueAtPercentile(90);
         }
@@ -314,6 +339,7 @@ public class RunMap {
                 this.lastNanoTime = Math.max(this.lastNanoTime, other.lastNanoTime);
                 this.totalDuration += other.totalDuration;
                 this.failRuns += other.failRuns;
+                this.skippedRuns += other.skippedRuns;
                 other.init();
             }
             return totalRuns;
