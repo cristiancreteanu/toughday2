@@ -97,7 +97,6 @@ public class ConfigParams {
     public List<ClassMetaObject> getItemsToAdd() { return itemsToAdd;};
 
     public void merge(ConfigParams other) {
-
         globalParams.putAll(other.getGlobalParams());
         itemsToAdd.addAll(other.getItemsToAdd());
         itemsToExclude.addAll(other.getItemsToExclude());

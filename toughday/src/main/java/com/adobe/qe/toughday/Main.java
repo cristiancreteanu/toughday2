@@ -42,7 +42,6 @@ public class Main {
                     + (t.getMessage() != null ? t.getMessage() : "Please check toughday.log for more information."));
             LogManager.getLogger(Engine.class).error("Error encountered", t);
         }
-
         System.exit(0);
     }
 }

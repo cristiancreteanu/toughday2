@@ -260,7 +260,6 @@ public class Configuration {
         }
 
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
-
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
