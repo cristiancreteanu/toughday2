@@ -255,6 +255,10 @@ public class CliParser implements ConfigurationParser {
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
+        if (cmdLineArgs.length == 0) {
+            return false;
+        }
+
         if (cmdLineArgs[0].equals("--help_full")) {
             printHelp();
             return true;

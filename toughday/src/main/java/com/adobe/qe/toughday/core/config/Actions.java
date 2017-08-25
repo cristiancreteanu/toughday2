@@ -21,7 +21,7 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "ExtensionFile | TestClass/PublisherClass property1=val property2=val";
+            return "ExtensionJar | TestClass/PublisherClass property1=val property2=val";
         }
 
         @Override
