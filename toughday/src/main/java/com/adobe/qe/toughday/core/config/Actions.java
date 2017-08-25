@@ -67,7 +67,7 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "TestName/PublisherName/ExtensionFileName";
+            return "TestName/PublisherName/ExtensionJar";
         }
 
         @Override
