@@ -48,7 +48,7 @@ public class Configuration {
 
         List<String> extensionList = new ArrayList<>();
         List<ConfigParams.ClassMetaObject> itemsToAddCopy = new ArrayList<>(configParams.getItemsToAdd());
-        List<String> itemsToExcludeCopy = new ArrayList<>(configParams.getItemsToExclude());
+        //List<String> itemsToExcludeCopy = new ArrayList<>(configParams.getItemsToExclude());
 
         // look for extension jar files that should be loaded.
         for (ConfigParams.ClassMetaObject itemToAdd : itemsToAddCopy) {
@@ -59,7 +59,7 @@ public class Configuration {
         }
 
         // look for extension jar files that should be excluded.
-        for (String itemToExclude : itemsToExcludeCopy) {
+        /*for (String itemToExclude : itemsToExcludeCopy) {
             if (itemToExclude.endsWith(".jar")) {
                 configParams.getItemsToExclude().remove(itemToExclude);
                 if (!extensionList.contains(itemToExclude)) {
@@ -67,7 +67,7 @@ public class Configuration {
                 }
                 extensionList.remove(itemToExclude);
             }
-        }
+        }*/
 
         List<JarFile> jarFiles = createJarFiles(extensionList);
         URLClassLoader classLoader = null;

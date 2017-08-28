@@ -67,12 +67,12 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "TestName/PublisherName/ExtensionJar";
+            return "TestName/PublisherName";
         }
 
         @Override
         public String actionDescription() {
-            return "Exclude a test/publisher/extension from config file or a predefined suite";
+            return "Exclude a test/publisher from config file or a predefined suite";
         }
     };
 
