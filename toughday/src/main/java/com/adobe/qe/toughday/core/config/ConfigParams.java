@@ -51,8 +51,7 @@ public class ConfigParams {
     private Map<String, String> globalParams = new HashMap<>();
     private Map<String, String> publishModeParams = new HashMap<>();
     private Map<String, String> runModeParams = new HashMap<>();
-    private List<ClassMetaObject> testsToAdd = new ArrayList<>();
-    private List<ClassMetaObject> publishers = new ArrayList<>();
+    private List<ClassMetaObject> itemsToAdd = new ArrayList<>();
     private List<NamedMetaObject> itemsToConfig = new ArrayList<>();
     private List<String> itemsToExclude = new ArrayList<>();
 
@@ -68,21 +67,18 @@ public class ConfigParams {
         this.runModeParams = runModeParams;
     }
 
-    public void addTest(String testClassName, Map<String, String> params) {
-        testsToAdd.add(new ClassMetaObject(testClassName, params));
-    }
-
     public void configItem(String testName, Map<String, String> params) {
         itemsToConfig.add(new NamedMetaObject(testName, params));
+    }
+
+    public void addItem(String itemName, Map<String, String> params) {
+        itemsToAdd.add(new ClassMetaObject(itemName, params));
     }
 
     public void exclude(String testName) {
         itemsToExclude.add(testName);
     }
 
-    public void addPublisher(String publisherClassName, Map<String, String> params) {
-        publishers.add(new ClassMetaObject(publisherClassName, params));
-    }
 
     public Map<String, String> getGlobalParams(){
         return globalParams;
@@ -92,26 +88,19 @@ public class ConfigParams {
 
     public Map<String, String> getRunModeParams() { return runModeParams; }
 
-    public List<ClassMetaObject> getTestsToAdd() {
-        return testsToAdd;
-    }
-
     public List<String> getItemsToExclude() { return itemsToExclude; }
 
     public List<NamedMetaObject> getItemsToConfig() {
         return itemsToConfig;
     }
 
-    public List<ClassMetaObject> getPublishers() {
-        return publishers;
-    }
+    public List<ClassMetaObject> getItemsToAdd() { return itemsToAdd;};
 
     public void merge(ConfigParams other) {
         globalParams.putAll(other.getGlobalParams());
-        testsToAdd.addAll(other.getTestsToAdd());
+        itemsToAdd.addAll(other.getItemsToAdd());
         itemsToExclude.addAll(other.getItemsToExclude());
         itemsToConfig.addAll(other.getItemsToConfig());
-        publishers.addAll(other.getPublishers());
 
         if(other.runModeParams.containsKey("type"))
             this.runModeParams.clear();

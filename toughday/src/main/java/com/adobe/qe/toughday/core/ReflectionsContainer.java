@@ -5,11 +5,8 @@ import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import org.reflections.Reflections;
 import org.reflections.scanners.ResourcesScanner;
-
 import java.lang.reflect.Modifier;
-import java.util.Map;
-import java.util.HashMap;
-import java.util.Iterator;
+import java.util.*;
 import java.util.regex.Pattern;
 
 /**
@@ -27,18 +24,12 @@ public class ReflectionsContainer {
         return instance;
     }
 
-    /**
-     * Getter for the underlining instance of the Reflections object.
-     */
-    public static Reflections getReflections() {
-        return reflections;
-    }
-
     private HashMap<String, Class<? extends AbstractTest>> testClasses;
     private HashMap<String, Class<? extends Publisher>> publisherClasses;
     private HashMap<String, Class<? extends SuiteSetup>> suiteSetupClasses;
     private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
     private HashMap<String, Class<? extends RunMode>> runModeClasses;
+    private Set<String> classRegister;
 
     private String toughdayContentPackage;
 
@@ -51,12 +42,26 @@ public class ReflectionsContainer {
     /**
      * Constructor.
      */
+
     private ReflectionsContainer() {
+
+        updateContainerContent();
+
+        Reflections reflections = new Reflections("", new ResourcesScanner());
+        Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
+        if (iterator.hasNext()) {
+            toughdayContentPackage = iterator.next();
+        }
+    }
+
+    private void updateContainerContent() {
+
         testClasses = new HashMap<>();
         publisherClasses = new HashMap<>();
         suiteSetupClasses = new HashMap<>();
         publishModeClasses = new HashMap<>();
         runModeClasses = new HashMap<>();
+        classRegister = new HashSet<>();
 
 
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
@@ -65,6 +70,7 @@ public class ReflectionsContainer {
             if(testClasses.containsKey(testClass.getSimpleName()))
                 throw new IllegalStateException("A test class with this name already exists here: "
                         + testClasses.get(testClass.getSimpleName()).getName());
+            addToClassRegister(testClass.getSimpleName());
             testClasses.put(testClass.getSimpleName(), testClass);
         }
 
@@ -74,6 +80,7 @@ public class ReflectionsContainer {
             if (publisherClasses.containsKey(publisherClass.getSimpleName()))
                 throw new IllegalStateException("A publisher class with this name already exists here: "
                         + publisherClasses.get(publisherClass.getSimpleName()).getName());
+            addToClassRegister(publisherClass.getSimpleName());
             publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
         }
 
@@ -83,6 +90,7 @@ public class ReflectionsContainer {
             if (suiteSetupClasses.containsKey(suiteSetupClass.getSimpleName()))
                 throw new IllegalStateException("A suite class with this name already exists here: "
                         + suiteSetupClasses.get(suiteSetupClass.getSimpleName()).getName());
+            addToClassRegister(suiteSetupClass.getSimpleName());
             suiteSetupClasses.put(suiteSetupClass.getSimpleName(), suiteSetupClass);
         }
 
@@ -93,6 +101,7 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A publish mode class with this name already exists here: "
                         + publishModeClasses.get(identifier).getName());
             }
+            addToClassRegister(identifier);
             publishModeClasses.put(identifier, publishModeClass);
         }
 
@@ -103,16 +112,20 @@ public class ReflectionsContainer {
                 throw new IllegalStateException("A run mode class with this name already exists here: " +
                         runModeClasses.get(identifier).getName());
             }
+            addToClassRegister(identifier);
             runModeClasses.put(identifier, runModeClass);
         }
-
-        Reflections reflections = new Reflections("", new ResourcesScanner());
-
-        Iterator<String> iterator = reflections.getResources(toughdayContentPackagePattern).iterator();
-        if (iterator.hasNext()) {
-            toughdayContentPackage = iterator.next();
-        }
     }
+
+
+    // Two classes with different types should not be allowed to have the same name.
+    private void addToClassRegister(String classIdentifier) {
+        if (!classRegister.contains(classIdentifier)) {
+            classRegister.add(classIdentifier);
+        } else
+            throw new IllegalArgumentException("A class with this name already exists. Please provide a different name for your class.");
+    }
+
 
     /**
      * Getter for the map of test classes.
@@ -136,7 +149,7 @@ public class ReflectionsContainer {
     }
 
     /**
-     * Getter for the map of PublishMode classes
+     * Getter for the map of PublishMode classes.
      */
     public Map<String, Class<? extends PublishMode>> getPublishModeClasses() { return publishModeClasses; }
 
@@ -144,7 +157,33 @@ public class ReflectionsContainer {
         return toughdayContentPackage;
     }
 
+    /**
+     * Getter for the map of RunMode classes.
+     */
+
     public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
         return runModeClasses;
     }
+
+    /**
+     *  Checks if the Reflection Container contains a class with the given name.
+     */
+    public boolean containsClass(String className) {
+        return classRegister.contains(className);
+    }
+
+    /**
+     * This method makes the Reflections instance aware about the new classes dynamically loaded from the jar files.
+     * @param reflections
+     */
+
+    public void merge(Reflections reflections) {
+        this.reflections = reflections;
+        updateContainerContent();
+    }
+
+    public static <T> Set<Class<? extends T>> getSubTypesOf(final Class<T> type) {
+       return reflections.getSubTypesOf(type);
+    }
+
 }

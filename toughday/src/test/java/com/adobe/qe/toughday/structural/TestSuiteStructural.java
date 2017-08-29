@@ -7,7 +7,6 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 
@@ -17,10 +16,9 @@ import java.lang.reflect.Method;
 public class TestSuiteStructural extends TestCase {
 
     public static TestSuite suite() {
-        Reflections reflections = ReflectionsContainer.getReflections();
         TestSuite suite = new TestSuite();
 
-        for(Class TDtestClass : reflections.getSubTypesOf(AbstractTest.class)) {
+        for(Class TDtestClass : ReflectionsContainer.getSubTypesOf(AbstractTest.class)) {
             suite.addTest(new TestConstructor("test", TDtestClass));
             for (Method method : TDtestClass.getDeclaredMethods()) {
                 if(method.getAnnotation(ConfigArgSet.class) != null) {
@@ -38,7 +36,7 @@ public class TestSuiteStructural extends TestCase {
             }
         }
 
-        for(Class TDpublisherClass : reflections.getSubTypesOf(Publisher.class)) {
+        for(Class TDpublisherClass : ReflectionsContainer.getSubTypesOf(Publisher.class)) {
             suite.addTest(new TestConstructor("test", TDpublisherClass));
             for (Method method : TDpublisherClass.getDeclaredMethods()) {
                 if(method.getAnnotation(ConfigArgSet.class) != null) {

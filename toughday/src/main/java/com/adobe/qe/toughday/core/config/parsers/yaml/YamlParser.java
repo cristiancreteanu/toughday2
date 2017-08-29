@@ -7,14 +7,8 @@ import org.yaml.snakeyaml.TypeDescription;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import org.yaml.snakeyaml.resolver.Resolver;
-
-import javax.annotation.concurrent.NotThreadSafe;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Created by tuicu on 26/12/16.
@@ -58,6 +52,7 @@ public class YamlParser implements ConfigurationParser {
                 TypeDescription yamlParserDesc = new TypeDescription(YamlConfiguration.class);
                 yamlParserDesc.putListPropertyType("tests", YamlAction.class);
                 yamlParserDesc.putListPropertyType("publishers", YamlAction.class);
+                yamlParserDesc.putListPropertyType("extensions", YamlAction.class);
 
                 constructor.addTypeDescription(yamlParserDesc);
                 Yaml yaml = new Yaml(constructor);
