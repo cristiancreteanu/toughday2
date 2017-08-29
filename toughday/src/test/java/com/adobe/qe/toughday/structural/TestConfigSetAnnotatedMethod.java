@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.structural;
 
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.experimental.categories.Category;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -9,6 +10,8 @@ import java.lang.reflect.Modifier;
 /**
  * Created by tuicu on 13/06/16.
  */
+
+@Category(TestTDConstraints.class)
 public class TestConfigSetAnnotatedMethod extends TestCase {
     private Method TDConfigAnnotatedMethod;
 

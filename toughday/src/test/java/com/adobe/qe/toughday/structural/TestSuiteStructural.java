@@ -7,12 +7,14 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.experimental.categories.Category;
 
 import java.lang.reflect.Method;
 
 /**
  * Created by tuicu on 13/06/16.
  */
+@Category(TestTDConstraints.class)
 public class TestSuiteStructural extends TestCase {
 
     public static TestSuite suite() {

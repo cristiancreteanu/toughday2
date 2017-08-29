@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.core.annotations.CloneSetup;
 import com.adobe.qe.toughday.core.annotations.Setup;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.junit.experimental.categories.Category;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -13,6 +14,8 @@ import java.lang.reflect.Modifier;
 /**
  * Created by tuicu on 13/06/16.
  */
+
+@Category(TestTDConstraints.class)
 public class TestAnnotatedMethod extends TestCase {
     private Method TDAnnotatedMethod;
 

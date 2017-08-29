@@ -5,6 +5,9 @@
     <packaging>jar</packaging>
     <version>0.1.0-SNAPSHOT</version>
 
+    <properties>
+        <toughday.version>0.2.2-SNAPSHOT</toughday.version>
+    </properties>
 
     <distributionManagement>
         <repository>
@@ -20,11 +23,46 @@
         </snapshotRepository>
     </distributionManagement>
     <dependencies>
-        <!-- Get slf4j from it-framework to log to log4j -->
-        <dependency>
-            <groupId>com.adobe.qe</groupId>
-            <artifactId>toughday2</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
-        </dependency>
+
+         <!-- https://mvnrepository.com/artifact/junit/junit -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>4.12</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- include ToughDay JUnit tests -->
+            <dependency>
+                <groupId>com.adobe.qe</groupId>
+                <artifactId>toughday2</artifactId>
+                <version>${toughday.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- include ToughDay API -->
+            <dependency>
+                <groupId>com.adobe.qe</groupId>
+                <artifactId>toughday2</artifactId>
+                <version>${toughday.version}</version>
+            </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>2.20</version>
+                <configuration>
+                    <dependenciesToScan>
+                        <dependency>com.adobe.qe:toughday2</dependency>
+                    </dependenciesToScan>
+                    <groups>com.adobe.qe.toughday.structural.TestTDConstraints</groups>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
