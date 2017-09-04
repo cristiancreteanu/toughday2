@@ -16,7 +16,7 @@ import java.util.Collection;
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher extends Publisher {
     public static final String DEFAULT_FILE_PATH = "results.csv";
-    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %d, %d, %d, %f, %f, %d, %d, %d, %f";
+    private static final String INITIAL_FORMAT = "%s, %s, %d, %d, %d, %d, %d, %d, %f, %f, %d, %d, %d, %f";
 
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
 
@@ -31,7 +31,7 @@ public class CSVPublisher extends Publisher {
     private BufferedWriter writer;
 
     private String filePath = DEFAULT_FILE_PATH;
-    private static String HEADER = "Name, Timestamp, Passed, Failed, Min, Max, Median, Average, StdDev, 90p, 99p, 99.9p, RealTP";
+    private static String HEADER = "Name, Timestamp, Passed, Failed, Skipped, Min, Max, Median, Average, StdDev, 90p, 99p, 99.9p, RealTP";
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -98,6 +98,7 @@ public class CSVPublisher extends Publisher {
                         statistics.getTimestamp(),
                         statistics.getTotalRuns(),
                         statistics.getFailRuns(),
+                        statistics.getSkippedRuns(),
                         statistics.getMinDuration(),
                         statistics.getMaxDuration(),
                         statistics.getMedianDuration(),

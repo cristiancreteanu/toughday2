@@ -88,22 +88,24 @@ public class ConsolePublisher extends Publisher {
         final String SPACE = " ";
         System.out.println();
         for (RunMap.TestStatistics statistics : testStatistics) {
-            System.out.printf("%-35.35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n",
+            System.out.printf("%-35.35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%35s | %-35s | %-25s | %-25s |\r\n%-35s",
                     statistics.getTest().getFullName(),
                     "Timestamp:  " + statistics.getTimestamp(),
                     "Passed:     " + String.format("%d", statistics.getTotalRuns()),
                     "Failed:     " + String.format("%d", statistics.getFailRuns()),
                     SPACE,
+                    "Skipped:    " + String.format("%d", statistics.getSkippedRuns()),
                     "Average:    " + String.format("%.1f", statistics.getAverageDuration()) + " ms",
                     "Median:     " + String.format("%d", (long) statistics.getMedianDuration()) + " ms",
-                    "StdDev:     " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
                     SPACE,
+                    "StdDev:     " + String.format("%.1f", statistics.getStandardDeviation()) + " ms",
                     "90p:        " + String.format("%d", statistics.get90Percentile()) + " ms",
                     "99p:        " + String.format("%d", statistics.get99Percentile()) + " ms",
-                    "99.9p:      " + String.format("%d", statistics.get999Percentile()) + " ms",
                     SPACE,
+                    "99.9p:      " + String.format("%d", statistics.get999Percentile()) + " ms",
                     "Min:        " + String.format("%d", (long) statistics.getMinDuration()) + " ms",
                     "Max:        " + String.format("%d", (long) statistics.getMaxDuration()) + " ms",
+                    SPACE,
                     "RealTP:     " + String.format("%.1f", statistics.getRealThroughput()) + " rps"
             );
             System.out.println();
