@@ -6,11 +6,9 @@ import com.adobe.qe.toughday.core.annotations.Description;
 
 @Description(desc = "Number of fails.")
 public class Failed extends Metric {
-    final Metric metric = this;
-
     @Override
     public ResultInfo getResult(final RunMap runMap, final AbstractTest testInstance) {
-        final ResultInfo<Long> resultInfo = new ResultInfo<Long>() {
+        final ResultInfo<Long> resultInfo = new ResultInfo<Long>(this) {
             @Override
             public String getFormat() {
                 return "%d";
@@ -26,15 +24,6 @@ public class Failed extends Metric {
                 return runMap.getRecord(testInstance).getFailRuns();
             }
 
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
-            }
         };
 
         return resultInfo;

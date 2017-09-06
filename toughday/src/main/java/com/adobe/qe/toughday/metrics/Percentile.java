@@ -8,7 +8,6 @@ import com.adobe.qe.toughday.core.config.ConfigArgSet;
 @Description(desc = "Percentile.")
 public class Percentile extends Metric {
     private double value;
-    private Metric metric = this;
 
     @ConfigArgSet(required = true, desc = "The value at which percentile will be calculated.")
     public Percentile setValue(String value) {
@@ -21,7 +20,7 @@ public class Percentile extends Metric {
 
     @Override
     public ResultInfo<Long> getResult(final RunMap runMap, final AbstractTest testInstance) {
-        return new ResultInfo<Long>() {
+        return new ResultInfo<Long>(this) {
             @Override
             public String getFormat() {
                 return "%d";
@@ -35,16 +34,6 @@ public class Percentile extends Metric {
             @Override
             public Long getValue() {
                 return runMap.getRecord(testInstance).getValueAtPercentile(value);
-            }
-
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
             }
         };
     }

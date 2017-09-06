@@ -6,11 +6,9 @@ import com.adobe.qe.toughday.core.annotations.Description;
 
 @Description(desc = "Standard deviation.")
 public class StdDev extends Metric {
-    private Metric metric = this;
-
     @Override
     public ResultInfo getResult(final RunMap runMap, final AbstractTest testInstance) {
-        ResultInfo<Double> resultInfo = new ResultInfo<Double>() {
+        ResultInfo<Double> resultInfo = new ResultInfo<Double>(this) {
             @Override
             public String getFormat() {
                 return "%." + this.getDecimals() + "f";
@@ -26,15 +24,6 @@ public class StdDev extends Metric {
                 return runMap.getRecord(testInstance).getStandardDeviation();
             }
 
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
-            }
         };
         return resultInfo;
     }

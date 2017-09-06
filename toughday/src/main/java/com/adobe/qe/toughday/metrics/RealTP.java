@@ -6,11 +6,9 @@ import com.adobe.qe.toughday.core.annotations.Description;
 
 @Description(desc = "Number of runs divided by elapsed time. Formula: Runs / elapsed execution time.")
 public class RealTP extends Metric {
-    private Metric metric = this;
-
     @Override
     public ResultInfo getResult(final RunMap runMap, final AbstractTest testInstance) {
-        ResultInfo<Double> resultInfo = new ResultInfo<Double>() {
+        ResultInfo<Double> resultInfo = new ResultInfo<Double>(this) {
             @Override
             public String getFormat() {
                 return "%." + this.getDecimals() + "f";
@@ -24,16 +22,6 @@ public class RealTP extends Metric {
             @Override
             public Double getValue() {
                 return runMap.getRecord(testInstance).getRealThroughput();
-            }
-
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
             }
         };
 

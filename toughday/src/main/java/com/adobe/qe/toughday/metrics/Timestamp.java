@@ -12,7 +12,7 @@ public class Timestamp extends Metric {
 
     @Override
     public ResultInfo<String> getResult(final RunMap runMap, final AbstractTest testInstance) {
-        final ResultInfo<String> resultInfo = new ResultInfo<String>() {
+        final ResultInfo<String> resultInfo = new ResultInfo<String>(this) {
             @Override
             public String getFormat() {
                 return "%s";
@@ -26,16 +26,6 @@ public class Timestamp extends Metric {
             @Override
             public String getValue() {
                 return runMap.getRecord(testInstance).getTimestamp();
-            }
-
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
             }
         };
 

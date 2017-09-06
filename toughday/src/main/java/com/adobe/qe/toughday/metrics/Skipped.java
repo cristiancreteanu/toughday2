@@ -4,11 +4,9 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.RunMap;
 
 public class Skipped extends Metric {
-    private Metric metric = this;
-
     @Override
     public ResultInfo getResult(final RunMap runMap, final AbstractTest testInstance) {
-        final ResultInfo<Long> resultInfo = new ResultInfo<Long>() {
+        final ResultInfo<Long> resultInfo = new ResultInfo<Long>(this) {
             @Override
             public String getFormat() {
                 return "%d";
@@ -22,16 +20,6 @@ public class Skipped extends Metric {
             @Override
             public Long getValue() {
                 return runMap.getRecord(testInstance).getSkippedRuns();
-            }
-
-            @Override
-            public String getName() {
-                return metric.getName();
-            }
-
-            @Override
-            public int getDecimals() {
-                return metric.getDecimals();
             }
         };
 
