@@ -4,7 +4,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.metrics.ResultInfo;
+import com.adobe.qe.toughday.metrics.MetricResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -80,8 +80,8 @@ public class ConsolePublisher extends Publisher {
     }
 
     // publish results method, called periodically
-    private void publish(Map<String, List<ResultInfo>> testsResults) {
-        int nrStats = testsResults.values().iterator().next().size();
+    private void publish(Map<String, List<MetricResult>> results) {
+        int nrStats = results.values().iterator().next().size();
         final int METRIC_LENGTH = 12;
         final int METRICS_PER_LINE_LIMIT = 3;
         final String FORMAT = "%-35s | ";
@@ -92,13 +92,13 @@ public class ConsolePublisher extends Publisher {
             }
         }
 
-        for (String testName : testsResults.keySet()) {
+        for (String testName : results.keySet()) {
             System.out.printf("%-35.35s", testName);
-            List<ResultInfo> metrics = testsResults.get(testName);
-            metrics.remove(0);
+            List<MetricResult> metricResults = results.get(testName);
+            metricResults.remove(0);
             int metricsPerLineCounter = 0;
 
-            for (ResultInfo resultInfo : metrics) {
+            for (MetricResult resultInfo : metricResults) {
                 String metricIdentifier = resultInfo.getName();
                 String padding = StringUtils.repeat(' ', METRIC_LENGTH - metricIdentifier.length());
                 String resultFormat = resultInfo.getFormat();
@@ -121,16 +121,16 @@ public class ConsolePublisher extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Map<String, List<ResultInfo>> testsResults) {
-        publish(testsResults);
+    public void publishIntermediate(Map<String, List<MetricResult>> results) {
+        publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<ResultInfo>> testsResults) {
+    public void publishFinal(Map<String, List<MetricResult>> results) {
         System.out.println("********************************************************************");
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
-        publish(testsResults);
+        publish(results);
     }
 
     @Override

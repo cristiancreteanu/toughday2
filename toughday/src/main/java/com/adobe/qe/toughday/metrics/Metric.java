@@ -1,6 +1,5 @@
 package com.adobe.qe.toughday.metrics;
 
-import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
@@ -15,6 +14,7 @@ public abstract class Metric {
 
     protected String name;
     protected int decimals;
+
     private static final int DEFAULT_DECIMALS = 6;
 
     public static final List<Metric> basicMetrics = Collections.unmodifiableList(
@@ -48,7 +48,12 @@ public abstract class Metric {
      * Returns all the information that publishers need in order to print this metric.
      * @return
      */
-    public abstract ResultInfo getResult(RunMap runMap, AbstractTest testInstance);
+
+    public MetricResult getResult(RunMap.TestEntry testEntry) {
+        return new MetricResultImp<>(this.getName(), this.getValue(testEntry), this.getFormat(), this.getUnitOfMeasure());
+    }
+
+    public abstract Object getValue(RunMap.TestEntry testEntry);
 
     @ConfigArgSet(required = false, desc = "The name of the metric.")
     public Metric setName(String name) {
@@ -74,8 +79,12 @@ public abstract class Metric {
 
     @Override
     public boolean equals(Object o) {
-        return o == this || (o instanceof Metric && this.name.equals(((Metric) o).name));
+        return o == this || (o instanceof Metric && this.getName().equals(((Metric) o).getName()));
     }
+
+    public abstract String getFormat();
+
+    public abstract String getUnitOfMeasure();
 
     @Override
     public int hashCode() {

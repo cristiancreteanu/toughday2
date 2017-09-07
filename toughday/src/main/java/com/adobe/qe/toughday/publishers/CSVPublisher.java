@@ -4,7 +4,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.metrics.ResultInfo;
+import com.adobe.qe.toughday.metrics.MetricResult;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -52,16 +52,16 @@ public class CSVPublisher extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Map<String, List<ResultInfo>> testsResults) {
+    public void publishIntermediate(Map<String, List<MetricResult>> results) {
         if (header.compareTo("") == 0) {
-            createHeaderFormat(testsResults.values().iterator().next());
+            createHeaderFormat(results.values().iterator().next());
         }
-        publish(testsResults);
+        publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<ResultInfo>> testsResults) {
-        publish(testsResults);
+    public void publishFinal(Map<String, List<MetricResult>> results) {
+        publish(results);
     }
 
     @Override
@@ -69,9 +69,9 @@ public class CSVPublisher extends Publisher {
         this.finished = true;
     }
 
-    private String createHeaderFormat(List<ResultInfo> resultInfoList) {
+    private String createHeaderFormat(List<MetricResult> resultsList) {
 
-        for (ResultInfo resultInfo : resultInfoList) {
+        for (MetricResult resultInfo : resultsList) {
             header += resultInfo.getName() + ", ";
             headerFormat += resultInfo.getFormat() + ", ";
         }
@@ -83,7 +83,7 @@ public class CSVPublisher extends Publisher {
         return headerFormat;
     }
 
-    public void publish(Map<String, List<ResultInfo>> testsResults) {
+    public void publish(Map<String, List<MetricResult>> testsResults) {
         try {
             if(!created || !append) {
                 printWriter = new PrintWriter(filePath);
@@ -93,10 +93,10 @@ public class CSVPublisher extends Publisher {
                 writer.newLine();
                 writer.flush();
             }
-            for (String test : testsResults.keySet()) {
+            for (String testName : testsResults.keySet()) {
                 List<Object> results = new ArrayList<>();
-                List<ResultInfo> testResultInfos = testsResults.get(test);
-                for (ResultInfo resultInfo : testResultInfos) {
+                List<MetricResult> testResultInfos = testsResults.get(testName);
+                for (MetricResult resultInfo : testResultInfos) {
                     results.add(resultInfo.getValue());
                 }
 

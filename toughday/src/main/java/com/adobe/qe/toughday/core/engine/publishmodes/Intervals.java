@@ -5,7 +5,7 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.core.engine.Engine;
-import com.adobe.qe.toughday.metrics.ResultInfo;
+import com.adobe.qe.toughday.metrics.MetricResult;
 
 import java.util.List;
 import java.util.Map;
@@ -38,12 +38,12 @@ public class Intervals extends Simple {
     public String getInterval() { return this.interval; }
 
     @Override
-    public void publishIntermediateResults(Map<String, List<ResultInfo>> testsResults) {
+    public void publishIntermediateResults(Map<String, List<MetricResult>> results) {
         if (currentDelta < delta) {
             currentDelta++;
             return;
         }
-        super.publishIntermediateResults(testsResults);
+        super.publishIntermediateResults(results);
 
         this.globalRunMap.reinitialize();
         this.currentDelta = 0;

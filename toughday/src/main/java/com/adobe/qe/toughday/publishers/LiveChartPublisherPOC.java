@@ -4,7 +4,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Internal;
-import com.adobe.qe.toughday.metrics.ResultInfo;
+import com.adobe.qe.toughday.metrics.MetricResult;
 import org.apache.http.*;
 import org.apache.http.entity.InputStreamEntity;
 import org.apache.http.entity.StringEntity;
@@ -65,13 +65,13 @@ public class LiveChartPublisherPOC extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Map<String, List<ResultInfo>> requiredResults) {
-        publish(requiredResults);
+    public void publishIntermediate(Map<String, List<MetricResult>> results) {
+        publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<ResultInfo>> requiredResults) {
-        publish(requiredResults);
+    public void publishFinal(Map<String, List<MetricResult>> results) {
+        publish(results);
     }
 
     @Override
@@ -79,7 +79,7 @@ public class LiveChartPublisherPOC extends Publisher {
         this.finished = true;
     }
 
-    public void publish(Map<String, List<ResultInfo>> requiredResults) {
+    public void publish(Map<String, List<MetricResult>> results) {
 
     }
 }

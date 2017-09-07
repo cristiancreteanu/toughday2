@@ -22,7 +22,7 @@ import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.metrics.Metric;
-import com.adobe.qe.toughday.metrics.ResultInfo;
+import com.adobe.qe.toughday.metrics.MetricResult;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -62,14 +62,14 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
     }
 
     // creates a map containing the results of the metrics that are going to be published
-    public Map<String, List<ResultInfo>> filterResults() {
-        Map<String, List<ResultInfo>> results = new LinkedHashMap<>();
+    public Map<String, List<MetricResult>> filterResults() {
+        Map<String, List<MetricResult>> results = new LinkedHashMap<>();
         RunMap runMap = engine.getGlobalRunMap();
         Set<AbstractTest> tests = runMap.getTests();
         for (AbstractTest testInstance : tests) {
-            List<ResultInfo> metricResults = new ArrayList<>();
+            List<MetricResult> metricResults = new ArrayList<>();
             for (Metric metric : engine.getGlobalArgs().getMetrics()) {
-                metricResults.add(metric.getResult(runMap, testInstance));
+                metricResults.add(metric.getResult(runMap.getRecord(testInstance)));
             }
             results.put(testInstance.getFullName(), metricResults);
         }
@@ -99,7 +99,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 if (testsFinished) {
                     this.finishExecution();
                 }
-                Map<String, List<ResultInfo>> results = filterResults();
+                Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publishIntermediateResults(results);
                 elapsed = (System.nanoTime() - start) / 1000000l;
             }
