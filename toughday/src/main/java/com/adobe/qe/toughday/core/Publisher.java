@@ -2,8 +2,10 @@ package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.metrics.MetricResult;
 
-import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Common interface for all publishers. Classes implementing this interface, if not abstract,
@@ -26,15 +28,15 @@ public abstract class Publisher {
 
     /**
      * Publish intermediate report
-     * @param testStatistics
+     * @param results
      */
-    public abstract void publishIntermediate(Collection<? extends RunMap.TestStatistics> testStatistics);
+    public abstract void publishIntermediate(Map<String, List<MetricResult>> results);
 
     /**
      * Publish final report
-     * @param testStatistics
+     * @param results
      */
-    public abstract void publishFinal(Collection<? extends RunMap.TestStatistics> testStatistics);
+    public abstract void publishFinal(Map<String, List<MetricResult>> results);
 
     /**
      * Method that signals the publisher that it is stopped

@@ -9,6 +9,7 @@ import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.core.engine.RunMode;
+import com.adobe.qe.toughday.metrics.*;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
@@ -178,7 +179,7 @@ public class Configuration {
         this.publishMode = getPublishMode(configParams);
         suite = getTestSuite(globalArgsMeta);
 
-        // add tests and publishers
+        // add tests,publishers and metrics
         for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
                 AbstractTest test = createObject(
@@ -202,12 +203,29 @@ public class Configuration {
 
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addPublisher(publisher);
+            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(itemToAdd.getClassName())) {
+
+                Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName()),
+                        itemToAdd.getParameters());
+
+                checkInvalidArgs(itemToAdd.getParameters());
+                this.globalArgs.addMetric(metric);
+            } else if (itemToAdd.getClassName().equals("BASICMetrics")) {
+                Collection<Metric> basicMetrics = Metric.basicMetrics;
+                for (Metric metric : basicMetrics) {
+                    this.globalArgs.addMetric(metric);
+                }
+            } else if (itemToAdd.getClassName().equals("DEFAULTMetrics")) {
+                Collection<Metric> defaultMetrics = Metric.defaultMetrics;
+                for (Metric metric : defaultMetrics) {
+                    this.globalArgs.addMetric(metric);
+                }
             } else {
-                throw new IllegalArgumentException("Unknown publisher or test class: " + itemToAdd.getClassName());
+                throw new IllegalArgumentException("Unknown publisher, test or metric class: " + itemToAdd.getClassName());
             }
         }
 
-        // Add a default publishers if none is specified
+        // Add default publishers if none is specified
         if (globalArgs.getPublishers().size() == 0) {
             Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, String>());
             this.globalArgs.addPublisher(publisher);
@@ -218,10 +236,18 @@ public class Configuration {
         }
 
         // Add a default suite of tests if no test is added or no predefined suite is choosen.
-        if ((suite.getTests().size() == 0) ) {
+        if (suite.getTests().size() == 0) {
             // Replace the empty suite with the default predefined suite if no test has been configured,
             // either by selecting a suite or manually using --add
             this.suite = predefinedSuites.getDefaultSuite();
+        }
+
+        // Add default metrics if no metric is specified.
+        if (globalArgs.metrics.size() == 0) {
+            Collection<Metric> defaultMetrics = Metric.defaultMetrics;
+            for (Metric metric : defaultMetrics) {
+                this.globalArgs.addMetric(metric);
+            }
         }
 
         // Add and configure tests to the suite
@@ -241,21 +267,26 @@ public class Configuration {
             } else if (globalArgs.containsPublisher(itemMeta.getName())) {
                 Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
                 setObjectProperties(publisherObject, itemMeta.getParameters());
+            } else if (globalArgs.containsMetric(itemMeta.getName())) {
+                Metric metricObject = globalArgs.getMetric(itemMeta.getName());
+                setObjectProperties(metricObject, itemMeta.getParameters());
             } else {
-                throw new IllegalStateException("No test or publisher found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
+                throw new IllegalStateException("No test/publisher/metric found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
             }
 
             checkInvalidArgs(itemMeta.getParameters());
         }
 
-        // Exclude tests and publishers
+        // Exclude tests/publishers/metrics
         for (String itemName : configParams.getItemsToExclude()) {
             if (suite.contains(itemName)) {
                 suite.remove(itemName);
             } else if (globalArgs.containsPublisher(itemName)) {
                 globalArgs.removePublisher(itemName);
+            } else if (getGlobalArgs().containsMetric(itemName)) {
+                globalArgs.removeMetric(itemName);
             } else {
-                throw new IllegalStateException("No test or publisher found with name \"" + itemName + "\", so we can't exclude it.");
+                throw new IllegalStateException("No test/publisher/metric found with name \"" + itemName + "\", so we can't exclude it.");
             }
         }
 
@@ -510,6 +541,7 @@ public class Configuration {
         private String password;
         private long duration;
         private Map<String, Publisher> publishers;
+        private Map<String, Metric> metrics;
         private long timeout;
         private String protocol;
         private boolean installSampleContent = true;
@@ -522,6 +554,7 @@ public class Configuration {
          */
         public GlobalArgs() {
             this.publishers = new HashMap<>();
+            this.metrics = new LinkedHashMap<>();
             this.port = DEFAULT_PORT;
             this.user = DEFAULT_USER;
             this.password = DEFAULT_PASSWORD;
@@ -578,6 +611,13 @@ public class Configuration {
             return finalDuration;
         }
 
+        public void addMetric(Metric metric) {
+            if (metrics.containsKey(metric.getName())) {
+                LOGGER.warn("A metric with this name was already added. Only the last one is taken into consideration.");
+            }
+            metrics.put(metric.getName(), metric);
+        }
+
         public void addPublisher(Publisher publisher) {
             if (publishers.containsKey(publisher.getName())) {
                 throw new IllegalStateException("There is already a publisher named \"" + publisher.getName() + "\"." +
@@ -593,14 +633,30 @@ public class Configuration {
             return publishers.get(publisherName);
         }
 
+        public Metric getMetric(String metricName) {
+            if (!metrics.containsKey(metricName)) {
+                throw new IllegalStateException("Could not find a metric with the name \"" + metricName + "\" to configure it.");
+            }
+            return metrics.get(metricName);
+        }
+
         public boolean containsPublisher(String publisherName) {
             return publishers.containsKey(publisherName);
         }
+
+        public boolean containsMetric(String metricName) { return metrics.containsKey(metricName); }
 
         public void removePublisher(String publisherName) {
             Publisher publisher = publishers.remove(publisherName);
             if (publisher == null) {
                 throw new IllegalStateException("Could not exclude publisher \"" + publisherName + "\", because there was no publisher configured with that name");
+            }
+        }
+
+        public void removeMetric(String metricName) {
+            Metric metric = metrics.remove(metricName);
+            if (metric == null) {
+                throw new IllegalStateException("Could not exclude metric \"" + metricName + "\", because there was no metric configured with that name");
             }
         }
 
@@ -614,9 +670,27 @@ public class Configuration {
             this.duration = parseDurationToSeconds(durationString);
         }
 
+        /**
+         * Returns a list with all the metrics that are going to be published.
+         * @return
+         */
+        public Collection<Metric> getMetrics() {
+
+            Collection<Metric> requiredMetrics = new ArrayList<>();
+
+            //add mandatory metrics
+            requiredMetrics.add(new Name());
+            requiredMetrics.add(new Timestamp());
+
+            requiredMetrics.addAll(metrics.values());
+            return requiredMetrics;
+        }
+
         public Collection<Publisher> getPublishers() {
             return publishers.values();
         }
+
+        // Adders and getters
 
         @ConfigArgGet
         public long getTimeout() {
@@ -633,9 +707,6 @@ public class Configuration {
         public String getHost() {
             return host;
         }
-
-
-        // Adders and getters
 
         @ConfigArgSet(required = true, desc = "The host name/ip which will be targeted", order = 1)
         public void setHost(String host) {

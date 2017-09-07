@@ -36,6 +36,12 @@ public class YamlConfiguration {
         }
     }
 
+    public void setMetrics(List<YamlAction> metrics) {
+        for(YamlAction yamlAction : metrics) {
+            yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
+        }
+    }
+
     public void setExtensions(List<YamlAction> extensions) {
         for (YamlAction yamlAction : extensions) {
             yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());

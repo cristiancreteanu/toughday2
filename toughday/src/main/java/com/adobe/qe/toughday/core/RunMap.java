@@ -47,6 +47,10 @@ public class RunMap {
         return runMap.get(test);
     }
 
+    public Set<AbstractTest> getTests() {
+        return runMap.keySet();
+    }
+
     public void recordRun (AbstractTest test, double duration) {
         TestEntry entry = runMap.get(test);
         if(entry != null) {
@@ -89,10 +93,6 @@ public class RunMap {
         for (TestEntry entry : runMap.values()) {
             entry.reinitStartTime();
         }
-    }
-
-    public Collection<? extends TestStatistics> getTestStatistics() {
-        return keepTestsOrdered ? orderedTests : runMap.values();
     }
 
     public RunMap newInstance() {
@@ -152,12 +152,6 @@ public class RunMap {
         long getFailRuns();
 
         long getSkippedRuns();
-
-        long get90Percentile();
-
-        long get99Percentile();
-
-        long get999Percentile();
 
         long getValueAtPercentile(double percentile);
 
@@ -296,22 +290,6 @@ public class RunMap {
             return skippedRuns;
         }
 
-        @Override
-        public long get90Percentile() {
-            return histogram.getValueAtPercentile(90);
-        }
-
-        @Override
-        public long get99Percentile() {
-            return histogram.getValueAtPercentile(99);
-        }
-
-        @Override
-        public long get999Percentile() {
-            return histogram.getValueAtPercentile(99.9);
-        }
-
-        @Override
         public long getValueAtPercentile(double percentile) {
             return histogram.getValueAtPercentile(percentile);
         }

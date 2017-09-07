@@ -8,6 +8,7 @@ import com.adobe.qe.toughday.core.config.*;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -27,8 +28,8 @@ public class CliParser implements ConfigurationParser {
     private static final String HELP_HEADER_FORMAT_NO_TAGS = "   %-40s   %s";
     private static final String TEST_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Class", "Tags", "Description");
     private static final String PUBLISH_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_NO_TAGS, "Class", "Description");
+    private static final String METRIC_CLASS_HELP_HEADER = PUBLISH_CLASS_HELP_HEADER;
     private static final String SUITE_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Suite", "Tags", "Description");
-
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
@@ -40,6 +41,7 @@ public class CliParser implements ConfigurationParser {
                 add("help_full");
                 add("help_tests");
                 add("help_publish");
+                add("help_metrics");
             }});
 
     public static final List<String> helpOptionsParameters = Collections.unmodifiableList(
@@ -249,9 +251,30 @@ public class CliParser implements ConfigurationParser {
         }
     }
 
+    public static void printMetricClasses() {
+        final String basicMetrics = "Name, Timestamp, Passed, Failed, Skipped";
+        final String defaultMetrics = basicMetrics + ", Average, Median, StdDev, 90p, 99p, 99.9p, Min, Max";
+
+        System.out.println();
+        System.out.println("Available metric classes:");
+        System.out.println(METRIC_CLASS_HELP_HEADER);
+
+        for (Class<? extends Metric> metricClass : ReflectionsContainer.getInstance().getMetricClasses().values()) {
+            printClass(metricClass, false, false, false);
+        }
+
+        System.out.println();
+
+        System.out.println("Available metric categories:");
+        System.out.println(String.format(" - %-40s - %s", "BASICMetrics", basicMetrics));
+        System.out.println(String.format(" - %-40s - %s", "DEFAULTMetrics", defaultMetrics));
+
+    }
+
     public static void printExtraHelp() {
         printTestClasses(new AllowAllFilter());
         printPublisherClasses();
+        printMetricClasses();
     }
 
     public boolean printHelp(String[] cmdLineArgs) {
@@ -268,6 +291,9 @@ public class CliParser implements ConfigurationParser {
         } else if (cmdLineArgs[0].equals("--help_publish")) {
             printPublisherClasses();
             return true;
+        } else if (cmdLineArgs[0].equals("--help_metrics")) {
+            printMetricClasses();
+            return true;
         } else if ( (cmdLineArgs[0].equals("--help") && cmdLineArgs.length > 1 )) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
                 Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
@@ -277,6 +303,9 @@ public class CliParser implements ConfigurationParser {
                 Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
                 System.out.println(PUBLISH_CLASS_HELP_HEADER);
                 printClass(publisherClass, true, false, false);
+            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(cmdLineArgs[1])) {
+                Class<? extends Metric> metricClass = ReflectionsContainer.getInstance().getMetricClasses().get(cmdLineArgs[1]);
+                printClass(metricClass, true, false, false);
             } else if (cmdLineArgs[1].startsWith("--suite=")) {
                 System.out.println(SUITE_HELP_HEADER);
                 printTestSuite(new PredefinedSuites(), cmdLineArgs[1].split("=")[1], true, true);
@@ -342,6 +371,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("\t java -jar toughday.jar --host=localhost --port=4502");
         System.out.println("\t java -jar toughday.jar --runmode type=normal concurrency=20 --host=localhost --port=4502");
         System.out.println("\t java -jar toughday.jar --host=localhost --add extension.jar --add extensionTest");
+        System.out.println("\t java -jar toughday.jar --suite=toughday --add BASICMetrics --add Average decimals=3 --exclude Failed");
 
         System.out.println("\r\nGlobal arguments:");
 
