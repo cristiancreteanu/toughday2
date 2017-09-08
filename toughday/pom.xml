@@ -158,6 +158,17 @@
         </extensions>
     </build>
     <dependencies>
+        <!-- Force third-party libraries to use slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.25</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>1.7.25</version>
+        </dependency>
         <!-- Get slf4j from it-framework to log to log4j -->
         <dependency>
             <groupId>org.slf4j</groupId>

@@ -59,6 +59,9 @@ public class Configuration {
             }
         }
 
+        if (extensionList.isEmpty()) {
+            return;
+        }
         // look for extension jar files that should be excluded.
         /*for (String itemToExclude : itemsToExcludeCopy) {
             if (itemToExclude.endsWith(".jar")) {
