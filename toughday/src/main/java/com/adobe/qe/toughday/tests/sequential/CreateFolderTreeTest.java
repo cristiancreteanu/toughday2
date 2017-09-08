@@ -5,7 +5,6 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
-import junit.framework.Assert;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
@@ -19,8 +18,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 public class CreateFolderTreeTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 
-    private static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
-    private static final String UNSTRUCTURED_RESOURCE_TYPE = "nt:unstructured";
+    public static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
     public static final String DEFAULT_TITLE = "toughday";
 
@@ -29,6 +27,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String title = DEFAULT_TITLE;
+    private String resourceType = FOLDER_RESOURCE_TYPE;
 
     private int nextChild;
 
@@ -42,10 +41,11 @@ public class CreateFolderTreeTest extends SequentialTestBase {
 
     }
 
-    protected CreateFolderTreeTest(TreePhaser phaser, String parentPath, String title) {
+    protected CreateFolderTreeTest(TreePhaser phaser, String parentPath, String title, String resourceType) {
         this.phaser = phaser;
         this.rootParentPath = parentPath;
         this.title = title;
+        this.resourceType = resourceType;
     }
 
     @Setup
@@ -117,16 +117,15 @@ public class CreateFolderTreeTest extends SequentialTestBase {
     private void createFolder(String nodeName, String parentPath) throws Exception {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter(":name", nodeName)
-                .addParameter("./jcr:content/jcr:title", nodeName)
-                .addParameter("./jcr:primaryType", FOLDER_RESOURCE_TYPE)
-                .addParameter("./jcr:content/jcr:primaryType", UNSTRUCTURED_RESOURCE_TYPE);
+                .addParameter("./jcr:primaryType", resourceType);
+
         getDefaultClient().doPost(parentPath, feb.build(), HttpStatus.SC_CREATED);
     }
 
 
     @Override
     public AbstractTest newInstance() {
-        return new CreateFolderTreeTest(phaser, rootParentPath, title);
+        return new CreateFolderTreeTest(phaser, rootParentPath, title, resourceType);
     }
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_TITLE,
@@ -163,4 +162,16 @@ public class CreateFolderTreeTest extends SequentialTestBase {
     public int getBase() {
         return this.phaser.getBase();
     }
+
+    @ConfigArgSet(required = false, desc = "Reasource type for folders.", defaultValue = FOLDER_RESOURCE_TYPE)
+    public AbstractTest setResourceType(String resourceType){
+        this.resourceType = resourceType;
+        return this;
+    }
+
+    @ConfigArgGet
+    public String getResourceType() {
+        return this.resourceType;
+    }
+
 }

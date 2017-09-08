@@ -7,9 +7,11 @@ import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
@@ -38,6 +40,7 @@ public class CreateUserTest extends SequentialTestBase {
     public static final String DEFAULT_GENDER = "male";
     public static final String DEFAULT_STATE = "California";
     public static final String DEFAULT_ABOUT_ME = "Stress testing and performance benchmarking.";
+    public static final String DEFAULT_PATH_TO_ADD_USERS = "/home/users";
 
     private String id;
     private String title;
@@ -55,6 +58,7 @@ public class CreateUserTest extends SequentialTestBase {
     private String state = DEFAULT_STATE;
     private String gender = DEFAULT_GENDER;
     private String aboutMe = DEFAULT_ABOUT_ME;
+    private String pathToAddUsers = DEFAULT_PATH_TO_ADD_USERS;
     private List<String> groups = new ArrayList<>();
     private AtomicInteger increment;
     private boolean incrementGender = true;
@@ -95,6 +99,8 @@ public class CreateUserTest extends SequentialTestBase {
             emailAddress = tmp[0] + incrementValue + "@" + tmp[1];
         }
 
+        String currentPathToAddUsers = StringUtils.stripEnd(getCommunication("parentPath", pathToAddUsers), "/");
+
         //Create user
         FormEntityBuilder entityBuilder = FormEntityBuilder.create()
             .addParameter("authorizableId", id)
@@ -114,11 +120,11 @@ public class CreateUserTest extends SequentialTestBase {
             .addParameter("./profile/gender", gender)
             .addParameter("./profile/aboutMe", aboutMe)
             .addParameter("_charset_", "utf-8")
+            .addParameter("intermediatePath",currentPathToAddUsers)
             .addParameter("createUser", "1");
 
         try {
             LOG.debug("{}: Trying to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
-
             getDefaultClient().doPost("/libs/granite/security/post/authorizables.html", entityBuilder.build(), HttpStatus.SC_CREATED);
         } catch (Throwable e) {
             LOG.warn("{}: Failed to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
@@ -160,6 +166,17 @@ public class CreateUserTest extends SequentialTestBase {
         }
 
         LOG.debug("{}: Successfully added user={}, to group ={}", Thread.currentThread().getName(), user, group);
+    }
+
+    @ConfigArgSet(required = false, desc = "Path where the users are created.", defaultValue = DEFAULT_PATH_TO_ADD_USERS)
+    public CreateUserTest setPathToAddUsers(String pathToAddUsers) {
+        this.pathToAddUsers = pathToAddUsers;
+        return this;
+    }
+
+    @ConfigArgGet
+    public String getPathToAddUsers() {
+        return pathToAddUsers;
     }
 
     @ConfigArgSet(required = false, desc = "Email address for created users.", defaultValue = DEFAULT_EMAIL_ADDRESS)
@@ -376,6 +393,7 @@ public class CreateUserTest extends SequentialTestBase {
                 .setEmailAddress(emailAddress)
                 .setAboutMe(aboutMe)
                 .setGender(gender)
+                .setPathToAddUsers(pathToAddUsers)
                 .setIncrementGender(incrementGender);
     }
 
