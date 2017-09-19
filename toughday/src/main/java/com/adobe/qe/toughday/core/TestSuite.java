@@ -163,6 +163,19 @@ public class TestSuite {
     }
 
     /**
+     * Method for replacing the name of a test inside the suite.
+     * @param abstractTest
+     * @param newTestName
+     * @return
+     */
+    public TestSuite replaceName(AbstractTest abstractTest, String newTestName) {
+        int weight = weightMap.remove(abstractTest);
+        abstractTest.setName(newTestName);
+        weightMap.put(abstractTest, weight);
+        return this;
+    }
+
+    /**
      * Getter for the setup step.
      * @return a SetupStep object if configured, null otherwise.
      */

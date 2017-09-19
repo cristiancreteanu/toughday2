@@ -257,22 +257,33 @@ public class Configuration {
         for (ConfigParams.NamedMetaObject itemMeta : configParams.getItemsToConfig()) {
             if (suite.contains(itemMeta.getName())) {
                 AbstractTest testObject = suite.getTest(itemMeta.getName());
+                if ( itemMeta.getParameters().containsKey("name")) {
+                    suite.replaceName(testObject, itemMeta.getParameters().remove("name"));
+                }
                 setObjectProperties(testObject, itemMeta.getParameters());
                 if (itemMeta.getParameters().containsKey("weight")) {
-                    suite.replaceWeight(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("weight")));
+                    suite.replaceWeight(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("weight")));
                 }
                 if (itemMeta.getParameters().containsKey("timeout")) {
-                    suite.replaceTimeout(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("timeout")));
+                    suite.replaceTimeout(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("timeout")));
                 }
                 if (itemMeta.getParameters().containsKey("count")) {
-                    suite.replaceCount(itemMeta.getName(), Integer.parseInt(itemMeta.getParameters().remove("count")));
+                    suite.replaceCount(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("count")));
                 }
             } else if (globalArgs.containsPublisher(itemMeta.getName())) {
                 Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
+                String name = publisherObject.getName();
                 setObjectProperties(publisherObject, itemMeta.getParameters());
+                if (!name.equals(publisherObject.getName())) {
+                    this.getGlobalArgs().updatePublisherName(name, publisherObject.getName());
+                }
             } else if (globalArgs.containsMetric(itemMeta.getName())) {
                 Metric metricObject = globalArgs.getMetric(itemMeta.getName());
+                String name = metricObject.getName();
                 setObjectProperties(metricObject, itemMeta.getParameters());
+                if (!name.equals(metricObject.getName())) {
+                    this.getGlobalArgs().updateMetricName(name, metricObject.getName());
+                }
             } else {
                 throw new IllegalStateException("No test/publisher/metric found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
             }
@@ -612,6 +623,14 @@ public class Configuration {
                 // everything else, like whitespaces is ignored
             }
             return finalDuration;
+        }
+
+        private void updatePublisherName(String oldName, String newName) {
+            publishers.put(newName, publishers.remove(oldName));
+        }
+
+        private void updateMetricName(String oldName, String newName) {
+            metrics.put(newName, metrics.remove(oldName));
         }
 
         public void addMetric(Metric metric) {
