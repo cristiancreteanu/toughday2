@@ -10,14 +10,13 @@ import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import sun.rmi.runtime.Log;
 
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Description(desc = "Generates a constant load of test executions, regardless of their execution time.")
 public class ConstantLoad implements RunMode {
@@ -25,11 +24,12 @@ public class ConstantLoad implements RunMode {
 
     private static final String DEFAULT_LOAD_STRING = "50";
     private static final int DEFAULT_LOAD = Integer.parseInt(DEFAULT_LOAD_STRING);
+    private AtomicBoolean loggedWarning = new AtomicBoolean(false);
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
     private Collection<AsyncTestWorker> testWorkers = Collections.synchronizedSet(new HashSet<AsyncTestWorker>());
     private AsyncTestWorkerScheduler scheduler;
-    private ArrayList<RunMap> runMaps;
+    private final List<RunMap> runMaps = new ArrayList<>();
     private int load = DEFAULT_LOAD;
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
@@ -39,15 +39,18 @@ public class ConstantLoad implements RunMode {
     public int getLoad() { return this.load; }
 
     @Override
-    public RunContext runTests(Engine engine) throws Exception {
-        runMaps = new ArrayList<>(load);
+    public void runTests(Engine engine) throws Exception {
         for(int i = 0; i < load; i++) {
-            runMaps.add(engine.getGlobalRunMap().newInstance());
+            synchronized (runMaps) {
+                runMaps.add(engine.getGlobalRunMap().newInstance());
+            }
         }
 
         this.scheduler = new AsyncTestWorkerScheduler(engine);
         executorService.execute(scheduler);
+    }
 
+    public RunContext getRunContext() {
         return new RunContext() {
             @Override
             public Collection<AsyncTestWorker> getTestWorkers() {
@@ -126,15 +129,20 @@ public class ConstantLoad implements RunMode {
                         nextRound.add(nextTest.clone());
                     }
 
-                    try {
-                        for (int i = 0; i < load; i++) {
-                            AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
+
+                    for (int i = 0; i < load; i++) {
+                        AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
+                        try {
                             executorService.execute(worker);
+                        } catch (OutOfMemoryError e) {
+                            if (!loggedWarning.getAndSet(true)) {
+                                LOG.warn("The desired load could not be achieved. We are creating as many threads as possible.");
+                            }
+                            break;
+                        }
+                        synchronized (testWorkers) {
                             testWorkers.add(worker);
                         }
-                    } catch (OutOfMemoryError e) {
-                        LOG.error("The desired load could not be achieved. We could not create enough threads.");
-                        finishExecution();
                     }
 
                     //TODO use this

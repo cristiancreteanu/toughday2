@@ -9,9 +9,10 @@ import java.util.concurrent.ExecutorService;
  * Created by tuicu on 15/03/17.
  */
 public interface RunMode {
-    RunContext runTests(Engine engine) throws Exception;
+    void runTests(Engine engine) throws Exception;
     void finishExecution();
     ExecutorService getExecutorService();
+    RunContext getRunContext();
 
     interface RunContext {
         Collection<AsyncTestWorker> getTestWorkers();

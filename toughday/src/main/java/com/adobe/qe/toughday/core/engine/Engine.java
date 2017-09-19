@@ -309,15 +309,16 @@ public class Engine {
 
         publishMode.getGlobalRunMap().reinitStartTimes();
 
-        RunMode.RunContext context = runMode.runTests(this);
-
         // Create the result aggregator thread
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, context);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, runMode.getRunContext());
         engineExecutorService.execute(resultAggregator);
 
-        // create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), context, Thread.currentThread());
+        // Create the timeout checker thread
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), runMode.getRunContext(), Thread.currentThread());
         engineExecutorService.execute(timeoutChecker);
+
+        runMode.runTests(this);
+
         // This thread sleeps until the duration
         try {
             Thread.sleep(globalArgs.getDuration() * 1000L);

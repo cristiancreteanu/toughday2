@@ -6,6 +6,8 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.config.Configuration;
 import com.adobe.qe.toughday.core.engine.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
@@ -14,6 +16,8 @@ import java.util.concurrent.Executors;
 @Description(desc = "Runs tests normally.")
 public class Normal implements RunMode {
 
+    private static final Logger LOG = LoggerFactory.getLogger(Normal.class);
+
     public static final String DEFAULT_CONCURRENCY_STRING = "200";
     public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
 
@@ -21,8 +25,8 @@ public class Normal implements RunMode {
     public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
 
     private ExecutorService testsExecutorService;
-    private List<AsyncTestWorker> testWorkers = new ArrayList<>();
-    private List<RunMap> runMaps = new ArrayList<RunMap>();
+    private final List<AsyncTestWorker> testWorkers = new ArrayList<>();
+    private final List<RunMap> runMaps = new ArrayList<>();
 
     private int concurrency = DEFAULT_CONCURRENCY;
     private long waitTime = DEFAULT_WAIT_TIME;
@@ -49,7 +53,7 @@ public class Normal implements RunMode {
     }
 
     @Override
-    public RunContext runTests(Engine engine) throws Exception {
+    public void runTests(Engine engine) throws Exception {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         Configuration.GlobalArgs globalArgs = configuration.getGlobalArgs();
@@ -58,11 +62,22 @@ public class Normal implements RunMode {
         // Create the test worker threads
         for (int i = 0; i < concurrency; i++) {
             AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
-            testWorkers.add(testWorker);
-            runMaps.add(testWorker.getLocalRunMap());
-            testsExecutorService.execute(testWorker);
+            try {
+                testsExecutorService.execute(testWorker);
+            } catch (OutOfMemoryError e) {
+                LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(i - 1) + ".");
+                break;
+            }
+            synchronized (testWorkers) {
+                testWorkers.add(testWorker);
+            }
+            synchronized (runMaps) {
+                runMaps.add(testWorker.getLocalRunMap());
+            }
         }
+    }
 
+    public RunContext getRunContext() {
         return new RunContext() {
             @Override
             public Collection<AsyncTestWorker> getTestWorkers() {
