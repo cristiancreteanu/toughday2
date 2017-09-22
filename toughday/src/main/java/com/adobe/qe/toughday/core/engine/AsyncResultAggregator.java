@@ -65,7 +65,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
     public Map<String, List<MetricResult>> filterResults() {
         Map<String, List<MetricResult>> results = new LinkedHashMap<>();
         RunMap runMap = engine.getGlobalRunMap();
-        Set<AbstractTest> tests = runMap.getTests();
+        Collection<AbstractTest> tests = runMap.getTests();
         for (AbstractTest testInstance : tests) {
             List<MetricResult> metricResults = new ArrayList<>();
             for (Metric metric : engine.getGlobalArgs().getMetrics()) {

@@ -16,6 +16,7 @@ public class TestSuite {
     private HashMap<AbstractTest, Long> counterMap;
     private String description = "";
     private List<String> tags = new ArrayList<>();
+    private List<AbstractTest> orderedTests;
 
 
     /**
@@ -94,6 +95,7 @@ public class TestSuite {
         timeoutMap = new HashMap<>();
         counterMap = new HashMap<>();
         setupStep = new ArrayList<>();
+        orderedTests = new ArrayList<>();
     }
 
     /**
@@ -104,6 +106,7 @@ public class TestSuite {
      */
     public TestSuite add(AbstractTest test, int weight) {
         weightMap.put(test, weight);
+        orderedTests.add(test);
         return this;
     }
 
@@ -184,6 +187,7 @@ public class TestSuite {
         this.timeoutMap.putAll(testSuite.timeoutMap);
         this.counterMap.putAll(testSuite.counterMap);
         this.setupStep.addAll(testSuite.setupStep);
+        this.orderedTests.addAll(testSuite.orderedTests);
         return this;
     }
 
@@ -341,8 +345,8 @@ public class TestSuite {
     /**
      * Getter for the test set.
      */
-    public Set<AbstractTest> getTests() {
-        return weightMap.keySet();
+    public Collection<AbstractTest> getTests() {
+        return orderedTests;
     }
 
     /**
@@ -359,7 +363,9 @@ public class TestSuite {
      * @param testName
      */
     public void remove(String testName) {
-        weightMap.remove(weightMap.getTest(testName));
+        AbstractTest test = weightMap.getTest(testName);
+        orderedTests.remove(test);
+        weightMap.remove(test);
     }
 
     /**
@@ -368,6 +374,7 @@ public class TestSuite {
      */
     public void remove(AbstractTest test) {
         weightMap.remove(test);
+        orderedTests.remove(test);
     }
 
     /**

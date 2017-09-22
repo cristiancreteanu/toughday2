@@ -18,7 +18,7 @@ public class RunMap {
         a future run mode would require it.
      */
     private Map<AbstractTest, TestEntry> runMap;
-    private List<TestEntry> orderedTests;
+    private List<AbstractTest> orderedTests;
     private boolean keepTestsOrdered = false;
 
     public RunMap () {
@@ -39,16 +39,21 @@ public class RunMap {
         TestEntry entry = new TestEntry(test);
         runMap.put(test, entry);
         if(keepTestsOrdered) {
-            orderedTests.add(entry);
+            orderedTests.add(test);
         }
     }
 
     public TestEntry getRecord(AbstractTest test) {
         return runMap.get(test);
     }
-
-    public Set<AbstractTest> getTests() {
-        return runMap.keySet();
+    
+    /**
+     * Returns a list that contains all tests(including the child tests of a composite test) in the exact order in which they were
+     * added to the suite.
+     * @return
+     */
+    public Collection<AbstractTest> getTests() {
+        return orderedTests;
     }
 
     public void recordRun (AbstractTest test, double duration) {
