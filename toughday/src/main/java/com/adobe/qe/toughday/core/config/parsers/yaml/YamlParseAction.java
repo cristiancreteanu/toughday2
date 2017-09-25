@@ -8,10 +8,10 @@ import java.util.Map;
 /**
  * Created by tuicu on 27/12/16.
  */
-public class YamlAction {
+public class YamlParseAction {
     private Actions action;
     private String identifier;
-    private Map<String, String> testMetaInfo = new HashMap<>();
+    private Map<String, Object> testMetaInfo = new HashMap<>();
 
     public void setAdd(String identifier) {
         this.action = Actions.ADD;
@@ -28,7 +28,7 @@ public class YamlAction {
         this.identifier = identifier;
     }
 
-    public void setProperties(Map<String, String> testMetaInfo) {
+    public void setProperties(Map<String, Object> testMetaInfo) {
         this.testMetaInfo = testMetaInfo;
     }
 
@@ -40,7 +40,7 @@ public class YamlAction {
         return identifier;
     }
 
-    public Map<String, String> getProperties() {
+    public Map<String, Object> getProperties() {
         return testMetaInfo;
     }
 

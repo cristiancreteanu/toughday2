@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Name;
 import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.config.*;
+import com.adobe.qe.toughday.core.config.parsers.yaml.GenerateYamlConfiguration;
 import com.adobe.qe.toughday.core.engine.Engine;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.core.engine.PublishMode;
@@ -33,7 +34,7 @@ public class CliParser implements ConfigurationParser {
     private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
-    public final static List<String> parserArgs = new ArrayList<>();
+    public final static List<Object> parserArgs = new ArrayList<>();
 
     public static final List<String> availableHelpOptions = Collections.unmodifiableList(
             new ArrayList<String>() {{
@@ -75,6 +76,21 @@ public class CliParser implements ConfigurationParser {
                 }
             }
         }
+    }
+
+    private static Object getObjectFromString(String string) {
+
+        String integerRegex = "\\d+";
+        String floatRegex = "\\d+.+\\d";
+
+        if (string.matches(integerRegex)) {
+            return Integer.valueOf(string);
+        } else if (string.matches(floatRegex)) {
+            return Float.valueOf(string);
+        } else {
+            return string;
+        }
+
     }
 
     interface TestFilter {
@@ -134,9 +150,11 @@ public class CliParser implements ConfigurationParser {
      * @param propertyAndValue string that contains both the property name and the property value separated by "="
      * @param args map in which the parsed property should be put
      */
-    private void parseAndAddProperty(String propertyAndValue, HashMap<String, String> args) {
+    private void parseAndAddProperty(String propertyAndValue, HashMap<String, Object> args) {
         String[] res = parseProperty(propertyAndValue);
-        args.put(res[0], res[1]);
+        String propertyValueAsString = res[1];
+        Object propertyValue = getObjectFromString(propertyValueAsString);
+        args.put(res[0], propertyValue);
     }
 
     private String[] parseProperty(String propertyAndValue) {
@@ -155,8 +173,8 @@ public class CliParser implements ConfigurationParser {
         return new String[] {prop, val};
     }
 
-    private HashMap<String, String> parseObjectProperties(int startIndex, String[] cmdLineArgs) {
-        HashMap<String, String> args = new HashMap<>();
+    private HashMap<String, Object> parseObjectProperties(int startIndex, String[] cmdLineArgs) {
+        HashMap<String, Object> args = new HashMap<>();
         for (int j = startIndex; j < cmdLineArgs.length && !cmdLineArgs[j].startsWith("--"); j++) {
             parseAndAddProperty(cmdLineArgs[j], args);
         }
@@ -170,7 +188,7 @@ public class CliParser implements ConfigurationParser {
      * @return a populated ConfigParams object
      */
     public ConfigParams parse(String[] cmdLineArgs) {
-        HashMap<String, String> globalArgs = new HashMap<>();
+        HashMap<String, Object> globalArgs = new HashMap<>();
         ConfigParams configParams = new ConfigParams();
 
         // action parameters
@@ -180,7 +198,7 @@ public class CliParser implements ConfigurationParser {
                 if(Actions.isAction(arg)) {
                     Actions action = Actions.fromString(arg);
                     String identifier = cmdLineArgs[i + 1];
-                    HashMap<String, String> args = parseObjectProperties(i+2, cmdLineArgs);
+                    HashMap<String, Object> args = parseObjectProperties(i+2, cmdLineArgs);
                     action.apply(configParams, identifier, args);
                 } else if (arg.equals("publishmode")) {
                     configParams.setPublishModeParams(parseObjectProperties(i+1, cmdLineArgs));
@@ -189,7 +207,7 @@ public class CliParser implements ConfigurationParser {
                 } else {
                     String[] res = parseProperty(arg);
                     String key = res[0];
-                    String val = res[1];
+                    Object val = getObjectFromString(res[1]);
                     // if global param does not exist
                     boolean found = false;
                     for (Map<String, ConfigArgSet> args : availableGlobalArgs.values()) {

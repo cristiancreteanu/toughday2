@@ -12,38 +12,38 @@ public class YamlConfiguration {
 
     private ConfigParams configParams = new ConfigParams();
 
-    public void setGlobals(Map<String, String> globals) {
+    public void setGlobals(Map<String, Object> globals) {
         this.configParams.setGlobalParams(globals);
     }
 
-    public void setPublishmode(Map<String, String> publishModeProperties) {
+    public void setPublishmode(Map<String, Object> publishModeProperties) {
         configParams.setPublishModeParams(publishModeProperties);
     }
 
-    public void setRunmode(Map<String, String> runmode) {
+    public void setRunmode(Map<String, Object> runmode) {
         configParams.setRunModeParams(runmode);
     }
 
-    public void setTests(List<YamlAction> tests) {
-        for(YamlAction yamlAction : tests) {
-            yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
+    public void setTests(List<YamlParseAction> tests) {
+        for(YamlParseAction yamlParseAction : tests) {
+            yamlParseAction.getAction().apply(configParams, yamlParseAction.getIdentifier(), yamlParseAction.getProperties());
         }
     }
 
-    public void setPublishers(List<YamlAction> publishers) {
-        for(YamlAction yamlAction : publishers) {
-            yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
+    public void setPublishers(List<YamlParseAction> publishers) {
+        for(YamlParseAction yamlParseAction : publishers) {
+            yamlParseAction.getAction().apply(configParams, yamlParseAction.getIdentifier(), yamlParseAction.getProperties());
         }
     }
 
-    public void setMetrics(List<YamlAction> metrics) {
-        for(YamlAction yamlAction : metrics) {
-            yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
+    public void setMetrics(List<YamlParseAction> metrics) {
+        for (YamlParseAction yamlParseAction : metrics) {
+            yamlParseAction.getAction().apply(configParams, yamlParseAction.getIdentifier(), yamlParseAction.getProperties());
         }
     }
 
-    public void setExtensions(List<YamlAction> extensions) {
-        for (YamlAction yamlAction : extensions) {
+    public void setExtensions(List<YamlParseAction> extensions) {
+        for (YamlParseAction yamlAction : extensions) {
             yamlAction.getAction().apply(configParams, yamlAction.getIdentifier(), yamlAction.getProperties());
         }
     }

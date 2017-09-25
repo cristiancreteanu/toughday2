@@ -7,7 +7,7 @@ import java.util.Map;
  */
 public interface ConfigAction {
     String value();
-    void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo);
+    void apply(ConfigParams configParams, String identifier, Map<String, Object> metaInfo);
     String actionParams();
     String actionDescription();
 }

@@ -15,7 +15,7 @@ public enum Actions implements ConfigAction {
         }
 
         @Override
-        public void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo) {
+        public void apply(ConfigParams configParams, String identifier, Map<String, Object> metaInfo) {
             configParams.addItem(identifier, metaInfo);
         }
 
@@ -36,7 +36,7 @@ public enum Actions implements ConfigAction {
         }
 
         @Override
-        public void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo) {
+        public void apply(ConfigParams configParams, String identifier, Map<String, Object> metaInfo) {
             configParams.configItem(identifier, metaInfo);
         }
 
@@ -57,7 +57,7 @@ public enum Actions implements ConfigAction {
         }
 
         @Override
-        public void apply(ConfigParams configParams, String identifier, Map<String, String> metaInfo) {
+        public void apply(ConfigParams configParams, String identifier, Map<String, Object> metaInfo) {
             if (metaInfo != null && metaInfo.size() != 0) {
                 throw new IllegalArgumentException("--exclude cannot have properties for identifier: " + identifier);
             }

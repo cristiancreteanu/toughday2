@@ -6,10 +6,12 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.ReflectionsContainer;
 import com.adobe.qe.toughday.core.TestSuite;
 import com.adobe.qe.toughday.core.config.parsers.cli.CliParser;
+import com.adobe.qe.toughday.core.config.parsers.yaml.GenerateYamlConfiguration;
 import com.adobe.qe.toughday.core.config.parsers.yaml.YamlParser;
 import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.core.engine.RunMode;
 import com.adobe.qe.toughday.metrics.*;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;
@@ -164,11 +166,13 @@ public class Configuration {
     public Configuration(String[] cmdLineArgs)
             throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
+        ConfigParams copyOfConfigParams = ConfigParams.deepClone(configParams);
+        Map<String, Class> items = new HashMap<>();
 
         // we should load extensions before any configuration object is created.
         handleExtensions(configParams);
 
-        Map<String, String> globalArgsMeta = configParams.getGlobalParams();
+        Map<String, Object> globalArgsMeta = configParams.getGlobalParams();
         for (String helpOption : CliParser.availableHelpOptions) {
            if (globalArgsMeta.containsKey(helpOption)) {
                return;
@@ -182,20 +186,23 @@ public class Configuration {
         this.publishMode = getPublishMode(configParams);
         suite = getTestSuite(globalArgsMeta);
 
+        for (AbstractTest abstractTest : suite.getTests()) {
+            items.put(abstractTest.getName(), abstractTest.getClass());
+        }
+
         // add tests,publishers and metrics
         for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
-                AbstractTest test = createObject(
-                        ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()),
-                        itemToAdd.getParameters());
+                AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()), itemToAdd.getParameters());
+                items.put(test.getName(), test.getClass());
 
                 // defaults
                 int weight = (itemToAdd.getParameters().containsKey("weight"))
-                        ? Integer.parseInt(itemToAdd.getParameters().remove("weight")) : 1;
+                        ? (Integer) (itemToAdd.getParameters().remove("weight")) : 1;
                 long timeout = (itemToAdd.getParameters().containsKey("timeout"))
-                        ? Integer.parseInt(itemToAdd.getParameters().remove("timeout")) : -1;
+                        ? (Integer) (itemToAdd.getParameters().remove("timeout")) : -1;
                 long counter = (itemToAdd.getParameters().containsKey("count"))
-                        ? Integer.parseInt(itemToAdd.getParameters().remove("count")) : -1;
+                        ? (Integer) (itemToAdd.getParameters().remove("count")) : -1;
 
                 suite.add(test, weight, timeout, counter);
                 checkInvalidArgs(itemToAdd.getParameters());
@@ -203,6 +210,7 @@ public class Configuration {
                 Publisher publisher = createObject(
                         ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
+                items.put(publisher.getName(), publisher.getClass());
 
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addPublisher(publisher);
@@ -210,6 +218,7 @@ public class Configuration {
 
                 Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
+                items.put(metric.getName(), metric.getClass());
 
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addMetric(metric);
@@ -217,11 +226,13 @@ public class Configuration {
                 Collection<Metric> basicMetrics = Metric.basicMetrics;
                 for (Metric metric : basicMetrics) {
                     this.globalArgs.addMetric(metric);
+                    items.put(metric.getName(), metric.getClass());
                 }
             } else if (itemToAdd.getClassName().equals("DEFAULTMetrics")) {
                 Collection<Metric> defaultMetrics = Metric.defaultMetrics;
                 for (Metric metric : defaultMetrics) {
                     this.globalArgs.addMetric(metric);
+                    items.put(metric.getName(), metric.getClass());
                 }
             } else {
                 throw new IllegalArgumentException("Unknown publisher, test or metric class: " + itemToAdd.getClassName());
@@ -230,9 +241,9 @@ public class Configuration {
 
         // Add default publishers if none is specified
         if (globalArgs.getPublishers().size() == 0) {
-            Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, String>());
+            Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, Object>());
             this.globalArgs.addPublisher(publisher);
-            publisher = createObject(CSVPublisher.class, new HashMap<String, String>() {{
+            publisher = createObject(CSVPublisher.class, new HashMap<String, Object>() {{
                 put("append", "true");
             }});
             this.globalArgs.addPublisher(publisher);
@@ -258,18 +269,20 @@ public class Configuration {
             if (suite.contains(itemMeta.getName())) {
                 AbstractTest testObject = suite.getTest(itemMeta.getName());
                 if ( itemMeta.getParameters().containsKey("name")) {
-                    suite.replaceName(testObject, itemMeta.getParameters().remove("name"));
+                    suite.replaceName(testObject, String.valueOf(itemMeta.getParameters().remove("name")));
                 }
                 setObjectProperties(testObject, itemMeta.getParameters());
+                items.put(testObject.getName(), testObject.getClass());
                 if (itemMeta.getParameters().containsKey("weight")) {
-                    suite.replaceWeight(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("weight")));
+                    suite.replaceWeight(testObject.getName(), (Integer) (itemMeta.getParameters().remove("weight")));
                 }
                 if (itemMeta.getParameters().containsKey("timeout")) {
-                    suite.replaceTimeout(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("timeout")));
+                    suite.replaceTimeout(testObject.getName(), (Integer) (itemMeta.getParameters().remove("timeout")));
                 }
                 if (itemMeta.getParameters().containsKey("count")) {
-                    suite.replaceCount(testObject.getName(), Integer.parseInt(itemMeta.getParameters().remove("count")));
+                    suite.replaceCount(testObject.getName(), (Integer) (itemMeta.getParameters().remove("count")));
                 }
+
             } else if (globalArgs.containsPublisher(itemMeta.getName())) {
                 Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
                 String name = publisherObject.getName();
@@ -308,6 +321,13 @@ public class Configuration {
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
         }
+
+        // Check if we should create a configuration file for this run.
+        if (this.getGlobalArgs().getSaveConfig()) {
+            GenerateYamlConfiguration generateYaml = new GenerateYamlConfiguration(copyOfConfigParams, items);
+            generateYaml.createYamlConfigurationFile();
+        }
+
     }
 
     /**
@@ -330,7 +350,7 @@ public class Configuration {
      * @throws InvocationTargetException caused by reflection
      * @throws IllegalAccessException    caused by reflection
      */
-    public static <T> T setObjectProperties(T object, Map<String, String> args) throws InvocationTargetException, IllegalAccessException {
+    public static <T> T setObjectProperties(T object, Map<String, Object> args) throws InvocationTargetException, IllegalAccessException {
         Class classObject = object.getClass();
         LOGGER.info("Configuring object of class: " + classObject.getSimpleName());
         for (Method method : classObject.getMethods()) {
@@ -369,7 +389,7 @@ public class Configuration {
      * @throws InstantiationException
      * @throws NoSuchMethodException
      */
-    public static <T> T createObject(Class<? extends T> classObject, Map<String, String> args)
+    public static <T> T createObject(Class<? extends T> classObject, Map<String, Object> args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
         Constructor constructor = null;
         try {
@@ -386,7 +406,7 @@ public class Configuration {
         return object;
     }
 
-    private TestSuite getTestSuite(Map<String, String> globalArgsMeta)
+    private TestSuite getTestSuite(Map<String, Object> globalArgsMeta)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (!globalArgsMeta.containsKey("suite"))
             return createObject(TestSuite.class, globalArgsMeta);
@@ -395,7 +415,7 @@ public class Configuration {
          What happens with the setup step if two or more suites have setup steps? */
 
         TestSuite testSuite = new TestSuite();
-        String[] testSuiteNames = globalArgsMeta.remove("suite").split(",");
+        String[] testSuiteNames = String.valueOf(globalArgsMeta.remove("suite")).split(",");
         for (String testSuiteName : testSuiteNames) {
             if (!predefinedSuites.containsKey(testSuiteName)) {
                 throw new IllegalArgumentException("Unknown suite: " + testSuiteName);
@@ -405,14 +425,14 @@ public class Configuration {
         return testSuite;
     }
 
-    private void checkInvalidArgs(Map<String, String> args, List<String>... whitelisted) {
-        Map<String, String> argsCopy = new HashMap<>();
+    private void checkInvalidArgs(Map<String, Object> args, List<Object>... whitelisted) {
+        Map<String, Object> argsCopy = new HashMap<>();
         argsCopy.putAll(args);
         args = argsCopy;
 
         for (int i = 0; i < whitelisted.length; i++) {
-            List<String> whitelist = whitelisted[i];
-            for (String whitelistedArg : whitelist) {
+            List<Object> whitelist = whitelisted[i];
+            for (Object whitelistedArg : whitelist) {
                 args.remove(whitelistedArg);
             }
         }
@@ -429,13 +449,13 @@ public class Configuration {
 
     private RunMode getRunMode(ConfigParams configParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Map<String, String> runModeParams = configParams.getRunModeParams();
+        Map<String, Object> runModeParams = configParams.getRunModeParams();
         if (runModeParams.size() != 0 && !runModeParams.containsKey("type")) {
             throw new IllegalStateException("The Run mode doesn't have a type");
         }
 
 
-        String type = runModeParams.size() != 0 ? runModeParams.get("type") : DEFAULT_RUN_MODE;
+        String type = runModeParams.size() != 0 ? String.valueOf(runModeParams.get("type")) : DEFAULT_RUN_MODE;
         Class<? extends RunMode> runModeClass = ReflectionsContainer.getInstance().getRunModeClasses().get(type);
 
         if (runModeClass == null) {
@@ -447,12 +467,12 @@ public class Configuration {
 
     private PublishMode getPublishMode(ConfigParams configParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Map<String, String> publishModeParams = configParams.getPublishModeParams();
+        Map<String, Object> publishModeParams = configParams.getPublishModeParams();
         if (publishModeParams.size() != 0 && !publishModeParams.containsKey("type")) {
             throw new IllegalStateException("The Publish mode doesn't have a type");
         }
 
-        String type = publishModeParams.size() != 0 ? publishModeParams.get("type") : DEFAULT_PUBLISH_MODE;
+        String type = publishModeParams.size() != 0 ? String.valueOf(publishModeParams.get("type")) : DEFAULT_PUBLISH_MODE;
         Class<? extends PublishMode> publishModeClass = ReflectionsContainer.getInstance().getPublishModeClasses().get(type);
 
         if (publishModeClass == null) {
@@ -552,6 +572,7 @@ public class Configuration {
         public static final String DEFAULT_LOG_LEVEL_STRING = "INFO";
         public static final Level DEFAULT_LOG_LEVEL = Level.valueOf(DEFAULT_LOG_LEVEL_STRING);
         public static final String DEFAULT_DRY_RUN = "false";
+        public static final String DEFAULT_SAVE_CONFIG = "true";
         private String host;
         private int port;
         private String user;
@@ -565,6 +586,7 @@ public class Configuration {
         private String contextPath;
         private Level logLevel = DEFAULT_LOG_LEVEL;
         private boolean dryRun = Boolean.parseBoolean(DEFAULT_DRY_RUN);
+        private boolean saveConfig = Boolean.parseBoolean(DEFAULT_SAVE_CONFIG);
 
         /**
          * Constructor
@@ -816,6 +838,16 @@ public class Configuration {
         @ConfigArgSet(required = false, defaultValue = "false", desc = "If true, prints the resulting configuration and does not run any tests.")
         public void setDryRun(String dryRun) {
             this.dryRun = Boolean.valueOf(dryRun);
+        }
+
+        @ConfigArgSet(required = false, defaultValue = "true", desc = "If true, saves the current configuration into a yaml configuration file.")
+        public void setSaveConfig(String saveConfig) {
+            this.saveConfig = Boolean.valueOf(saveConfig);
+        }
+
+        @ConfigArgGet
+        public boolean getSaveConfig() {
+            return saveConfig;
         }
     }
 }

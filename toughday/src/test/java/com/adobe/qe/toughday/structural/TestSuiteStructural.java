@@ -67,7 +67,6 @@ public class TestSuiteStructural extends TestCase {
             }
 
         }
-
         return suite;
     }
 }
