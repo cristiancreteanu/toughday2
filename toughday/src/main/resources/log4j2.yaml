@@ -52,3 +52,6 @@ Configuration:
             additivity: false
             AppenderRef:
                 ref: CoreFile
+          - name: org.reflections.Reflections
+            level: error
+            additivity: false

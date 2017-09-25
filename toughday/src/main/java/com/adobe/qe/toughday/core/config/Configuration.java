@@ -466,7 +466,10 @@ public class Configuration {
         LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
         for (LoggerConfig loggerConfig : config.getLoggers().values()) {
-            loggerConfig.setLevel(level);
+            // we must keep logging only errors from reflections, in order to avoid irrelevant warning messages when loading an extension into TD.
+            if (!loggerConfig.getName().equals("org.reflections.Reflections")) {
+                loggerConfig.setLevel(level);
+            }
         }
         System.setProperty("toughday.log.level", level.name());
         ctx.updateLoggers();  // This causes all Loggers to refetch information from their LoggerConfig.
