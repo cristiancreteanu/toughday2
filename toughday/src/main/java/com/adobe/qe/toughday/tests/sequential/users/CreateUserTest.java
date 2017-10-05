@@ -74,7 +74,7 @@ public class CreateUserTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         String firstName    = this.firstName;
         String lastName     = this.lastName;
         String phoneNumber  = this.phoneNumber;
@@ -147,7 +147,7 @@ public class CreateUserTest extends SequentialTestBase {
         }
     }
 
-    private void addUserToGroup(String group, String user) throws Exception {
+    private void addUserToGroup(String group, String user) throws Throwable {
         String groupServlet = group + ".rw.userprops.html";
 
         FormEntityBuilder entityBuilder = FormEntityBuilder.create()

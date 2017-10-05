@@ -63,7 +63,7 @@ public class RunMap {
         }
     }
 
-    public void recordFail (AbstractTest test, Exception e) {
+    public void recordFail (AbstractTest test, Throwable e) {
         TestEntry entry = runMap.get(test);
         if(entry != null) {
             runMap.get(test).recordFail(e);
@@ -174,7 +174,7 @@ public class RunMap {
         private double totalDuration;
         private long failRuns;
         private long skippedRuns;
-        private Map<Class<? extends Exception>, Long> failsMap;
+        private Map<Class<? extends Throwable>, Long> failsMap;
         private long startNanoTime;
         private long lastNanoTime;
         private long startMillisTime;
@@ -212,7 +212,7 @@ public class RunMap {
          * Mark a failed run
          * @param e
          */
-        public synchronized void recordFail(Exception e) {
+        public synchronized void recordFail(Throwable e) {
             lastNanoTime = System.nanoTime();
             if (!failsMap.containsKey(e.getClass())) {
                 failsMap.put(e.getClass(), 0L);

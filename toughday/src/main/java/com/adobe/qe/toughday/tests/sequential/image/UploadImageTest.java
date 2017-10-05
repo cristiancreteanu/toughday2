@@ -72,7 +72,7 @@ public class UploadImageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         MultipartEntity multiPartEntity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         try {
             multiPartEntity.addPart("file", new FileBody(lastCreated.get()));

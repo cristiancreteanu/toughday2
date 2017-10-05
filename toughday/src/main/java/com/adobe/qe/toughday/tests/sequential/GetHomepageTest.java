@@ -10,7 +10,7 @@ import org.apache.http.HttpStatus;
 public class GetHomepageTest extends SequentialTestBase {
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         getDefaultClient().doGet("/", HttpStatus.SC_OK);
     }
 

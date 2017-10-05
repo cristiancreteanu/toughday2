@@ -39,7 +39,7 @@ public class PublishPageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         String pagePath = getCommunication("resource", null);
 
         if (pagePath == null)
@@ -61,7 +61,7 @@ public class PublishPageTest extends SequentialTestBase {
         return new PublishPageTest(withReferences);
     }
 
-    private List<String> getPageReferences(String pagePath) throws Exception {
+    private List<String> getPageReferences(String pagePath) throws Throwable {
         FormEntityBuilder form = FormEntityBuilder.create()
                 .addParameter("_charset_", "UTF-8")
                 .addParameter("path", pagePath);
@@ -81,7 +81,7 @@ public class PublishPageTest extends SequentialTestBase {
 
     }
 
-    private SlingHttpResponse publish(String pagePath, boolean withReferences, int... expectedStatus) throws Exception {
+    private SlingHttpResponse publish(String pagePath, boolean withReferences, int... expectedStatus) throws Throwable {
         FormEntityBuilder form = FormEntityBuilder.create()
                 .addParameter("_charset_", "UTF-8")
                 .addParameter("cmd", "Activate")

@@ -42,7 +42,7 @@ public class CreatePageTest extends SequentialTestBase {
     public static final String DEFAULT_TEMPLATE = SampleContent.TOUGHDAY_TEMPLATE;
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
 
         String nextTitle = title + nextNumber.getAndIncrement();
         lastCreated.set(nextTitle);

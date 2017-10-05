@@ -33,14 +33,14 @@ public abstract class SequentialTestBase extends AbstractTest {
         return SequentialTestRunner.class;
     }
 
-    public SlingClient getDefaultClient() throws Exception {
+    public SlingClient getDefaultClient() throws Throwable {
         if (defaultClient == null) {
             defaultClient = SequentialTestBase.createClient(getGlobalArgs());
         }
         return defaultClient;
     }
 
-    public abstract void test() throws Exception;
+    public abstract void test() throws Throwable;
 
 
     public static SlingClient createClient (Configuration.GlobalArgs args) throws URISyntaxException, ClientException {

@@ -20,7 +20,7 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
      * @throws ChildTestFailedException if its part of another composite test and a step fails.
      */
     @Override
-    protected void run(CompositeTest testObject, RunMap runMap) throws ChildTestFailedException, SkippedTestException {
+    protected void run(CompositeTest testObject, RunMap runMap) throws Throwable {
         Long start = System.nanoTime();
         for(AbstractTest child : testObject.getChildren()) {
             AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(child);

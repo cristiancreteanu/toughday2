@@ -51,7 +51,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
     private void setup() {
         try {
             extraGroup = createGroup(getDefaultClient(), id, groupName, description);
-        } catch (Exception e) {
+        } catch (Throwable e) {
             //TODO
             extraGroup = null;
         }
@@ -63,7 +63,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         String groupName = this.groupName;
         if(increment != null) {
             groupName += increment.getAndIncrement();
@@ -88,7 +88,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
      * Create a group
      * @return path to the created group
      */
-    public static String createGroup(SlingClient client, String id, String groupName, String description) throws Exception {
+    public static String createGroup(SlingClient client, String id, String groupName, String description) throws Throwable {
         HtmlParserImpl htmlParser = htmlParser = new HtmlParserImpl();
         FormEntityBuilder entityBuilder = FormEntityBuilder.create()
                 .addParameter("authorizableId", id)

@@ -16,7 +16,7 @@ public class SequentialTestRunner extends AbstractTestRunner<SequentialTestBase>
     }
 
     @Override
-    protected void run(SequentialTestBase testObject, RunMap runMap) throws ChildTestFailedException, SkippedTestException {
+    protected void run(SequentialTestBase testObject, RunMap runMap) throws Throwable {
         Long start = System.nanoTime();
         try {
             testObject.test();

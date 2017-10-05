@@ -38,7 +38,7 @@ public class DeletePageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         String nextTitle = getNextTitle();
         if (nextTitle == null) {
             throw new SkippedTestException(new ClientException("No page created (by CreatePageTest). Marking as skipped."));

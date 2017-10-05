@@ -72,7 +72,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to create folder={}{}", Thread.currentThread().getName(), parentPath, nodeName);
             createFolder();
@@ -110,11 +110,11 @@ public class CreateFolderTreeTest extends SequentialTestBase {
         phaser.arriveAndDeregister();
     }
 
-    private void createFolder() throws Exception {
+    private void createFolder() throws Throwable {
         createFolder(nodeName, parentPath);
     }
 
-    private void createFolder(String nodeName, String parentPath) throws Exception {
+    private void createFolder(String nodeName, String parentPath) throws Throwable {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter(":name", nodeName)
                 .addParameter("./jcr:primaryType", resourceType);

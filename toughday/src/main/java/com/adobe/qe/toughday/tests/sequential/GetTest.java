@@ -37,7 +37,7 @@ public class GetTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
             getDefaultClient().doGet(path, HttpStatus.SC_OK);
