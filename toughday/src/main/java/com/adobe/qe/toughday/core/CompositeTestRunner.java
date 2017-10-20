@@ -20,7 +20,7 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
      * @throws ChildTestFailedException if its part of another composite test and a step fails.
      */
     @Override
-    protected void run(CompositeTest testObject, RunMap runMap) throws Throwable {
+    protected void run(CompositeTest testObject, RunMap runMap) throws ToughDayException {
         Long start = System.nanoTime();
         for(AbstractTest child : testObject.getChildren()) {
             AbstractTestRunner runner = RunnersContainer.getInstance().getRunner(child);
@@ -34,10 +34,18 @@ public class CompositeTestRunner extends  AbstractTestRunner<CompositeTest> {
                     return; //don't let exceptions get to the suite
                 }
             }
-            catch (ChildTestFailedException e) {
+            catch (ToughDayException e) {
                 runMap.recordFail(testObject, e);
                 if(testObject.getParent() != null) {
                     throw e;
+                } else {
+                    return; //don't let exceptions get to the suite
+                }
+            }
+            catch (Throwable e) {
+                runMap.recordFail(testObject, e);
+                if(testObject.getParent() != null) {
+                    throw new ToughDayException(e);
                 } else {
                     return; //don't let exceptions get to the suite
                 }

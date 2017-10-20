@@ -123,26 +123,24 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param runMap the run map in which the benchmark will be recorded.
      * @throws ChildTestFailedException propagated exception if the test object is part of a composite test.
      */
-    public void runTest(AbstractTest testObject, RunMap runMap) throws Throwable {
+    public void runTest(AbstractTest testObject, RunMap runMap) throws ToughDayException {
         executeCloneSetup(testObject);
         executeBefore(testObject);
 
-        SkippedTestException skippedTestException = null;
-        Throwable throwableException = null;
+        ToughDayException exception = null;
         try {
             run((T) testObject, runMap);
-        } catch (SkippedTestException e) {
-            skippedTestException = e;
-        } catch (Throwable e) {
-            throwableException = e;
+        } catch (ToughDayException e) {
+            exception = e;
+        }
+        catch (Throwable e) {
+            exception = new ToughDayException(e);
         }
 
         executeAfter(testObject);
 
-        if(skippedTestException != null) {
-            throw  skippedTestException;
-        } else if (throwableException != null) {
-            throw throwableException;
+        if(testObject.getParent() != null && exception != null) {
+            throw exception;
         }
     }
 
@@ -152,7 +150,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param runMap the run map in which the benchmark will be recorded.
      * @throws ChildTestFailedException propagated exception if the test object is part of a composite test.
      */
-    protected abstract void run(T testObject, RunMap runMap) throws Throwable;
+    protected abstract void run(T testObject, RunMap runMap) throws ToughDayException;
 
     /**
      * Run a annotated method using reflections.
