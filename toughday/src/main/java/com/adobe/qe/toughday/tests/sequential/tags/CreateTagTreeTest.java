@@ -61,7 +61,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
             String isolatedNameSpace = namespace + "_" + RandomStringUtils.randomAlphanumeric(5);
             createNamespace(isolatedNameSpace, isolatedNameSpace, NAMEPSPACE_DESCRIPTION);
             namespace = isolatedNameSpace;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.warn("Failed to create namespace {}", namespace);
             namespace = "default";
         }
@@ -70,7 +70,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
         try {
             createTag(EXTRA_TAG_TITLE, EXTRA_TAG_TITLE, "ToughDay extra tag", namespace + ":");
             extra_tag = namespace + ":" + EXTRA_TAG_TITLE;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             //TODO
         }
     }
@@ -88,11 +88,11 @@ public class CreateTagTreeTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
             createTag();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we just count them.
@@ -116,7 +116,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
                     LOG.debug("{}: Retrying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                     createTag();
                 }
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 LOG.warn("{}: Failed to create after retry tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                 LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
             }
@@ -126,7 +126,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
         phaser.arriveAndDeregister();
     }
 
-    private void createNamespace(String title, String tag, String description) throws Exception {
+    private void createNamespace(String title, String tag, String description) throws Throwable {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("jcr:title", title)
                 .addParameter("tag", tag)
@@ -135,11 +135,11 @@ public class CreateTagTreeTest extends SequentialTestBase {
         getDefaultClient().doPost(TAG_COMMAND_URL, feb.build(), HttpStatus.SC_OK);
     }
 
-    private void createTag() throws Exception {
+    private void createTag() throws Throwable {
         createTag(nodeName, nodeName, TAG_DESCRIPTION, parentPath);
     }
 
-    private void createTag(String title, String tag, String description, String parentTagID) throws Exception {
+    private void createTag(String title, String tag, String description, String parentTagID) throws Throwable {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("jcr:title", title)
                 .addParameter("tag", tag)

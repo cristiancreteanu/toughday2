@@ -165,7 +165,7 @@ public class Normal implements RunMode {
                     mutex.unlock();
                     try {
                         runner.runTest(currentTest, localRunMap);
-                    } catch (ChildTestFailedException | SkippedTestException e) {
+                    } catch (Throwable e) {
                         LOG.warn("Exceptions from tests should not reach this point", e);
                     }
                     mutex.lock();

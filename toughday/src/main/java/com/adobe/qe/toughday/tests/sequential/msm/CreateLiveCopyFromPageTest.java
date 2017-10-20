@@ -52,18 +52,18 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     }
 
     @Setup
-    private void setup() throws Exception {
+    private void setup() throws Throwable {
         String isolatedFolder = "toughday_lc" + UUID.randomUUID();
         try {
             getDefaultClient().createFolder(isolatedFolder, isolatedFolder, destinationRoot);
             destinationRoot = destinationRoot + "/" + isolatedFolder;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOG.debug("Could not create isolated folder for running " + getFullName());
         }
     }
 
     @Before
-    private void before() throws Exception {
+    private void before() throws Throwable {
         this.sourcePage = getCommunication("resource", sourcePage);
         phaser.register();
 
@@ -77,7 +77,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
 
@@ -93,7 +93,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
         }
     }
 
-    private void createLC() throws Exception {
+    private void createLC() throws Throwable {
         WcmUtils.createLiveCopy(getDefaultClient(), nodeName, title, destinationPage, sourcePage, false, null, null, false, 200);
         communicate("livecopy", destinationPage + nodeName);
     }

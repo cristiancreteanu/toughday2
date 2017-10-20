@@ -71,7 +71,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
             createPage();
@@ -109,7 +109,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
         phaser.arriveAndDeregister();
     }
 
-    private void createPage() throws Exception {
+    private void createPage() throws Throwable {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("cmd", WcmUtils.CMD_CREATE_PAGE)
                 .addParameter("parentPath", parentPath)

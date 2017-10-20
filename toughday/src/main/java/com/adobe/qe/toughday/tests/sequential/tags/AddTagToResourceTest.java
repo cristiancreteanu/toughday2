@@ -15,7 +15,7 @@ public class AddTagToResourceTest extends SequentialTestBase {
     public static final Logger LOG = createLogger(AddTagToResourceTest.class);
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         String resourcePath = getCommunication("resource", null);
         List<String> tags = getCommunication("tags", null);
 

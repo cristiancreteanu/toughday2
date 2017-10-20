@@ -51,13 +51,13 @@ public class RolloutTest extends SequentialTestBase {
     }
 
     @Before
-    private void before() throws Exception {
+    private void before() throws Throwable {
         this.sourcePage = getCommunication("resource", sourcePage);
         this.destinationPage = getCommunication("livecopy", destinationPage);
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
 

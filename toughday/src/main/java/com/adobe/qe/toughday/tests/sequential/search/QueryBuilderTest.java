@@ -22,7 +22,7 @@ public class QueryBuilderTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         getDefaultClient().doGet("/bin/querybuilder.json?" + query);
     }
 

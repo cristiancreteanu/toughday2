@@ -73,7 +73,7 @@ public class UploadPDFTest extends SequentialTestBase {
     }
 
     @Override
-    public void test() throws Exception {
+    public void test() throws Throwable {
         MultipartEntityBuilder multiPartEntity = MultipartEntityBuilder.create();
         try {
             multiPartEntity.addPart("file", new FileBody(currentFile));
