@@ -12,6 +12,7 @@ import com.adobe.qe.toughday.core.engine.PublishMode;
 import com.adobe.qe.toughday.metrics.Metric;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -80,16 +81,32 @@ public class CliParser implements ConfigurationParser {
 
     private static Object getObjectFromString(String string) {
 
-        String integerRegex = "\\d+";
-        String floatRegex = "\\d+.+\\d";
+        if (NumberUtils.isNumber(string)) {
+            try {
+                return Integer.valueOf(string);
+            } catch (NumberFormatException e) {
+            }
 
-        if (string.matches(integerRegex)) {
-            return Integer.valueOf(string);
-        } else if (string.matches(floatRegex)) {
-            return Float.valueOf(string);
-        } else {
-            return string;
+            try {
+                return Long.valueOf(string);
+            } catch (NumberFormatException e) {
+            }
+
+            try {
+                return Float.valueOf(string);
+            } catch (NumberFormatException e) {
+            }
+
+            try {
+                return Double.valueOf(string);
+            } catch (NumberFormatException e) {
+            }
         }
+
+        if (string.equals("true")) return true;
+        if (string.equals("false")) return false;
+
+        return string;
 
     }
 
