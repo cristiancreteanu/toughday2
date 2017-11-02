@@ -80,6 +80,9 @@ public class CliParser implements ConfigurationParser {
     }
 
     private static Object getObjectFromString(String string) {
+        if (string == null) {
+            return string;
+        }
 
         if (NumberUtils.isNumber(string)) {
             try {
