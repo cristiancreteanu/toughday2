@@ -3,13 +3,14 @@ package com.adobe.qe.toughday.core;
 import com.adobe.qe.toughday.core.annotations.Before;
 import com.adobe.qe.toughday.core.annotations.After;
 import com.adobe.qe.toughday.core.annotations.CloneSetup;
+import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.core.engine.AssumptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.LinkedList;
 
 /**
@@ -30,7 +31,6 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
     /**
      * Constructor
      * @param testClass
-     * TODO: throw exceptions if not valid methods.
      */
     public AbstractTestRunner(Class<? extends AbstractTest> testClass) {
         cloneSetupExecuted = true;
@@ -41,25 +41,21 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         Class currentClass = testClass;
 
         while(!currentClass.getName().equals(AbstractTest.class.getName())) {
-            //System.out.println(currentClass.getName()); // ?
             for (Method method : currentClass.getDeclaredMethods()) {
                 for (Annotation annotation : method.getAnnotations()) {
                     if (annotation.annotationType() == CloneSetup.class) {
-                        if (validateMethod(method, CloneSetup.class)) {
-                            setupMethodList.addFirst(method);
-                            method.setAccessible(true);
-                            cloneSetupExecuted = false;
-                        }
+                        AssumptionUtils.validateAnnotatedMethod(method, CloneSetup.class);
+                        setupMethodList.addFirst(method);
+                        method.setAccessible(true);
+                        cloneSetupExecuted = false;
                     } else if (annotation.annotationType() == Before.class) {
-                        if (validateMethod(method, Before.class)) {
-                            method.setAccessible(true);
-                            beforeMethodList.addFirst(method);
-                        }
+                        AssumptionUtils.validateAnnotatedMethod(method, Before.class);
+                        method.setAccessible(true);
+                        beforeMethodList.addFirst(method);
                     } else if (annotation.annotationType() == After.class) {
-                        if (validateMethod(method, After.class)) {
-                            method.setAccessible(true);
-                            afterMethodList.addLast(method);
-                        }
+                        AssumptionUtils.validateAnnotatedMethod(method, After.class);
+                        method.setAccessible(true);
+                        afterMethodList.addLast(method);
                     }
                 }
             }
@@ -172,22 +168,4 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
         }
     }
 
-    /**
-     * Validator for methods annotated with test_annotations.
-     * @param method
-     * @param annotation
-     * @return true if the method is valid, false if not.
-     */
-    private boolean validateMethod(Method method, Class<? extends Annotation> annotation) {
-        if(method.getParameterTypes().length != 0) {
-            logger.error("Method " + method + " annotated with " + annotation.getSimpleName() + " cannot have parameters");
-            return false;
-        }
-
-        if((method.getModifiers() & Modifier.PRIVATE) == 0) {
-            logger.error("Method " + method + " annotated with " + annotation.getSimpleName() + " must be private");
-            return false;
-        }
-        return true;
-    }
 }

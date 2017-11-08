@@ -40,8 +40,8 @@ public class TestAnnotatedMethod extends TestCase {
     }
 
     public void testModifier() {
-        assertTrue("ToughDay2 annotated method \"" + TdAnnotatedMethod + "\" must be private",
-                (TdAnnotatedMethod.getModifiers() & Modifier.PRIVATE) != 0);
+        assertTrue("ToughDay2 annotated method \"" + TdAnnotatedMethod + "\" must be final or private",
+                Modifier.isFinal(TdAnnotatedMethod.getModifiers()) || Modifier.isPrivate(TdAnnotatedMethod.getModifiers()));
     }
 
     public void testArguments() {

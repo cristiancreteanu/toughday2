@@ -250,9 +250,9 @@ public class Engine {
     }
     
     //TODO find a place in the AbstractTestRunner for this. The problem is that we need to invoke it at a specific time.
-    public static void runFactorySetup(AbstractTest test) throws Exception {
+    public static void runSetup(AbstractTest test) throws Exception {
         for (AbstractTest child : test.getChildren()) {
-            runFactorySetup(child);
+            runSetup(child);
         }
 
         LinkedList<Method> setupMethods = new LinkedList<>();
@@ -260,6 +260,7 @@ public class Engine {
         while(!currentClass.getName().equals(AbstractTest.class.getName())) {
             for (Method method : currentClass.getDeclaredMethods()) {
                 if (method.getAnnotation(Setup.class) != null) {
+                    AssumptionUtils.validateAnnotatedMethod(method, Setup.class);
                     setupMethods.addFirst(method);
                 }
             }
@@ -304,7 +305,7 @@ public class Engine {
 
         //TODO move this to a better place while keeping in mind to preserve the execution order.
         for(AbstractTest test : testSuite.getTests()) {
-            runFactorySetup(test);
+            runSetup(test);
         }
 
         publishMode.getGlobalRunMap().reinitStartTimes();
