@@ -587,6 +587,7 @@ public class Configuration {
         private Level logLevel = DEFAULT_LOG_LEVEL;
         private boolean dryRun = Boolean.parseBoolean(DEFAULT_DRY_RUN);
         private boolean saveConfig = Boolean.parseBoolean(DEFAULT_SAVE_CONFIG);
+        private boolean showSteps = false;
 
         /**
          * Constructor
@@ -848,6 +849,16 @@ public class Configuration {
         @ConfigArgGet
         public boolean getSaveConfig() {
             return saveConfig;
+        }
+
+        @ConfigArgSet(required = false, defaultValue = "false", desc = "Show test steps in the aggregated publish. (They are always shown in the detailed publish)")
+        public void setShowSteps(String showTestSteps) {
+            this.showSteps = Boolean.parseBoolean(showTestSteps);
+        }
+
+        @ConfigArgGet
+        public boolean getShowSteps() {
+            return this.showSteps;
         }
     }
 }

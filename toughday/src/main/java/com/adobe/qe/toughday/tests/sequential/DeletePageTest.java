@@ -48,7 +48,7 @@ public class DeletePageTest extends SequentialTestBase {
                 .addParameter("cmd", CMD_DELETE_PAGE)
                 .addParameter("force", Boolean.valueOf(force).toString())
                 .addParameter("shallow", Boolean.toString(false))
-                .addParameter("path", parentPath + nextTitle);
+                .addParameter("path", parentPath + "/" + nextTitle);
 
         try {
             LOG.debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
@@ -62,7 +62,7 @@ public class DeletePageTest extends SequentialTestBase {
             throw e;
         }
 
-        LOG.warn("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
+        LOG.debug("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
     }
 
 

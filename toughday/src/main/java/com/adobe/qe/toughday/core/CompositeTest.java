@@ -57,13 +57,13 @@ public abstract class CompositeTest extends AbstractTest {
     }
 
     /**
-     * Getter for a child if the UUID is known.
+     * Getter for a child if the id is known.
      * @param id
-     * @return the child with the UUID given, or null if it cannot be found.
+     * @return the child with the id given, or null if it cannot be found.
      */
-    public AbstractTest getChild(UUID id) {
+    public AbstractTest getChild(TestId id) {
         for (AbstractTest child : children) {
-            if (child.getId() == id)
+            if (child.getId().equals(id))
                 return child;
         }
         return null;

@@ -13,11 +13,11 @@ import java.lang.reflect.Modifier;
 
 @Category(TestTDConstraints.class)
 public class TestConfigSetAnnotatedMethod extends TestCase {
-    private Method TDConfigAnnotatedMethod;
+    private Method TdConfigAnnotatedMethod;
 
     public TestConfigSetAnnotatedMethod(String testName, Method method) {
         super(testName);
-        this.TDConfigAnnotatedMethod = method;
+        this.TdConfigAnnotatedMethod = method;
     }
 
     /**
@@ -27,15 +27,15 @@ public class TestConfigSetAnnotatedMethod extends TestCase {
     public static TestSuite suite() { return new TestSuite(); }
 
     public void testModifier() {
-        assertTrue("ToughDay2 config method \"" + TDConfigAnnotatedMethod + "\" must be public",
-                (TDConfigAnnotatedMethod.getModifiers() & Modifier.PUBLIC) != 0);
+        assertTrue("ToughDay2 config method \"" + TdConfigAnnotatedMethod + "\" must be public",
+                (TdConfigAnnotatedMethod.getModifiers() & Modifier.PUBLIC) != 0);
     }
 
     public void testArguments() {
-        assertTrue( "ToughDay2 config method \"" + TDConfigAnnotatedMethod + "\" must have only one parameter",
-                TDConfigAnnotatedMethod.getParameterTypes().length == 1);
+        assertTrue( "ToughDay2 config method \"" + TdConfigAnnotatedMethod + "\" must have only one parameter",
+                TdConfigAnnotatedMethod.getParameterTypes().length == 1);
 
-        assertTrue( "ToughDay2 config method's \"" + TDConfigAnnotatedMethod + "\" parameter must be of type String",
-                TDConfigAnnotatedMethod.getParameterTypes()[0].isAssignableFrom(String.class));
+        assertTrue( "ToughDay2 config method's \"" + TdConfigAnnotatedMethod + "\" parameter must be of type String",
+                TdConfigAnnotatedMethod.getParameterTypes()[0].isAssignableFrom(String.class));
     }
 }

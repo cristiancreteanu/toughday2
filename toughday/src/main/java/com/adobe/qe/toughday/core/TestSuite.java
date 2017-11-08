@@ -22,7 +22,7 @@ public class TestSuite {
     /**
      * Weight map class.
      */
-    private static class WeightMap extends TreeMap<AbstractTest, Integer> {
+    private static class WeightMap extends HashMap<AbstractTest, Integer> {
         private int totalWeight;
         private HashMap<String, AbstractTest> nameMap = new HashMap<>();
 

@@ -2,34 +2,65 @@ package com.adobe.qe.toughday.publishers;
 
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.benckmark.TestResult;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.metrics.MetricResult;
+import com.google.gson.Gson;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 @Description(desc = "Publish statistics to a csv file")
 public class CSVPublisher extends Publisher {
-    public static final String DEFAULT_FILE_PATH = "results.csv";
-    private static String header = "";
-    private static String headerFormat = "";
-
     private static final Logger LOG = LoggerFactory.getLogger(CSVPublisher.class);
 
-    private boolean finished = false;
+    /**
+     * The default name of the file where aggregated results are published
+     */
+    public static final String DEFAULT_FILE_PATH = "results.csv";
+
+    /**
+     * The default name of the file where raw results are published
+     */
+    private static final String DEFAULT_RAW_FILE_PATH = "results.raw.csv";
+
+    /**
+     * Format of the raw results
+     */
+    private static final String BATCH_FORMAT = "%-50s, %-6s, %-6s, %-23s, %-23s, %-10s, %s";
+
+    /**
+     * Header for the raw results
+     */
+    private static final String[] BATCH_HEADER = { "Name", "Status", "Thread", "Start Timestamp", "End Timestamp", "Duration", "Data" };
+
+    private Gson GSON = new Gson();
+
+    private String header;
+    private String headerFormat;
     private boolean append = true;
     private boolean created = false;
 
-    private PrintWriter printWriter;
-    private BufferedWriter writer;
+    private PrintWriter resultsPrintWriter;
+    private BufferedWriter resultsWriter;
     private String filePath = DEFAULT_FILE_PATH;
+
+    private PrintWriter rawResultsWriter;
+    private String rawFilePath = DEFAULT_RAW_FILE_PATH;
+
+    public CSVPublisher() {
+        setAggregatedPublish(Boolean.FALSE.toString()); //TODO remove this when call config arg set is merged
+    }
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -51,26 +82,100 @@ public class CSVPublisher extends Publisher {
         return append;
     }
 
+    @ConfigArgSet(required = false, desc = "The filename to write the raw results to", defaultValue = DEFAULT_RAW_FILE_PATH)
+    public void setRawFilePath(String rawResultsFilePath) {
+        this.rawFilePath = rawResultsFilePath;
+    }
+
+    @ConfigArgGet
+    public String getRawFilePath() {
+        return rawFilePath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = "false", desc = "Enable the aggregated result publishing")
+    public void setAggregatedPublish(String aggregatedPublish) {
+        super.setAggregatedPublish(aggregatedPublish);
+    }
+
     @Override
-    public void publishIntermediate(Map<String, List<MetricResult>> results) {
-        if (header.compareTo("") == 0) {
+    protected void doPublishIntermediate(Map<String, List<MetricResult>> results) {
+        if (header == null) {
             createHeaderFormat(results.values().iterator().next());
         }
         publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishFinal(Map<String, List<MetricResult>> results) {
         publish(results);
+    }
+
+    public void publish(Map<String, List<MetricResult>> testsResults) {
+        try {
+            if(!created || !append) {
+                resultsPrintWriter = new PrintWriter(filePath);
+                created = true;
+                resultsWriter = new BufferedWriter(resultsPrintWriter);
+                resultsWriter.write(header);
+                resultsWriter.newLine();
+                resultsWriter.flush();
+            }
+            for (String testName : testsResults.keySet()) {
+                List<Object> results = new ArrayList<>();
+                List<MetricResult> testResultInfos = testsResults.get(testName);
+                for (MetricResult resultInfo : testResultInfos) {
+                    results.add(resultInfo.getValue());
+                }
+
+                resultsWriter.write(String.format(headerFormat, results.toArray()));
+                resultsWriter.newLine();
+            }
+
+            resultsWriter.flush();
+            resultsPrintWriter.flush();
+
+            if(!append) {
+                resultsWriter.close();
+                resultsPrintWriter.close();
+            }
+        } catch (IOException e) {
+            LOG.error("Could not publish results", e);
+        }
+    }
+
+    @Override
+    protected void doPublish(Collection<TestResult> testResults) {
+        try {
+            if (rawResultsWriter == null) {
+                rawResultsWriter = new PrintWriter(new BufferedWriter(new FileWriter(rawFilePath)));
+                rawResultsWriter.println(String.format(BATCH_FORMAT, BATCH_HEADER));
+            }
+
+            for (TestResult testResult : testResults) {
+                Object data = testResult.getData();
+                rawResultsWriter.println(String.format(BATCH_FORMAT,
+                        testResult.getTestFullName(),
+                        testResult.getStatus().toString(),
+                        testResult.getThreadId(),
+                        testResult.getFormattedStartTimestamp(),
+                        testResult.getFormattedEndTimestamp(),
+                        testResult.getDuration(),
+                        StringEscapeUtils.escapeCsv(data != null ? GSON.toJson(data) : "")
+                ));
+            }
+        } catch (IOException e) {
+            LOG.error("Could not publish results", e);
+        }
     }
 
     @Override
     public void finish() {
-        this.finished = true;
+
     }
 
     private String createHeaderFormat(List<MetricResult> resultsList) {
-
+        header = "";
+        headerFormat = "";
         for (MetricResult resultInfo : resultsList) {
             header += resultInfo.getName() + ", ";
             headerFormat += resultInfo.getFormat() + ", ";
@@ -81,38 +186,5 @@ public class CSVPublisher extends Publisher {
         headerFormat = headerFormat.substring(0, headerFormat.length() - 2);
 
         return headerFormat;
-    }
-
-    public void publish(Map<String, List<MetricResult>> testsResults) {
-        try {
-            if(!created || !append) {
-                printWriter = new PrintWriter(filePath);
-                created = true;
-                writer = new BufferedWriter(printWriter);
-                writer.write(header);
-                writer.newLine();
-                writer.flush();
-            }
-            for (String testName : testsResults.keySet()) {
-                List<Object> results = new ArrayList<>();
-                List<MetricResult> testResultInfos = testsResults.get(testName);
-                for (MetricResult resultInfo : testResultInfos) {
-                    results.add(resultInfo.getValue());
-                }
-
-                writer.write(String.format(headerFormat, results.toArray()));
-                writer.newLine();
-            }
-
-            writer.flush();
-            printWriter.flush();
-
-            if(!append) {
-                writer.close();
-                printWriter.close();
-            }
-        } catch (IOException e) {
-            LOG.error("Could not publish results", e);
-        }
     }
 }

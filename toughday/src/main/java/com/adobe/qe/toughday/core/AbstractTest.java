@@ -1,6 +1,9 @@
 package com.adobe.qe.toughday.core;
 
 import com.adobe.qe.toughday.core.annotations.Name;
+import com.adobe.qe.toughday.core.annotations.labels.NotNull;
+import com.adobe.qe.toughday.core.benckmark.Benchmark;
+import com.adobe.qe.toughday.core.benckmark.BenchmarkImpl;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.config.Configuration;
@@ -12,7 +15,6 @@ import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.Layout;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.appender.SyslogAppender;
 import org.apache.logging.log4j.core.config.AppenderRef;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
@@ -26,29 +28,32 @@ import java.util.*;
  * have to write a runner for your new type of test. Instead you should extend the existing convenience classes
  * that already have a runner. {@link DemoTest} for a detailed example.
  */
-public abstract class AbstractTest implements Comparable<AbstractTest> {
-    private UUID id;
+public abstract class AbstractTest {
+    private @NotNull
+    TestId id;
     private String name;
     private AbstractTest parent;
     private Configuration.GlobalArgs globalArgs;
     protected File workspace;
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
     private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private BenchmarkImpl benchmark;
+    private boolean showSteps = false;
 
     /**
-     * Constructor.
+     * Constructor. Used by the core with reflections
      */
     public AbstractTest() {
-        this.id = UUID.randomUUID();
+        this.id = new UUIDTestId();
         this.workspace = new File("workspace");
         // create dir structure
         this.workspace.mkdirs();
+        benchmark = new BenchmarkImpl();
         this.name = getClass().getSimpleName();
         if (getClass().isAnnotationPresent(Name.class)) {
             Name d = getClass().getAnnotation(Name.class);
             this.name = d.name();
         }
-
     }
 
     public static List<Thread> getExtraThreads() {
@@ -84,6 +89,26 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         return this;
     }
 
+    @ConfigArgSet(required = false, defaultValue = "false", desc = "Show test steps in the aggregated publish. (They are always shown in the detailed publish)")
+    public AbstractTest setShowSteps(String showTestSteps) {
+        this.showSteps = Boolean.parseBoolean(showTestSteps);
+        return this;
+    }
+
+    @ConfigArgGet
+    public boolean getShowSteps() {
+        return this.showSteps;
+    }
+
+    /**
+     * Getter for the resolution between this test, ancestor tests and {@link com.adobe.qe.toughday.core.config.Configuration.GlobalArgs}
+     * of whether or not to show the steps in the aggregated publish. If anywhere in the chain, it's set to true, we publish the steps.
+     * @return
+     */
+    public boolean getShowStepsResolved() {
+        return this.getShowSteps() || (getParent() != null ? getParent().getShowStepsResolved() : getGlobalArgs().getShowSteps());
+    }
+
     public void setWorkspace (File workspace) {
         this.workspace = workspace;
     }
@@ -92,11 +117,14 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         return workspace;
     }
 
+    public Benchmark benchmark() { return this.benchmark; }
+
     /**
      * Getter for the id
      * @return
      */
-    public final UUID getId() {
+    public final @NotNull
+    TestId getId() {
         return id;
     }
 
@@ -104,7 +132,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
      * Setter for the id. Used in the cloning process.
      * @param id
      */
-    public final void setID(UUID id) {
+    public final void setID(TestId id) {
         this.id = id;
     }
 
@@ -133,7 +161,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
 
     /**
      * Implementation of equals method based on Id.
-     * @return true if it's the same UUID, false otherwise.
+     * @return true if it's the same TestId, false otherwise.
      * It is final, because all the maps in the core rely on it.
      */
     @Override
@@ -145,7 +173,7 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
     }
 
     /**
-     * Method for replicating a test for all threads. All clones will have the same UUID.
+     * Method for replicating a test for all threads. All clones will have the same TestId.
      * @return a deep clone of this test.
      */
     public AbstractTest clone() {
@@ -153,6 +181,8 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         newInstance.setID(this.id);
         newInstance.setName(this.getName());
         newInstance.setGlobalArgs(this.getGlobalArgs());
+        newInstance.benchmark = this.benchmark.clone();
+        newInstance.setShowSteps(Boolean.toString(this.getShowSteps()));
         return newInstance;
     }
 
@@ -210,11 +240,6 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
         return globalArgs;
     }
 
-    @Override
-    public int compareTo(AbstractTest that) {
-        return this.getId().compareTo(that.getId());
-    }
-
     /**
      * Getter for the children of this test.
      * @return a list with all children of this test. Must not return null, instead should return an empty list.
@@ -249,5 +274,22 @@ public abstract class AbstractTest implements Comparable<AbstractTest> {
             return (T) parent.getCommunication(key, defaultValue);
         }
         return defaultValue;
+    }
+
+    /**
+     * Determine is the current test is an ancestor of the other one.
+     * Ancestor means that the other test instance is either equal or is somewhere in the child hierarchy of this test.
+     * @param test the other test instance
+     * @return true if the current test is an ancestor
+     */
+    public boolean isAncestorOf(AbstractTest test) {
+        AbstractTest p = test;
+        while(p != null) {
+            if(this.equals(p)) {
+                return true;
+            }
+            p = p.getParent();
+        }
+        return false;
     }
 }

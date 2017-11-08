@@ -2,6 +2,7 @@ package com.adobe.qe.toughday.publishers;
 
 import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.annotations.Description;
+import com.adobe.qe.toughday.core.benckmark.TestResult;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.metrics.MetricResult;
@@ -10,6 +11,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -22,9 +24,16 @@ public class ConsolePublisher extends Publisher {
     private boolean begun = false;
     private boolean finished = false;
     private boolean clearScreen = true;
+    private boolean batchLoggingCalled = false;
     private final CleanerThread cleaner;
     private Scanner sc;
     private AtomicInteger extraLines;
+
+
+    @ConfigArgSet(required = false, defaultValue = "false", desc = "Enable the raw result publishing")
+    public void setRawPublish(String rawPublish) {
+        super.setRawPublish(rawPublish);
+    }
 
     class CleanerThread extends Thread {
 
@@ -58,13 +67,14 @@ public class ConsolePublisher extends Publisher {
     }
 
     public ConsolePublisher() {
+        setRawPublish(Boolean.FALSE.toString()); //TODO remove this when call config arg set is merged
         sc = new Scanner(System.in);
         extraLines = new AtomicInteger(0);
         this.cleaner = new CleanerThread();
         this.cleaner.start();
     }
 
-    @ConfigArgSet(required = false, defaultValue = "true",desc = "Clear the screen before printing each stat")
+    @ConfigArgSet(required = false, defaultValue = "true", desc = "Clear the screen before printing each stat")
     public void setClear(String clearScreen) {
         this.clearScreen = Boolean.parseBoolean(clearScreen);
     }
@@ -121,16 +131,21 @@ public class ConsolePublisher extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Map<String, List<MetricResult>> results) {
+    protected void doPublishIntermediate(Map<String, List<MetricResult>> results) {
         publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishFinal(Map<String, List<MetricResult>> results) {
         System.out.println("********************************************************************");
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
         publish(results);
+    }
+
+    @Override
+    protected void doPublish(Collection<TestResult> testResults) {
+
     }
 
     @Override

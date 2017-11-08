@@ -1,16 +1,25 @@
 package com.adobe.qe.toughday.core;
 
+import com.adobe.qe.toughday.core.benckmark.AdHocTest;
+import com.adobe.qe.toughday.core.benckmark.TestResult;
 import org.HdrHistogram.SynchronizedHistogram;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
+import org.apache.commons.lang3.tuple.Triple;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.locks.ReadWriteLock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 /**
  * Map for storing benchmarks. Thread safe for benchmarking operations. Not thread safe for  adding and removing tests.
  */
 public class RunMap {
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+    public static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
 
+    private long startNanoTime;
+    private long startMillisTime;
     /*
         The map should remain unordered (hash map) for faster access, that is why we are using a second
         data structure - list - to keep the order of the tests in output, just for the global run map.
@@ -18,33 +27,61 @@ public class RunMap {
         a future run mode would require it.
      */
     private Map<AbstractTest, TestEntry> runMap;
+    private ReadWriteLock runMapLock = new ReentrantReadWriteLock();
     private List<AbstractTest> orderedTests;
-    private boolean keepTestsOrdered = false;
+
+    /*
+        This is not the usual read/write scenario, actually quite the opposite, we want concurrent writes, exclusive read.
+        We want to allow concurrent writes in the test results collection, while threads execute tests - use readLock
+        We want that when the aggregator reads the results, nobody is writing new results              - use writeLock
+     */
+    private ReadWriteLock testResultsLock = new ReentrantReadWriteLock();
+    private ConcurrentLinkedQueue<TestResult> currentTestResults = new ConcurrentLinkedQueue<>();
 
     public RunMap () {
         runMap = new HashMap<>();
-        orderedTests = new ArrayList<>();
-        this.keepTestsOrdered = true;
+        orderedTests = Collections.synchronizedList(new ArrayList<>());
     }
 
-    private RunMap (Collection<AbstractTest> tests) {
+    private RunMap (List<AbstractTest> orderedTests) {
         this();
-        this.keepTestsOrdered = false;
-        for (AbstractTest test : tests) {
+        this.orderedTests.addAll(orderedTests);
+        for (AbstractTest test : orderedTests) {
             runMap.put(test, new TestEntry(test));
         }
     }
 
-    public void addTest (AbstractTest test) {
-        TestEntry entry = new TestEntry(test);
-        runMap.put(test, entry);
-        if(keepTestsOrdered) {
-            orderedTests.add(test);
+    public void addTest(AbstractTest test) {
+        runMapLock.writeLock().lock();
+        try {
+            //This test was already added by a previous thread
+            if(runMap.containsKey(test)) {
+                return;
+            }
+            TestEntry entry = new TestEntry(test);
+            runMap.put(test, entry);
+            if (test instanceof AdHocTest) {
+                insertPartiallyOrderedAdHocTest(test);
+            } else {
+                orderedTests.add(test);
+            }
+        } finally {
+            runMapLock.writeLock().unlock();
         }
     }
 
+
     public TestEntry getRecord(AbstractTest test) {
-        return runMap.get(test);
+        runMapLock.readLock().lock();
+        try {
+            return runMap.get(test);
+        } finally {
+            runMapLock.readLock().unlock();
+        }
+    }
+
+    public Collection<TestResult> getCurrentTestResults() {
+        return currentTestResults;
     }
     
     /**
@@ -56,52 +93,183 @@ public class RunMap {
         return orderedTests;
     }
 
-    public void recordRun (AbstractTest test, double duration) {
-        TestEntry entry = runMap.get(test);
-        if(entry != null) {
-            runMap.get(test).recordRun(duration);
+    public void record(TestResult testResult) {
+        testResultsLock.readLock().lock();
+        currentTestResults.add(testResult);
+        testResultsLock.readLock().unlock();
+
+        runMapLock.readLock().lock();
+        try {
+            if (testResult.isShowInAggregatedView()) {
+                AbstractTest test = testResult.getTest();
+                TestEntry entry = runMap.get(test);
+                if (entry == null) {
+                    runMapLock.readLock().unlock();
+                    addTest(test);
+                    runMapLock.readLock().lock();
+                    entry = runMap.get(test);
+                }
+                entry.record(testResult);
+            }
+        } finally {
+            runMapLock.readLock().unlock();
         }
     }
 
-    public void recordFail (AbstractTest test, Throwable e) {
-        TestEntry entry = runMap.get(test);
-        if(entry != null) {
-            runMap.get(test).recordFail(e);
+    public Map<AbstractTest, Long> aggregateAndReinitialize(RunMap other) {
+        other.testResultsLock.writeLock().lock();
+        try {
+            this.testResultsLock.writeLock().lock();
+            try {
+                TestResult testResult = other.currentTestResults.poll();
+                while (testResult != null) {
+                    this.currentTestResults.add(testResult);
+                    testResult = other.currentTestResults.poll();
+                }
+            } finally {
+                this.testResultsLock.writeLock().unlock();
+            }
+        } finally {
+            other.testResultsLock.writeLock().unlock();
+        }
+
+        this.runMapLock.writeLock().lock();
+        try {
+            other.runMapLock.writeLock().lock();
+            try {
+                Map<AbstractTest, Long> counts = new HashMap<>();
+                synchronized (orderedTests) {
+                    for (AbstractTest test : other.orderedTests) {
+                        TestEntry otherEntry = other.runMap.get(test);
+                        TestEntry thisEntry = this.runMap.get(test);
+                        if (thisEntry == null) {
+                            addTest(test.clone());
+                            thisEntry = this.runMap.get(test);
+                        }
+                        long count = thisEntry.aggregateAndReinitialize(otherEntry);
+                        counts.put(test, count);
+                    }
+                }
+                return counts;
+            } finally {
+                other.runMapLock.writeLock().unlock();
+            }
+        } finally {
+            this.runMapLock.writeLock().unlock();
         }
     }
 
-    public void recordSkipped(AbstractTest test, SkippedTestException e) {
-        TestEntry entry = runMap.get(test);
-        if (entry != null) {
-            runMap.get(test).recordSkipped(e);
-        }
-    }
-
-    public Map<AbstractTest, Long> aggregateAndReinitialize (RunMap other) {
-        Map<AbstractTest, Long> counts = new HashMap<>();
-        for (Map.Entry<AbstractTest, TestEntry> entry : other.runMap.entrySet()) {
-            long count = this.runMap.get(entry.getKey()).aggregateAndReinitialize(entry.getValue());
-            counts.put(entry.getKey(), count);
-        }
-        return counts;
-    }
-
-    public synchronized void reinitialize() {
-        for (TestEntry testEntry : runMap.values()) {
-            testEntry.init();
-            testEntry.reinitStartTime();
+    public void reinitialize() {
+        runMapLock.writeLock().lock();
+        try {
+            for (TestEntry testEntry : runMap.values()) {
+                testEntry.init();
+                testEntry.reinitTime();
+            }
+        } finally {
+            runMapLock.writeLock().unlock();
         }
     }
 
     //TODO refactor this
     public void reinitStartTimes() {
-        for (TestEntry entry : runMap.values()) {
-            entry.reinitStartTime();
+        runMapLock.writeLock().lock();
+        try {
+            this.startNanoTime = System.nanoTime();
+            this.startMillisTime = System.currentTimeMillis();
+            for (TestEntry entry : runMap.values()) {
+                entry.reinitTime();
+            }
+        } finally {
+            runMapLock.writeLock().unlock();
+        }
+    }
+
+    public void clearCurrentTestResults() {
+        try {
+            runMapLock.writeLock().lock();
+
+            currentTestResults.clear();
+        } finally {
+            runMapLock.writeLock().unlock();
         }
     }
 
     public RunMap newInstance() {
-        return new RunMap(runMap.keySet());
+        try {
+            runMapLock.readLock().lock();
+
+            return new RunMap(orderedTests);
+        } finally {
+            runMapLock.readLock().unlock();
+        }
+    }
+
+
+    /**
+     * TODO: Optimize this?
+     * @param test
+     */
+    private void insertPartiallyOrderedAdHocTest(AbstractTest test) {
+        //Shouldn't happen, but better safe than sorry
+        if(test.getParent() == null) {
+            orderedTests.add(test);
+            return;
+        }
+
+        int ancestorLevel = -1;
+        int index = -1;
+        int i = 0;
+        for(AbstractTest other : orderedTests) {
+            i++;
+            Triple<AbstractTest, Integer, Integer> commonAncestorAndLevel = lowestCommonAncestor(test, other);
+            if(commonAncestorAndLevel.getLeft() != null &&
+                    (commonAncestorAndLevel.getMiddle() > ancestorLevel || (commonAncestorAndLevel.getRight() >= 0 && commonAncestorAndLevel.getMiddle() == ancestorLevel))) {
+                index = i + (commonAncestorAndLevel.getRight() < 0 ? -1 : 0);
+                ancestorLevel = commonAncestorAndLevel.getMiddle();
+            }
+        }
+
+        if(index != -1 && index < orderedTests.size()) {
+            orderedTests.add(index, test);
+        } else {
+            orderedTests.add(test);
+        }
+    }
+
+    private Triple<AbstractTest, Integer, Integer> lowestCommonAncestor(AbstractTest test1, AbstractTest test2) {
+        LinkedList<AbstractTest> test1Ancestors = new LinkedList<>();
+        LinkedList<AbstractTest> test2Ancestors = new LinkedList<>();
+        for(AbstractTest p = test1; p != null; p = p.getParent()) {
+            test1Ancestors.addFirst(p);
+        }
+        int test1AncestorsSize = test1Ancestors.size();
+        if(test1AncestorsSize == 0) {
+            return new ImmutableTriple<>(null, -1, 0);
+        }
+
+        for(AbstractTest p = test2; p != null; p = p.getParent()) {
+            test2Ancestors.addFirst(p);
+        }
+
+        int test2AncestorsSize = test2Ancestors.size();
+        if(test2AncestorsSize == 0) {
+            return new ImmutableTriple<>(null, -1, 0);
+        }
+
+        //No common ancestor
+        if(!test1Ancestors.peekFirst().equals(test2Ancestors.peekFirst())) {
+            return new ImmutableTriple<>(null, -1, 0);
+        }
+
+        int level = 0;
+        AbstractTest lowestCommonAncestor = null;
+        while (test1Ancestors.peekFirst() != null && test2Ancestors.peekFirst() != null && test1Ancestors.peekFirst().equals(test2Ancestors.peekFirst())) {
+            ++level;
+            lowestCommonAncestor = test1Ancestors.removeFirst();
+            test2Ancestors.removeFirst();
+        }
+        return new ImmutableTriple<>(lowestCommonAncestor, level, level == test1AncestorsSize ? -1 : 1);
     }
 
     /**
@@ -175,9 +343,7 @@ public class RunMap {
         private long failRuns;
         private long skippedRuns;
         private Map<Class<? extends Throwable>, Long> failsMap;
-        private long startNanoTime;
         private long lastNanoTime;
-        private long startMillisTime;
         private SynchronizedHistogram histogram;
 
         private void init() {
@@ -195,8 +361,23 @@ public class RunMap {
         public TestEntry(AbstractTest test) {
             this.test = test;
             histogram = new SynchronizedHistogram(3600000L /* 1h */, 3);
-            reinitStartTime();
+            reinitTime();
             init();
+        }
+
+
+        public synchronized void record(TestResult testResult) {
+            switch (testResult.getStatus()) {
+                case PASSED:
+                    recordRun(testResult.getDuration());
+                    break;
+                case SKIPPED:
+                    recordSkipped(testResult.getSkippedCause());
+                    break;
+                case FAILED:
+                    recordFail(testResult.getFailCause());
+                    break;
+            }
         }
 
         /**
@@ -227,16 +408,15 @@ public class RunMap {
          * @param duration
          */
         public synchronized void recordRun(double duration) {
+            long endTimestamp = System.currentTimeMillis();
             histogram.recordValue((long) duration);
             lastNanoTime = System.nanoTime();
             totalDuration += duration;
         }
 
         //TODO refactor this?
-        public synchronized void reinitStartTime() {
-            this.startNanoTime = System.nanoTime();
+        public synchronized void reinitTime() {
             this.lastNanoTime = System.nanoTime();
-            this.startMillisTime = System.currentTimeMillis();
         }
 
         @Override

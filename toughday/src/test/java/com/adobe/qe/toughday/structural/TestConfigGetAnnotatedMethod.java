@@ -13,11 +13,11 @@ import java.lang.reflect.Modifier;
 
 @Category(TestTDConstraints.class)
 public class TestConfigGetAnnotatedMethod extends TestCase {
-    private Method TDConfigAnnotatedMethod;
+    private Method TdConfigAnnotatedMethod;
 
     public TestConfigGetAnnotatedMethod(String testName, Method method) {
         super(testName);
-        this.TDConfigAnnotatedMethod = method;
+        this.TdConfigAnnotatedMethod = method;
     }
 
     /**
@@ -27,12 +27,12 @@ public class TestConfigGetAnnotatedMethod extends TestCase {
     public static TestSuite suite() { return new TestSuite(); }
 
     public void testModifier() {
-        assertTrue("ToughDay2 config get method \"" + TDConfigAnnotatedMethod + "\" must be public",
-                (TDConfigAnnotatedMethod.getModifiers() & Modifier.PUBLIC) != 0);
+        assertTrue("ToughDay2 config get method \"" + TdConfigAnnotatedMethod + "\" must be public",
+                (TdConfigAnnotatedMethod.getModifiers() & Modifier.PUBLIC) != 0);
     }
 
     public void testArguments() {
-        assertTrue( "ToughDay2 config get method \"" + TDConfigAnnotatedMethod + "\" must have no parameters",
-                TDConfigAnnotatedMethod.getParameterTypes().length == 0);
+        assertTrue( "ToughDay2 config get method \"" + TdConfigAnnotatedMethod + "\" must have no parameters",
+                TdConfigAnnotatedMethod.getParameterTypes().length == 0);
     }
 }

@@ -17,11 +17,11 @@ import java.lang.reflect.Modifier;
 
 @Category(TestTDConstraints.class)
 public class TestAnnotatedMethod extends TestCase {
-    private Method TDAnnotatedMethod;
+    private Method TdAnnotatedMethod;
 
     public TestAnnotatedMethod(String testName, Method method) {
         super(testName);
-        this.TDAnnotatedMethod = method;
+        this.TdAnnotatedMethod = method;
     }
 
     public static boolean hasAnnotation(Method method) {
@@ -40,12 +40,12 @@ public class TestAnnotatedMethod extends TestCase {
     }
 
     public void testModifier() {
-        assertTrue("ToughDay2 annotated method \"" + TDAnnotatedMethod + "\" must be private",
-                (TDAnnotatedMethod.getModifiers() & Modifier.PRIVATE) != 0);
+        assertTrue("ToughDay2 annotated method \"" + TdAnnotatedMethod + "\" must be private",
+                (TdAnnotatedMethod.getModifiers() & Modifier.PRIVATE) != 0);
     }
 
     public void testArguments() {
-        assertTrue("ToughDay2 annotated method \"" + TDAnnotatedMethod + "\" is not allowed to have parameters",
-                TDAnnotatedMethod.getParameterTypes().length == 0);
+        assertTrue("ToughDay2 annotated method \"" + TdAnnotatedMethod + "\" is not allowed to have parameters",
+                TdAnnotatedMethod.getParameterTypes().length == 0);
     }
 }

@@ -114,7 +114,7 @@ public class Normal implements RunMode {
 
     private class AsyncTestWorkerImpl extends AsyncTestWorker {
         protected final Engine engine;
-        private HashMap<UUID, AbstractTest> localTests;
+        private HashMap<TestId, AbstractTest> localTests;
         private TestSuite testSuite;
         private RunMap localRunMap;
 

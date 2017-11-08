@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.core.Publisher;
 import com.adobe.qe.toughday.core.RunMap;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Internal;
+import com.adobe.qe.toughday.core.benckmark.TestResult;
 import com.adobe.qe.toughday.metrics.MetricResult;
 import org.apache.http.*;
 import org.apache.http.entity.InputStreamEntity;
@@ -65,13 +66,18 @@ public class LiveChartPublisherPOC extends Publisher {
     }
 
     @Override
-    public void publishIntermediate(Map<String, List<MetricResult>> results) {
+    protected void doPublishIntermediate(Map<String, List<MetricResult>> results) {
         publish(results);
     }
 
     @Override
-    public void publishFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishFinal(Map<String, List<MetricResult>> results) {
         publish(results);
+    }
+
+    @Override
+    protected void doPublish(Collection<TestResult> testResults) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

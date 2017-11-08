@@ -6,12 +6,14 @@ import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
+import com.adobe.qe.toughday.tests.utils.SlingClientsProxyFactory;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.ThreadContext;
+import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.UUID;
@@ -38,6 +40,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     public CreatePageTreeTest() {
         phaser = new TreePhaser();
+        benchmark().registerHierarchyProxyFactory(SlingClient.class, new SlingClientsProxyFactory());
     }
 
     protected CreatePageTreeTest(TreePhaser phaser, String parentPath, String template, String title) {
@@ -117,10 +120,14 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 .addParameter("title", title)
                 .addParameter("template", template);
 
-        getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+        try {
+            HttpEntity entity = feb.build();
+            benchmark().measure(this, "Create Page", getDefaultClient()).doPost("/bin/wcmcommand", entity, HttpStatus.SC_OK);
+        } catch (Throwable e) {
+            e.printStackTrace();
+        }
         communicate("resource", parentPath + nodeName);
     }
-
 
     @Override
     public AbstractTest newInstance() {

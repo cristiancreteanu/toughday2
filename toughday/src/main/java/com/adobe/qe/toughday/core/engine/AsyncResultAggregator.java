@@ -53,8 +53,8 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 Map<AbstractTest, Long> counts = engine.getPublishMode().aggregateAndReinitialize(localRunMap);
 
                 Map<AbstractTest, AtomicLong> globalCounts = engine.getCounts();
-                for (Map.Entry<AbstractTest, Long> entry : counts.entrySet()) {
-                    globalCounts.get(entry.getKey()).addAndGet(entry.getValue());
+                for (Map.Entry<AbstractTest, AtomicLong> entry : globalCounts.entrySet()) {
+                    globalCounts.get(entry.getKey()).addAndGet(counts.get(entry.getKey()));
                 }
             }
         }
@@ -101,6 +101,8 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publishIntermediateResults(results);
+                engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
+                engine.getPublishMode().getGlobalRunMap().clearCurrentTestResults();
                 elapsed = (System.nanoTime() - start) / 1000000l;
             }
         } catch (InterruptedException e) {

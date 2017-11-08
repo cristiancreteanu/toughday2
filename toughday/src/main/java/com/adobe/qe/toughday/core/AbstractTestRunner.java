@@ -121,26 +121,24 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * Runs a test an benchmarks its execution.
      * @param testObject instance of the test to run
      * @param runMap the run map in which the benchmark will be recorded.
-     * @throws ChildTestFailedException propagated exception if the test object is part of a composite test.
+     * @throws Throwable any throwable occurred in the test and was propagated upstream by the implementation runner
      */
-    public void runTest(AbstractTest testObject, RunMap runMap) throws ToughDayException {
+    public void runTest(AbstractTest testObject, RunMap runMap) throws Throwable {
+        testObject.benchmark().setRunMap(runMap);
         executeCloneSetup(testObject);
         executeBefore(testObject);
 
-        ToughDayException exception = null;
+        Throwable throwable = null;
         try {
             run((T) testObject, runMap);
-        } catch (ToughDayException e) {
-            exception = e;
-        }
-        catch (Throwable e) {
-            exception = new ToughDayException(e);
+        } catch (Throwable e) {
+            throwable = e;
+        } finally {
+            executeAfter(testObject);
         }
 
-        executeAfter(testObject);
-
-        if(testObject.getParent() != null && exception != null) {
-            throw exception;
+        if(testObject.getParent() != null && throwable != null) {
+            throw throwable;
         }
     }
 
@@ -148,9 +146,9 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * Method for delegating the responsability of correctly running and benchmarking the test to subclasses.
      * @param testObject instance of the test to run
      * @param runMap the run map in which the benchmark will be recorded.
-     * @throws ChildTestFailedException propagated exception if the test object is part of a composite test.
+     * @throws Throwable any throwable occurred in the test and was propagated upstream by the implementation runner
      */
-    protected abstract void run(T testObject, RunMap runMap) throws ToughDayException;
+    protected abstract void run(T testObject, RunMap runMap) throws Throwable;
 
     /**
      * Run a annotated method using reflections.

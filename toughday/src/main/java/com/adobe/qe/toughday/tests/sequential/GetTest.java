@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Tag;
+import com.adobe.qe.toughday.core.benckmark.Benchmark;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
@@ -40,15 +41,12 @@ public class GetTest extends SequentialTestBase {
     public void test() throws Throwable {
         try {
             LOG.debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
-            getDefaultClient().doGet(path, HttpStatus.SC_OK);
+            benchmark().measure(this, "GET", getDefaultClient()).doGet(path, HttpStatus.SC_OK);
         } catch (Throwable e) {
             LOG.warn("{}: Failed to GET path={}", Thread.currentThread().getName(), path);
             LOG.debug(Thread.currentThread().getName() + ": ERROR :", e);
-
             throw e;
         }
-
-        LOG.debug("{}: Successfully did GET path={}", Thread.currentThread().getName(), path);
     }
 
     @Override

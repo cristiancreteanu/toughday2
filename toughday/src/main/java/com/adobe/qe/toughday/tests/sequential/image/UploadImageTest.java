@@ -48,8 +48,7 @@ public class UploadImageTest extends SequentialTestBase {
     private BufferedImage img;
     private InputStream imageStream;
 
-    public UploadImageTest() {
-    }
+    public UploadImageTest() {}
 
     private UploadImageTest(String fileName, String resourcePath, String mimeType, String parentPath) {
         this.resourcePath = resourcePath;
