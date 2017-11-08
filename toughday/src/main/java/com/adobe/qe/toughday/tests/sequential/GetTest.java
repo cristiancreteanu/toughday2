@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.FluentLogging;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.annotations.Tag;
 import com.adobe.qe.toughday.core.benckmark.Benchmark;
@@ -13,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 @Tag(tags = { "author", "publish" })
 @Description(desc = "GET a specific page.")
 public class GetTest extends SequentialTestBase {
-    public static Logger LOG = createLogger(GetTest.class);
 
     public static final String DEFAULT_PATH = "/crx/de";
     private String path;
@@ -40,11 +40,11 @@ public class GetTest extends SequentialTestBase {
     @Override
     public void test() throws Throwable {
         try {
-            LOG.debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
+            logger().debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
             benchmark().measure(this, "GET", getDefaultClient()).doGet(path, HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to GET path={}", Thread.currentThread().getName(), path);
-            LOG.debug(Thread.currentThread().getName() + ": ERROR :", e);
+            logger().warn("{}: Failed to GET path={}", Thread.currentThread().getName(), path);
+            logger().debug(Thread.currentThread().getName() + ": ERROR :", e);
             throw e;
         }
     }

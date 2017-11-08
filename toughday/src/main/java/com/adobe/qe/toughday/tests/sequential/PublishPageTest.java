@@ -27,7 +27,6 @@ import java.util.List;
 public class PublishPageTest extends SequentialTestBase {
     private static final String REFERENCES_SERVLET = "/libs/wcm/core/content/reference.json?_charset_=utf-8";
     private static final Gson GSON = new Gson();
-    private static final Logger LOG = createLogger(PublishPageTest.class);
     public static final String DEFAULT_WITH_REFERENCES = "false";
 
     private boolean withReferences = Boolean.parseBoolean(DEFAULT_WITH_REFERENCES);
@@ -45,12 +44,12 @@ public class PublishPageTest extends SequentialTestBase {
         if (pagePath == null)
             throw new Exception("No page was created. Cannot activate it");
 
-        LOG.debug("{}: Trying to publish page={}", Thread.currentThread().getName(), pagePath);
+        logger().debug("{}: Trying to publish page={}", Thread.currentThread().getName(), pagePath);
         try {
             publish(pagePath, withReferences, HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to publish page={}: {}", Thread.currentThread().getName(), pagePath, e.getMessage());
-            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+            logger().warn("{}: Failed to publish page={}: {}", Thread.currentThread().getName(), pagePath, e.getMessage());
+            logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
             
             throw e;
         }

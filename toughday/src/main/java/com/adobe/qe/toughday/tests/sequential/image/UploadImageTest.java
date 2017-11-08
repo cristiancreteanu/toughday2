@@ -34,7 +34,6 @@ import java.util.concurrent.atomic.AtomicInteger;
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreateAssetTreeTest.")
 public class UploadImageTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(UploadImageTest.class);
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
     private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
@@ -86,17 +85,17 @@ public class UploadImageTest extends SequentialTestBase {
         String currentParentPath = StringUtils.stripEnd(getCommunication("parentPath", parentPath), "/");
 
         try {
-            LOG.debug("{}: Trying to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
+            logger().debug("{}: Trying to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
 
             getDefaultClient().doPost(currentParentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
-            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+            logger().warn("{}: Failed to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
+            logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully uploaded image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
+        logger().debug("{}: Successfully uploaded image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
     }
 
     @After

@@ -19,7 +19,6 @@ import java.util.concurrent.atomic.AtomicInteger;
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreatePageTreeTest.")
 public class CreatePageTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreatePageTest.class);
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;
@@ -54,17 +53,17 @@ public class CreatePageTest extends SequentialTestBase {
                 .addParameter("template", template);
 
         try {
-            LOG.debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, nextTitle, template);
+            logger().debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getId(), rootParentPath, nextTitle, template);
 
             getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, nextTitle, template);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getId(), rootParentPath, nextTitle, template);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), rootParentPath, nextTitle, template);
+        logger().debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getId(), rootParentPath, nextTitle, template);
     }
 
     @Override

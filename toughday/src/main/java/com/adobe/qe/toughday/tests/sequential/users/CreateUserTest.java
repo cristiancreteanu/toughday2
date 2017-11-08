@@ -24,7 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Tag(tags = { "author" })
 @Description(desc = "Creates users similar to the user editor console (/libs/granite/security/content/userEditor.html)")
 public class CreateUserTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreateUserTest.class);
 
     public static final String DEFAULT_PASSWORD = "toughday";
     public static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";
@@ -124,16 +123,16 @@ public class CreateUserTest extends SequentialTestBase {
             .addParameter("createUser", "1");
 
         try {
-            LOG.debug("{}: Trying to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
+            logger().debug("{}: Trying to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
             getDefaultClient().doPost("/libs/granite/security/post/authorizables.html", entityBuilder.build(), HttpStatus.SC_CREATED);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully created user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
+        logger().debug("{}: Successfully created user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
 
         //Add user to the groups
         for(String group : groups) {
@@ -155,17 +154,17 @@ public class CreateUserTest extends SequentialTestBase {
                 .addParameter("_charset_", "utf-8");
 
         try {
-            LOG.debug("{}: Trying to add user={}, to group ={}", Thread.currentThread().getName(), user, group);
+            logger().debug("{}: Trying to add user={}, to group ={}", Thread.currentThread().getName(), user, group);
 
             getDefaultClient().doPost(groupServlet, entityBuilder.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to add user={}, to group ={}", Thread.currentThread().getName(), user, group);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to add user={}, to group ={}", Thread.currentThread().getName(), user, group);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully added user={}, to group ={}", Thread.currentThread().getName(), user, group);
+        logger().debug("{}: Successfully added user={}, to group ={}", Thread.currentThread().getName(), user, group);
     }
 
     @ConfigArgSet(required = false, desc = "Path where the users are created.", defaultValue = DEFAULT_PATH_TO_ADD_USERS)

@@ -31,7 +31,6 @@ import org.apache.logging.log4j.Logger;
 @Name(name = "rollout_source")
 @Description(desc = "Rollout the source page/ blueprint")
 public class RolloutTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(RolloutTest.class);
 
     private String sourcePage = null;
     private String destinationPage = null;
@@ -59,18 +58,18 @@ public class RolloutTest extends SequentialTestBase {
     @Override
     public void test() throws Throwable {
         try {
-            LOG.debug("{}: Trying to rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
+            logger().debug("{}: Trying to rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
 
             WcmUtils.rolloutPage(getDefaultClient(), type, background,
                     new String[]{sourcePage}, null, new String[]{destinationPage}, 200);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to rollout page={}{}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
-            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+            logger().warn("{}: Failed to rollout page={}{}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
+            logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
+        logger().debug("{}: Successfully rollout page={}, from source={}", Thread.currentThread().getName(), destinationPage, sourcePage);
     }
 
     @Override

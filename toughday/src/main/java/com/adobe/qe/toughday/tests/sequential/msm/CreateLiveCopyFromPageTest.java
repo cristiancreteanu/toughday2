@@ -16,7 +16,6 @@ import java.util.UUID;
 @Name(name = "create_lc")
 @Description(desc = "Creates live copies from pages")
 public class CreateLiveCopyFromPageTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreateLiveCopyFromPageTest.class);
 
     public static final String SOURCE_PAGE_NAME = "create_lc_source";
     public static final String DESTINATION_PAGE_NAME = "create_lc_dest";
@@ -58,7 +57,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
             getDefaultClient().createFolder(isolatedFolder, isolatedFolder, destinationRoot);
             destinationRoot = destinationRoot + "/" + isolatedFolder;
         } catch (Throwable e) {
-            LOG.debug("Could not create isolated folder for running " + getFullName());
+            logger().debug("Could not create isolated folder for running " + getFullName());
         }
     }
 
@@ -79,15 +78,15 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     @Override
     public void test() throws Throwable {
         try {
-            LOG.debug("{}: Trying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+            logger().debug("{}: Trying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
 
             createLC();
         } catch (Throwable e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we're just count them.
-            LOG.warn("{}: Failed to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
@@ -106,15 +105,15 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.destinationPage + nodeName)) {
-                    LOG.debug("{}: Successfully created live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+                    logger().debug("{}: Successfully created live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
                     break;
                 } else {
-                    LOG.debug("{}: Retrying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+                    logger().debug("{}: Retrying to create live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
                     createLC();
                 }
             } catch (Throwable e) {
-                LOG.warn("{}: Failed to create after retry live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
-                LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+                logger().warn("{}: Failed to create after retry live copy={}{}, from page={}", Thread.currentThread().getName(), destinationPage, nodeName, sourcePage);
+                logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
             }
         }
 

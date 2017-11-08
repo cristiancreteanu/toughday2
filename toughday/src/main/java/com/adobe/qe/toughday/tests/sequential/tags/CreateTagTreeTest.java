@@ -22,7 +22,6 @@ import java.util.Arrays;
         "This test creates tags hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the tag tree, up to base^level")
 public class CreateTagTreeTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 
     public static final String CREATE_TAG_CMD = "createTag";
     public static final String TAG_COMMAND_URL = "/bin/tagcommand";
@@ -62,7 +61,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
             createNamespace(isolatedNameSpace, isolatedNameSpace, NAMEPSPACE_DESCRIPTION);
             namespace = isolatedNameSpace;
         } catch (Throwable e) {
-            LOG.warn("Failed to create namespace {}", namespace);
+            logger().warn("Failed to create namespace {}", namespace);
             namespace = "default";
         }
 
@@ -90,14 +89,14 @@ public class CreateTagTreeTest extends SequentialTestBase {
     @Override
     public void test() throws Throwable {
         try {
-            LOG.debug("{}: Trying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+            logger().debug("{}: Trying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
             createTag();
         } catch (Throwable e) {
             this.failed = true;
             // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
             // we just count them.
-            LOG.warn("{}: Failed to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
             throw e;
         }
     }
@@ -110,15 +109,15 @@ public class CreateTagTreeTest extends SequentialTestBase {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
-                    LOG.debug("{}: Successfully created tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+                    logger().debug("{}: Successfully created tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                     break;
                 } else {
-                    LOG.debug("{}: Retrying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+                    logger().debug("{}: Retrying to create tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
                     createTag();
                 }
             } catch (Throwable e) {
-                LOG.warn("{}: Failed to create after retry tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
-                LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+                logger().warn("{}: Failed to create after retry tag={}{}", Thread.currentThread().getName(), parentPath, nodeName);
+                logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
             }
         }
 

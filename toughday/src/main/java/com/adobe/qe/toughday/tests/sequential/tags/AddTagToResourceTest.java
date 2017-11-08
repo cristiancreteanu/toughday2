@@ -12,7 +12,6 @@ import java.util.List;
 
 @Internal
 public class AddTagToResourceTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(AddTagToResourceTest.class);
 
     @Override
     public void test() throws Throwable {
@@ -33,15 +32,15 @@ public class AddTagToResourceTest extends SequentialTestBase {
         builder.addParameter("./cq:tags@TypeHint", "String[]");
 
         try {
-            LOG.debug("{}: Trying to add tags to the resource", Thread.currentThread().getName());
+            logger().debug("{}: Trying to add tags to the resource", Thread.currentThread().getName());
             getDefaultClient().doPost(resourcePath, builder.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to add tags to the resource", Thread.currentThread().getName());
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to add tags to the resource", Thread.currentThread().getName());
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
-        LOG.debug("{}: Successfully added tags to the resource", Thread.currentThread().getName());
+        logger().debug("{}: Successfully added tags to the resource", Thread.currentThread().getName());
     }
 
     @Override

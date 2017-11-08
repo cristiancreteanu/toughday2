@@ -29,14 +29,16 @@ import java.util.*;
  * that already have a runner. {@link DemoTest} for a detailed example.
  */
 public abstract class AbstractTest {
+    protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+
     private @NotNull
     TestId id;
     private String name;
     private AbstractTest parent;
     private Configuration.GlobalArgs globalArgs;
     protected File workspace;
-    protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private Logger logger;
     private BenchmarkImpl benchmark;
     private boolean showSteps = false;
 
@@ -181,6 +183,7 @@ public abstract class AbstractTest {
         newInstance.setID(this.id);
         newInstance.setName(this.getName());
         newInstance.setGlobalArgs(this.getGlobalArgs());
+        newInstance.logger = logger();
         newInstance.benchmark = this.benchmark.clone();
         newInstance.setShowSteps(Boolean.toString(this.getShowSteps()));
         return newInstance;
@@ -188,16 +191,13 @@ public abstract class AbstractTest {
 
     /**
      * Get the logger of this test
-     * @param clazz
      * @return
      */
-    public static Logger createLogger(Class<?> clazz) {
+    private static Logger createLogger(AbstractTest test) {
 
-            String name = clazz.getSimpleName();
-        if (clazz.isAnnotationPresent(Name.class)) {
-            Name d = clazz.getAnnotation(Name.class);
-            name = d.name();
-        }
+        String testName = test.getFullName();
+        Class clazz = test.getClass();
+        String clazzLoggerName = clazz.getName() + "#" + testName;
 
         Level logLevel = System.getProperty("toughday.log.level") != null ? Level.valueOf(System.getProperty("toughday.log.level")) : Level.INFO;
         final String timestamp = TIME_STAMP_FORMAT.format(new Date());
@@ -205,20 +205,28 @@ public abstract class AbstractTest {
         final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
         Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %c{1}:%L - %m%n", null, config,
                 null, null, true, false, null, null);
-        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s_%s.log", name, timestamp),
+        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s_%s.log", testName, timestamp),
                 "true", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
         appender.start();
         config.addAppender(appender);
         AppenderRef ref = AppenderRef.createAppenderRef("File", null, null);
         AppenderRef[] refs = new AppenderRef[] {ref};
         LoggerConfig loggerConfig =
-                LoggerConfig.createLogger("false", logLevel, clazz.getName(), "true", refs, null, config, null);
+                LoggerConfig.createLogger("false", logLevel, clazzLoggerName, "true", refs, null, config, null);
         loggerConfig.addAppender(appender, null, null);
-        config.addLogger(clazz.getName(), loggerConfig);
+        config.addLogger(clazzLoggerName, loggerConfig);
         ctx.updateLoggers();
-        Logger logger = LogManager.getLogger(clazz);
+        Logger logger = LogManager.getLogger(clazzLoggerName);
         logger.info("Created logger {}", logger);
         return logger;
+    }
+
+    public Logger logger() {
+        if (this.logger == null) {
+            this.logger = createLogger(this);
+        }
+
+        return this.logger;
     }
 
     /**

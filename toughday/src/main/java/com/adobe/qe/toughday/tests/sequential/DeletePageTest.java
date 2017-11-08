@@ -17,7 +17,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Tag(tags = { "author" })
 @Description(desc = "Test for deleting pages.")
 public class DeletePageTest extends SequentialTestBase {
-    public static Logger LOG = createLogger(DeletePageTest.class);
 
     private static final String CMD_DELETE_PAGE = "deletePage";
     private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
@@ -51,18 +50,18 @@ public class DeletePageTest extends SequentialTestBase {
                 .addParameter("path", parentPath + "/" + nextTitle);
 
         try {
-            LOG.debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+            logger().debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
 
             getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
 
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to delete={}{}", Thread.currentThread().getName(), parentPath, title);
-            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
+            logger().warn("{}: Failed to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+            logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
+        logger().debug("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
     }
 
 

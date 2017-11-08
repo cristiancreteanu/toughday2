@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.FluentLogging;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
@@ -12,6 +13,7 @@ import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
@@ -24,7 +26,6 @@ import java.util.UUID;
                 "This test creates pages hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the pages tree, up to base^level")
 public class CreatePageTreeTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreatePageTreeTest.class);
 
     private final TreePhaser phaser;
 
@@ -57,7 +58,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
             getDefaultClient().createFolder(isolatedFolder, isolatedFolder, rootParentPath);
             rootParentPath = rootParentPath + "/" + isolatedFolder;
         } catch (Throwable e) {
-            LOG.debug("Could not create isolated folder for running " + getFullName());
+            logger().debug("Could not create isolated folder for running " + getFullName());
         }
     }
 
@@ -75,17 +76,11 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     @Override
     public void test() throws Throwable {
-        try {
-            LOG.debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
-            createPage();
-        } catch (Throwable e) {
-            this.failed = true;
-            // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
-            // we're just count them.
-            LOG.warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
-            LOG.debug(Thread.currentThread().getName() + ": ERROR: ", e);
-            throw e;
-        }
+        FluentLogging.create(logger())
+                .before(Level.DEBUG, "{}: Trying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template)
+                .onThrowable(Level.WARN, "{}: Failed to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template)
+                .onThrowable(Level.DEBUG, Thread.currentThread().getName() + ": ERROR: ", true)
+                .run(() -> createPage());
     }
 
     @After
@@ -96,15 +91,15 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
-                    LOG.debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
+                    logger().debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
                     break;
                 } else {
-                    LOG.debug("{}: Retrying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
+                    logger().debug("{}: Retrying to create page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
                     createPage();
                 }
             } catch (Throwable e) {
-                LOG.warn("{}: Failed to create after retry page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template, e.getMessage());
-                LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+                logger().warn("{}: Failed to create after retry page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template, e.getMessage());
+                logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
             }
         }
 

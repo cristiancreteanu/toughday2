@@ -25,7 +25,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Tag(tags = { "author" })
 @Description(desc = "Create groups of users. Similar to group editor console (/libs/granite/security/content/groupEditor.html)")
 public class CreateUserGroupTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreateUserGroupTest.class);
 
     private String id;
     private String groupName = DEFAULT_GROUP_NAME;
@@ -70,18 +69,18 @@ public class CreateUserGroupTest extends SequentialTestBase {
         }
 
         try {
-            LOG.debug("{}: Trying to create user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
+            logger().debug("{}: Trying to create user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
 
             String groupPath = createGroup(getDefaultClient(), id, groupName, description);
             communicate("groups", extraGroup != null ? Arrays.asList(extraGroup, groupPath) : Arrays.asList(groupPath));
         } catch (Throwable e) {
-            LOG.warn("{}: Failed to create user group={}{}", Thread.currentThread().getName(), groupName, id);
-            LOG.debug(Thread.currentThread().getName() + "ERROR: ", e);
+            logger().warn("{}: Failed to create user group={}{}", Thread.currentThread().getName(), groupName, id);
+            logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
 
-        LOG.debug("{}: Successfully created user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
+        logger().debug("{}: Successfully created user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
     }
 
     /**

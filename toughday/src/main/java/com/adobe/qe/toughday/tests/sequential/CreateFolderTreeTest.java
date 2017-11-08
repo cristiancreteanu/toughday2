@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.core.AbstractTest;
+import com.adobe.qe.toughday.core.FluentLogging;
 import com.adobe.qe.toughday.core.annotations.*;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
@@ -8,6 +9,7 @@ import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
@@ -16,7 +18,6 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 @Description(desc="This test creates folders hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the folder tree, up to base^level")
 public class CreateFolderTreeTest extends SequentialTestBase {
-    public static final Logger LOG = createLogger(CreateFolderTreeTest.class);
 
     public static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
@@ -73,17 +74,11 @@ public class CreateFolderTreeTest extends SequentialTestBase {
 
     @Override
     public void test() throws Throwable {
-        try {
-            LOG.debug("{}: Trying to create folder={}{}", Thread.currentThread().getName(), parentPath, nodeName);
-            createFolder();
-        } catch (Throwable e) {
-            this.failed = true;
-            // log and throw. It's normally an anti-pattern, but we don't log exceptions anywhere on the upper level,
-            // we're just count them.
-            LOG.warn("{}: Failed to create folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
-            LOG.debug(Thread.currentThread().getId() + "ERROR: ", e);
-            throw e;
-        }
+        FluentLogging.create(logger())
+                .before(Level.DEBUG, "{}: Trying to create folder={}{}", Thread.currentThread().getId(), parentPath, nodeName)
+                .onThrowable(Level.WARN, "{}: Failed to create folder={}{}", Thread.currentThread().getId(), parentPath, nodeName)
+                .onThrowable(Level.DEBUG, Thread.currentThread().getId() + "ERROR: ", true)
+                .run(() -> createFolder());
     }
 
     @After
@@ -94,15 +89,15 @@ public class CreateFolderTreeTest extends SequentialTestBase {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
                 if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
-                    LOG.debug("{}: Successfully created folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
+                    logger().debug("{}: Successfully created folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
                     break;
                 } else {
-                    LOG.debug("{}: Retrying to create folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
+                    logger().debug("{}: Retrying to create folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
                     createFolder();
                 }
             } catch (Throwable e) {
-                LOG.warn("{}: Failed to create after retry folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
-                LOG.debug(Thread.currentThread().getId() + "ERROR: ", e);
+                logger().warn("{}: Failed to create after retry folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
+                logger().debug(Thread.currentThread().getId() + "ERROR: ", e);
             }
         }
         communicate("parentPath", parentPath);
