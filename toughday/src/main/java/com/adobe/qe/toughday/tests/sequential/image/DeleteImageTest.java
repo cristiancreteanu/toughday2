@@ -1,11 +1,11 @@
 package com.adobe.qe.toughday.tests.sequential.image;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Tag;
-import com.adobe.qe.toughday.core.SkippedTestException;
-import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Tag;
+import com.adobe.qe.toughday.api.core.SkippedTestException;
 import org.apache.sling.testing.clients.ClientException;
+import com.adobe.qe.toughday.tests.sequential.DeletePageTest;
 
 @Tag(tags = { "author" })
 @Description(desc = "Test for deleting image assets created by the UploadImageTest")

@@ -1,11 +1,11 @@
 package com.adobe.qe.toughday.structural;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.Publisher;
-import com.adobe.qe.toughday.core.ReflectionsContainer;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.metrics.Metric;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.Publisher;
+import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.internal.core.metrics.Metric;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;

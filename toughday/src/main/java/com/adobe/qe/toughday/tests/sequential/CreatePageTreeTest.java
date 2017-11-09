@@ -1,11 +1,9 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.FluentLogging;
-import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.samplecontent.SampleContent;
+import com.adobe.qe.toughday.api.annotations.*;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.FluentLogging;
+import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.utils.SlingClientsProxyFactory;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
@@ -14,7 +12,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 

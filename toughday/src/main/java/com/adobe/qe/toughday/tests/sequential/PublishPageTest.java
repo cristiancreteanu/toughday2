@@ -1,13 +1,12 @@
 package com.adobe.qe.toughday.tests.sequential;
 
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.Publisher;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Internal;
-import com.adobe.qe.toughday.core.annotations.Tag;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Internal;
+import com.adobe.qe.toughday.api.annotations.Tag;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;

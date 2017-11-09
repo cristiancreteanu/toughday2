@@ -1,15 +1,14 @@
 package com.adobe.qe.toughday.tests.sequential.image;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Tag;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.samplecontent.SampleContent;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Tag;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.annotations.After;
+import com.adobe.qe.toughday.api.annotations.Before;
+import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
-import com.adobe.qe.toughday.tests.sequential.CreatePageTest;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;

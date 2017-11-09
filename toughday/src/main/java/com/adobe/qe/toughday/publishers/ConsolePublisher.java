@@ -1,16 +1,18 @@
 package com.adobe.qe.toughday.publishers;
 
-import com.adobe.qe.toughday.core.Publisher;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.benckmark.TestResult;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.metrics.MetricResult;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.core.MetricResult;
+import com.adobe.qe.toughday.api.core.Publisher;
+import com.adobe.qe.toughday.api.core.benchmark.TestResult;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;

@@ -1,11 +1,11 @@
 package com.adobe.qe.toughday.tests.composite.msm;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.samplecontent.SampleContent;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.CompositeTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.msm.CreateLiveCopyFromPageTest;
 import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;

@@ -1,8 +1,8 @@
 package com.adobe.qe.toughday.tests.async;
 
 import com.adobe.qe.toughday.runners.AsyncTestRunner;
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.AbstractTestRunner;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.AbstractTestRunner;
 import org.apache.http.HttpRequest;
 
 import java.util.ArrayList;

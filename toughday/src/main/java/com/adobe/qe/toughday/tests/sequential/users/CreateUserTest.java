@@ -1,13 +1,11 @@
 package com.adobe.qe.toughday.tests.sequential.users;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Name;
-import com.adobe.qe.toughday.core.annotations.Tag;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Before;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Tag;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
 import org.apache.commons.lang3.RandomStringUtils;

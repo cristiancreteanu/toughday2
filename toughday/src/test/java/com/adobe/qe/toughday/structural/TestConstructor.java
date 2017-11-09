@@ -1,7 +1,7 @@
 package com.adobe.qe.toughday.structural;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.benckmark.AdHocTest;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.internal.core.benckmark.AdHocTest;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;

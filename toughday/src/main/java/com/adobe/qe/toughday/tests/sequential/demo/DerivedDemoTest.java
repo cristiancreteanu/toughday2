@@ -1,7 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential.demo;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.*;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.*;
+import com.adobe.qe.toughday.api.annotations.Internal;
 import org.apache.sling.testing.clients.ClientException;
 
 @Internal // <-- remove this to see the test in cli/help and to be able to run it

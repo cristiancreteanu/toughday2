@@ -1,8 +1,9 @@
 package com.adobe.qe.toughday.tests.composite.demo;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.annotations.*;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.CompositeTest;
+import com.adobe.qe.toughday.api.annotations.*;
+import com.adobe.qe.toughday.api.annotations.Internal;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 
 @Internal // <-- remove this to see the test in cli/help and to be able to run it

@@ -1,11 +1,8 @@
 package com.adobe.qe.toughday.structural;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
 import org.junit.Assert;
 import org.junit.Test;
-
-import java.util.regex.Pattern;
 
 /**
  * Created by tuicu on 11/01/17.

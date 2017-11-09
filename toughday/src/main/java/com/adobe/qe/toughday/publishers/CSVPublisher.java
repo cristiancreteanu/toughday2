@@ -1,11 +1,11 @@
 package com.adobe.qe.toughday.publishers;
 
-import com.adobe.qe.toughday.core.Publisher;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.benckmark.TestResult;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.metrics.MetricResult;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.core.MetricResult;
+import com.adobe.qe.toughday.api.core.Publisher;
+import com.adobe.qe.toughday.api.core.benchmark.TestResult;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.slf4j.Logger;

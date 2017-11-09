@@ -1,8 +1,8 @@
 package com.adobe.qe.toughday;
 
 
-import com.adobe.qe.toughday.core.benckmark.Benchmark;
-import com.adobe.qe.toughday.core.benckmark.BenchmarkImpl;
+import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
+import com.adobe.qe.toughday.internal.core.benckmark.BenchmarkImpl;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 
 

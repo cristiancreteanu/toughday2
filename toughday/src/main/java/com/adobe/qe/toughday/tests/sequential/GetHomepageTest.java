@@ -1,8 +1,8 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Tag;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Tag;
 import org.apache.http.HttpStatus;
 
 @Tag(tags = { "author", "publish" })

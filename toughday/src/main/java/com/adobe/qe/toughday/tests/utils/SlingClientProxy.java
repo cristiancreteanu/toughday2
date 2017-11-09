@@ -1,10 +1,10 @@
 package com.adobe.qe.toughday.tests.utils;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.annotations.labels.NotThreadSafe;
-import com.adobe.qe.toughday.core.benckmark.Benchmark;
-import com.adobe.qe.toughday.core.benckmark.Proxy;
-import com.adobe.qe.toughday.core.benckmark.TestResult;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.labels.NotThreadSafe;
+import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
+import com.adobe.qe.toughday.api.core.benchmark.Proxy;
+import com.adobe.qe.toughday.api.core.benchmark.TestResult;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
@@ -13,9 +13,15 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.sling.testing.clients.*;
+import org.apache.sling.testing.clients.ClientException;
+import org.apache.sling.testing.clients.SlingClient;
+import org.apache.sling.testing.clients.SlingClientConfig;
+import org.apache.sling.testing.clients.SlingHttpResponse;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 
 @NotThreadSafe(description = "Don't reuse a proxy for requests. Always create a new proxy for a new request.")
 public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> {

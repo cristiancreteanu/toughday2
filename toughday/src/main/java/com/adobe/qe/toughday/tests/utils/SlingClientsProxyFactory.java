@@ -1,10 +1,10 @@
 package com.adobe.qe.toughday.tests.utils;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.benckmark.Benchmark;
-import com.adobe.qe.toughday.core.benckmark.ProxyFactory;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
+import com.adobe.qe.toughday.api.core.benchmark.ProxyFactory;
 
-import com.adobe.qe.toughday.core.benckmark.ProxyHelpers;
+import com.adobe.qe.toughday.api.core.benchmark.ProxyHelpers;
 import org.apache.http.Header;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.methods.HttpUriRequest;

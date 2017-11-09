@@ -1,16 +1,14 @@
 package com.adobe.qe.toughday.tests.sequential;
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.FluentLogging;
-import com.adobe.qe.toughday.core.annotations.*;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.samplecontent.SampleContent;
+
+import com.adobe.qe.toughday.api.annotations.*;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.FluentLogging;
+import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 @Tag(tags = { "author" })

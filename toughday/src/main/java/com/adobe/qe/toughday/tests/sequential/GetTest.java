@@ -1,15 +1,11 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.FluentLogging;
-import com.adobe.qe.toughday.core.annotations.Description;
-import com.adobe.qe.toughday.core.annotations.Tag;
-import com.adobe.qe.toughday.core.benckmark.Benchmark;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.image.UploadImageTest;
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.annotations.Description;
+import com.adobe.qe.toughday.api.annotations.Tag;
+import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
+import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 
 @Tag(tags = { "author", "publish" })
 @Description(desc = "GET a specific page.")

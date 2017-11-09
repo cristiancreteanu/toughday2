@@ -1,9 +1,9 @@
 package com.adobe.qe.toughday.structural;
 
-import com.adobe.qe.toughday.core.annotations.After;
-import com.adobe.qe.toughday.core.annotations.Before;
-import com.adobe.qe.toughday.core.annotations.CloneSetup;
-import com.adobe.qe.toughday.core.annotations.Setup;
+import com.adobe.qe.toughday.api.annotations.After;
+import com.adobe.qe.toughday.api.annotations.Before;
+import com.adobe.qe.toughday.api.annotations.CloneSetup;
+import com.adobe.qe.toughday.api.annotations.Setup;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;

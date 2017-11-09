@@ -37,7 +37,7 @@ Configuration:
             additivity: false
             AppenderRef:
                 ref: Console
-          - name: com.adobe.qe.toughday.core
+          - name: com.adobe.qe.toughday.internal.core
             level: info
             additivity: false
             AppenderRef:

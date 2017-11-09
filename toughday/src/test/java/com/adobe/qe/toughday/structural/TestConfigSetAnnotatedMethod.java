@@ -1,20 +1,11 @@
 package com.adobe.qe.toughday.structural;
 
-import com.adobe.qe.toughday.core.AbstractTest;
-import com.adobe.qe.toughday.core.CompositeTest;
-import com.adobe.qe.toughday.core.benckmark.AdHocTest;
-import com.adobe.qe.toughday.core.config.ConfigArgGet;
-import com.adobe.qe.toughday.core.config.ConfigArgSet;
-import com.adobe.qe.toughday.core.config.Configuration;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;
-import org.junit.Assert;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.HashMap;
 
 /**
  * Created by tuicu on 13/06/16.
