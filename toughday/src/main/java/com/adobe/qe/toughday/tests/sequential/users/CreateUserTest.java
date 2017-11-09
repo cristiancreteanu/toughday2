@@ -336,7 +336,7 @@ public class CreateUserTest extends SequentialTestBase {
 
     @ConfigArgSet(required = false, desc = "If this is \"true\" then some of user properties will be either incremented or randomised", defaultValue = "true")
     public CreateUserTest setIncrement(String value) {
-        if (!Boolean.getBoolean(value))
+        if (!Boolean.valueOf(value))
             this.increment = null;
         return this;
     }

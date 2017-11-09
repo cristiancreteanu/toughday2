@@ -27,7 +27,7 @@ public abstract class Publisher {
         return name;
     }
 
-    @ConfigArgSet(required = false, defaultValue = "The class name", desc = "The name of this publisher")
+    @ConfigArgSet(required = false, desc = "The name of this publisher")
     public void setName(String name) { this.name = name; }
 
     @ConfigArgSet(required = false, defaultValue = "true", desc = "Enable the raw result publishing")

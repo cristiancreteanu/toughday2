@@ -96,7 +96,7 @@ public class CreatePageTest extends SequentialTestBase {
         return this.rootParentPath;
     }
 
-    @ConfigArgSet(required = false, defaultValue = DEFAULT_TEMPLATE)
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_TEMPLATE, desc = "The template of the page.")
     public AbstractTest setTemplate(String template) {
         this.template = template;
         return this;

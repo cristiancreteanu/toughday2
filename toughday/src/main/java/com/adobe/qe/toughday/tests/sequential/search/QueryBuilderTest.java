@@ -12,7 +12,7 @@ import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 @Description(desc = "Search that uses the Query Builder Json Rest Api")
 public class QueryBuilderTest extends SequentialTestBase {
     private static final String DEFAULT_QUERY = "type=cq:Page&group.1_path=/content&orderby=@jcr:score&orderby.sort=desc";
-    private String query;
+    private String query = DEFAULT_QUERY;
 
     public QueryBuilderTest() {
     }

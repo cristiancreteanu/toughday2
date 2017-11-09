@@ -41,7 +41,7 @@ public class CreatePDFTreeTest extends CompositeTest {
         return new CreatePDFTreeTest(false);
     }
 
-    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = CreateFolderTreeTest.DEFAULT_TITLE,
             desc = "The title of the folders. Internally, this is incremented")
     public AbstractTest setFolderTitle(String title) {
         createFolderTreeTest.setTitle(title);
@@ -53,7 +53,7 @@ public class CreatePDFTreeTest extends CompositeTest {
         return createFolderTreeTest.getTitle();
     }
 
-    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_NAME,
             desc = "The title of the PDF. Internally, this is incremented")
     public AbstractTest setPDFTitle(String title) {
         uploadPDFTest.setFileName(title);
@@ -77,7 +77,7 @@ public class CreatePDFTreeTest extends CompositeTest {
         return this.createFolderTreeTest.getParentPath();
     }
 
-    @ConfigArgSet(required = false, defaultValue = AuthoringTest.DEFAULT_RESOURCE_PATH,
+    @ConfigArgSet(required = false, defaultValue = UploadPDFTest.DEFAULT_PDF_PATH,
             desc = "The PDF resource path either in the classpath or the filesystem")
     public void setPDFResourcePath(String resourcePath) {
         uploadPDFTest.setResourcePath(resourcePath);

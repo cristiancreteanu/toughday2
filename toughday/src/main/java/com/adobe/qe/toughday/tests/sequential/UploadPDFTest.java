@@ -34,7 +34,7 @@ public class UploadPDFTest extends SequentialTestBase {
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
     public static final String PDF_CONTENT_TYPE = "application/pdf";
     public static final String DEFAULT_PDF_NAME = "toughday_pdf_asset";
-    private static final String DEFAULT_PDF_PATH = "document.pdf";
+    public static final String DEFAULT_PDF_PATH = "document.pdf";
 
     private String fileName = DEFAULT_PDF_NAME;
     private String resourcePath = DEFAULT_PDF_PATH;

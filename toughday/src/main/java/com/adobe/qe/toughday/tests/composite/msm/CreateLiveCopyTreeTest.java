@@ -5,6 +5,7 @@ import com.adobe.qe.toughday.core.CompositeTest;
 import com.adobe.qe.toughday.core.annotations.Description;
 import com.adobe.qe.toughday.core.config.ConfigArgGet;
 import com.adobe.qe.toughday.core.config.ConfigArgSet;
+import com.adobe.qe.toughday.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.msm.CreateLiveCopyFromPageTest;
 import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;
@@ -59,7 +60,7 @@ public class CreateLiveCopyTreeTest  extends CompositeTest {
         return this.createPageTest.getTemplate();
     }
 
-    @ConfigArgSet(required = false, desc = "The path prefix for all source pages.")
+    @ConfigArgSet(required = false, defaultValue = SampleContent.TOUGHDAY_SITE, desc = "The path prefix for all source pages.")
     public CreateLiveCopyTreeTest setParentPath(String parentPath) {
         createPageTest.setParentPath(parentPath);
         createLcTest.setDestinationRoot(parentPath);

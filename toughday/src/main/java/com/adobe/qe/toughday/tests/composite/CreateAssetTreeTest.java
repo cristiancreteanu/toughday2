@@ -38,7 +38,7 @@ public class CreateAssetTreeTest extends CompositeTest {
         return new CreateAssetTreeTest(false);
     }
 
-    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = CreateFolderTreeTest.DEFAULT_TITLE,
             desc = "The title of the folders. Internally, this is incremented")
     public CreateAssetTreeTest setFolderTitle(String title) {
         createFolderTreeTest.setTitle(title);
@@ -50,7 +50,7 @@ public class CreateAssetTreeTest extends CompositeTest {
         return createFolderTreeTest.getTitle();
     }
 
-    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_PAGE_TITLE,
+    @ConfigArgSet(required = false, defaultValue = AuthoringTreeTest.DEFAULT_ASSET_NAME,
             desc = "The title of the assets. Internally, this is incremented")
     public CreateAssetTreeTest setAssetTitle(String title) {
         uploadImageTest.setFileName(title);

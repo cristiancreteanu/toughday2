@@ -24,11 +24,11 @@ public class TestSuiteStructural extends TestCase {
         for(Class TDtestClass : ReflectionsContainer.getSubTypesOf(AbstractTest.class)) {
             suite.addTest(new TestConstructor("test", TDtestClass));
             for (Method method : TDtestClass.getDeclaredMethods()) {
-                if(method.getAnnotation(ConfigArgSet.class) != null) {
+                if (method.getAnnotation(ConfigArgSet.class) != null) {
                     suite.addTest(new TestConfigSetAnnotatedMethod("testModifier", method));
                     suite.addTest(new TestConfigSetAnnotatedMethod("testArguments", method));
                 }
-                if(method.getAnnotation(ConfigArgGet.class) != null) {
+                if (method.getAnnotation(ConfigArgGet.class) != null) {
                     suite.addTest(new TestConfigGetAnnotatedMethod("testModifier", method));
                     suite.addTest(new TestConfigGetAnnotatedMethod("testArguments", method));
                 }
@@ -42,11 +42,11 @@ public class TestSuiteStructural extends TestCase {
         for(Class TDpublisherClass : ReflectionsContainer.getSubTypesOf(Publisher.class)) {
             suite.addTest(new TestConstructor("test", TDpublisherClass));
             for (Method method : TDpublisherClass.getDeclaredMethods()) {
-                if(method.getAnnotation(ConfigArgSet.class) != null) {
+                if (method.getAnnotation(ConfigArgSet.class) != null) {
                     suite.addTest(new TestConfigSetAnnotatedMethod("testModifier", method));
                     suite.addTest(new TestConfigSetAnnotatedMethod("testArguments", method));
                 }
-                if(method.getAnnotation(ConfigArgGet.class) != null) {
+                if (method.getAnnotation(ConfigArgGet.class) != null) {
                     suite.addTest(new TestConfigGetAnnotatedMethod("testModifier", method));
                     suite.addTest(new TestConfigGetAnnotatedMethod("testArguments", method));
                 }

@@ -365,7 +365,10 @@ public class Configuration {
                 if (annotation.required()) {
                     throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
                 } else {
-                    //will use default value
+                    String defaultValue = annotation.defaultValue();
+                    if (defaultValue.compareTo("") != 0) {
+                        method.invoke(object, defaultValue);
+                    }
                     continue;
                 }
             }

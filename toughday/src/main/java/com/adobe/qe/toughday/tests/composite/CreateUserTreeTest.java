@@ -30,9 +30,6 @@ public class CreateUserTreeTest extends CompositeTest {
             createFolderTreeTest.setGlobalArgs(this.getGlobalArgs());
             createUserTest.setGlobalArgs(this.getGlobalArgs());
 
-            this.setFolderParentPath(DEFAULT_FOLDER_PATH);
-            this.setResourceType(AUTHORIZABLE_FOLDER_RESOURCE_TYPE);
-
             this.addChild(createFolderTreeTest);
             this.addChild(createUserTest);
         }
@@ -235,7 +232,7 @@ public class CreateUserTreeTest extends CompositeTest {
         return this.createFolderTreeTest.getParentPath();
     }
 
-    @ConfigArgSet(required = false, defaultValue = CreateFolderTreeTest.DEFAULT_PARENT_PATH, desc = "The path prefix for all folders.")
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_FOLDER_PATH, desc = "The path prefix for all folders.")
     public CreateUserTreeTest setFolderParentPath(String parentPath) {
         this.createFolderTreeTest.setParentPath(parentPath);
         return this;
@@ -252,7 +249,7 @@ public class CreateUserTreeTest extends CompositeTest {
         return this;
     }
 
-    @ConfigArgSet(required = false, desc = "Resource type for folders.", defaultValue = CreateFolderTreeTest.FOLDER_RESOURCE_TYPE)
+    @ConfigArgSet(required = false, desc = "Resource type for folders.", defaultValue = AUTHORIZABLE_FOLDER_RESOURCE_TYPE)
     public CreateUserTreeTest setResourceType(String resourceType) {
         this.createFolderTreeTest.setResourceType(resourceType);
         return this;

@@ -85,7 +85,7 @@ public abstract class AbstractTest {
     /**
      * Setter for the name
      */
-    @ConfigArgSet(required = false, defaultValue = "The class name", desc = "The name of this test")
+    @ConfigArgSet(required = false, desc = "The name of this test")
     public AbstractTest setName(String name) {
         this.name = name;
         return this;

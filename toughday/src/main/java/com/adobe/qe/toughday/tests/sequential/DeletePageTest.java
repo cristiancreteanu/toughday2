@@ -7,6 +7,7 @@ import com.adobe.qe.toughday.core.config.ConfigArgSet;
 import com.adobe.qe.toughday.core.AbstractTest;
 import com.adobe.qe.toughday.core.SkippedTestException;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.ClientException;
@@ -76,7 +77,7 @@ public class DeletePageTest extends SequentialTestBase {
     @ConfigArgSet(required = false, defaultValue = CreatePageTest.DEFAULT_PARENT_PATH,
             desc = "The parent path of the page to be deleted. E.g. The one created by CreatePageTest")
     public DeletePageTest setParentPath(String parentPath) {
-        this.parentPath = (parentPath.endsWith("/") ? parentPath : parentPath + "/") ;
+        this.parentPath = parentPath.endsWith("/") ? StringUtils.stripEnd(parentPath, "/") : parentPath;
         return this;
     }
 
