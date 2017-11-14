@@ -3,8 +3,9 @@ package com.adobe.qe.toughday.api.core;
 import com.adobe.qe.toughday.api.annotations.Before;
 import com.adobe.qe.toughday.api.annotations.After;
 import com.adobe.qe.toughday.api.annotations.CloneSetup;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.adobe.qe.toughday.api.core.benchmark.TestResult;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -19,7 +20,6 @@ import java.util.LinkedList;
  * runners should have no state.
  */
 public abstract class AbstractTestRunner<T extends AbstractTest> {
-    private static final Logger logger = LoggerFactory.getLogger(AbstractTestRunner.class);
     private volatile boolean cloneSetupExecuted;
     private Method[] setupMethods;
     private Method[] beforeMethods;
@@ -74,18 +74,28 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * The setup is guaranteed to be executed once even if the test is replicated(cloned) for multiple threads.
      * @param testObject
      */
-    private void executeCloneSetup(AbstractTest testObject) {
+    private boolean executeCloneSetup(AbstractTest testObject, RunMap runMap) throws Throwable{
         /* The synchronized block, the second if and the assignation of the variable cloneSetupExecuted only after
         the call of the method, are to ensure that the setup is executed exactly once, even if this runner is used
         by multiple threads. The first if is to ensure that no bottleneck occurs due to synchronization. */
         if (!cloneSetupExecuted) {
             synchronized (this) {
                 if (!cloneSetupExecuted) {
-                    executeMethods(testObject, setupMethods, CloneSetup.class);
-                    cloneSetupExecuted = true;
+                    try {
+                        executeMethods(testObject, setupMethods, CloneSetup.class);
+                    } catch (Throwable e) {
+                        testObject.logger().error("Failure in @CloneSetup: ", e);
+                        if(testObject.getParent() != null) {
+                            throw e;
+                        }
+                        return false;
+                    } finally {
+                        cloneSetupExecuted = true;
+                    }
                 }
             }
         }
+        return true;
     }
 
     /**
@@ -93,9 +103,17 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * It will run before each test run.
      * @param testObject
      */
-    private void executeBefore(AbstractTest testObject) {
+    private void executeBefore(AbstractTest testObject, RunMap runMap) throws Throwable {
         if (beforeMethods != null) {
-            executeMethods(testObject, beforeMethods, Before.class);
+            try {
+                executeMethods(testObject, beforeMethods, Before.class);
+            }
+            catch (Throwable e) {
+                TestResult testResult = new TestResult(testObject).markAsSkipped(new SkippedTestException(e));
+                runMap.record(testResult);
+                testObject.logger().debug("Failure in @Before: ", e);
+                throw e;
+            }
         }
     }
 
@@ -106,7 +124,11 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      */
     private void executeAfter(AbstractTest testObject) {
         if (afterMethods != null) {
-            executeMethods(testObject, afterMethods, After.class);
+            try{
+                executeMethods(testObject, afterMethods, After.class);
+            } catch (Throwable e) {
+                testObject.logger().debug("Failure in @After: ", e);
+            }
         }
     }
 
@@ -118,11 +140,11 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      */
     public final void runTest(AbstractTest testObject, RunMap runMap) throws Throwable {
         testObject.benchmark().setRunMap(runMap);
-        executeCloneSetup(testObject);
-        executeBefore(testObject);
+        if(!executeCloneSetup(testObject, runMap)) { return; }
 
         Throwable throwable = null;
         try {
+            executeBefore(testObject, runMap);
             run((T) testObject, runMap);
         } catch (Throwable e) {
             throwable = e;
@@ -130,8 +152,11 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
             executeAfter(testObject);
         }
 
-        if(testObject.getParent() != null && throwable != null) {
-            throw throwable;
+        if(throwable != null) {
+            if(testObject.getParent() != null) {
+                throw throwable;
+            }
+            testObject.logger().debug("Test failed with error:", throwable);
         }
     }
 
@@ -149,18 +174,13 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param methods that will be invoked by using reflections
      * @param annotation what annotation caused this method to be ran
      */
-    private void executeMethods(AbstractTest testObject, Method[] methods, Class<? extends Annotation> annotation) {
+    private void executeMethods(AbstractTest testObject, Method[] methods, Class<? extends Annotation> annotation)
+            throws Throwable {
         for (Method method : methods) {
             try {
                 method.invoke(testObject);
-            } catch (IllegalAccessException e) {
-                logger.error("Could not execute " + method.getName() +
-                        " annotated with " + annotation.getSimpleName() + ": Illegal Access.", e);
-                e.printStackTrace();
             } catch (InvocationTargetException e) {
-                logger.error("Could not execute " + method.getName() +
-                        " annotated with " + annotation.getSimpleName(), e);
-                e.printStackTrace();
+                throw e.getCause();
             }
         }
     }

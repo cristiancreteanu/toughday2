@@ -32,8 +32,7 @@ public abstract class AbstractTest {
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
     private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
 
-    private @NotNull
-    TestId id;
+    private @NotNull TestId id;
     private String name;
     private AbstractTest parent;
     private GlobalArgs globalArgs;
