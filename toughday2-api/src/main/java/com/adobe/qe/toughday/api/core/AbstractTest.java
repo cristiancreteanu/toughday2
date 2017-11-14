@@ -234,6 +234,9 @@ public abstract class AbstractTest {
      */
     public AbstractTest setGlobalArgs(GlobalArgs globalArgs) {
         this.globalArgs = globalArgs;
+        for(AbstractTest child : getChildren()) {
+            child.setGlobalArgs(globalArgs);
+        }
         return this;
     }
 
