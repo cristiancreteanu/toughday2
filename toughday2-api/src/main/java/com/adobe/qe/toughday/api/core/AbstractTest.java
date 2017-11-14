@@ -3,12 +3,11 @@ package com.adobe.qe.toughday.api.core;
 import com.adobe.qe.toughday.api.annotations.Name;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.UUIDTestId;
-import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.api.annotations.labels.NotNull;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
 import com.adobe.qe.toughday.internal.core.benckmark.BenchmarkImpl;
-import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,7 +26,7 @@ import java.util.*;
 /**
  * Abstract base class for all tests. Normally you would not extend this class directly, because you would
  * have to write a runner for your new type of test. Instead you should extend the existing convenience classes
- * that already have a runner. {@link DemoTest} for a detailed example.
+ * that already have a runner.
  */
 public abstract class AbstractTest {
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
@@ -37,7 +36,7 @@ public abstract class AbstractTest {
     TestId id;
     private String name;
     private AbstractTest parent;
-    private Configuration.GlobalArgs globalArgs;
+    private GlobalArgs globalArgs;
     protected File workspace;
     private Logger logger;
     private BenchmarkImpl benchmark;
@@ -80,7 +79,7 @@ public abstract class AbstractTest {
      * Getter for the full name of the test. It has prefixed, in order, all the names of the parents
      */
     public String getFullName() {
-        return parent != null ? parent.getFullName() + "." + getName() : getName();
+        return parent != null ? parent.getFullName() + "" + getName() : getName();
     }
 
     /**
@@ -234,7 +233,7 @@ public abstract class AbstractTest {
      * Setter for global args
      * @param globalArgs
      */
-    public AbstractTest setGlobalArgs(Configuration.GlobalArgs globalArgs) {
+    public AbstractTest setGlobalArgs(GlobalArgs globalArgs) {
         this.globalArgs = globalArgs;
         return this;
     }
@@ -245,7 +244,7 @@ public abstract class AbstractTest {
      * lazy instantiation for those objects.
      * @return
      */
-    public Configuration.GlobalArgs getGlobalArgs() {
+    public GlobalArgs getGlobalArgs() {
         return globalArgs;
     }
 

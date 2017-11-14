@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.runners;
+package com.adobe.qe.toughday.api.runners;
 
 import com.adobe.qe.toughday.api.core.*;
 import com.adobe.qe.toughday.api.core.RunMap;

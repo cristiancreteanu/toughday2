@@ -8,7 +8,6 @@ import com.adobe.qe.toughday.api.core.benchmark.signatures.Callable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.InjectTestResultCallable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.VoidCallable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.VoidInjectTestResultCallable;
-import org.apache.commons.lang3.tuple.Triple;
 
 /**
  * This class provides methods for benchmarking arbitrary code blocks and method calls + helper methods.
@@ -81,7 +80,7 @@ public interface Benchmark {
      * @param <K> The type of the data from the {@link TestResult}
      * @return A triplet containing: The test result, the return value and any Throwable that occurred.
      */
-    <R, K> Triple<TestResult<K>, R, Throwable> computeTestResult(AbstractTest test, InjectTestResultCallable<R, K> callable);
+    <R, K> ResultInfo<R, K> computeTestResult(AbstractTest test, InjectTestResultCallable<R, K> callable);
 
     /**
      * Measures the duration of a method call using either a registered proxy implementation for the object's class, or

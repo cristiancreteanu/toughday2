@@ -9,8 +9,6 @@ import com.adobe.qe.toughday.api.core.benchmark.signatures.Callable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.InjectTestResultCallable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.VoidCallable;
 import com.adobe.qe.toughday.api.core.benchmark.signatures.VoidInjectTestResultCallable;
-import org.apache.commons.lang3.tuple.ImmutableTriple;
-import org.apache.commons.lang3.tuple.Triple;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -54,7 +52,7 @@ public class BenchmarkImpl implements Benchmark {
     /*  ############ Default proxy flavour. Default proxy will use the simple lambda flavour. ############ */
 
     @Override
-    public <R, K> Triple<TestResult<K>, R, Throwable> computeTestResult(AbstractTest test, InjectTestResultCallable<R, K> callable) {
+    public <R, K> ResultInfo<R, K> computeTestResult(AbstractTest test, InjectTestResultCallable<R, K> callable) {
         Throwable throwableResult = null;
         R callableResult = null;
         TestResult<K> testResult = new TestResult<K>(test)
@@ -79,7 +77,7 @@ public class BenchmarkImpl implements Benchmark {
             testResult.withShowInAggregatedView(test.getShowStepsResolved());
         }
 
-        return new ImmutableTriple(testResult, callableResult, throwableResult);
+        return new ImmutableResultInfo(testResult, callableResult, throwableResult);
     }
 
     @Override
@@ -124,13 +122,13 @@ public class BenchmarkImpl implements Benchmark {
     /*  ############ Simple lambda flavour ############ */
     @Override
     public <T> T measure(AbstractTest test, Callable<T> callable) throws Throwable {
-        Triple<TestResult<Object>, T, Throwable> result = computeTestResult(test, (TestResult<Object> testResult) -> {
+        ResultInfo<T, Object> result = computeTestResult(test, (TestResult<Object> testResult) -> {
             return callable.call();
         });
-        runMap.record(result.getLeft());
-        Throwable throwable = result.getRight();
+        runMap.record(result.getTestResult());
+        Throwable throwable = result.getThrowable();
         if(throwable != null) throw throwable;
-        return result.getMiddle();
+        return result.getReturnValue();
     }
 
     public <T> T measure(@Nullable UUID id, AbstractTest parent, String label, Callable<T> callable) throws Throwable {
@@ -145,12 +143,12 @@ public class BenchmarkImpl implements Benchmark {
     /*  ############ Simple void lambda flavour ############ */
     @Override
     public void measure(AbstractTest test, VoidCallable callable) throws Throwable {
-        Triple<TestResult<Object>, Void, Throwable> result = computeTestResult(test, (TestResult<Object> testResult) -> {
+        ResultInfo<Void, Object> result = computeTestResult(test, (TestResult<Object> testResult) -> {
             callable.call();
             return null;
         });
-        runMap.record(result.getLeft());
-        Throwable throwable = result.getRight();
+        runMap.record(result.getTestResult());
+        Throwable throwable = result.getThrowable();
         if(throwable != null) throw throwable;
     }
 
@@ -165,14 +163,14 @@ public class BenchmarkImpl implements Benchmark {
 
     @Override
     public <T, K> T measure(AbstractTest test, InjectTestResultCallable<T, K> callable) throws Throwable {
-        Triple<TestResult<K>, T, Throwable> result = this.computeTestResult(test, (TestResult<K> testResult) -> {
+        ResultInfo<T, K> result = this.computeTestResult(test, (TestResult<K> testResult) -> {
             return callable.call(testResult);
         });
 
-        runMap.record(result.getLeft());
-        Throwable throwable = result.getRight();
+        runMap.record(result.getTestResult());
+        Throwable throwable = result.getThrowable();
         if(throwable != null) throw throwable;
-        return result.getMiddle();
+        return result.getReturnValue();
     }
 
     public <T, K> T measure(@Nullable UUID id, AbstractTest parent, String label, InjectTestResultCallable<T, K> callable) throws Throwable {
@@ -187,12 +185,12 @@ public class BenchmarkImpl implements Benchmark {
     /* ############ Injected void lambda flavour ############ */
     @Override
     public <K> void measure(AbstractTest test, VoidInjectTestResultCallable<K> callable) throws Throwable {
-        Triple<TestResult<K>, Void, Throwable> result = this.computeTestResult(test, (TestResult<K> testResult) -> {
+        ResultInfo<Void, K> result = this.computeTestResult(test, (TestResult<K> testResult) -> {
             callable.call(testResult);
             return null;
         });
-        runMap.record(result.getLeft());
-        Throwable throwable = result.getRight();
+        runMap.record(result.getTestResult());
+        Throwable throwable = result.getThrowable();
         if(throwable != null) throw throwable;
     }
 

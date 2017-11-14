@@ -26,9 +26,8 @@
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
-
-
 	<modules>
+		<module>toughday2-api</module>
 		<module>toughday_sample</module>
 		<module>toughday</module>
 	</modules>

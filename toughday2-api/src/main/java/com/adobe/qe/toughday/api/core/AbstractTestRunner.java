@@ -3,7 +3,6 @@ package com.adobe.qe.toughday.api.core;
 import com.adobe.qe.toughday.api.annotations.Before;
 import com.adobe.qe.toughday.api.annotations.After;
 import com.adobe.qe.toughday.api.annotations.CloneSetup;
-import com.adobe.qe.toughday.internal.core.engine.AssumptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +17,6 @@ import java.util.LinkedList;
  * replicated for each thread. Aside from setup step execution, this class is not thread safe. Any other required
  * synchronization must be implemented by subtypes, but it could affect the throughput of the executed tests. Ideally
  * runners should have no state.
- * TODO: investigate what happens if there are multiple engines. Since they use the same container, CloneSetup will not work correctly
  */
 public abstract class AbstractTestRunner<T extends AbstractTest> {
     private static final Logger logger = LoggerFactory.getLogger(AbstractTestRunner.class);
@@ -76,7 +74,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * The setup is guaranteed to be executed once even if the test is replicated(cloned) for multiple threads.
      * @param testObject
      */
-    protected void executeCloneSetup(AbstractTest testObject) {
+    private void executeCloneSetup(AbstractTest testObject) {
         /* The synchronized block, the second if and the assignation of the variable cloneSetupExecuted only after
         the call of the method, are to ensure that the setup is executed exactly once, even if this runner is used
         by multiple threads. The first if is to ensure that no bottleneck occurs due to synchronization. */
@@ -95,7 +93,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * It will run before each test run.
      * @param testObject
      */
-    protected void executeBefore(AbstractTest testObject) {
+    private void executeBefore(AbstractTest testObject) {
         if (beforeMethods != null) {
             executeMethods(testObject, beforeMethods, Before.class);
         }
@@ -106,7 +104,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * The after method is guaranteed to run after every test run, even if exceptions occur.
      * @param testObject
      */
-    protected void executeAfter(AbstractTest testObject) {
+    private void executeAfter(AbstractTest testObject) {
         if (afterMethods != null) {
             executeMethods(testObject, afterMethods, After.class);
         }
@@ -118,7 +116,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
      * @param runMap the run map in which the benchmark will be recorded.
      * @throws Throwable any throwable occurred in the test and was propagated upstream by the implementation runner
      */
-    public void runTest(AbstractTest testObject, RunMap runMap) throws Throwable {
+    public final void runTest(AbstractTest testObject, RunMap runMap) throws Throwable {
         testObject.benchmark().setRunMap(runMap);
         executeCloneSetup(testObject);
         executeBefore(testObject);
@@ -138,7 +136,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
     }
 
     /**
-     * Method for delegating the responsability of correctly running and benchmarking the test to subclasses.
+     * Method for delegating the responsibility of correctly running and benchmarking the test to subclasses.
      * @param testObject instance of the test to run
      * @param runMap the run map in which the benchmark will be recorded.
      * @throws Throwable any throwable occurred in the test and was propagated upstream by the implementation runner

@@ -1,6 +1,6 @@
 package com.adobe.qe.toughday.api.core;
 
-import com.adobe.qe.toughday.runners.SequentialTestRunner;
+import com.adobe.qe.toughday.api.runners.SequentialTestRunner;
 
 import java.util.ArrayList;
 import java.util.List;

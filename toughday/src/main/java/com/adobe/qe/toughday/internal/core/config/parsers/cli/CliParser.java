@@ -36,7 +36,7 @@ public class CliParser implements ConfigurationParser {
     private static final String PUBLISH_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_NO_TAGS, "Class", "Description");
     private static final String METRIC_CLASS_HELP_HEADER = PUBLISH_CLASS_HELP_HEADER;
     private static final String SUITE_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Suite", "Tags", "Description");
-    private static Method[] globalArgMethods = Configuration.GlobalArgs.class.getMethods();
+    private static Method[] globalArgMethods = GlobalArgs.class.getMethods();
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
     public final static List<Object> parserArgs = new ArrayList<>();
@@ -513,7 +513,7 @@ public class CliParser implements ConfigurationParser {
             }
             if(AbstractTest.class.isAssignableFrom(klass)) {
                 printClassProperty("weight", false, "1", "The weight of this test");
-                printClassProperty("timeout", false, String.valueOf(Configuration.GlobalArgs.DEFAULT_TIMEOUT),
+                printClassProperty("timeout", false, String.valueOf(GlobalArgs.DEFAULT_TIMEOUT),
                         "How long a test will run before it will be interrupted and marked as failed. Expressed in seconds");
                 printClassProperty("count", false, "none", "The approximate number of times this test should run");
             }

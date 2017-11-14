@@ -1,7 +1,7 @@
 package com.adobe.qe.toughday.api.core;
 
-import com.adobe.qe.toughday.runners.CompositeTestRunner;
-import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.api.core.config.GlobalArgs;
+import com.adobe.qe.toughday.api.runners.CompositeTestRunner;
 
 import java.util.*;
 
@@ -113,7 +113,7 @@ public abstract class CompositeTest extends AbstractTest {
      * @param globalArgs
      */
     @Override
-    public CompositeTest setGlobalArgs(Configuration.GlobalArgs globalArgs) {
+    public CompositeTest setGlobalArgs(GlobalArgs globalArgs) {
         super.setGlobalArgs(globalArgs);
         for (AbstractTest test: children) {
             test.setGlobalArgs(globalArgs);

@@ -2,12 +2,14 @@ package com.adobe.qe.toughday.internal.core.engine;
 
 import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.AssumptionUtils;
 import com.adobe.qe.toughday.api.core.Publisher;
 import com.adobe.qe.toughday.api.core.RunnersContainer;
 import com.adobe.qe.toughday.internal.core.*;
 import com.adobe.qe.toughday.api.annotations.Setup;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.metrics.Metric;
 import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
 import org.apache.commons.lang3.StringUtils;
@@ -37,7 +39,7 @@ public class Engine {
     protected static Random _rnd = new Random();
 
     private final Configuration configuration;
-    private Configuration.GlobalArgs globalArgs;
+    private GlobalArgs globalArgs;
     private ExecutorService engineExecutorService = Executors.newFixedThreadPool(2);
     private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
@@ -76,7 +78,7 @@ public class Engine {
 
     public Configuration getConfiguration() { return configuration; }
 
-    public Configuration.GlobalArgs getGlobalArgs() {
+    public GlobalArgs getGlobalArgs() {
         return globalArgs;
     }
 
@@ -194,7 +196,7 @@ public class Engine {
         out.println("#########################################################");
     }
 
-    public static void installToughdayContentPackage(Configuration.GlobalArgs globalArgs) throws Exception {
+    public static void installToughdayContentPackage(GlobalArgs globalArgs) throws Exception {
         logGlobal("Installing ToughDay 2 Content Package...");
         PackageManagerClient packageManagerClient = SequentialTestBase.createClient(globalArgs).adaptTo(PackageManagerClient.class);
 
@@ -233,7 +235,7 @@ public class Engine {
             Long timeout = testSuite.getTimeout(test);
             Integer weight = testSuite.getWeightMap().get(test);
             printObjectProperty(out, "weight",  weight != null ? weight : 1);
-            printObjectProperty(out, "timeout", timeout != null ? timeout : Configuration.GlobalArgs.DEFAULT_TIMEOUT);
+            printObjectProperty(out, "timeout", timeout != null ? timeout : GlobalArgs.DEFAULT_TIMEOUT);
             printObjectProperty(out, "count", count != null ? count : "none");
         }
         out.println();

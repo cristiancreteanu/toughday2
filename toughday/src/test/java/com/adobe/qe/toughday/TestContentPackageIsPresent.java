@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.structural;
+package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
 import org.junit.Assert;

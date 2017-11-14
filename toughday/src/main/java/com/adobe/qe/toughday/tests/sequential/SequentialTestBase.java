@@ -1,9 +1,7 @@
 package com.adobe.qe.toughday.tests.sequential;
 
-import com.adobe.qe.toughday.api.core.AbstractTestRunner;
 import com.adobe.qe.toughday.api.core.SequentialTest;
-import com.adobe.qe.toughday.internal.core.config.Configuration;
-import com.adobe.qe.toughday.runners.SequentialTestRunner;
+import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
@@ -25,7 +23,7 @@ public abstract class SequentialTestBase extends SequentialTest {
     }
 
 
-    public static SlingClient createClient (Configuration.GlobalArgs args) throws URISyntaxException, ClientException {
+    public static SlingClient createClient (GlobalArgs args) throws URISyntaxException, ClientException {
         URIBuilder uriBuilder = new URIBuilder()
                 .setScheme(args.getProtocol())
                 .setHost(args.getHost())

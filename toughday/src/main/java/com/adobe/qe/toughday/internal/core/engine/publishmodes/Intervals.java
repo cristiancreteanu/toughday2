@@ -4,7 +4,7 @@ import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.core.MetricResult;
-import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
 
 import java.util.List;
@@ -19,7 +19,7 @@ public class Intervals extends Simple {
     private long currentDelta = 0;
 
     public Intervals() {
-        delta = computeDelta(Configuration.GlobalArgs.parseDurationToSeconds(interval));
+        delta = computeDelta(GlobalArgs.parseDurationToSeconds(interval));
     }
 
     private final long computeDelta(long interval) {
@@ -30,7 +30,7 @@ public class Intervals extends Simple {
     @ConfigArgSet(required = false, defaultValue = DEFAULT_INTERVAL, desc = "Set the publishing interval. Can be expressed in s(econds), m(inutes), h(ours). Example: 1m30s.")
     public void setInterval(String interval) {
         this.interval = interval;
-        this.delta = computeDelta(Configuration.GlobalArgs.parseDurationToSeconds(interval));
+        this.delta = computeDelta(GlobalArgs.parseDurationToSeconds(interval));
     }
 
 

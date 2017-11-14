@@ -6,6 +6,7 @@ import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class Normal implements RunMode {
     public void runTests(Engine engine) throws Exception {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
-        Configuration.GlobalArgs globalArgs = configuration.getGlobalArgs();
+        GlobalArgs globalArgs = configuration.getGlobalArgs();
         testsExecutorService = Executors.newFixedThreadPool(concurrency);
 
         // Create the test worker threads

@@ -2,8 +2,10 @@ package com.adobe.qe.toughday;
 
 
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
+import com.adobe.qe.toughday.internal.core.RunMapImpl;
 import com.adobe.qe.toughday.internal.core.benckmark.BenchmarkImpl;
 import com.adobe.qe.toughday.tests.sequential.demo.DemoTest;
+import org.junit.Test;
 
 
 /**
@@ -29,6 +31,7 @@ public class BenchmarkTest {
     //@Test
     public void test() throws Throwable {
         Benchmark benchmark = new BenchmarkImpl();
+        benchmark.setRunMap(new RunMapImpl());
         DemoTest demoTest = new DemoTest();
 
         benchmark.measure(demoTest, "Test", new MyClass()).method("Andrei", 10L, 1);

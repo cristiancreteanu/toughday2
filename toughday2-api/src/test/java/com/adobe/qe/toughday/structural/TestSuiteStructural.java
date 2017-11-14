@@ -2,13 +2,12 @@ package com.adobe.qe.toughday.structural;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.Publisher;
-import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.junit.experimental.categories.Category;
+import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
 
@@ -19,9 +18,10 @@ import java.lang.reflect.Method;
 public class TestSuiteStructural extends TestCase {
 
     public static TestSuite suite() {
+        Reflections reflections = new Reflections("");
         TestSuite suite = new TestSuite();
 
-        for(Class TDtestClass : ReflectionsContainer.getSubTypesOf(AbstractTest.class)) {
+        for(Class TDtestClass : reflections.getSubTypesOf(AbstractTest.class)) {
             suite.addTest(new TestConstructor("test", TDtestClass));
             for (Method method : TDtestClass.getDeclaredMethods()) {
                 if (method.getAnnotation(ConfigArgSet.class) != null) {
@@ -39,7 +39,7 @@ public class TestSuiteStructural extends TestCase {
             }
         }
 
-        for(Class TDpublisherClass : ReflectionsContainer.getSubTypesOf(Publisher.class)) {
+        for(Class TDpublisherClass : reflections.getSubTypesOf(Publisher.class)) {
             suite.addTest(new TestConstructor("test", TDpublisherClass));
             for (Method method : TDpublisherClass.getDeclaredMethods()) {
                 if (method.getAnnotation(ConfigArgSet.class) != null) {
@@ -51,21 +51,6 @@ public class TestSuiteStructural extends TestCase {
                     suite.addTest(new TestConfigGetAnnotatedMethod("testArguments", method));
                 }
             }
-        }
-
-        for (Class TDMetricClass : ReflectionsContainer.getSubTypesOf(Metric.class)) {
-            suite.addTest(new TestConstructor("test", TDMetricClass));
-            for (Method method : TDMetricClass.getDeclaredMethods()) {
-                if(method.getAnnotation(ConfigArgSet.class) != null) {
-                    suite.addTest(new TestConfigSetAnnotatedMethod("testModifier", method));
-                    suite.addTest(new TestConfigSetAnnotatedMethod("testArguments", method));
-                }
-                if(method.getAnnotation(ConfigArgGet.class) != null) {
-                    suite.addTest(new TestConfigGetAnnotatedMethod("testModifier", method));
-                    suite.addTest(new TestConfigGetAnnotatedMethod("testArguments", method));
-                }
-            }
-
         }
         return suite;
     }

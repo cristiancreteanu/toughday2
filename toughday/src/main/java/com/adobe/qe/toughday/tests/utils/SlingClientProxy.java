@@ -4,6 +4,7 @@ import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.annotations.labels.NotThreadSafe;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
 import com.adobe.qe.toughday.api.core.benchmark.Proxy;
+import com.adobe.qe.toughday.api.core.benchmark.ResultInfo;
 import com.adobe.qe.toughday.api.core.benchmark.TestResult;
 import org.apache.commons.lang3.tuple.Triple;
 import org.apache.http.Header;
@@ -65,13 +66,13 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
 
     public SlingHttpResponse doGet(String requestPath, List<NameValuePair> parameters, List<Header> headers, int... expectedStatus) throws ClientException {
         boolean recordResultHere = shouldIRecord();
-        Triple<TestResult<SlingHttpData>, SlingHttpResponse, Throwable> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
+        ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
             return super.doGet(requestPath, parameters, headers, expectedStatus);
         });
 
-        TestResult<SlingHttpData> currentResult = result.getLeft();
-        SlingHttpResponse response = result.getMiddle();
-        Throwable throwable = result.getRight();
+        TestResult<SlingHttpData> currentResult = result.getTestResult();
+        SlingHttpResponse response = result.getReturnValue();
+        Throwable throwable = result.getThrowable();
 
         currentResult.withData(this.testResult.getData());
         currentResult.getData().withBytes(response.getContent().length());
@@ -89,13 +90,13 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
     @Override
     public SlingHttpResponse doRequest(HttpUriRequest request, List<Header> headers, int... expectedStatus) throws ClientException {
         boolean recordResultHere = shouldIRecord();
-        Triple<TestResult<SlingHttpData>, SlingHttpResponse, Throwable> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
+        ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
             return super.doRequest(request, headers, expectedStatus);
         });
 
-        TestResult<SlingHttpData> currentResult = result.getLeft();
-        SlingHttpResponse response = result.getMiddle();
-        Throwable throwable = result.getRight();
+        TestResult<SlingHttpData> currentResult = result.getTestResult();
+        SlingHttpResponse response = result.getReturnValue();
+        Throwable throwable = result.getThrowable();
 
         currentResult.withData(this.testResult.getData());
         currentResult.getData().withBytes(response.getContent().length());
@@ -114,7 +115,7 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
     public SlingHttpResponse doRawRequest(String method, String uri, List<Header> headers, int... expectedStatus) throws ClientException {
         boolean recordResultHere = shouldIRecord();
 
-        Triple<TestResult<SlingHttpData>, SlingHttpResponse, Throwable> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
+        ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
             SlingHttpResponse response = target.doRawRequest(method, uri, headers, expectedStatus);
             SlingHttpData data = testResult.getData() != null ? testResult.getData() : new SlingHttpData();
             Header contentLengthHeader = response.getFirstHeader("Content-Length");
@@ -128,9 +129,9 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
             return response;
         });
 
-        TestResult<SlingHttpData> currentResult = result.getLeft();
-        SlingHttpResponse response = result.getMiddle();
-        Throwable throwable = result.getRight();
+        TestResult<SlingHttpData> currentResult = result.getTestResult();
+        SlingHttpResponse response = result.getReturnValue();
+        Throwable throwable = result.getThrowable();
         currentResult.getData().withLatency(currentResult.getDuration());
 
         if(recordResultHere) {
@@ -147,7 +148,7 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
     public SlingHttpResponse doStreamRequest(HttpUriRequest request, List<Header> headers, int... expectedStatus) throws ClientException {
         boolean recordResultHere = shouldIRecord();
 
-        Triple<TestResult<SlingHttpData>, SlingHttpResponse, Throwable> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
+        ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
             SlingHttpResponse response = target.doStreamRequest(request, headers, expectedStatus);
             SlingHttpData data = testResult.getData() != null ? testResult.getData() : new SlingHttpData();
             Header contentLengthHeader = response.getFirstHeader("Content-Length");
@@ -163,9 +164,9 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
             return response;
         });
 
-        TestResult<SlingHttpData> currentResult = result.getLeft();
-        SlingHttpResponse response = result.getMiddle();
-        Throwable throwable = result.getRight();
+        TestResult<SlingHttpData> currentResult = result.getTestResult();
+        SlingHttpResponse response = result.getReturnValue();
+        Throwable throwable = result.getThrowable();
         currentResult.getData().withLatency(currentResult.getDuration());
 
         if(recordResultHere) {
