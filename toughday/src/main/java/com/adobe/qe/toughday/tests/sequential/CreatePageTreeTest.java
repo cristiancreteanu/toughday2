@@ -112,12 +112,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 .addParameter("title", title)
                 .addParameter("template", template);
 
-        try {
-            HttpEntity entity = feb.build();
-            benchmark().measure(this, "Create Page", getDefaultClient()).doPost("/bin/wcmcommand", entity, HttpStatus.SC_OK);
-        } catch (Throwable e) {
-            e.printStackTrace();
-        }
+        HttpEntity entity = feb.build();
+        benchmark().measure(this, "Create Page", getDefaultClient()).doPost("/bin/wcmcommand", entity, HttpStatus.SC_OK);
         communicate("resource", parentPath + nodeName);
     }
 

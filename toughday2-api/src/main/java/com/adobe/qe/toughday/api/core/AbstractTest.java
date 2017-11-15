@@ -78,7 +78,7 @@ public abstract class AbstractTest {
      * Getter for the full name of the test. It has prefixed, in order, all the names of the parents
      */
     public String getFullName() {
-        return parent != null ? parent.getFullName() + "" + getName() : getName();
+        return parent != null ? parent.getFullName() + "." + getName() : getName();
     }
 
     /**

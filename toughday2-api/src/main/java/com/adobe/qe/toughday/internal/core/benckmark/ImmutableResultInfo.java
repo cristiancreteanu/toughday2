@@ -16,16 +16,16 @@ public class ImmutableResultInfo<R, K> implements ResultInfo<R, K> {
 
     @Override
     public TestResult<K> getTestResult() {
-        return null;
+        return testResult;
     }
 
     @Override
     public R getReturnValue() {
-        return null;
+        return returnValue;
     }
 
     @Override
     public Throwable getThrowable() {
-        return null;
+        return throwable;
     }
 }
