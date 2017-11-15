@@ -168,6 +168,7 @@ public class Configuration {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
         ConfigParams copyOfConfigParams = ConfigParams.deepClone(configParams);
         Map<String, Class> items = new HashMap<>();
+        boolean anyMetricAdded = false;
 
         // we should load extensions before any configuration object is created.
         handleExtensions(configParams);
@@ -222,18 +223,21 @@ public class Configuration {
 
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addMetric(metric);
+                anyMetricAdded = true;
             } else if (itemToAdd.getClassName().equals("BASICMetrics")) {
                 Collection<Metric> basicMetrics = Metric.basicMetrics;
                 for (Metric metric : basicMetrics) {
                     this.globalArgs.addMetric(metric);
                     items.put(metric.getName(), metric.getClass());
                 }
+                anyMetricAdded = true;
             } else if (itemToAdd.getClassName().equals("DEFAULTMetrics")) {
                 Collection<Metric> defaultMetrics = Metric.defaultMetrics;
                 for (Metric metric : defaultMetrics) {
                     this.globalArgs.addMetric(metric);
                     items.put(metric.getName(), metric.getClass());
                 }
+                anyMetricAdded = true;
             } else {
                 throw new IllegalArgumentException("Unknown publisher, test or metric class: " + itemToAdd.getClassName());
             }
@@ -257,7 +261,8 @@ public class Configuration {
         }
 
         // Add default metrics if no metric is specified.
-        if (globalArgs.getMetrics().size() == 0) {
+        // TODO add better fix here?
+        if (!anyMetricAdded) {
             Collection<Metric> defaultMetrics = Metric.defaultMetrics;
             for (Metric metric : defaultMetrics) {
                 this.globalArgs.addMetric(metric);
