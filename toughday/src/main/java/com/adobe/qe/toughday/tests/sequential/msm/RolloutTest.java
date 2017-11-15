@@ -23,15 +23,14 @@ import com.adobe.qe.toughday.api.annotations.*;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.annotations.Internal;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
-import org.apache.logging.log4j.Logger;
 
 @Internal
 @Tag(tags = { "author" })
 @Name(name = "rollout_source")
 @Description(desc = "Rollout the source page/ blueprint")
-public class RolloutTest extends SequentialTestBase {
+public class RolloutTest extends AEMTestBase {
 
     private String sourcePage = null;
     private String destinationPage = null;

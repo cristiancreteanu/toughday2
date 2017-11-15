@@ -13,7 +13,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.logging.log4j.Logger;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
@@ -29,7 +28,7 @@ import java.util.UUID;
 @Description(desc = "Test for uploading PDF assets under the same path." +
         "Due to OAK limitations, performance will decrease over time." +
         "If you are not looking for this specific scenario, please consider using CreatePDFTreeTest.")
-public class UploadPDFTest extends SequentialTestBase {
+public class UploadPDFTest extends AEMTestBase {
 
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
     public static final String PDF_CONTENT_TYPE = "application/pdf";
@@ -88,7 +87,7 @@ public class UploadPDFTest extends SequentialTestBase {
         try {
             logger().debug("{}: Trying to upload pdf={}/{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
 
-            getDefaultClient().doPost(currentParentPath + ".createasset.html", multiPartEntity.build(), HttpStatus.SC_OK);
+            benchmark().measure(this, "UploadPDF", getDefaultClient()).doPost(currentParentPath + ".createasset.html", multiPartEntity.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
             logger().warn("{}: Failed to upload pdf={}/{}", Thread.currentThread().getName(), currentParentPath, currentFile.getName());
             logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);

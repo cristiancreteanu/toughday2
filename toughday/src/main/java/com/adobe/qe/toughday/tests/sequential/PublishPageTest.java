@@ -12,7 +12,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.SlingHttpResponse;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 import org.apache.sling.testing.clients.util.HttpUtils;
@@ -23,7 +22,7 @@ import java.util.List;
 @Internal
 @Tag(tags = { "author" })
 @Description(desc= "Publishes a page")
-public class PublishPageTest extends SequentialTestBase {
+public class PublishPageTest extends AEMTestBase {
     private static final String REFERENCES_SERVLET = "/libs/wcm/core/content/reference.json?_charset_=utf-8";
     private static final Gson GSON = new Gson();
     public static final String DEFAULT_WITH_REFERENCES = "false";
@@ -63,7 +62,7 @@ public class PublishPageTest extends SequentialTestBase {
         FormEntityBuilder form = FormEntityBuilder.create()
                 .addParameter("_charset_", "UTF-8")
                 .addParameter("path", pagePath);
-        SlingHttpResponse content = getDefaultClient().doPost(REFERENCES_SERVLET, form.build(), HttpStatus.SC_OK);
+        SlingHttpResponse content =benchmark().measure(this, "GetPageReferences", getDefaultClient()).doPost(REFERENCES_SERVLET, form.build(), HttpStatus.SC_OK);
 
         List<String> paths = new ArrayList<>();
 
@@ -92,7 +91,7 @@ public class PublishPageTest extends SequentialTestBase {
             }
         }
 
-        return getDefaultClient().doPost("/bin/replicate", form.build(), HttpUtils.getExpectedStatus(HttpStatus.SC_OK, expectedStatus));
+        return benchmark().measure(this, "Publish", getDefaultClient()).doPost("/bin/replicate", form.build(), HttpUtils.getExpectedStatus(HttpStatus.SC_OK, expectedStatus));
     }
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_WITH_REFERENCES, desc = "Publish references along with the page")

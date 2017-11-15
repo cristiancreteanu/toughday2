@@ -6,12 +6,11 @@ import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.Tag;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import com.adobe.qe.toughday.tests.utils.Constants;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.ArrayList;
@@ -21,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Tag(tags = { "author" })
 @Description(desc = "Creates users similar to the user editor console (/libs/granite/security/content/userEditor.html)")
-public class CreateUserTest extends SequentialTestBase {
+public class CreateUserTest extends AEMTestBase {
 
     public static final String DEFAULT_PASSWORD = "toughday";
     public static final String DEFAULT_EMAIL_ADDRESS = "toughday@adobe.com";
@@ -122,7 +121,7 @@ public class CreateUserTest extends SequentialTestBase {
 
         try {
             logger().debug("{}: Trying to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
-            getDefaultClient().doPost("/libs/granite/security/post/authorizables.html", entityBuilder.build(), HttpStatus.SC_CREATED);
+            benchmark().measure(this, "CreateUser", getDefaultClient()).doPost("/libs/granite/security/post/authorizables.html", entityBuilder.build(), HttpStatus.SC_CREATED);
         } catch (Throwable e) {
             logger().warn("{}: Failed to create user={}, with id={}", Thread.currentThread().getName(), firstName + " " + lastName, id);
             logger().debug(Thread.currentThread().getName() + "ERROR: ", e);

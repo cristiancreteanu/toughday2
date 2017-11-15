@@ -18,6 +18,8 @@
  ******************************************************************************/
 package com.adobe.qe.toughday.tests.utils;
 
+import com.adobe.qe.toughday.api.core.AbstractTest;
+import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
 import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
@@ -44,10 +46,10 @@ public class WcmUtils {
         return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
     }
 
-    public static SlingHttpResponse createLiveCopy(SlingClient client, String label, String title, String destPath, String srcPath,
-                                            boolean shallow, String[] rolloutConfigs, String[] missingPages, boolean excludeSubPages,
-                                            int... expectedStatus)
-            throws ClientException {
+    public static SlingHttpResponse createLiveCopy(AbstractTest test, SlingClient client, String label, String title, String destPath, String srcPath,
+                                                   boolean shallow, String[] rolloutConfigs, String[] missingPages, boolean excludeSubPages,
+                                                   int... expectedStatus)
+            throws Throwable {
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("cmd", CMD_CREATE_LIVECOPY)
                 .addParameter("title", title)
@@ -65,7 +67,7 @@ public class WcmUtils {
         feb.addParameter("cq:rolloutConfigs@Delete", "true");
         fillParameters(feb, "cq:rolloutConfigs", rolloutConfigs);
 
-        return client.doPost("/bin/wcmcommand", feb.build(), expectedStatus);
+        return test.benchmark().measure(test, "CreateLiveCopy", client).doPost("/bin/wcmcommand", feb.build(), expectedStatus);
     }
 
     private static void fillParameters(FormEntityBuilder formEntityBuilder, String paramName, String... values) {

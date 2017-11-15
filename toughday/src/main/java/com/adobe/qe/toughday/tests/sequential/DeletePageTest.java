@@ -9,7 +9,6 @@ import com.adobe.qe.toughday.api.core.SkippedTestException;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
@@ -17,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Tag(tags = { "author" })
 @Description(desc = "Test for deleting pages.")
-public class DeletePageTest extends SequentialTestBase {
+public class DeletePageTest extends AEMTestBase {
 
     private static final String CMD_DELETE_PAGE = "deletePage";
     private String parentPath = CreatePageTest.DEFAULT_PARENT_PATH;
@@ -53,7 +52,7 @@ public class DeletePageTest extends SequentialTestBase {
         try {
             logger().debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
 
-            getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+            benchmark().measure(this, "Delete Page", getDefaultClient()).doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
 
         } catch (Throwable e) {
             logger().warn("{}: Failed to delete={}{}", Thread.currentThread().getName(), parentPath, title);

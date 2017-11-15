@@ -9,7 +9,6 @@ import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.concurrent.atomic.AtomicInteger;
@@ -18,7 +17,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Description(desc = "This test creates pages under the same parent path." +
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreatePageTreeTest.")
-public class CreatePageTest extends SequentialTestBase {
+public class CreatePageTest extends AEMTestBase {
 
     private String rootParentPath = DEFAULT_PARENT_PATH;
     private String template = DEFAULT_TEMPLATE;
@@ -55,7 +54,7 @@ public class CreatePageTest extends SequentialTestBase {
         try {
             logger().debug("{}: Trying to create page={}{}, with template={}", Thread.currentThread().getId(), rootParentPath, nextTitle, template);
 
-            getDefaultClient().doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
+            benchmark().measure(this, "Create Page", getDefaultClient()).doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
             logger().warn("{}: Failed to create page={}{}, with template={}", Thread.currentThread().getId(), rootParentPath, nextTitle, template);
             logger().debug(Thread.currentThread().getName() + "ERROR: ", e);

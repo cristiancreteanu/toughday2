@@ -22,7 +22,7 @@ import java.util.UUID;
 @Description(desc=
                 "This test creates pages hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the pages tree, up to base^level")
-public class CreatePageTreeTest extends SequentialTestBase {
+public class CreatePageTreeTest extends AEMTestBase {
 
     private final TreePhaser phaser;
 
@@ -38,7 +38,6 @@ public class CreatePageTreeTest extends SequentialTestBase {
 
     public CreatePageTreeTest() {
         phaser = new TreePhaser();
-        benchmark().registerHierarchyProxyFactory(SlingClient.class, new SlingClientsProxyFactory());
     }
 
     protected CreatePageTreeTest(TreePhaser phaser, String parentPath, String template, String title) {
@@ -87,7 +86,7 @@ public class CreatePageTreeTest extends SequentialTestBase {
             try {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
-                if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
+                if (!failed || benchmark().measure(this, "Check Page Created", getDefaultClient()).exists(this.parentPath + nodeName)) {
                     logger().debug("{}: Successfully created page={}{}, with template={}", Thread.currentThread().getName(), parentPath, nodeName, template);
                     break;
                 } else {
@@ -111,9 +110,8 @@ public class CreatePageTreeTest extends SequentialTestBase {
                 .addParameter("label", nodeName)
                 .addParameter("title", title)
                 .addParameter("template", template);
-
         HttpEntity entity = feb.build();
-        benchmark().measure(this, "Create Page", getDefaultClient()).doPost("/bin/wcmcommand", entity, HttpStatus.SC_OK);
+        benchmark().measure(this, "CreatePage", getDefaultClient()).doPost("/bin/wcmcommand", entity, HttpStatus.SC_OK);
         communicate("resource", parentPath + nodeName);
     }
 

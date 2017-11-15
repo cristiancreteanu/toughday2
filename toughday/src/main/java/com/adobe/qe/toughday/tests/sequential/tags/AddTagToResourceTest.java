@@ -2,16 +2,15 @@ package com.adobe.qe.toughday.tests.sequential.tags;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.annotations.Internal;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.List;
 
 @Internal
-public class AddTagToResourceTest extends SequentialTestBase {
+public class AddTagToResourceTest extends AEMTestBase {
 
     @Override
     public void test() throws Throwable {

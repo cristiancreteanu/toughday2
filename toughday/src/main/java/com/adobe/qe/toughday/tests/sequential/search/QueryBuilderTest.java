@@ -5,11 +5,11 @@ import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.Tag;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 
 @Tag(tags = { "author" })
 @Description(desc = "Search that uses the Query Builder Json Rest Api")
-public class QueryBuilderTest extends SequentialTestBase {
+public class QueryBuilderTest extends AEMTestBase {
     private static final String DEFAULT_QUERY = "type=cq:Page&group.1_path=/content&orderby=@jcr:score&orderby.sort=desc";
     private String query = DEFAULT_QUERY;
 
@@ -22,7 +22,7 @@ public class QueryBuilderTest extends SequentialTestBase {
 
     @Override
     public void test() throws Throwable {
-        getDefaultClient().doGet("/bin/querybuilder.json?" + query);
+        benchmark().measure(this, "RunQuery", getDefaultClient()).doGet("/bin/querybuilder.json?" + query);
     }
 
     @Override

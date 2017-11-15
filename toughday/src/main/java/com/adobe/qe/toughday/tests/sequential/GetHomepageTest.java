@@ -7,11 +7,11 @@ import org.apache.http.HttpStatus;
 
 @Tag(tags = { "author", "publish" })
 @Description(desc = "GET the home page.")
-public class GetHomepageTest extends SequentialTestBase {
+public class GetHomepageTest extends AEMTestBase {
 
     @Override
     public void test() throws Throwable {
-        getDefaultClient().doGet("/", HttpStatus.SC_OK);
+        benchmark().measure(this, "GET Homepage", getDefaultClient()).doGet("/", HttpStatus.SC_OK);
     }
 
     @Override

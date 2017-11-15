@@ -9,14 +9,13 @@ import com.adobe.qe.toughday.api.annotations.After;
 import com.adobe.qe.toughday.api.annotations.Before;
 import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.composite.AuthoringTest;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.StringBody;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.Constants;
 
@@ -32,7 +31,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Description(desc = "Test for uploading assets under the same path."  +
         " Due to OAK limitations, performance will decrease over time." +
         " If you are not looking for this specific scenario, please consider using CreateAssetTreeTest.")
-public class UploadImageTest extends SequentialTestBase {
+public class UploadImageTest extends AEMTestBase {
 
     private String fileName = AuthoringTest.DEFAULT_ASSET_NAME;
     private String resourcePath = AuthoringTest.DEFAULT_RESOURCE_PATH;
@@ -86,7 +85,7 @@ public class UploadImageTest extends SequentialTestBase {
         try {
             logger().debug("{}: Trying to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
 
-            getDefaultClient().doPost(currentParentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
+            benchmark().measure(this, "UploadImage", getDefaultClient()).doPost(currentParentPath + ".createasset.html", multiPartEntity, HttpStatus.SC_OK);
         } catch (Throwable e) {
             logger().warn("{}: Failed to upload image={}{}", Thread.currentThread().getName(), currentParentPath, lastCreated.get().getName());
             logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);

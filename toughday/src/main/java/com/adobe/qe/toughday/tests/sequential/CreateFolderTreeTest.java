@@ -15,7 +15,7 @@ import org.apache.sling.testing.clients.util.FormEntityBuilder;
 @Name(name="create_folder_tree")
 @Description(desc="This test creates folders hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the folder tree, up to base^level")
-public class CreateFolderTreeTest extends SequentialTestBase {
+public class CreateFolderTreeTest extends AEMTestBase {
 
     public static final String FOLDER_RESOURCE_TYPE = "sling:Folder";
     public static final String DEFAULT_PARENT_PATH = SampleContent.TOUGHDAY_DAM_FOLDER;
@@ -37,7 +37,6 @@ public class CreateFolderTreeTest extends SequentialTestBase {
     public CreateFolderTreeTest() {
         phaser = new TreePhaser();
         AbstractTest.addExtraThread(phaser.mon);
-
     }
 
     protected CreateFolderTreeTest(TreePhaser phaser, String parentPath, String title, String resourceType) {
@@ -86,7 +85,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
             try {
                 // If operation was marked as failed and the path really does not exist,
                 // try and create it, as it is needed as the parent path for the children on the next level
-                if (!failed || getDefaultClient().exists(this.parentPath + nodeName)) {
+                if (!failed || benchmark().measure(this, "Check Folder Created", getDefaultClient()).exists(this.parentPath + nodeName)) {
                     logger().debug("{}: Successfully created folder={}{}", Thread.currentThread().getId(), parentPath, nodeName);
                     break;
                 } else {
@@ -112,7 +111,7 @@ public class CreateFolderTreeTest extends SequentialTestBase {
                 .addParameter(":name", nodeName)
                 .addParameter("./jcr:primaryType", resourceType);
 
-        getDefaultClient().doPost(parentPath, feb.build(), HttpStatus.SC_CREATED);
+        benchmark().measure(this, "Create Folder", getDefaultClient()).doPost(parentPath, feb.build(), HttpStatus.SC_CREATED);
     }
 
 

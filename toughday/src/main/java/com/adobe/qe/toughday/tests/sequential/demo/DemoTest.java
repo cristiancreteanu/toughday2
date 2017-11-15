@@ -5,18 +5,18 @@ import com.adobe.qe.toughday.api.annotations.*;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.annotations.Internal;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import org.apache.sling.testing.clients.ClientException;
 
 /**
- * A demo test class that explains how tests must be written. It extends the SequentialTestBase,
+ * A demo test class that explains how tests must be written. It extends the AEMTestBase,
  * meaning will have the test method as defined there and it will be run by SequentialTestRunner.
  * Since it is also a subtype of AbstractTest, it will be automatically picked up by the core
  * and can be added to the suite from the command line with --add DemoTest Property=myValue
  */
 @Internal // <-- remove this to see the test in cli/help and to be able to run it
 @Description(desc = "Demo description")
-public class DemoTest extends SequentialTestBase {
+public class DemoTest extends AEMTestBase {
     private String property;
 
     /**
@@ -84,7 +84,7 @@ public class DemoTest extends SequentialTestBase {
     }
 
     /**
-     *  Test method as defined by the SequentialTestBase. Different test bases
+     *  Test method as defined by the AEMTestBase. Different test bases
      *  can define test methods differently. The runner of the test needs to know
      *  how to properly run it. If none of the test bases are fitted for your particular
      *  test, you can choose to extend AbstractTest, but you will have to implement the runner

@@ -7,12 +7,11 @@ import com.adobe.qe.toughday.api.annotations.Setup;
 import com.adobe.qe.toughday.api.annotations.Tag;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
 import org.apache.sling.commons.html.impl.HtmlParserImpl;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;
@@ -24,7 +23,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @Tag(tags = { "author" })
 @Description(desc = "Create groups of users. Similar to group editor console (/libs/granite/security/content/groupEditor.html)")
-public class CreateUserGroupTest extends SequentialTestBase {
+public class CreateUserGroupTest extends AEMTestBase {
 
     private String id;
     private String groupName = DEFAULT_GROUP_NAME;
@@ -49,7 +48,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
     @Setup
     private void setup() {
         try {
-            extraGroup = createGroup(getDefaultClient(), id, groupName, description);
+            extraGroup = createGroup(getDefaultClient(), id, groupName, description, false);
         } catch (Throwable e) {
             //TODO
             extraGroup = null;
@@ -71,7 +70,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
         try {
             logger().debug("{}: Trying to create user group={}, with id={}", Thread.currentThread().getName(), groupName, id);
 
-            String groupPath = createGroup(getDefaultClient(), id, groupName, description);
+            String groupPath = createGroup(getDefaultClient(), id, groupName, description, true);
             communicate("groups", extraGroup != null ? Arrays.asList(extraGroup, groupPath) : Arrays.asList(groupPath));
         } catch (Throwable e) {
             logger().warn("{}: Failed to create user group={}{}", Thread.currentThread().getName(), groupName, id);
@@ -87,7 +86,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
      * Create a group
      * @return path to the created group
      */
-    public static String createGroup(SlingClient client, String id, String groupName, String description) throws Throwable {
+    private String createGroup(SlingClient client, String id, String groupName, String description, boolean addToRunmap) throws Throwable {
         HtmlParserImpl htmlParser = htmlParser = new HtmlParserImpl();
         FormEntityBuilder entityBuilder = FormEntityBuilder.create()
                 .addParameter("authorizableId", id)
@@ -96,6 +95,7 @@ public class CreateUserGroupTest extends SequentialTestBase {
                 .addParameter("createGroup", "1")
                 .addParameter("_charset_", "utf-8");
 
+        client = addToRunmap ? benchmark().measure(this, "CreateGroup", client) : client;
         SlingHttpResponse response = client.doPost("/libs/granite/security/post/authorizables.html", entityBuilder.build(), HttpStatus.SC_CREATED);
         Document responseHtml = htmlParser.parse(null, IOUtils.toInputStream(response.getContent()), "utf-8");
         return responseHtml.getElementsByTagName("title").item(0).getTextContent().split(" ")[2];

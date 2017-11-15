@@ -4,14 +4,13 @@ import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.annotations.*;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.tests.sequential.CreateFolderTreeTest;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
-import org.apache.logging.log4j.Logger;
+import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.Arrays;
@@ -21,7 +20,7 @@ import java.util.Arrays;
 @Description(desc=
         "This test creates tags hierarchically. Each child on each level has \"base\" children. " +
                 "Each author thread fills in a level in the tag tree, up to base^level")
-public class CreateTagTreeTest extends SequentialTestBase {
+public class CreateTagTreeTest extends AEMTestBase {
 
     public static final String CREATE_TAG_CMD = "createTag";
     public static final String TAG_COMMAND_URL = "/bin/tagcommand";
@@ -67,7 +66,7 @@ public class CreateTagTreeTest extends SequentialTestBase {
 
         //Create one initial tag to be used for adding it to all pages, so we have a very large index.
         try {
-            createTag(EXTRA_TAG_TITLE, EXTRA_TAG_TITLE, "ToughDay extra tag", namespace + ":");
+            createTag(EXTRA_TAG_TITLE, EXTRA_TAG_TITLE, "ToughDay extra tag", namespace + ":", false);
             extra_tag = namespace + ":" + EXTRA_TAG_TITLE;
         } catch (Throwable e) {
             //TODO
@@ -135,17 +134,18 @@ public class CreateTagTreeTest extends SequentialTestBase {
     }
 
     private void createTag() throws Throwable {
-        createTag(nodeName, nodeName, TAG_DESCRIPTION, parentPath);
+        createTag(nodeName, nodeName, TAG_DESCRIPTION, parentPath, false);
     }
 
-    private void createTag(String title, String tag, String description, String parentTagID) throws Throwable {
+    private void createTag(String title, String tag, String description, String parentTagID, boolean addToRunMap) throws Throwable {
+        SlingClient client = addToRunMap ? benchmark().measure(this, "CreateTag", getDefaultClient()) : getDefaultClient();
         FormEntityBuilder feb = FormEntityBuilder.create()
                 .addParameter("jcr:title", title)
                 .addParameter("tag", tag)
                 .addParameter("jcr:description", description)
                 .addParameter("parentTagID", parentTagID)
                 .addParameter("cmd", CREATE_TAG_CMD);
-        getDefaultClient().doPost(TAG_COMMAND_URL, feb.build(), HttpStatus.SC_OK);
+        client.doPost(TAG_COMMAND_URL, feb.build(), HttpStatus.SC_OK);
         communicate("tags", Arrays.asList(extra_tag, parentTagID + title));
     }
 

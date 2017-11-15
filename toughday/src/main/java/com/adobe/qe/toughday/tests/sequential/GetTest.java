@@ -9,7 +9,7 @@ import org.apache.http.HttpStatus;
 
 @Tag(tags = { "author", "publish" })
 @Description(desc = "GET a specific page.")
-public class GetTest extends SequentialTestBase {
+public class GetTest extends AEMTestBase {
 
     public static final String DEFAULT_PATH = "/crx/de";
     private String path;
@@ -37,7 +37,7 @@ public class GetTest extends SequentialTestBase {
     public void test() throws Throwable {
         try {
             logger().debug("{}: Trying to GET path={}", Thread.currentThread().getName(), path);
-            benchmark().measure(this, "GET", getDefaultClient()).doGet(path, HttpStatus.SC_OK);
+            benchmark().measure(this, "GET page", getDefaultClient()).doGet(path, HttpStatus.SC_OK);
         } catch (Throwable e) {
             logger().warn("{}: Failed to GET path={}", Thread.currentThread().getName(), path);
             logger().debug(Thread.currentThread().getName() + ": ERROR :", e);

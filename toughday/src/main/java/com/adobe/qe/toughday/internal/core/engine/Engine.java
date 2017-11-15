@@ -11,7 +11,7 @@ import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.metrics.Metric;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -198,7 +198,7 @@ public class Engine {
 
     public static void installToughdayContentPackage(GlobalArgs globalArgs) throws Exception {
         logGlobal("Installing ToughDay 2 Content Package...");
-        PackageManagerClient packageManagerClient = SequentialTestBase.createClient(globalArgs).adaptTo(PackageManagerClient.class);
+        PackageManagerClient packageManagerClient = AEMTestBase.createClient(globalArgs).adaptTo(PackageManagerClient.class);
 
         String tdContentPackageGroup = "com.adobe.qe.toughday";
         String tdContentPackageName = ReflectionsContainer.getInstance().getToughdayContentPackage();

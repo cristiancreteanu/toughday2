@@ -5,17 +5,16 @@ import com.adobe.qe.toughday.api.annotations.*;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
-import org.apache.logging.log4j.Logger;
 
 import java.util.UUID;
 
 @Tag(tags = { "author" })
 @Name(name = "create_lc")
 @Description(desc = "Creates live copies from pages")
-public class CreateLiveCopyFromPageTest extends SequentialTestBase {
+public class CreateLiveCopyFromPageTest extends AEMTestBase {
 
     public static final String SOURCE_PAGE_NAME = "create_lc_source";
     public static final String DESTINATION_PAGE_NAME = "create_lc_dest";
@@ -93,7 +92,7 @@ public class CreateLiveCopyFromPageTest extends SequentialTestBase {
     }
 
     private void createLC() throws Throwable {
-        WcmUtils.createLiveCopy(getDefaultClient(), nodeName, title, destinationPage, sourcePage, false, null, null, false, 200);
+        WcmUtils.createLiveCopy(this, getDefaultClient(), nodeName, title, destinationPage, sourcePage, false, null, null, false, 200);
         communicate("livecopy", destinationPage + nodeName);
     }
 
