@@ -217,7 +217,7 @@ public class Engine {
     public static void printObject(TestSuite testSuite, PrintStream out, Object obj)
             throws InvocationTargetException, IllegalAccessException {
         Class objectClass = obj.getClass();
-        out.println("- Configuration for object of class " + objectClass.getSimpleName());
+        out.println("- Configuration for object of class " + objectClass.getSimpleName()+" ["+objectClass.getName()+"]");
         out.println(String.format("\t%-32s %-64s", "Property", "Value"));
         for(Method method : objectClass.getMethods()) {
             if (method.isAnnotationPresent(ConfigArgGet.class)) {

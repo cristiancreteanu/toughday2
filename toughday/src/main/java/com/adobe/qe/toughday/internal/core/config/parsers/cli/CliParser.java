@@ -30,13 +30,13 @@ import java.util.*;
 public class CliParser implements ConfigurationParser {
     private static final Logger LOGGER = LogManager.getLogger(CliParser.class);
 
-    private static final String HELP_HEADER_FORMAT_WITH_TAGS = "   %-40s %-40s   %s";
-    private static final String HELP_HEADER_FORMAT_NO_TAGS = "   %-40s   %s";
-    private static final String TEST_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Class", "Tags", "Description");
-    private static final String PUBLISH_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_NO_TAGS, "Class", "Description");
+    private static final String HELP_HEADER_FORMAT_WITH_TAGS = "   %-42s %-75s %-20s   %s";
+    private static final String HELP_HEADER_FORMAT_NO_TAGS = "   %-42s %-75s   %s";
+    private static final String TEST_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Class", "Fully qualified domain name", "Tags", "Description");
+    private static final String PUBLISH_CLASS_HELP_HEADER = String.format(HELP_HEADER_FORMAT_NO_TAGS, "Class", "Fully qualified domain name", "Description");
     private static final String METRIC_CLASS_HELP_HEADER = PUBLISH_CLASS_HELP_HEADER;
-    private static final String SUITE_HELP_HEADER = String.format(HELP_HEADER_FORMAT_WITH_TAGS, "Suite", "Tags", "Description");
     private static Method[] globalArgMethods = GlobalArgs.class.getMethods();
+    private static final String SUITE_HELP_HEADER = String.format("   %-40s %-40s   %s", "Suite", "Tags", "Description");
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
     public final static List<Object> parserArgs = new ArrayList<>();
@@ -412,7 +412,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("\r\nExamples: \r\n");
         System.out.println("\t java -jar toughday.jar --host=localhost --port=4502");
         System.out.println("\t java -jar toughday.jar --runmode type=normal concurrency=20 --host=localhost --port=4502");
-        System.out.println("\t java -jar toughday.jar --host=localhost --add extension.jar --add extensionTest");
+        System.out.println("\t java -jar toughday.jar --host=localhost --add extension.jar --add com.adobe.qe.toughday.tests.extensionTest");
         System.out.println("\t java -jar toughday.jar --suite=toughday --add BASICMetrics --add Average decimals=3 --exclude Failed");
 
         System.out.println("\r\nGlobal arguments:");
@@ -477,6 +477,7 @@ public class CliParser implements ConfigurationParser {
 
     private static void printClass(Class klass, boolean printProperties, boolean printTags, boolean lowerCaseClass) {
         String name = lowerCaseClass ? klass.getSimpleName().toLowerCase() : klass.getSimpleName();
+        String full_name = lowerCaseClass ? klass.getName().toLowerCase() : klass.getName();
         String desc = "";
         String tags = "";
         if (klass.isAnnotationPresent(Name.class)) {
@@ -494,9 +495,9 @@ public class CliParser implements ConfigurationParser {
         }
 
         if(!printTags) {
-            System.out.println(String.format(" - %-40s - %s", name, desc));
+            System.out.println(String.format(" - %-42s %-75s - %s", name, full_name, desc));
         } else {
-            System.out.println(String.format(" - %-40s %-40s - %s", name, tags, desc));
+            System.out.println(String.format(" - %-42s %-75s %-20s - %s", name, full_name, tags, desc));
         }
 
         if (printProperties) {

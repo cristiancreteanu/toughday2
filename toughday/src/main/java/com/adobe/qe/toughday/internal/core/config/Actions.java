@@ -21,12 +21,12 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionParams() {
-            return "ExtensionJar | TestClass/PublisherClass/MetricClass property1=val property2=val";
+            return "ExtensionJar | [f.q.d.n]TestClass/[f.q.d.n]PublisherClass/[f.q.d.n]MetricClass property1=val property2=val";
         }
 
         @Override
         public String actionDescription() {
-            return "Add an extension or a test to the suite or a publisher/metric";
+            return "Add an extension or a test to the suite or a publisher/metric. For test, publisher and metric it can be used the fully qualified domain name which represents the package's name.";
         }
     },
     CONFIG {
@@ -72,7 +72,7 @@ public enum Actions implements ConfigAction {
 
         @Override
         public String actionDescription() {
-            return "Exclude a test/publisher/metric from config file or a predefined suite";
+            return "Exclude a test/publisher/metric from config file or a predefined suite.";
         }
     };
 

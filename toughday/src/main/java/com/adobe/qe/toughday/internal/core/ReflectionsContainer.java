@@ -71,21 +71,31 @@ public class ReflectionsContainer {
         for(Class<? extends AbstractTest> testClass : reflections.getSubTypesOf(AbstractTest.class)) {
             if(excludeClass(testClass))
                 continue;
-            if(testClasses.containsKey(testClass.getSimpleName()))
-                throw new IllegalStateException("A test class with this name already exists here: "
-                        + testClasses.get(testClass.getSimpleName()).getName());
-            addToClassRegister(testClass.getSimpleName());
-            testClasses.put(testClass.getSimpleName(), testClass);
+
+            addToClassRegister(testClass.getName());
+            testClasses.put(testClass.getName(), testClass);
+
+            if(testClasses.containsKey(testClass.getSimpleName())) {
+                testClasses.put(testClass.getSimpleName(), null);
+            }
+            else {
+                testClasses.put(testClass.getSimpleName(), testClass);
+            }
         }
 
         for (Class<? extends Publisher> publisherClass : reflections.getSubTypesOf(Publisher.class)) {
             if (excludeClass(publisherClass))
                 continue;
-            if (publisherClasses.containsKey(publisherClass.getSimpleName()))
-                throw new IllegalStateException("A publisher class with this name already exists here: "
-                        + publisherClasses.get(publisherClass.getSimpleName()).getName());
-            addToClassRegister(publisherClass.getSimpleName());
-            publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
+
+            addToClassRegister(publisherClass.getName());
+            publisherClasses.put(publisherClass.getName(), publisherClass);
+
+            if (publisherClasses.containsKey(publisherClass.getSimpleName())) {
+                publisherClasses.put(publisherClass.getSimpleName(), null);
+            }
+            else {
+                publisherClasses.put(publisherClass.getSimpleName(), publisherClass);
+            }
         }
 
         for (Class<? extends SuiteSetup> suiteSetupClass : reflections.getSubTypesOf(SuiteSetup.class)) {
@@ -122,14 +132,17 @@ public class ReflectionsContainer {
 
         for (Class<? extends Metric> metricClass : reflections.getSubTypesOf(Metric.class)) {
             if (excludeClass(metricClass)) { continue; }
-            String identifier = metricClass.getSimpleName();
-            if (metricClasses.containsKey(identifier)) {
-                throw new IllegalStateException("A metric class with this name already exists here: " +
-                        metricClasses.get(identifier).getName());
-            }
+            String identifier = metricClass.getName();
 
             addToClassRegister(identifier);
             metricClasses.put(identifier, metricClass);
+
+            if (metricClasses.containsKey(identifier)) {
+                metricClasses.put(metricClass.getSimpleName(), null);
+            }
+            else {
+                metricClasses.put(metricClass.getSimpleName(), metricClass);
+            }
         }
 
     }

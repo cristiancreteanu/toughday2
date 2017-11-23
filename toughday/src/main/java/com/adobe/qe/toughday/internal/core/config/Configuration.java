@@ -194,8 +194,12 @@ public class Configuration {
         // add tests,publishers and metrics
         for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
             if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
+                if(ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName())==null) {
+                    LOGGER.error("Test name clash: " + itemToAdd.getClassName());
+                    throw new IllegalArgumentException("Test name clash: " + itemToAdd.getClassName());
+                }
+
                 AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()), itemToAdd.getParameters());
-                items.put(test.getName(), test.getClass());
 
                 // defaults
                 int weight = (itemToAdd.getParameters().containsKey("weight"))
@@ -206,8 +210,14 @@ public class Configuration {
                         ? (Integer) (itemToAdd.getParameters().remove("count")) : -1;
 
                 suite.add(test, weight, timeout, counter);
+                items.put(test.getName(), test.getClass());
                 checkInvalidArgs(itemToAdd.getParameters());
             } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemToAdd.getClassName())) {
+                if(ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName())==null) {
+                    LOGGER.error("Publisher name clash: " + itemToAdd.getClassName());
+                    throw new IllegalArgumentException("Publisher name clash: " + itemToAdd.getClassName());
+                }
+
                 Publisher publisher = createObject(
                         ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
@@ -216,6 +226,10 @@ public class Configuration {
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addPublisher(publisher);
             } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(itemToAdd.getClassName())) {
+                if(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName())==null) {
+                    LOGGER.error("Metric name clash: " + itemToAdd.getClassName());
+                    throw new IllegalArgumentException("Metric name clash: " + itemToAdd.getClassName());
+                }
 
                 Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
@@ -357,7 +371,7 @@ public class Configuration {
      */
     public static <T> T setObjectProperties(T object, Map<String, Object> args) throws InvocationTargetException, IllegalAccessException {
         Class classObject = object.getClass();
-        LOGGER.info("Configuring object of class: " + classObject.getSimpleName());
+        LOGGER.info("Configuring object of class: " + classObject.getSimpleName()+" ["+classObject.getName()+"]");
         for (Method method : classObject.getMethods()) {
             ConfigArgSet annotation = method.getAnnotation(ConfigArgSet.class);
             if (annotation == null) {
@@ -399,6 +413,7 @@ public class Configuration {
      */
     public static <T> T createObject(Class<? extends T> classObject, Map<String, Object> args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
+
         Constructor constructor = null;
         try {
             constructor = classObject.getConstructor(null);
