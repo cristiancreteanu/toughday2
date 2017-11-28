@@ -260,10 +260,12 @@ public class Configuration {
         // Add default publishers if none is specified
         if (globalArgs.getPublishers().size() == 0) {
             Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, Object>());
+            items.put(publisher.getName(), publisher.getClass());
             this.globalArgs.addPublisher(publisher);
             publisher = createObject(CSVPublisher.class, new HashMap<String, Object>() {{
                 put("append", "true");
             }});
+            items.put(publisher.getName(), publisher.getClass());
             this.globalArgs.addPublisher(publisher);
         }
 
