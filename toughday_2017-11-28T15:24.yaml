@@ -1,0 +1,6 @@
+globals:
+  host: localhost
+publishers:
+- config: CSVPublisher
+  properties:
+    aggregatedpublish: true

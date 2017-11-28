@@ -134,10 +134,10 @@ public class ReflectionsContainer {
             if (excludeClass(metricClass)) { continue; }
             String identifier = metricClass.getName();
 
-            addToClassRegister(identifier);
-            metricClasses.put(identifier, metricClass);
+            addToClassRegister(metricClass.getName());
+            metricClasses.put(metricClass.getName(), metricClass);
 
-            if (metricClasses.containsKey(identifier)) {
+            if (metricClasses.containsKey(metricClass.getSimpleName())) {
                 metricClasses.put(metricClass.getSimpleName(), null);
             }
             else {

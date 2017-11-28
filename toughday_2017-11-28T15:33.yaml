@@ -1,0 +1,14 @@
+globals:
+  installsamplecontent: false
+  duration: 15m
+  host: localhost
+publishers:
+- exclude: ConsolePublisher
+publishmode:
+  type: intervals
+  interval: 1s
+runmode:
+  type: normal
+  concurrency: 5
+tests:
+- add: CreatePageTreeTest
