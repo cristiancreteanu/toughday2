@@ -28,6 +28,7 @@
 	</distributionManagement>
 	<modules>
 		<module>toughday2-api</module>
+		<module>aem-td2-core-tests</module>
 		<module>toughday_sample</module>
 		<module>toughday</module>
 	</modules>

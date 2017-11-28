@@ -7,7 +7,7 @@ import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.Tag;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
+import com.adobe.qe.toughday.tests.samplecontent.SampleContent;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.http.entity.mime.MultipartEntityBuilder;

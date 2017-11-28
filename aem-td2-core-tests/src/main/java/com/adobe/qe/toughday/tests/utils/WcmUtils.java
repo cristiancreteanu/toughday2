@@ -19,8 +19,7 @@
 package com.adobe.qe.toughday.tests.utils;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
-import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
-import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
+import com.adobe.qe.toughday.tests.samplecontent.SampleContent;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;

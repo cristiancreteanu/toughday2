@@ -6,7 +6,7 @@
     <version>0.1.0-SNAPSHOT</version>
 
     <properties>
-        <toughday.version>0.2.2-SNAPSHOT</toughday.version>
+        <toughday.api.version>0.1.0-SNAPSHOT</toughday.api.version>
     </properties>
 
     <distributionManagement>
@@ -23,30 +23,124 @@
         </snapshotRepository>
     </distributionManagement>
     <dependencies>
+        <!--  Toughday2 API + validation -->
+        <dependency>
+            <groupId>com.adobe.qe</groupId>
+            <artifactId>toughday2-api</artifactId>
+            <version>${toughday.api.version}</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.qe</groupId>
+            <artifactId>toughday2-api</artifactId>
+            <version>${toughday.api.version}</version>
+            <type>test-jar</type>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.adobe.qe</groupId>
+            <artifactId>aem-td2-core-tests</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 
-         <!-- https://mvnrepository.com/artifact/junit/junit -->
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.12</version>
-                <scope>test</scope>
-            </dependency>
+        <!--- Toughday2 Core - 3rd party dependencies -->
+         <dependency>
+            <groupId>org.reflections</groupId>
+            <artifactId>reflections</artifactId>
+            <version>0.9.11</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Force third-party libraries to use slf4j -->
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
+            <version>1.7.25</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jul-to-slf4j</artifactId>
+            <version>1.7.25</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- Get slf4j from it-framework to log to log4j -->
+        <dependency>
+            <groupId>org.apache.logging.log4j</groupId>
+            <artifactId>log4j-slf4j-impl</artifactId>
+            <version>2.4.1</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- include ToughDay JUnit tests -->
-            <dependency>
-                <groupId>com.adobe.qe</groupId>
-                <artifactId>toughday2</artifactId>
-                <version>${toughday.version}</version>
-                <type>test-jar</type>
-                <scope>test</scope>
-            </dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>1.3.2</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.testing.clients</artifactId>
+            <version>1.1.4</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.apache.pdfbox/pdfbox -->
+        <dependency>
+            <groupId>org.apache.pdfbox</groupId>
+            <artifactId>pdfbox</artifactId>
+            <version>2.0.3</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.sling</groupId>
+            <artifactId>org.apache.sling.commons.html</artifactId>
+            <version>1.0.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.17</version>
+            <scope>provided</scope>
+        </dependency>
 
-            <!-- include ToughDay API -->
-            <dependency>
-                <groupId>com.adobe.qe</groupId>
-                <artifactId>toughday2</artifactId>
-                <version>${toughday.version}</version>
-            </dependency>
+        <!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
+        <dependency>
+            <groupId>org.hdrhistogram</groupId>
+            <artifactId>HdrHistogram</artifactId>
+            <version>2.1.9</version>
+            <scope>provided</scope>
+        </dependency>
+        <!-- https://mvnrepository.com/artifact/com.google.code.gson/gson -->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.8.0</version>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+            <version>4.11</version>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -57,9 +151,8 @@
                 <version>2.20</version>
                 <configuration>
                     <dependenciesToScan>
-                        <dependency>com.adobe.qe:toughday2</dependency>
+                        <dependency>com.adobe.qe:toughday2-api</dependency>
                     </dependenciesToScan>
-                    <groups>com.adobe.qe.toughday.structural.TestTDConstraints</groups>
                 </configuration>
             </plugin>
         </plugins>

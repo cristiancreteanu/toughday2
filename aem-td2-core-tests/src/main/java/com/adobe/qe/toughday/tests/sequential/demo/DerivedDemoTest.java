@@ -18,7 +18,7 @@ public class DerivedDemoTest extends DemoTest {
 
     @Setup
     private void setupMethod() {
-        System.out.println(getFullName() + " Derived Setup");
+        logger().info(getFullName() + " Derived Setup");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -28,7 +28,7 @@ public class DerivedDemoTest extends DemoTest {
 
     @Before
     private void beforeMethod() {
-        System.out.println(getFullName() + " Derived Before");
+        logger().info(getFullName() + " Derived Before");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -38,7 +38,7 @@ public class DerivedDemoTest extends DemoTest {
 
     @After
     private void afterMethod() {
-        System.out.println(getFullName() + " Derived After");
+        logger().info(getFullName() + " Derived After");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -49,7 +49,7 @@ public class DerivedDemoTest extends DemoTest {
 
     @Override
     public void test() throws ClientException {
-        System.out.println(getFullName() + " Running derived test");
+        logger().info(getFullName() + " Running derived test");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

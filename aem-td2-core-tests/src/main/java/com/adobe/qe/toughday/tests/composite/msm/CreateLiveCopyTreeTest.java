@@ -5,7 +5,7 @@ import com.adobe.qe.toughday.api.core.CompositeTest;
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
+import com.adobe.qe.toughday.tests.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.sequential.CreatePageTreeTest;
 import com.adobe.qe.toughday.tests.sequential.msm.CreateLiveCopyFromPageTest;
 import com.adobe.qe.toughday.tests.sequential.msm.RolloutTest;

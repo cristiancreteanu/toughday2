@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.internal.samplecontent;
+package com.adobe.qe.toughday.tests.samplecontent;
 
 /**
  * Created by tuicu on 12/01/17.

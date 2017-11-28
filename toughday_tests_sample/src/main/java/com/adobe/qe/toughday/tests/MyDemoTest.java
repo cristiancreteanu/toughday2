@@ -2,17 +2,17 @@ package com.adobe.qe.toughday.tests;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.annotations.*;
-import com.adobe.qe.toughday.tests.sequential.SequentialTestBase;
-import org.apache.sling.testing.clients.ClientException;
+import com.adobe.qe.toughday.api.core.SkippedTestException;
+import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
 
 /**
- * A demo test class that explains how tests must be written. It extends the SequentialTestBase,
+ * A demo test class that explains how AEM tests can be written. It extends the AEMTestBase,
  * meaning will have the test method as defined there and it will be run by SequentialTestRunner.
  * Since it is also a subtype of AbstractTest, it will be automatically picked up by the core
- * and can be added to the suite from the command line with --add MyDemoTest Property=myValue
+ * and can be added to the suite from the command line with --add MyDemoTest property=myValue
  */
 @Description(desc = "Demo description")
-public class MyDemoTest extends SequentialTestBase {
+public class MyDemoTest extends AEMTestBase {
     private String property;
 
     /**
@@ -39,10 +39,10 @@ public class MyDemoTest extends SequentialTestBase {
      */
     @Setup
     private void setupMethod() {
-        System.out.println(getFullName() + " Setup");
+        logger().info(getFullName() + " Setup");
         try {
             /* Sleeps are not required, actually they are quite harmful, because they reduce the rate with which
-            the tests and affect the throughput. Use them only if the tests simulates wait between requests, otherwise
+            the tests run and affect the throughput. Use them only if the tests simulates wait between requests, otherwise
             use the --WaitTime parameter to specify wait between test runs.
              */
             Thread.sleep(1000);
@@ -57,7 +57,7 @@ public class MyDemoTest extends SequentialTestBase {
      */
     @Before
     private void beforeMethod() {
-        System.out.println(getFullName() + " Before");
+        logger().info(getFullName() + " Before");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -71,7 +71,7 @@ public class MyDemoTest extends SequentialTestBase {
      */
     @After
     private void afterMethod() {
-        System.out.println(getFullName() + " After");
+        logger().info(getFullName() + " After");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -87,9 +87,10 @@ public class MyDemoTest extends SequentialTestBase {
      *  for your new type of test as well.
      */
     @Override
-    public void test() throws ClientException {
-        System.out.println(getFullName() + " Running test with Property=" + property);
+    public void test() throws Throwable {
+        logger().info(getFullName() + " Running test with Property=" + property);
         try {
+            benchmark().measure(this, "DemoOperation", getDefaultClient()).exists("/content");
             Thread.sleep(1000);
         } catch (InterruptedException e) {
             e.printStackTrace();

@@ -3,7 +3,7 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.api.annotations.*;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.FluentLogging;
-import com.adobe.qe.toughday.internal.samplecontent.SampleContent;
+import com.adobe.qe.toughday.tests.samplecontent.SampleContent;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;

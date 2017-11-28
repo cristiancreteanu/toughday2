@@ -41,7 +41,7 @@ public class CompositeDemo extends CompositeTest {
 
     @Setup
     private void setupMethod() {
-        System.out.println(getFullName() + " Setup");
+        logger().info(getFullName() + " Setup");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -52,7 +52,7 @@ public class CompositeDemo extends CompositeTest {
 
     @Before
     private void beforeMethod() {
-        System.out.println(getFullName() + " Before");
+        logger().info(getFullName() + " Before");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -63,7 +63,7 @@ public class CompositeDemo extends CompositeTest {
 
     @After
     private void afterMethod() {
-        System.out.println(getFullName() + " After");
+        logger().info(getFullName() + " After");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {

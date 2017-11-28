@@ -43,7 +43,7 @@ public class DemoTest extends AEMTestBase {
      */
     @Setup
     private void setupMethod() {
-        System.out.println(getFullName() + " Setup");
+        logger().info(getFullName() + " Setup");
         try {
             /* Sleeps are not required, actually they are quite harmful, because they reduce the rate with which
             the tests and affect the throughput. Use them only if the tests simulates wait between requests, otherwise
@@ -61,7 +61,7 @@ public class DemoTest extends AEMTestBase {
      */
     @Before
     private void beforeMethod() {
-        System.out.println(getFullName() + " Before");
+        logger().info(getFullName() + " Before");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -75,7 +75,7 @@ public class DemoTest extends AEMTestBase {
      */
     @After
     private void afterMethod() {
-        System.out.println(getFullName() + " After");
+        logger().info(getFullName() + " After");
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
@@ -92,7 +92,7 @@ public class DemoTest extends AEMTestBase {
      */
     @Override
     public void test() throws ClientException {
-        System.out.println(getFullName() + " Running test with Property=" + property);
+        logger().info(getFullName() + " Running test with Property=" + property);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
