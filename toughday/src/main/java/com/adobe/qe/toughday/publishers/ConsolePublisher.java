@@ -98,7 +98,7 @@ public class ConsolePublisher extends Publisher {
         int nrMetrics = results.values().iterator().next().size() - 1;
         int nrLinesPerTest = nrMetrics / METRICS_PER_LINE_LIMIT + 2;
         int nrStats = results.size() * nrLinesPerTest;
-        final String FORMAT = "%-35s | ";
+        final String FORMAT = "%-37s | ";
         // "clear" screen
         if (begun && clearScreen) {
             for (int i=0; i < nrStats + extraLines.get(); i++ ) {
