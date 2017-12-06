@@ -87,19 +87,21 @@ public class ConsolePublisher extends Publisher {
     }
 
     private void alignMetrics() {
-        System.out.printf("\r\n");
+        System.out.println();
         System.out.printf("%-35s", " ");
     }
 
     // publish results method, called periodically
     private void publish(Map<String, List<MetricResult>> results) {
-        int nrStats = results.values().iterator().next().size();
         final int METRIC_LENGTH = 12;
         final int METRICS_PER_LINE_LIMIT = 3;
+        int nrMetrics = results.values().iterator().next().size() - 1;
+        int nrLinesPerTest = nrMetrics / METRICS_PER_LINE_LIMIT + 2;
+        int nrStats = results.size() * nrLinesPerTest;
         final String FORMAT = "%-35s | ";
         // "clear" screen
         if (begun && clearScreen) {
-            for (int i=0; i < (nrStats * 5) + 2 + extraLines.get(); i++ ) {
+            for (int i=0; i < nrStats + extraLines.get(); i++ ) {
                 System.out.print("\33[1A\33[2K");
             }
         }
@@ -129,7 +131,9 @@ public class ConsolePublisher extends Publisher {
             System.out.println();
             System.out.println();
         }
+        begun = true;
 
+        extraLines.set(0);
     }
 
     @Override
