@@ -37,17 +37,17 @@ public class CSVPublisher extends Publisher {
     /**
      * Format of the raw results
      */
-    private static final String BATCH_FORMAT = "%-50s, %-6s, %-6s, %-23s, %-23s, %-10s, %s";
+    private static final String RAW_FORMAT = "%s,%s,%s,%s,%s,%s,%s";
 
     /**
      * Header for the raw results
      */
-    private static final String[] BATCH_HEADER = { "Name", "Status", "Thread", "Start Timestamp", "End Timestamp", "Duration", "Data" };
+    private static final String[] RAW_HEADER = { "Name", "Status", "Thread", "Start Timestamp", "End Timestamp", "Duration", "Data" };
 
     private Gson GSON = new Gson();
 
     private String header;
-    private String headerFormat;
+    private String aggregatedFormat;
     private boolean append = true;
     private boolean created = false;
 
@@ -57,10 +57,6 @@ public class CSVPublisher extends Publisher {
 
     private PrintWriter rawResultsWriter;
     private String rawFilePath = DEFAULT_RAW_FILE_PATH;
-
-    public CSVPublisher() {
-        setAggregatedPublish(Boolean.FALSE.toString()); //TODO remove this when call config arg set is merged
-    }
 
     @ConfigArgSet(required = false, desc = "The filename to write results to", defaultValue = DEFAULT_FILE_PATH)
     public void setFilePath(String filePath) {
@@ -127,7 +123,7 @@ public class CSVPublisher extends Publisher {
                     results.add(resultInfo.getValue());
                 }
 
-                resultsWriter.write(String.format(headerFormat, results.toArray()));
+                resultsWriter.write(String.format(aggregatedFormat, results.toArray()));
                 resultsWriter.newLine();
             }
 
@@ -148,12 +144,12 @@ public class CSVPublisher extends Publisher {
         try {
             if (rawResultsWriter == null) {
                 rawResultsWriter = new PrintWriter(new BufferedWriter(new FileWriter(rawFilePath)));
-                rawResultsWriter.println(String.format(BATCH_FORMAT, BATCH_HEADER));
+                rawResultsWriter.println(String.format(RAW_FORMAT, RAW_HEADER));
             }
 
             for (TestResult testResult : testResults) {
                 Object data = testResult.getData();
-                rawResultsWriter.println(String.format(BATCH_FORMAT,
+                rawResultsWriter.println(String.format(RAW_FORMAT,
                         testResult.getTestFullName(),
                         testResult.getStatus().toString(),
                         testResult.getThreadId(),
@@ -173,18 +169,16 @@ public class CSVPublisher extends Publisher {
 
     }
 
-    private String createHeaderFormat(List<MetricResult> resultsList) {
+    private void createHeaderFormat(List<MetricResult> resultsList) {
         header = "";
-        headerFormat = "";
+        aggregatedFormat = "";
         for (MetricResult resultInfo : resultsList) {
-            header += resultInfo.getName() + ", ";
-            headerFormat += resultInfo.getFormat() + ", ";
+            if(!header.isEmpty()) {
+                header += ",";
+                aggregatedFormat += ",";
+            }
+            header += resultInfo.getName();
+            aggregatedFormat += resultInfo.getFormat();
         }
-
-        //remove last two characters
-        header = header.substring(0, header.length() - 2);
-        headerFormat = headerFormat.substring(0, headerFormat.length() - 2);
-
-        return headerFormat;
     }
 }
