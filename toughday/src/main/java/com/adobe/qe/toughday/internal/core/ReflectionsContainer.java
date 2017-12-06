@@ -33,6 +33,7 @@ public class ReflectionsContainer {
     private HashMap<String, Class<? extends PublishMode>> publishModeClasses;
     private HashMap<String, Class<? extends RunMode>> runModeClasses;
     private HashMap<String, Class<? extends Metric>> metricClasses;
+
     private Set<String> classRegister;
 
     private String toughdayContentPackage;
@@ -132,7 +133,6 @@ public class ReflectionsContainer {
 
         for (Class<? extends Metric> metricClass : reflections.getSubTypesOf(Metric.class)) {
             if (excludeClass(metricClass)) { continue; }
-            String identifier = metricClass.getName();
 
             addToClassRegister(metricClass.getName());
             metricClasses.put(metricClass.getName(), metricClass);
@@ -144,7 +144,6 @@ public class ReflectionsContainer {
                 metricClasses.put(metricClass.getSimpleName(), metricClass);
             }
         }
-
     }
 
     // Two classes with different types should not be allowed to have the same name.
@@ -157,10 +156,60 @@ public class ReflectionsContainer {
     }
 
     /**
+     * Verifies if the given name is a test class
+     * @param testClass the name of a test class
+     * @return true if the given name is a test class. false otherwise.
+     */
+    public boolean isTestClass(String testClass) {
+        return testClasses.containsKey(testClass);
+    }
+
+    /**
+     * Get the test class corresponding to the name
+     * @param testClass the name of a test class
+     * @return the test class corresponding to the name
+     * @throws IllegalArgumentException if the name is either ambiguous (more than one test class has the same name and a FQDN wasn't used) or there is no
+     *  test class with the specified name
+     */
+    public Class<? extends AbstractTest> getTestClass(String testClass) {
+        if(isTestClass(testClass)) {
+            if(testClasses.get(testClass) == null) {
+                throw new IllegalArgumentException("There is more than one test named: " + testClass + ". Please use the fully qualified domain name.");
+            }
+            return testClasses.get(testClass);
+        }
+        throw new IllegalArgumentException("Unknown test: " + testClass);
+    }
+
+    /**
      * Getter for the map of test classes.
      */
     public HashMap<String, Class<? extends AbstractTest>> getTestClasses() {
         return testClasses;
+    }
+
+    /**
+     * Verifies if the given name is a publisher class
+     * @param publisherClass the name of a publisher class
+     * @return true if the given name is a publisher class. false otherwise.
+     */
+    public boolean isPublisherClass(String publisherClass) { return publisherClasses.containsKey(publisherClass); }
+
+    /**
+     * Get the publisher class corresponding to the name
+     * @param publisherClass the name of a publisher class
+     * @return the publisher class corresponding to the name
+     * @throws IllegalArgumentException if the name is either ambiguous (more than one publisher class has the same name and a FQDN wasn't used) or there is no
+     *  publisher class with the specified name
+     */
+    public Class<? extends Publisher> getPublisherClass(String publisherClass) {
+        if(isPublisherClass(publisherClass)) {
+            if (publisherClasses.get(publisherClass) == null) {
+                throw new IllegalArgumentException("There is more than one publisher named: " + publisherClass + ". Please use the fully qualified domain name.");
+            }
+            return publisherClasses.get(publisherClass);
+        }
+        throw new IllegalArgumentException("Unknown publisher: " + publisherClass);
     }
 
     /**
@@ -192,6 +241,32 @@ public class ReflectionsContainer {
 
     public HashMap<String,Class<? extends RunMode>> getRunModeClasses() {
         return runModeClasses;
+    }
+
+    /**
+     * Verifies if the given name is a metric class
+     * @param metricClass the name of a metric class
+     * @return true if the given name is a metric class. false otherwise.
+     */
+    public boolean isMetricClass(String metricClass) {
+        return metricClasses.containsKey(metricClass);
+    }
+
+    /**
+     * Get the metric class corresponding to the name
+     * @param metricClass the name of a metric class
+     * @return the metric class corresponding to the name
+     * @throws IllegalArgumentException if the name is either ambiguous (more than one metric class has the same name and a FQDN wasn't used) or there is no
+     *  metric class with the specified name
+     */
+    public Class<? extends Metric> getMetricClass(String metricClass) {
+        if(isMetricClass(metricClass)) {
+            if (metricClasses.get(metricClass) == null) {
+                throw new IllegalArgumentException("There is more than one metric named: " + metricClass + ". Please use the fully qualified domain name.");
+            }
+            return metricClasses.get(metricClass);
+        }
+        throw new IllegalArgumentException("Unknown metric: " + metricClass);
     }
 
     /**

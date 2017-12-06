@@ -279,7 +279,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println();
         System.out.println("Available test classes:");
         System.out.println(TEST_CLASS_HELP_HEADER);
-        for (Class<? extends AbstractTest> testClass : filter.filterTests(ReflectionsContainer.getInstance().getTestClasses().values())){
+        for (Class<? extends AbstractTest> testClass : filter.filterTests(new HashSet<>(ReflectionsContainer.getInstance().getTestClasses().values()))){
             printClass(testClass, false, true, false);
         }
     }
@@ -288,7 +288,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println();
         System.out.println("Available publisher classes:");
         System.out.println(PUBLISH_CLASS_HELP_HEADER);
-        for (Class<? extends Publisher> publisherClass : ReflectionsContainer.getInstance().getPublisherClasses().values()) {
+        for (Class<? extends Publisher> publisherClass : new HashSet<>(ReflectionsContainer.getInstance().getPublisherClasses().values())) {
             printClass(publisherClass, false, false, false);
         }
     }
@@ -301,7 +301,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println("Available metric classes:");
         System.out.println(METRIC_CLASS_HELP_HEADER);
 
-        for (Class<? extends Metric> metricClass : ReflectionsContainer.getInstance().getMetricClasses().values()) {
+        for (Class<? extends Metric> metricClass : new HashSet<>(ReflectionsContainer.getInstance().getMetricClasses().values())) {
             printClass(metricClass, false, false, false);
         }
 
@@ -337,16 +337,16 @@ public class CliParser implements ConfigurationParser {
             printMetricClasses();
             return true;
         } else if ( (cmdLineArgs[0].equals("--help") && cmdLineArgs.length > 1 )) {
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(cmdLineArgs[1])) {
-                Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClasses().get(cmdLineArgs[1]);
+            if (ReflectionsContainer.getInstance().isTestClass(cmdLineArgs[1])) {
+                Class<? extends AbstractTest> testClass = ReflectionsContainer.getInstance().getTestClass(cmdLineArgs[1]);
                 System.out.println(TEST_CLASS_HELP_HEADER);
                 printClass(testClass, true, true, false);
-            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(cmdLineArgs[1])) {
-                Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClasses().get(cmdLineArgs[1]);
+            } else if (ReflectionsContainer.getInstance().isPublisherClass(cmdLineArgs[1])) {
+                Class<? extends Publisher> publisherClass = ReflectionsContainer.getInstance().getPublisherClass(cmdLineArgs[1]);
                 System.out.println(PUBLISH_CLASS_HELP_HEADER);
                 printClass(publisherClass, true, false, false);
-            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(cmdLineArgs[1])) {
-                Class<? extends Metric> metricClass = ReflectionsContainer.getInstance().getMetricClasses().get(cmdLineArgs[1]);
+            } else if (ReflectionsContainer.getInstance().isMetricClass(cmdLineArgs[1])) {
+                Class<? extends Metric> metricClass = ReflectionsContainer.getInstance().getMetricClass(cmdLineArgs[1]);
                 printClass(metricClass, true, false, false);
             } else if (cmdLineArgs[1].startsWith("--suite=")) {
                 System.out.println(SUITE_HELP_HEADER);

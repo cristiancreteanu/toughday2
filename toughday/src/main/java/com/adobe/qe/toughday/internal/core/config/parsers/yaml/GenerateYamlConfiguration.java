@@ -75,11 +75,11 @@ public class GenerateYamlConfiguration {
         // create add actions
         for (ConfigParams.ClassMetaObject item : configParams.getItemsToAdd()) {
             YamlDumpAddAction addAction = new YamlDumpAddAction(item.getClassName(), item.getParameters());
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(item.getClassName())) {
+            if (ReflectionsContainer.getInstance().isTestClass(item.getClassName())) {
                 yamlTestActions.add(addAction);
-            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(item.getClassName())) {
+            } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
                 yamlPublisherActions.add(addAction);
-            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(item.getClassName())
+            } else if (ReflectionsContainer.getInstance().isMetricClass(item.getClassName())
                     || item.getClassName().equals("BASICMetrics") || item.getClassName().equals("DEFAULTMetrics")){
                 yamlMetricActions.add(addAction);
             } else if (item.getClassName().endsWith(".jar")) {
@@ -90,11 +90,11 @@ public class GenerateYamlConfiguration {
         // create config actions
         for (ConfigParams.NamedMetaObject item : configParams.getItemsToConfig()) {
             YamlDumpConfigAction configAction = new YamlDumpConfigAction(item.getName(), item.getParameters());
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
                 yamlTestActions.add(configAction);
-            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
                 yamlPublisherActions.add(configAction);
-            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
                 yamlMetricActions.add(configAction);
             }
         }
@@ -102,11 +102,11 @@ public class GenerateYamlConfiguration {
         // create exclude actions
         for (String item : configParams.getItemsToExclude()) {
             YamlDumpExcludeAction excludeAction = new YamlDumpExcludeAction(item);
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemsIdentifiers.get(item).getSimpleName())) {
+            if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item).getSimpleName())) {
                 yamlTestActions.add(excludeAction);
-            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemsIdentifiers.get(item).getSimpleName())) {
+            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
                 yamlPublisherActions.add(excludeAction);
-            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(itemsIdentifiers.get(item).getSimpleName())) {
+            } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item).getSimpleName())) {
                 yamlMetricActions.add(excludeAction);
             }
         }

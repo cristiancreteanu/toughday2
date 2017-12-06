@@ -193,13 +193,8 @@ public class Configuration {
 
         // add tests,publishers and metrics
         for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
-            if (ReflectionsContainer.getInstance().getTestClasses().containsKey(itemToAdd.getClassName())) {
-                if(ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName())==null) {
-                    LOGGER.error("Test name clash: " + itemToAdd.getClassName());
-                    throw new IllegalArgumentException("Test name clash: " + itemToAdd.getClassName());
-                }
-
-                AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClasses().get(itemToAdd.getClassName()), itemToAdd.getParameters());
+            if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
+                AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClass(itemToAdd.getClassName()), itemToAdd.getParameters());
 
                 // defaults
                 int weight = (itemToAdd.getParameters().containsKey("weight"))
@@ -212,26 +207,16 @@ public class Configuration {
                 suite.add(test, weight, timeout, counter);
                 items.put(test.getName(), test.getClass());
                 checkInvalidArgs(itemToAdd.getParameters());
-            } else if (ReflectionsContainer.getInstance().getPublisherClasses().containsKey(itemToAdd.getClassName())) {
-                if(ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName())==null) {
-                    LOGGER.error("Publisher name clash: " + itemToAdd.getClassName());
-                    throw new IllegalArgumentException("Publisher name clash: " + itemToAdd.getClassName());
-                }
-
+            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemToAdd.getClassName())) {
                 Publisher publisher = createObject(
-                        ReflectionsContainer.getInstance().getPublisherClasses().get(itemToAdd.getClassName()),
+                        ReflectionsContainer.getInstance().getPublisherClass(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
                 items.put(publisher.getName(), publisher.getClass());
 
                 checkInvalidArgs(itemToAdd.getParameters());
                 this.globalArgs.addPublisher(publisher);
-            } else if (ReflectionsContainer.getInstance().getMetricClasses().containsKey(itemToAdd.getClassName())) {
-                if(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName())==null) {
-                    LOGGER.error("Metric name clash: " + itemToAdd.getClassName());
-                    throw new IllegalArgumentException("Metric name clash: " + itemToAdd.getClassName());
-                }
-
-                Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClasses().get(itemToAdd.getClassName()),
+            } else if (ReflectionsContainer.getInstance().isMetricClass(itemToAdd.getClassName())) {
+                Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClass(itemToAdd.getClassName()),
                         itemToAdd.getParameters());
                 items.put(metric.getName(), metric.getClass());
 
