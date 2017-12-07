@@ -39,6 +39,7 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     private Map<String, Metric> metrics;
     private long timeout;
     private String protocol;
+    private String authMethod;
     private boolean installSampleContent = true;
     private String contextPath;
     private Level logLevel = DEFAULT_LOG_LEVEL;
@@ -251,6 +252,16 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     @ConfigArgGet
     public String getProtocol() {
         return protocol;
+    }
+
+    @ConfigArgSet(required = false, desc = "Authentication Method", defaultValue = "basic")
+    public void setAuthMethod(String authMethod) {
+        this.authMethod = authMethod;
+    }
+
+    @ConfigArgGet
+    public String getAuthMethod() {
+        return this.authMethod;
     }
 
     @ConfigArgSet(required = false, desc = "What type of protocol to use for the host", defaultValue = DEFAULT_PROTOCOL)

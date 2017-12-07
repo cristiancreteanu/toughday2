@@ -14,6 +14,7 @@ public interface GlobalArgs {
     String getUser();
     String getPassword();
     String getProtocol();
+    String getAuthMethod();
     boolean getInstallSampleContent();
     String getContextPath();
     Level getLogLevel();
