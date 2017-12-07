@@ -30,8 +30,15 @@ public abstract class AEMTestBase extends SequentialTest {
         return defaultClient;
     }
 
-
-    public static SlingClient createClient (GlobalArgs args) throws URISyntaxException, ClientException {
+    /**
+     * Creates a client builder using the information from the Global Args and returns it in order to override any
+     * default properties
+     *
+     * @param args the GlobalArgs
+     * @return the builder for either building the default client or overwriting properties before
+     * @throws URISyntaxException
+     */
+    public static SlingClient.Builder createClientBuilder(GlobalArgs args) throws URISyntaxException {
         URIBuilder uriBuilder = new URIBuilder()
                 .setScheme(args.getProtocol())
                 .setHost(args.getHost())
@@ -54,7 +61,10 @@ public abstract class AEMTestBase extends SequentialTest {
         } else {
             throw new IllegalArgumentException("Unsupported authentication method: " + args.getAuthMethod());
         }
+        return builder;
+    }
 
-        return builder.build();
+    public static SlingClient createClient(GlobalArgs args) throws URISyntaxException, ClientException {
+        return createClientBuilder(args).build();
     }
 }
