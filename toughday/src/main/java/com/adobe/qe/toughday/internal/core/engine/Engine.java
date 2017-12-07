@@ -12,6 +12,7 @@ import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.metrics.Metric;
 import com.adobe.qe.toughday.tests.sequential.AEMTestBase;
+import com.adobe.qe.toughday.tests.utils.PackageManagerClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

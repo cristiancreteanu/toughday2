@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.internal.core.engine;
+package com.adobe.qe.toughday.tests.utils;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
@@ -15,9 +15,6 @@ import org.codehaus.jackson.map.ObjectMapper;
 import java.io.InputStream;
 import java.net.URI;
 
-/**
- * Created by tuicu on 12/01/17.
- */
 public class PackageManagerClient extends SlingClient {
 
     public PackageManagerClient(URI serverUrl, String user, String password) throws ClientException {
