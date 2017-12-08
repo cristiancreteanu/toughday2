@@ -51,6 +51,8 @@ public class PublishPageTest extends AEMTestBase {
             
             throw e;
         }
+
+        logger().debug("{}: Successfully published page={}", Thread.currentThread().getId(), pagePath);
     }
 
     @Override
