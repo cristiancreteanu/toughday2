@@ -31,15 +31,15 @@ public class AddTagToResourceTest extends AEMTestBase {
         builder.addParameter("./cq:tags@TypeHint", "String[]");
 
         try {
-            logger().debug("{}: Trying to add tags to the resource", Thread.currentThread().getName());
+            logger().debug("{}: Trying to add tags {} to the resource {}", Thread.currentThread().getName(), tags, resourcePath);
             getDefaultClient().doPost(resourcePath, builder.build(), HttpStatus.SC_OK);
         } catch (Throwable e) {
-            logger().warn("{}: Failed to add tags to the resource", Thread.currentThread().getName());
+            logger().warn("{}: Failed to add tags {} to the resource {}", Thread.currentThread().getName(), tags, resourcePath);
             logger().debug(Thread.currentThread().getName() + "ERROR: ", e);
 
             throw e;
         }
-        logger().debug("{}: Successfully added tags to the resource", Thread.currentThread().getName());
+        logger().debug("{}: Successfully added tags {} to the resource {}", Thread.currentThread().getName(), tags, resourcePath);
     }
 
     @Override
