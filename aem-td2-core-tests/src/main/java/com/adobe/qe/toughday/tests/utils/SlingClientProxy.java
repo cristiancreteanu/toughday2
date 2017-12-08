@@ -121,8 +121,8 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         boolean recordResultHere = shouldIRecord();
 
         ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
-            SlingHttpResponse response = target.doRawRequest(method, uri, headers, expectedStatus);
             SlingHttpData data = testResult.getData() != null ? testResult.getData() : new SlingHttpData();
+            SlingHttpResponse response = target.doRawRequest(method, uri, headers, expectedStatus);
             Header contentLengthHeader = response.getFirstHeader("Content-Length");
             long bytes = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : response.getEntity().getContentLength();
             data.withMethod(method)
@@ -137,7 +137,9 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
         @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
-        currentResult.getData().withLatency(currentResult.getDuration());
+        if(response != null) {
+            currentResult.getData().withLatency(currentResult.getDuration());
+        }
 
         if(recordResultHere) {
             doRecord(currentResult);
@@ -154,8 +156,8 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         boolean recordResultHere = shouldIRecord();
 
         ResultInfo<SlingHttpResponse, SlingHttpData> result = benchmark().computeTestResult(test, (TestResult<SlingHttpData> testResult) -> {
-            SlingHttpResponse response = target.doStreamRequest(request, headers, expectedStatus);
             SlingHttpData data = testResult.getData() != null ? testResult.getData() : new SlingHttpData();
+            SlingHttpResponse response = target.doStreamRequest(request, headers, expectedStatus);
             Header contentLengthHeader = response.getFirstHeader("Content-Length");
             long bytes = contentLengthHeader != null ? Long.parseLong(contentLengthHeader.getValue()) : response.getEntity().getContentLength();
             data.withMethod(request.getMethod())
@@ -172,7 +174,9 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
         @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
-        currentResult.getData().withLatency(currentResult.getDuration());
+        if(response != null) {
+            currentResult.getData().withLatency(currentResult.getDuration());
+        }
 
         if(recordResultHere) {
             doRecord(currentResult);
