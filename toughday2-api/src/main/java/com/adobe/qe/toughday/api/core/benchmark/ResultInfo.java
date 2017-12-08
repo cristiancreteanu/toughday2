@@ -1,5 +1,7 @@
 package com.adobe.qe.toughday.api.core.benchmark;
 
+import com.adobe.qe.toughday.api.annotations.labels.Nullable;
+
 /**
  * A wrapper over the outcome of a test run.
  */
@@ -12,10 +14,10 @@ public interface ResultInfo<R, K> {
     /**
      * (Optional) The return value
      */
-    R getReturnValue();
+    @Nullable R getReturnValue();
 
     /**
      * Any throwable that might have occurred
      */
-    Throwable getThrowable();
+    @Nullable Throwable getThrowable();
 }

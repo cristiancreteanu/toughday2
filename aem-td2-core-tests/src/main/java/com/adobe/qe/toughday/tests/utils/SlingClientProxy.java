@@ -1,5 +1,6 @@
 package com.adobe.qe.toughday.tests.utils;
 
+import com.adobe.qe.toughday.api.annotations.labels.Nullable;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.annotations.labels.NotThreadSafe;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
@@ -71,11 +72,13 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         });
 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
-        SlingHttpResponse response = result.getReturnValue();
+        @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
 
         currentResult.withData(this.testResult.getData());
-        currentResult.getData().withBytes(response.getContent().length());
+        if(response != null) {
+            currentResult.getData().withBytes(response.getContent().length());
+        }
 
         if(recordResultHere) {
             doRecord(currentResult);
@@ -95,11 +98,13 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         });
 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
-        SlingHttpResponse response = result.getReturnValue();
+        @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
 
         currentResult.withData(this.testResult.getData());
-        currentResult.getData().withBytes(response.getContent().length());
+        if(response != null) {
+            currentResult.getData().withBytes(response.getContent().length());
+        }
 
         if(recordResultHere) {
             doRecord(testResult);
@@ -130,7 +135,7 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         });
 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
-        SlingHttpResponse response = result.getReturnValue();
+        @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
         currentResult.getData().withLatency(currentResult.getDuration());
 
@@ -165,7 +170,7 @@ public class SlingClientProxy extends SlingClient implements Proxy<SlingClient> 
         });
 
         TestResult<SlingHttpData> currentResult = result.getTestResult();
-        SlingHttpResponse response = result.getReturnValue();
+        @Nullable SlingHttpResponse response = result.getReturnValue();
         Throwable throwable = result.getThrowable();
         currentResult.getData().withLatency(currentResult.getDuration());
 
