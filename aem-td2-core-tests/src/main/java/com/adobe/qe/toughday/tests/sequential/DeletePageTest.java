@@ -50,18 +50,18 @@ public class DeletePageTest extends AEMTestBase {
                 .addParameter("path", parentPath + "/" + nextTitle);
 
         try {
-            logger().debug("{}: Trying to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+            logger().debug("{}: Trying to delete={}/{}", Thread.currentThread().getName(), parentPath, nextTitle);
 
             benchmark().measure(this, "Delete Page", getDefaultClient()).doPost("/bin/wcmcommand", feb.build(), HttpStatus.SC_OK);
 
         } catch (Throwable e) {
-            logger().warn("{}: Failed to delete={}{}", Thread.currentThread().getName(), parentPath, title);
+            logger().warn("{}: Failed to delete={}/{}", Thread.currentThread().getName(), parentPath, nextTitle);
             logger().debug(Thread.currentThread().getName() + ": ERROR: ", e);
 
             throw e;
         }
 
-        logger().debug("{}: Successfully deleted={}{}", Thread.currentThread().getName(), parentPath, title);
+        logger().debug("{}: Successfully deleted={}/{}", Thread.currentThread().getName(), parentPath, nextTitle);
     }
 
 
