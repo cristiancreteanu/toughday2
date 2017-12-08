@@ -256,11 +256,7 @@ public class Engine {
     }
     
     //TODO find a place in the AbstractTestRunner for this. The problem is that we need to invoke it at a specific time.
-    public static void runSetup(AbstractTest test) throws Exception {
-        for (AbstractTest child : test.getChildren()) {
-            runSetup(child);
-        }
-
+    public void runSetup(AbstractTest test) throws Exception {
         LinkedList<Method> setupMethods = new LinkedList<>();
         Class currentClass = test.getClass();
         while(!currentClass.getName().equals(AbstractTest.class.getName())) {
@@ -272,10 +268,16 @@ public class Engine {
             }
             currentClass = currentClass.getSuperclass();
         }
+        test.benchmark().setRunMap(getGlobalRunMap());
         for(Method setupMethod : setupMethods) {
             setupMethod.setAccessible(true);
             setupMethod.invoke(test);
             setupMethod.setAccessible(false);
+        }
+        test.benchmark().setRunMap(null);
+
+        for (AbstractTest child : test.getChildren()) {
+            runSetup(child);
         }
     }
 
