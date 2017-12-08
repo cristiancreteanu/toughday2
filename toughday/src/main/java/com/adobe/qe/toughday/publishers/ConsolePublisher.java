@@ -26,7 +26,7 @@ public class ConsolePublisher extends Publisher {
     private boolean begun = false;
     private boolean finished = false;
     private boolean clearScreen = true;
-    private boolean batchLoggingCalled = false;
+    private boolean rawPublishCalled = false;
     private final CleanerThread cleaner;
     private Scanner sc;
     private AtomicInteger extraLines;
@@ -91,8 +91,8 @@ public class ConsolePublisher extends Publisher {
         System.out.printf("%-35s", " ");
     }
 
-    // publish results method, called periodically
-    private void publish(Map<String, List<MetricResult>> results) {
+    // publish aggregated results method, called periodically
+    private void publishAggregated(Map<String, List<MetricResult>> results) {
         final int METRIC_LENGTH = 12;
         final int METRICS_PER_LINE_LIMIT = 3;
         int nrMetrics = results.values().iterator().next().size() - 1;
@@ -137,21 +137,24 @@ public class ConsolePublisher extends Publisher {
     }
 
     @Override
-    protected void doPublishIntermediate(Map<String, List<MetricResult>> results) {
-        publish(results);
+    protected void doPublishAggregatedIntermediate(Map<String, List<MetricResult>> results) {
+        publishAggregated(results);
     }
 
     @Override
-    protected void doPublishFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
         System.out.println("********************************************************************");
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
-        publish(results);
+        publishAggregated(results);
     }
 
     @Override
-    protected void doPublish(Collection<TestResult> testResults) {
-
+    protected void doPublishRaw(Collection<TestResult> testResults) {
+        if(!rawPublishCalled) {
+            System.out.println("Raw publish is not supported in " + this.getClass().getSimpleName());
+            rawPublishCalled = true;
+        }
     }
 
     @Override

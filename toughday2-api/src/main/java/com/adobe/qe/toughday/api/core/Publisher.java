@@ -59,36 +59,52 @@ public abstract class Publisher {
     }
 
     /**
-     * Publish intermediate report
-     * @param results
+     * Publish aggregated intermediate report
+     * @param results Map from test name to metrics
      */
-    public void publishIntermediate(Map<String, List<MetricResult>> results) {
+    public void publishAggregatedIntermediate(Map<String, List<MetricResult>> results) {
         if(aggregatedPublish) {
-            doPublishIntermediate(results);
+            doPublishAggregatedIntermediate(results);
         }
     }
 
     /**
-     * Publish final report
-     * @param results
+     * Publish aggregated final report
+     * @param results Map from test name to metrics
      */
-    public void publishFinal(Map<String, List<MetricResult>> results) {
+    public void publishAggregatedFinal(Map<String, List<MetricResult>> results) {
         if(aggregatedPublish) {
-            doPublishFinal(results);
+            doPublishAggregatedFinal(results);
         }
     }
 
-    public void publish(Collection<TestResult> testResults) {
+    /**
+     * Publish raw data
+     * @param testResults
+     */
+    public void publishRaw(Collection<TestResult> testResults) {
         if(rawPublish) {
-            doPublish(testResults);
+            doPublishRaw(testResults);
         }
     }
 
-    protected abstract void doPublishIntermediate(Map<String, List<MetricResult>> results);
+    /**
+     * Publish aggregated intermediate report
+     * @param results Map from test name to metrics
+     */
+    protected abstract void doPublishAggregatedIntermediate(Map<String, List<MetricResult>> results);
 
-    protected abstract void doPublishFinal(Map<String, List<MetricResult>> results);
+    /**
+     * Publish aggregated final report
+     * @param results Map from test name to metrics
+     */
+    protected abstract void doPublishAggregatedFinal(Map<String, List<MetricResult>> results);
 
-    protected abstract void doPublish(Collection<TestResult> testResults);
+    /**
+     * Publish raw data
+     * @param testResults
+     */
+    protected abstract void doPublishRaw(Collection<TestResult> testResults);
 
     /**
      * Method that signals the publisher that it is stopped

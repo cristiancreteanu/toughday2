@@ -94,19 +94,19 @@ public class CSVPublisher extends Publisher {
     }
 
     @Override
-    protected void doPublishIntermediate(Map<String, List<MetricResult>> results) {
+    protected void doPublishAggregatedIntermediate(Map<String, List<MetricResult>> results) {
         if (header == null) {
             createHeaderFormat(results.values().iterator().next());
         }
-        publish(results);
+        publishAggtegated(results);
     }
 
     @Override
-    protected void doPublishFinal(Map<String, List<MetricResult>> results) {
-        publish(results);
+    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
+        publishAggtegated(results);
     }
 
-    public void publish(Map<String, List<MetricResult>> testsResults) {
+    public void publishAggtegated(Map<String, List<MetricResult>> testsResults) {
         try {
             if(!created || !append) {
                 resultsPrintWriter = new PrintWriter(filePath);
@@ -135,12 +135,12 @@ public class CSVPublisher extends Publisher {
                 resultsPrintWriter.close();
             }
         } catch (IOException e) {
-            LOG.error("Could not publish results", e);
+            LOG.error("Could not publish aggregated results", e);
         }
     }
 
     @Override
-    protected void doPublish(Collection<TestResult> testResults) {
+    protected void doPublishRaw(Collection<TestResult> testResults) {
         try {
             if (rawResultsWriter == null) {
                 rawResultsWriter = new PrintWriter(new BufferedWriter(new FileWriter(rawFilePath)));

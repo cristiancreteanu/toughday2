@@ -101,8 +101,8 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                     this.finishExecution();
                 }
                 Map<String, List<MetricResult>> results = filterResults();
-                engine.getPublishMode().publishIntermediateResults(results);
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
+                engine.getPublishMode().publishIntermediateResults(results);
                 ((RunMapImpl)engine.getPublishMode().getGlobalRunMap()).clearCurrentTestResults();
                 elapsed = (System.nanoTime() - start) / 1000000l;
             }

@@ -17,21 +17,21 @@ public class Simple extends PublishMode {
     @Override
     public void publishIntermediateResults(Map<String, List<MetricResult>> results) {
         for(Publisher publisher : engine.getGlobalArgs().getPublishers()) {
-            publisher.publishIntermediate(results);
+            publisher.publishAggregatedIntermediate(results);
         }
     }
 
     @Override
     public void publish(Collection<TestResult> testResults) {
         for(Publisher publisher : engine.getGlobalArgs().getPublishers()) {
-            publisher.publish(testResults);
+            publisher.publishRaw(testResults);
         }
     }
 
     @Override
     public void publishFinalResults(Map<String, List<MetricResult>> results) {
         for (Publisher publisher : engine.getGlobalArgs().getPublishers()) {
-            publisher.publishFinal(results);
+            publisher.publishAggregatedFinal(results);
         }
     }
 }
