@@ -88,6 +88,12 @@ public class CliParser implements ConfigurationParser {
             return string;
         }
 
+        try {
+            GlobalArgs.parseDurationToSeconds(string);
+            return string;
+        } catch (IllegalArgumentException e) {
+        }
+
         if (NumberUtils.isNumber(string)) {
             try {
                 return Integer.valueOf(string);
