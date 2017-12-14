@@ -47,11 +47,11 @@ Configuration:
             additivity: false
             AppenderRef:
                 ref: TestsFile
-          - name: org.apache
+          - name: org.apache:
             level: info
             additivity: false
             AppenderRef:
-                ref: CoreFile
+                ref: TestsFile
           - name: org.reflections.Reflections
             level: error
             additivity: false
