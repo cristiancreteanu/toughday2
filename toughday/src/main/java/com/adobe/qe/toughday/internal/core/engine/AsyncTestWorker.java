@@ -66,4 +66,6 @@ public abstract class AsyncTestWorker extends AsyncEngineWorker {
      * Getter for the mutex that is only unlocked when the test is running.
      */
     public ReentrantLock getMutex() { return mutex; }
+
+    public abstract boolean hasExited();
 }

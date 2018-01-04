@@ -47,7 +47,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
     /**
      * Method aggregating results.
      */
-    private boolean aggregateResults() {
+    public boolean aggregateResults() {
         Collection<RunMap> localRunMaps = context.getRunMaps();
         synchronized (localRunMaps) {
             for (RunMap localRunMap : localRunMaps) {

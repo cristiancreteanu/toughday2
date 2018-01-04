@@ -143,6 +143,7 @@ public class ConsolePublisher extends Publisher {
 
     @Override
     protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
+        this.clearScreen = false;
         System.out.println("********************************************************************");
         System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");

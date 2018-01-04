@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutorService;
  */
 public interface RunMode {
     void runTests(Engine engine) throws Exception;
-    void finishExecution();
+    void finishExecutionAndAwait();
     ExecutorService getExecutorService();
     RunContext getRunContext();
 

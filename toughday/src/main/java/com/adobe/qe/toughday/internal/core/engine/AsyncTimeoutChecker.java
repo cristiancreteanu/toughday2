@@ -99,7 +99,9 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
                 }
                 if (context.isRunFinished()) {
                     this.finishExecution();
-                    mainThread.interrupt();
+                    if(engine.areTestsRunning()) {
+                        mainThread.interrupt();
+                    }
                 }
             }
         } catch (InterruptedException e) {

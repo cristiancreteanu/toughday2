@@ -46,6 +46,7 @@ public class Engine {
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private PublishMode publishMode;
     private RunMode runMode;
+    private boolean testsRunning;
 
     /**
      * Constructor
@@ -90,6 +91,8 @@ public class Engine {
     public PublishMode getPublishMode() {
         return publishMode;
     }
+
+    public boolean areTestsRunning() { return testsRunning; }
 
     /**
      * Recursive method for preparing a test to run.
@@ -291,12 +294,6 @@ public class Engine {
                 configuration.getGlobalArgs().getDuration()));
 
         Engine.logGlobal("Test execution started at: " + Engine.getCurrentDateTime());
-        final Thread mainThread = Thread.currentThread();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
-            public void run() {
-                Engine.logGlobal("Test execution finished at: " + Engine.getCurrentDateTime());
-            }
-        });
 
         if (globalArgs.getDryRun()) {
             System.out.println("NOTE: This is just a dry run. No test is actually executed.");
@@ -326,6 +323,37 @@ public class Engine {
         AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), runMode.getRunContext(), Thread.currentThread());
         engineExecutorService.execute(timeoutChecker);
 
+        Thread shutdownHook = new Thread() {
+            public void run() {
+                try {
+                    runMode.finishExecutionAndAwait();
+                    String finishTime = Engine.getCurrentDateTime();
+
+                    // interrupt extra test threads
+                    // TODO: this is suboptimal, replace with a better mechanism for notifications
+                    List<Thread> threadsList = AbstractTest.getExtraThreads();
+                    synchronized (threadsList) {
+                        for (Thread t : threadsList) {
+                            t.interrupt();
+                        }
+                    }
+                    timeoutChecker.finishExecution();
+                    resultAggregator.finishExecution();
+                    resultAggregator.aggregateResults();
+                    publishMode.publishFinalResults(resultAggregator.filterResults());
+                    shutdownAndAwaitTermination(runMode.getExecutorService());
+                    shutdownAndAwaitTermination(engineExecutorService);
+                } catch (Throwable e) {
+                    System.out.println("Exception in shutdown hook!");
+                    e.printStackTrace();
+                }
+                Engine.logGlobal("Test execution finished at: " + Engine.getCurrentDateTime());
+                LogManager.shutdown();
+            }
+        };
+
+        Runtime.getRuntime().addShutdownHook(shutdownHook);
+        this.testsRunning = true;
         runMode.runTests(this);
 
         // This thread sleeps until the duration
@@ -333,32 +361,11 @@ public class Engine {
             Thread.sleep(globalArgs.getDuration() * 1000L);
         } catch (InterruptedException e) {
             LOG.info("Engine Interrupted", e);
+        } finally {
+            testsRunning = false;
+            Runtime.getRuntime().removeShutdownHook(shutdownHook);
+            shutdownHook.run();
         }
-        // Then close all threads
-        finally {
-            runMode.finishExecution();
-            resultAggregator.finishExecution();
-            timeoutChecker.finishExecution();
-
-            try {
-                Thread.sleep(5000);
-            } catch (InterruptedException e)
-            {}
-
-            // interrupt extra test threads
-            // TODO: this is suboptimal, replace with a better mechanism for notifications
-            List<Thread> threadsList = AbstractTest.getExtraThreads();
-            synchronized (threadsList) {
-                for (Thread t : threadsList) {
-                    t.interrupt();
-                }
-            }
-
-            shutdownAndAwaitTermination(runMode.getExecutorService());
-            shutdownAndAwaitTermination(engineExecutorService);
-            publishMode.publishFinalResults(resultAggregator.filterResults());
-        }
-
     }
 
 

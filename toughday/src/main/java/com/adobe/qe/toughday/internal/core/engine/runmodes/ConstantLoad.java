@@ -1,7 +1,6 @@
 package com.adobe.qe.toughday.internal.core.engine.runmodes;
 
 import com.adobe.qe.toughday.api.core.*;
-import com.adobe.qe.toughday.internal.core.*;
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
@@ -11,7 +10,6 @@ import com.adobe.qe.toughday.internal.core.engine.Engine;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.rmi.runtime.Log;
 
 
 import java.util.*;
@@ -71,13 +69,36 @@ public class ConstantLoad implements RunMode {
     }
 
     @Override
-    public void finishExecution() {
+    public void finishExecutionAndAwait() {
         scheduler.finishExecution();
+        for(AsyncTestWorker testWorker : testWorkers) {
+            testWorker.finishExecution();
+        }
+
+        boolean allExited = false;
+        while(!allExited) {
+            try {
+                Thread.sleep(50);
+            } catch (InterruptedException e) {
+            }
+            allExited = true;
+            for (AsyncTestWorker testWorker : testWorkers) {
+                if (!testWorker.hasExited()) {
+                    if(!testWorker.getMutex().tryLock())
+                        continue;
+                    allExited = false;
+                    testWorker.getWorkerThread().interrupt();
+                    testWorker.getMutex().unlock();
+                }
+            }
+        }
+
     }
 
     private class AsyncTestWorkerImpl extends AsyncTestWorker {
         private AbstractTest test;
         private RunMap runMap;
+        private boolean exited = false;
 
         public AsyncTestWorkerImpl(AbstractTest test, RunMap runMap) {
             this.test = test;
@@ -100,9 +121,15 @@ public class ConstantLoad implements RunMode {
 
             mutex.lock();
             currentTest = null;
+            exited = true;
             testWorkers.remove(this);
             Thread.interrupted();
             mutex.unlock();
+        }
+
+        @Override
+        public boolean hasExited() {
+            return exited;
         }
     }
 
@@ -132,7 +159,7 @@ public class ConstantLoad implements RunMode {
                     }
 
 
-                    for (int i = 0; i < load; i++) {
+                    for (int i = 0; i < load && !isFinished(); i++) {
                         AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
                         try {
                             executorService.execute(worker);

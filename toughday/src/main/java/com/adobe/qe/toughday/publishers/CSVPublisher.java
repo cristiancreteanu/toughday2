@@ -98,15 +98,15 @@ public class CSVPublisher extends Publisher {
         if (header == null) {
             createHeaderFormat(results.values().iterator().next());
         }
-        publishAggtegated(results);
+        publishAggregated(results);
     }
 
     @Override
     protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
-        publishAggtegated(results);
+        publishAggregated(results);
     }
 
-    public void publishAggtegated(Map<String, List<MetricResult>> testsResults) {
+    public void publishAggregated(Map<String, List<MetricResult>> testsResults) {
         try {
             if(!created || !append) {
                 resultsPrintWriter = new PrintWriter(filePath);

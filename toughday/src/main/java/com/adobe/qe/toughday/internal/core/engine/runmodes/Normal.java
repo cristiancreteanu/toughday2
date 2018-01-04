@@ -104,10 +104,30 @@ public class Normal implements RunMode {
     }
 
     @Override
-    public void finishExecution() {
-        for (AsyncTestWorker run : testWorkers) {
-            run.finishExecution();
+    public void finishExecutionAndAwait() {
+        for (AsyncTestWorker testWorker : testWorkers) {
+            testWorker.finishExecution();
         }
+
+        boolean allExited = false;
+        while(!allExited) {
+            try {
+                Thread.sleep(10);
+            } catch (InterruptedException e) {
+            }
+            allExited = true;
+            for (AsyncTestWorker testWorker : testWorkers) {
+                if (!testWorker.hasExited()) {
+                    if(!testWorker.getMutex().tryLock()) {
+                        continue;
+                    }
+                    allExited = false;
+                    testWorker.getWorkerThread().interrupt();
+                    testWorker.getMutex().unlock();
+                }
+            }
+        }
+
     }
 
     @Override
@@ -120,6 +140,7 @@ public class Normal implements RunMode {
         private HashMap<TestId, AbstractTest> localTests;
         private TestSuite testSuite;
         private RunMap localRunMap;
+        private boolean exited = false;
 
         /**
          * Constructor
@@ -182,11 +203,17 @@ public class Normal implements RunMode {
                 LOG.error("Unexpected exception caught", e);
             } finally {
                 mutex.unlock();
+                this.exited = true;
             }
         }
 
         public RunMap getLocalRunMap() {
             return localRunMap;
+        }
+
+        @Override
+        public boolean hasExited() {
+            return exited;
         }
     }
  }
