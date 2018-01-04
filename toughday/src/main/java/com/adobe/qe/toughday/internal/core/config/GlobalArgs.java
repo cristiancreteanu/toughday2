@@ -94,7 +94,7 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
 
         //if time unit is not specified, consider it seconds by default.
         if (duration.matches("^[0-9]+$")) {
-            duration = duration + "s";
+            throw new IllegalArgumentException("Time unit is not specified");
         }
 
         for (char c : duration.toCharArray()) {
