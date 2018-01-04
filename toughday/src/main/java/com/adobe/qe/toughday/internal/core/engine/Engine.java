@@ -46,7 +46,7 @@ public class Engine {
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private PublishMode publishMode;
     private RunMode runMode;
-    private boolean testsRunning;
+    private volatile boolean testsRunning;
 
     /**
      * Constructor
