@@ -26,10 +26,14 @@
 			<uniqueVersion>false</uniqueVersion>
 		</snapshotRepository>
 	</distributionManagement>
+
 	<modules>
 		<module>toughday2-api</module>
+		<module>toughday2-tests-parent</module>
 		<module>aem-td2-core-tests</module>
 		<module>toughday_sample</module>
 		<module>toughday</module>
+		<module>aem-td2-tests-parent</module>
+		<module>toughday_tests_sample</module>
 	</modules>
 </project>

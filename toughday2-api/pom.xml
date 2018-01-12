@@ -8,6 +8,20 @@
     <artifactId>toughday2-api</artifactId>
     <version>0.1.0-SNAPSHOT</version>
 
+    <distributionManagement>
+        <repository>
+            <id>${releaseRepository-Id}</id>
+            <name>${releaseRepository-Name}</name>
+            <url>${releaseRepository-URL}</url>
+        </repository>
+        <snapshotRepository>
+            <id>${snapshotRepository-Id}</id>
+            <name>${snapshotRepository-Name}</name>
+            <url>${snapshotRepository-URL}</url>
+            <uniqueVersion>false</uniqueVersion>
+        </snapshotRepository>
+    </distributionManagement>
+
     <build>
         <plugins>
             <plugin>
