@@ -11,7 +11,7 @@ import com.adobe.qe.toughday.internal.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.internal.core.config.parsers.yaml.YamlParser;
 import com.adobe.qe.toughday.internal.core.engine.PublishMode;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.adobe.qe.toughday.publishers.CSVPublisher;
 import com.adobe.qe.toughday.publishers.ConsolePublisher;
 import org.apache.commons.lang3.StringUtils;

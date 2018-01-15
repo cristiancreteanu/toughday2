@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.internal.core.metrics;
+package com.adobe.qe.toughday.metrics;
 
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;

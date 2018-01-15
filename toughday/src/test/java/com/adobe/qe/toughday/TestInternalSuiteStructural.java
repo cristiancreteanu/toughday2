@@ -3,7 +3,7 @@ package com.adobe.qe.toughday;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.adobe.qe.toughday.structural.TestConfigGetAnnotatedMethod;
 import com.adobe.qe.toughday.structural.TestConfigSetAnnotatedMethod;
 import com.adobe.qe.toughday.structural.TestConstructor;

@@ -1,14 +1,14 @@
-package com.adobe.qe.toughday.internal.core.metrics;
+package com.adobe.qe.toughday.metrics;
 
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.core.RunMap;
 
-@Description(desc = "Standard deviation.")
-public class StdDev extends Metric {
+@Description(desc = "Number of runs divided by elapsed time. Formula: Runs / elapsed execution time.")
+public class RealTP extends Metric {
 
     @Override
     public Object getValue(RunMap.TestStatistics testStatistics) {
-        return testStatistics.getStandardDeviation();
+        return testStatistics.getRealThroughput();
     }
 
     @Override
@@ -18,6 +18,6 @@ public class StdDev extends Metric {
 
     @Override
     public String getUnitOfMeasure() {
-        return "ms";
+        return "rps";
     }
 }

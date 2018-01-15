@@ -1,14 +1,13 @@
-package com.adobe.qe.toughday.internal.core.metrics;
+package com.adobe.qe.toughday.metrics;
 
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.core.RunMap;
 
-@Description(desc = "Number of fails.")
-public class Failed extends Metric {
-
+@Description(desc = "Number of skipped runs.")
+public class Skipped extends Metric {
     @Override
     public Object getValue(RunMap.TestStatistics testStatistics) {
-        return testStatistics.getFailRuns();
+        return testStatistics.getSkippedRuns();
     }
 
     @Override
@@ -20,5 +19,4 @@ public class Failed extends Metric {
     public String getUnitOfMeasure() {
         return "";
     }
-
 }

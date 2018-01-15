@@ -1,14 +1,14 @@
-package com.adobe.qe.toughday.internal.core.metrics;
+package com.adobe.qe.toughday.metrics;
 
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.core.RunMap;
 
-@Description(desc = "Number of successful runs.")
-public class Passed extends Metric {
+@Description(desc = "Lowest duration of test execution.")
+public class Min extends Metric {
 
     @Override
     public Object getValue(RunMap.TestStatistics testStatistics) {
-        return testStatistics.getTotalRuns();
+        return testStatistics.getMinDuration();
     }
 
     @Override
@@ -18,7 +18,6 @@ public class Passed extends Metric {
 
     @Override
     public String getUnitOfMeasure() {
-        return "";
+        return "ms";
     }
-
 }

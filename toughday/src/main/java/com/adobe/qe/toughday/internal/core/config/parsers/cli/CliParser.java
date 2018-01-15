@@ -13,7 +13,7 @@ import com.adobe.qe.toughday.internal.core.config.*;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
 import com.adobe.qe.toughday.internal.core.engine.PublishMode;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.google.common.base.Joiner;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;

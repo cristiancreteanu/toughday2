@@ -23,7 +23,7 @@ import com.adobe.qe.toughday.api.core.MetricResult;
 import com.adobe.qe.toughday.api.core.Publisher;
 import com.adobe.qe.toughday.api.core.RunMap;
 import com.adobe.qe.toughday.internal.core.RunMapImpl;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
+import com.adobe.qe.toughday.metrics.Metric;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;

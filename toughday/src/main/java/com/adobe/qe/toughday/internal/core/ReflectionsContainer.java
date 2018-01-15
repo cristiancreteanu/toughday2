@@ -3,7 +3,7 @@ package com.adobe.qe.toughday.internal.core;
 import com.adobe.qe.toughday.api.core.Publisher;
 import com.adobe.qe.toughday.api.annotations.Internal;
 import com.adobe.qe.toughday.api.core.AbstractTest;
-import com.adobe.qe.toughday.internal.core.metrics.Metric;
+import com.adobe.qe.toughday.metrics.Metric;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
 import com.adobe.qe.toughday.internal.core.engine.PublishMode;
 import org.reflections.Reflections;
