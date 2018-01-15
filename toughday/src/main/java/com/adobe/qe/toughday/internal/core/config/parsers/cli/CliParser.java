@@ -281,11 +281,19 @@ public class CliParser implements ConfigurationParser {
         printExtraHelp();
     }
 
+    private static  <T> Collection<T> unique(Collection<T> collection, boolean allowNull) {
+        HashSet<T> hashSet = new HashSet<>(collection);
+        if(!allowNull) {
+            hashSet.remove(null);
+        }
+        return hashSet;
+    }
+
     public static void printTestClasses(TestFilter filter) {
         System.out.println();
         System.out.println("Available test classes:");
         System.out.println(TEST_CLASS_HELP_HEADER);
-        for (Class<? extends AbstractTest> testClass : filter.filterTests(new HashSet<>(ReflectionsContainer.getInstance().getTestClasses().values()))){
+        for (Class<? extends AbstractTest> testClass : filter.filterTests(unique(ReflectionsContainer.getInstance().getTestClasses().values(), false))){
             printClass(testClass, false, true, false);
         }
     }
@@ -294,7 +302,7 @@ public class CliParser implements ConfigurationParser {
         System.out.println();
         System.out.println("Available publisher classes:");
         System.out.println(PUBLISH_CLASS_HELP_HEADER);
-        for (Class<? extends Publisher> publisherClass : new HashSet<>(ReflectionsContainer.getInstance().getPublisherClasses().values())) {
+        for (Class<? extends Publisher> publisherClass : unique(ReflectionsContainer.getInstance().getPublisherClasses().values(), false)) {
             printClass(publisherClass, false, false, false);
         }
     }
