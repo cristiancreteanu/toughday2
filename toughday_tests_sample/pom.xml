@@ -4,7 +4,7 @@
     <parent>
         <groupId>com.adobe.qe</groupId>
         <artifactId>aem-td2-tests-parent</artifactId>
-        <version>0.1.0-SNAPSHOT</version>
+        <version>0.9.0</version>
         <relativePath>../aem-td2-tests-parent/pom.xml</relativePath>
     </parent>
 
