@@ -56,3 +56,5 @@ Configuration:
           - name: org.reflections.Reflections
             level: error
             additivity: false
+            AppenderRef:
+                ref: CoreFile

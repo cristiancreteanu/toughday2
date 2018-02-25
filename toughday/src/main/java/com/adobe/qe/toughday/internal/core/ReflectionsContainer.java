@@ -17,7 +17,7 @@ import java.util.regex.Pattern;
  */
 public class ReflectionsContainer {
     private static final Pattern toughdayContentPackagePattern = Pattern.compile("toughday_sample-.*.zip");
-    private static Reflections reflections = new Reflections("com.adobe.qe");
+    private static Reflections reflections = new Reflections("");
     private static ReflectionsContainer instance = new ReflectionsContainer();
 
     /**
