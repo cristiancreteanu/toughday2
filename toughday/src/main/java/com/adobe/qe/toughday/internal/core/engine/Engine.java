@@ -340,6 +340,7 @@ public class Engine {
                     timeoutChecker.finishExecution();
                     resultAggregator.finishExecution();
                     resultAggregator.aggregateResults();
+                    publishMode.publish(getGlobalRunMap().getCurrentTestResults());
                     publishMode.publishFinalResults(resultAggregator.filterResults());
                     shutdownAndAwaitTermination(runMode.getExecutorService());
                     shutdownAndAwaitTermination(engineExecutorService);

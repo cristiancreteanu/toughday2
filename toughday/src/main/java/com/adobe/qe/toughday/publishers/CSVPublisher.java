@@ -159,6 +159,7 @@ public class CSVPublisher extends Publisher {
                         StringEscapeUtils.escapeCsv(data != null ? GSON.toJson(data) : "")
                 ));
             }
+            rawResultsWriter.flush();
         } catch (IOException e) {
             LOG.error("Could not publish results", e);
         }
@@ -166,7 +167,7 @@ public class CSVPublisher extends Publisher {
 
     @Override
     public void finish() {
-
+        rawResultsWriter.flush();
     }
 
     private void createHeaderFormat(List<MetricResult> resultsList) {
