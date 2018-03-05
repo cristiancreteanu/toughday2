@@ -1,6 +1,5 @@
 package com.adobe.qe.toughday.internal.core.config;
 
-import com.adobe.qe.toughday.Main;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.Publisher;
@@ -28,7 +27,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.net.URLClassLoader;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -75,8 +73,9 @@ public class Configuration {
             }
         }*/
 
+        ReflectionsContainer.getInstance(); //make sure that the core classes are loaded by the default class loader
         List<JarFile> jarFiles = createJarFiles(extensionList);
-        URLClassLoader classLoader = null;
+        ClassLoader classLoader = null;
         try {
             classLoader = processJarFiles(jarFiles, formJarURLs(extensionList));
         } catch (MalformedURLException e) {
@@ -127,9 +126,10 @@ public class Configuration {
 
     // loads all classes from the extension jar files using a new class loader.
 
-    private URLClassLoader processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
-        URLClassLoader classLoader = URLClassLoader.newInstance(urls, Main.class.getClassLoader());
+    private ClassLoader processJarFiles(List<JarFile> jarFiles, URL[] urls) throws MalformedURLException {
+        ToughdayExtensionClassLoader classLoader = new ToughdayExtensionClassLoader(urls, Thread.currentThread().getContextClassLoader());
         Map<String, String> newClasses = new HashMap<>();
+        Thread.currentThread().setContextClassLoader(classLoader);
 
         for (JarFile jar : jarFiles) {
             Enumeration<JarEntry> jarContent = jar.entries();
@@ -153,8 +153,8 @@ public class Configuration {
                 // load class
                 try {
                     classLoader.loadClass(className);
-                } catch (Exception e) {
-                    e.printStackTrace();
+                } catch (Throwable e) {
+                    LOGGER.error("Class " + className + " could not be loaded from your extension jar. If this is an extension class, you will not be able to use it.", e);
                 }
             }
         }
