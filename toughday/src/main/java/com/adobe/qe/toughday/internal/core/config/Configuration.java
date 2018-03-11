@@ -277,7 +277,7 @@ public class Configuration {
                 if ( itemMeta.getParameters().containsKey("name")) {
                     suite.replaceName(testObject, String.valueOf(itemMeta.getParameters().remove("name")));
                 }
-                setObjectProperties(testObject, itemMeta.getParameters());
+                setObjectProperties(testObject, itemMeta.getParameters(), false);
                 items.put(testObject.getName(), testObject.getClass());
                 if (itemMeta.getParameters().containsKey("weight")) {
                     suite.replaceWeight(testObject.getName(), (Integer) (itemMeta.getParameters().remove("weight")));
@@ -292,14 +292,14 @@ public class Configuration {
             } else if (globalArgs.containsPublisher(itemMeta.getName())) {
                 Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
                 String name = publisherObject.getName();
-                setObjectProperties(publisherObject, itemMeta.getParameters());
+                setObjectProperties(publisherObject, itemMeta.getParameters(), false);
                 if (!name.equals(publisherObject.getName())) {
                     this.getGlobalArgs().updatePublisherName(name, publisherObject.getName());
                 }
             } else if (globalArgs.containsMetric(itemMeta.getName())) {
                 Metric metricObject = globalArgs.getMetric(itemMeta.getName());
                 String name = metricObject.getName();
-                setObjectProperties(metricObject, itemMeta.getParameters());
+                setObjectProperties(metricObject, itemMeta.getParameters(), false);
                 if (!name.equals(metricObject.getName())) {
                     this.getGlobalArgs().updateMetricName(name, metricObject.getName());
                 }
@@ -351,12 +351,13 @@ public class Configuration {
      *
      * @param object
      * @param args
+     * @param applyDefaults whether to apply default values from properties or not
      * @param <T>
      * @return the object with the properties set
      * @throws InvocationTargetException caused by reflection
      * @throws IllegalAccessException    caused by reflection
      */
-    public static <T> T setObjectProperties(T object, Map<String, Object> args) throws InvocationTargetException, IllegalAccessException {
+    public static <T> T setObjectProperties(T object, Map<String, Object> args, boolean applyDefaults) throws InvocationTargetException, IllegalAccessException {
         Class classObject = object.getClass();
         LOGGER.info("Configuring object of class: " + classObject.getSimpleName()+" ["+classObject.getName()+"]");
         for (Method method : classObject.getMethods()) {
@@ -370,18 +371,18 @@ public class Configuration {
             if (value == null) {
                 if (annotation.required()) {
                     throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
-                } else {
+                } else if(applyDefaults) {
                     String defaultValue = annotation.defaultValue();
                     if (defaultValue.compareTo("") != 0) {
+                        LOGGER.info("\tSetting property \"" + property + "\" to default value: \"" + defaultValue + "\"");
                         method.invoke(object, defaultValue);
                     }
-                    continue;
                 }
+            } else {
+                LOGGER.info("\tSetting property \"" + property + "\" to: \"" + value + "\"");
+                //TODO fix this ugly thing: all maps should be String -> String, but snake yaml automatically converts Integers, etc. so for now we call toString.
+                method.invoke(object, value.toString());
             }
-
-            LOGGER.info("\tSetting property \"" + property + "\" to: \"" + value + "\"");
-            //TODO fix this ugly thing: all maps should be String -> String, but snake yaml automatically converts Integers, etc. so for now we call toString.
-            method.invoke(object, value.toString());
         }
         return object;
     }
@@ -412,7 +413,7 @@ public class Configuration {
         }
 
         T object = (T) constructor.newInstance();
-        setObjectProperties(object, args);
+        setObjectProperties(object, args, true);
         return object;
     }
 
