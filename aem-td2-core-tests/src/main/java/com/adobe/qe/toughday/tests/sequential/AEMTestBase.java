@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.tests.sequential;
 import com.adobe.qe.toughday.api.core.SequentialTest;
 import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import com.adobe.qe.toughday.tests.utils.SlingClientsProxyFactory;
+import jdk.nashorn.internal.objects.Global;
 import org.apache.http.auth.AuthSchemeProvider;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.config.Lookup;
@@ -83,5 +84,23 @@ public abstract class AEMTestBase extends SequentialTest {
 
     public static SlingClient createClient(GlobalArgs args) throws Exception {
         return createClientBuilder(args).build();
+    }
+
+    /**
+     * Creates a client builder using the information from the Global Args, but with different user/pass and returns
+     * it in order to override any default properties
+     *
+     * @param args the GlobalArgs
+     * @param user username to be used
+     * @param password the password for the user
+     * @return the client builder
+     * @throws Exception
+     */
+    public static SlingClient.Builder createClientBuilder(GlobalArgs args, String user, String password) throws Exception {
+        SlingClient.Builder builder = createClientBuilder(args);
+        builder.setUser(user);
+        builder.setPassword(password);
+
+        return builder;
     }
 }
