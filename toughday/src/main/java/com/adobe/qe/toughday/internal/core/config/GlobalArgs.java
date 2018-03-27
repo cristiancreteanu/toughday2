@@ -46,6 +46,7 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     private boolean dryRun = Boolean.parseBoolean(DEFAULT_DRY_RUN);
     private boolean saveConfig = Boolean.parseBoolean(DEFAULT_SAVE_CONFIG);
     private boolean showSteps = false;
+    private boolean hostValidationEnabled = true;
 
     /**
      * Constructor
@@ -279,6 +280,11 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
         this.installSampleContent = Boolean.valueOf(installSampleContent);
     }
 
+    @ConfigArgSet(required = false, desc = "Enable/Disable Host Validation", defaultValue = "true")
+    public void setHostValidationEnabled(String hostValidationEnabled) {
+        this.hostValidationEnabled = Boolean.valueOf(hostValidationEnabled);
+    }
+
     @ConfigArgGet
     public String getContextPath() {
         return this.contextPath;
@@ -327,5 +333,10 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     @ConfigArgGet
     public boolean getShowSteps() {
         return this.showSteps;
+    }
+
+    @ConfigArgGet
+    public boolean getHostValidationEnabled() {
+        return this.hostValidationEnabled;
     }
 }
