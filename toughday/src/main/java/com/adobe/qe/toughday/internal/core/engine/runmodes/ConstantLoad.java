@@ -1,9 +1,13 @@
 package com.adobe.qe.toughday.internal.core.engine.runmodes;
 
+import com.adobe.qe.toughday.api.annotations.labels.NotNull;
+import com.adobe.qe.toughday.api.annotations.labels.Nullable;
 import com.adobe.qe.toughday.api.core.*;
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.internal.core.TestSuite;
+import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.internal.core.engine.AsyncEngineWorker;
 import com.adobe.qe.toughday.internal.core.engine.AsyncTestWorker;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
@@ -13,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -30,6 +35,7 @@ public class ConstantLoad implements RunMode {
     private AsyncTestWorkerScheduler scheduler;
     private final List<RunMap> runMaps = new ArrayList<>();
     private int load = DEFAULT_LOAD;
+    private TestCache testCache;
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
     public void setLoad(String load) { this.load = Integer.parseInt(load); }
@@ -37,8 +43,30 @@ public class ConstantLoad implements RunMode {
     @ConfigArgGet
     public int getLoad() { return this.load; }
 
+    private static class TestCache {
+        public Map<TestId, Queue<AbstractTest>> cache = new HashMap<>();
+
+        public TestCache(TestSuite testSuite) {
+            for(AbstractTest test : testSuite.getTests()) {
+                cache.put(test.getId(), new ConcurrentLinkedQueue());
+            }
+        }
+
+        public void add(@NotNull AbstractTest test) {
+            cache.get(test.getId()).add(test);
+        }
+
+        public @Nullable AbstractTest getCachedValue(@NotNull TestId testID) {
+            return cache.get(testID).poll();
+        }
+    }
+
     @Override
     public void runTests(Engine engine) throws Exception {
+        Configuration configuration = engine.getConfiguration();
+        TestSuite testSuite = configuration.getTestSuite();
+        this.testCache = new TestCache(testSuite);
+
         for(int i = 0; i < load; i++) {
             synchronized (runMaps) {
                 runMaps.add(engine.getGlobalRunMap().newInstance());
@@ -123,6 +151,7 @@ public class ConstantLoad implements RunMode {
             currentTest = null;
             exited = true;
             testWorkers.remove(this);
+            testCache.add(test);
             Thread.interrupted();
             mutex.unlock();
         }
@@ -155,7 +184,14 @@ public class ConstantLoad implements RunMode {
                             this.finishExecution();
                             return;
                         }
-                        nextRound.add(nextTest.clone());
+
+                        //Use a cache test if available
+                        AbstractTest localNextTest = testCache.getCachedValue(nextTest.getId());
+                        if(localNextTest == null) {
+                            localNextTest = nextTest.clone();
+                        }
+
+                        nextRound.add(localNextTest);
                     }
 
 
