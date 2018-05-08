@@ -6,6 +6,14 @@
     <version>0.9.3-SNAPSHOT</version>
     <name>toughday2</name>
 
+    <licenses>
+        <license>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
     <properties>
         <sample.path>${project.basedir}/../toughday_sample/target</sample.path>
         <javadoc.opts>-Xdoclint:none</javadoc.opts>
