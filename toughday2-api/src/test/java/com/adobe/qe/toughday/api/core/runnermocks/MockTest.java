@@ -23,6 +23,7 @@ import java.util.List;
 public class MockTest extends AbstractTest {
 
     private List<String> executedMethods = new ArrayList<>();
+    private List<AbstractTest> children = new ArrayList<>();
 
     boolean failBefore;
     boolean failTest;
@@ -30,7 +31,7 @@ public class MockTest extends AbstractTest {
 
     @Override
     public List<AbstractTest> getChildren() {
-        return Collections.emptyList();
+        return this.children;
     }
 
     @Override
@@ -40,7 +41,7 @@ public class MockTest extends AbstractTest {
 
     @Override
     public AbstractTest newInstance() {
-        return this;
+        return new MockTest();
     }
 
     @Before
@@ -78,5 +79,10 @@ public class MockTest extends AbstractTest {
 
     public void doFailAfter() {
         this.failAfter = true;
+    }
+
+    public void addChild(AbstractTest test) {
+        children.add(test);
+        test.setParent(this);
     }
 }
