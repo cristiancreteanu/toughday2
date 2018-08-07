@@ -24,6 +24,7 @@ import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Modifier;
 import java.util.UUID;
 
@@ -74,6 +75,20 @@ public class BenchmarkImpl implements Benchmark {
         catch (SkippedTestException e) {
             testResult.markAsSkipped(e);
             throwableResult = e;
+        }
+        catch (InvocationTargetException e) {
+            if(e.getTargetException() != null) {
+                Throwable cause = e.getTargetException();
+                if (cause instanceof SkippedTestException) {
+                    testResult.markAsSkipped((SkippedTestException)cause);
+                } else {
+                    testResult.markAsFailed(cause);
+                }
+                throwableResult = cause;
+            } else {
+                testResult.markAsFailed(e);
+                throwableResult = e;
+            }
         }
         catch (Throwable e) {
             testResult.markAsFailed(e);
