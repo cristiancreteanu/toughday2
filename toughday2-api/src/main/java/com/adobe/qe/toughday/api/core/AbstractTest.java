@@ -193,9 +193,11 @@ public abstract class AbstractTest {
         newInstance.setID(this.id);
         newInstance.setName(this.getName());
         newInstance.setGlobalArgs(this.getGlobalArgs());
+        newInstance.setParent(this.getParent());
         newInstance.logger = logger();
         newInstance.benchmark = this.benchmark.clone();
         newInstance.setShowSteps(Boolean.toString(this.getShowSteps()));
+        newInstance.setWorkspace(this.getWorkspace());
         return newInstance;
     }
 

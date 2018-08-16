@@ -144,7 +144,7 @@ public abstract class AbstractTestRunner<T extends AbstractTest> {
     }
 
     /**
-     * Runs a test an benchmarks its execution.
+     * Runs a test and benchmarks its execution.
      * @param testObject instance of the test to run
      * @param runMap the run map in which the benchmark will be recorded.
      * @throws Throwable any throwable occurred in the test and was propagated upstream by the implementation runner

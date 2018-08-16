@@ -9,22 +9,8 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-package com.adobe.qe.toughday.api.annotations;
+package com.adobe.qe.toughday.internal.core.benchmarkmocks;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
-/**
- * Annotation for executing a method once before any runs of any replication (clone) of a test.
- * Guaranteed to be executed only once, no matter how many threads have a replica of the test.
- *
- * @deprecated use {@link Setup} instead
- */
-@Deprecated
-@Retention(RetentionPolicy.RUNTIME)
-@Target(value = ElementType.METHOD)
-public @interface CloneSetup {
-
+public class MockWorkerSubclass extends MockWorker {
 }

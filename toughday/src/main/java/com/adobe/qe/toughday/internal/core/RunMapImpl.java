@@ -179,6 +179,7 @@ public class RunMapImpl implements RunMap {
                 testEntry.init();
                 testEntry.reinitTime();
             }
+            clearCurrentTestResults();
         } finally {
             runMapLock.writeLock().unlock();
         }
