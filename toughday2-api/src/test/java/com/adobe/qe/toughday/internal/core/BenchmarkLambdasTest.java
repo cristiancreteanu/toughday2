@@ -27,7 +27,7 @@ import org.mockito.Mockito;
 import java.util.Collections;
 import java.util.Map;
 
-public class BenchmarkLambasTest {
+public class BenchmarkLambdasTest {
 
     private static final String STEP_NAME = "STEP_NAME";
     private static final Object RETURN_VALUE = "RETURN_VALUE";
