@@ -148,6 +148,8 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.20</version>
                 <configuration>
+                	<forkCount>0</forkCount>
+                    <reuseForks>true</reuseForks>
                     <dependenciesToScan>
                         <dependency>com.adobe.qe:toughday2-api</dependency>
                     </dependenciesToScan>

@@ -55,6 +55,7 @@ public class Configuration {
     private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
+    private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
 
     private void handleExtensions(ConfigParams configParams) {
 
@@ -367,6 +368,11 @@ public class Configuration {
             String property = propertyFromMethod(method.getName());
             Object value = args.remove(property);
             if (value == null) {
+                if (requiredFieldsForClassAdded.containsKey(object)
+                        && requiredFieldsForClassAdded.get(object).contains(property)) {
+                    continue;
+                }
+
                 if (annotation.required()) {
                     throw new IllegalArgumentException("Property \"" + property + "\" is required for class " + classObject.getSimpleName());
                 } else if(applyDefaults) {
@@ -377,6 +383,14 @@ public class Configuration {
                     }
                 }
             } else {
+                if (annotation.required()) {
+                    if (requiredFieldsForClassAdded.containsKey(object)) {
+                        requiredFieldsForClassAdded.get(object).add(property);
+                    } else {
+                        requiredFieldsForClassAdded.put(object,
+                                new HashSet<>(Collections.singletonList(property)));
+                    }
+                }
                 LOGGER.info("\tSetting property \"" + property + "\" to: \"" + value + "\"");
                 //TODO fix this ugly thing: all maps should be String -> String, but snake yaml automatically converts Integers, etc. so for now we call toString.
                 method.invoke(object, value.toString());
@@ -566,4 +580,7 @@ public class Configuration {
         return new CliParser();
     }
 
+    public static Map<Object, HashSet<String>> getRequiredFieldsForClassAdded() {
+        return requiredFieldsForClassAdded;
+    }
 }
