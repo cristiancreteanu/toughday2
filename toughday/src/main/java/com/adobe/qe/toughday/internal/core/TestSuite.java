@@ -23,121 +23,30 @@ import java.util.*;
  */
 public class TestSuite {
     private List<SuiteSetup> setupStep;
-    private WeightMap weightMap;
-    private HashMap<AbstractTest, Long> timeoutMap;
-    private HashMap<AbstractTest, Long> counterMap;
     private String description = "";
     private List<String> tags = new ArrayList<>();
     private List<AbstractTest> orderedTests;
-
-
-    /**
-     * Weight map class.
-     */
-    private static class WeightMap extends HashMap<AbstractTest, Integer> {
-        private int totalWeight;
-        private HashMap<String, AbstractTest> nameMap = new HashMap<>();
-
-        /**
-         * Puts the test in the map with the associated weight and returns the previous weight.
-         * @param test
-         * @param weight
-         * @return
-         */
-        @Override
-        public Integer put(AbstractTest test, Integer weight) {
-            if (nameMap.containsKey(test.getName())) {
-                throw new IllegalArgumentException("Suite already contains a test named: \"" + test.getName() + "\". " +
-                        "Please provide a different name using the \"name\" property.");
-            }
-
-            nameMap.put(test.getName(), test);
-            Integer previous = super.put(test, weight);
-            totalWeight += -(previous != null ? previous : 0) + weight;
-            return previous;
-        }
-
-        @Override
-        public void putAll(Map<? extends AbstractTest, ? extends Integer> other) {
-            for(Map.Entry<? extends AbstractTest, ? extends Integer> entry : other.entrySet()) {
-                this.put(entry.getKey(), entry.getValue());
-            }
-        }
-
-        /**
-         * Removes the test from the map.
-         * @param test
-         * @return
-         */
-        @Override
-        public Integer remove(Object test) {
-            if(!(test instanceof AbstractTest))
-                throw new IllegalArgumentException("Argument must extend AbstractTest");
-            nameMap.remove(((AbstractTest) test).getName());
-
-            Integer previous = super.remove(test);
-            totalWeight -= (previous != null ? previous : 0);
-            return previous;
-        }
-
-        /**
-         * Getter for the total weight.
-         * @return
-         */
-        public int getTotalWeight() {
-            return totalWeight;
-        }
-
-        public AbstractTest getTest(String testName) {
-            if(!nameMap.containsKey(testName))
-                throw new IllegalArgumentException("Test suite doesn't contain a test with this name: " + testName);
-            return nameMap.get(testName);
-        }
-
-        public boolean contains(String testName) {
-            return nameMap.containsKey(testName);
-        }
-    }
+    private HashMap<String, AbstractTest> nameMap = new HashMap<>();
+    private int totalWeight;
 
     /**
      * Constructor.
      */
     public TestSuite() {
-        weightMap = new WeightMap();
-        timeoutMap = new HashMap<>();
-        counterMap = new HashMap<>();
         setupStep = new ArrayList<>();
         orderedTests = new ArrayList<>();
+        totalWeight = 0;
     }
 
     /**
-     * Method for adding a test with the weight.
+     * Method for adding a test.
      * @param test
-     * @param weight
      * @return this object. (builder pattern)
      */
-    public TestSuite add(AbstractTest test, int weight) {
-        weightMap.put(test, weight);
+    public TestSuite add(AbstractTest test) {
+        nameMap.put(test.getName(), test);
         orderedTests.add(test);
-        return this;
-    }
-
-    /**
-     * Method for adding a test with weight, timeout and a count
-     * @param test the test to be executed
-     * @param weight the weight of this test compared to other tests in this suite
-     * @param timeout the time it takes for a test to be considered timed-out
-     * @param count Maximum number of executions
-     * @return
-     */
-    public TestSuite add(AbstractTest test, int weight, long timeout, long count) {
-        add(test, weight);
-        if (timeout >= 0) {
-            timeoutMap.put(test, timeout * 1000);
-        }
-        if (count >= 0) {
-            counterMap.put(test, count);
-        }
+        totalWeight += test.getWeight();
         return this;
     }
 
@@ -148,32 +57,12 @@ public class TestSuite {
      * @return
      */
     public TestSuite replaceWeight(String testName, int weight) {
-        AbstractTest test = weightMap.getTest(testName);
-        weightMap.put(test, weight);
-        return this;
-    }
-
-    /**
-     * Method for replacing the timeout for a test
-     * @param testName
-     * @param timeout
-     * @return
-     */
-    public TestSuite replaceTimeout(String testName, long timeout) {
-        AbstractTest test = weightMap.getTest(testName);
-        timeoutMap.put(test, timeout);
-        return this;
-    }
-
-    /**
-     * Method for replacing the max count for a test
-     * @param testName
-     * @param count
-     * @return
-     */
-    public TestSuite replaceCount(String testName, long count) {
-        AbstractTest test = weightMap.getTest(testName);
-        counterMap.put(test, count);
+//        if (contains(testName)) {
+            AbstractTest test = nameMap.get(testName);
+            totalWeight -= test.getWeight();
+            test.setWeight(Integer.toString(weight));
+            totalWeight += weight;
+//            }
         return this;
     }
 
@@ -184,9 +73,9 @@ public class TestSuite {
      * @return
      */
     public TestSuite replaceName(AbstractTest abstractTest, String newTestName) {
-        int weight = weightMap.remove(abstractTest);
+        nameMap.remove(abstractTest.getName());
         abstractTest.setName(newTestName);
-        weightMap.put(abstractTest, weight);
+        nameMap.put(newTestName, abstractTest);
         return this;
     }
 
@@ -195,11 +84,13 @@ public class TestSuite {
      * @return a SetupStep object if configured, null otherwise.
      */
     public TestSuite addAll(TestSuite testSuite) {
-        this.weightMap.putAll(testSuite.getWeightMap());
-        this.timeoutMap.putAll(testSuite.timeoutMap);
-        this.counterMap.putAll(testSuite.counterMap);
         this.setupStep.addAll(testSuite.setupStep);
         this.orderedTests.addAll(testSuite.orderedTests);
+
+        for (AbstractTest test : testSuite.orderedTests) {
+            totalWeight += test.getWeight();
+            nameMap.put(test.getName(), test);
+        }
         return this;
     }
 
@@ -322,36 +213,10 @@ public class TestSuite {
     }
 
     /**
-     * Method for getting the timeout for a specific test.
-     * @param test
-     * @return the timeout if configured, null otherwise.
-     */
-    public Long getTimeout(AbstractTest test) {
-        return timeoutMap.get(test);
-    }
-
-    /**
-     * Method for getting the count for a specific test.
-     * @param test
-     * @return the timeout if configured, null otherwise.
-     */
-    public Long getCount(AbstractTest test) {
-        return counterMap.get(test);
-    }
-
-    /**
-     * Getter for the weight map.
-     * @return
-     */
-    public Map<AbstractTest, Integer> getWeightMap() {
-        return weightMap;
-    }
-
-    /**
      * Getter for the total weight.
      */
     public int getTotalWeight() {
-        return weightMap.getTotalWeight();
+        return totalWeight;
     }
 
     /**
@@ -367,7 +232,7 @@ public class TestSuite {
      * @return
      */
     public AbstractTest getTest(String testName) {
-        return weightMap.getTest(testName);
+        return nameMap.get(testName);
     }
 
     /**
@@ -375,9 +240,8 @@ public class TestSuite {
      * @param testName
      */
     public void remove(String testName) {
-        AbstractTest test = weightMap.getTest(testName);
-        orderedTests.remove(test);
-        weightMap.remove(test);
+        AbstractTest test = nameMap.get(testName);
+        remove(test);
     }
 
     /**
@@ -385,8 +249,9 @@ public class TestSuite {
      * @param test
      */
     public void remove(AbstractTest test) {
-        weightMap.remove(test);
+        AbstractTest previous = nameMap.remove(test.getName());
         orderedTests.remove(test);
+        totalWeight -= (previous == null? 0 : previous.getWeight());
     }
 
     /**
@@ -395,7 +260,7 @@ public class TestSuite {
      * @return
      */
     public boolean contains(String testName) {
-        return weightMap.contains(testName);
+        return nameMap.containsKey(testName);
     }
 }
 

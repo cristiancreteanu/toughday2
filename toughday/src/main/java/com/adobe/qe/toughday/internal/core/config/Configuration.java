@@ -207,15 +207,7 @@ public class Configuration {
             if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
                 AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClass(itemToAdd.getClassName()), itemToAdd.getParameters());
 
-                // defaults
-                int weight = (itemToAdd.getParameters().containsKey("weight"))
-                        ? (Integer) (itemToAdd.getParameters().remove("weight")) : 1;
-                long timeout = (itemToAdd.getParameters().containsKey("timeout"))
-                        ? (Integer) (itemToAdd.getParameters().remove("timeout")) : -1;
-                long counter = (itemToAdd.getParameters().containsKey("count"))
-                        ? (Integer) (itemToAdd.getParameters().remove("count")) : -1;
-
-                suite.add(test, weight, timeout, counter);
+                suite.add(test);
                 items.put(test.getName(), test.getClass());
                 checkInvalidArgs(itemToAdd.getParameters());
             } else if (ReflectionsContainer.getInstance().isPublisherClass(itemToAdd.getClassName())) {
@@ -288,17 +280,12 @@ public class Configuration {
                 if ( itemMeta.getParameters().containsKey("name")) {
                     suite.replaceName(testObject, String.valueOf(itemMeta.getParameters().remove("name")));
                 }
-                setObjectProperties(testObject, itemMeta.getParameters(), false);
-                items.put(testObject.getName(), testObject.getClass());
                 if (itemMeta.getParameters().containsKey("weight")) {
                     suite.replaceWeight(testObject.getName(), (Integer) (itemMeta.getParameters().remove("weight")));
                 }
-                if (itemMeta.getParameters().containsKey("timeout")) {
-                    suite.replaceTimeout(testObject.getName(), (Integer) (itemMeta.getParameters().remove("timeout")));
-                }
-                if (itemMeta.getParameters().containsKey("count")) {
-                    suite.replaceCount(testObject.getName(), (Integer) (itemMeta.getParameters().remove("count")));
-                }
+
+                setObjectProperties(testObject, itemMeta.getParameters(), false);
+                items.put(testObject.getName(), testObject.getClass());
 
             } else if (globalArgs.containsPublisher(itemMeta.getName())) {
                 Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());

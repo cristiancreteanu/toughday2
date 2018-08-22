@@ -28,7 +28,6 @@ public class TestInternalSuiteStructural extends TestCase {
     public static TestSuite suite() {
         TestSuite suite = new TestSuite();
 
-        System.out.println("Here!!!");
         for (Class TDMetricClass : ReflectionsContainer.getSubTypesOf(Metric.class)) {
             suite.addTest(new TestConstructor("test", TDMetricClass));
             for (Method method : TDMetricClass.getDeclaredMethods()) {

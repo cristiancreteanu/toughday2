@@ -41,7 +41,7 @@ public class GenerateYamlConfiguration {
 
     private static final String DEFAULT_YAML_CONFIGURATION_FILENAME = "toughday_";
     private static final String DEFAULT_YAML_EXTENSION = ".yaml";
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
 
     public GenerateYamlConfiguration(ConfigParams configParams, Map<String, Class> items) {
         this.configParams = configParams;

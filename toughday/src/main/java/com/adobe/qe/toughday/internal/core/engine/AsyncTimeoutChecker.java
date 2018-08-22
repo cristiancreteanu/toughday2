@@ -39,10 +39,10 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
         this.testSuite = testSuite;
         minTimeout = engine.getGlobalArgs().getTimeout();
         for(AbstractTest test : testSuite.getTests()) {
-            if(testSuite.getTimeout(test) == null) {
+            if(test.getTimeout() < 0) {
                 continue;
             }
-            minTimeout = Math.min(minTimeout, testSuite.getTimeout(test));
+            minTimeout = Math.min(minTimeout, test.getTimeout());
         }
     }
 
@@ -57,8 +57,8 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
         if(currentTest == null)
             return;
 
-        Long testTimeout = testSuite.getTimeout(currentTest);
-        long timeout = testTimeout != null ? testTimeout : engine.getGlobalArgs().getTimeout();
+        Long testTimeout = currentTest.getTimeout();
+        long timeout = testTimeout >= 0 ? testTimeout : engine.getGlobalArgs().getTimeout();
 
         if (!worker.getMutex().tryLock()) {
             /* nothing to interrupt. if the test was running

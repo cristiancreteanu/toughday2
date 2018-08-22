@@ -41,7 +41,7 @@ import java.util.*;
  */
 public abstract class AbstractTest {
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm");
+    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
 
     private @NotNull TestId id;
     private String name;
@@ -51,6 +51,9 @@ public abstract class AbstractTest {
     private Logger logger;
     private BenchmarkImpl benchmark;
     private boolean showSteps = false;
+    private int weight;
+    private long timeout;
+    private long count;
 
     /**
      * Constructor. Used by the core with reflections
@@ -66,6 +69,10 @@ public abstract class AbstractTest {
             Name d = getClass().getAnnotation(Name.class);
             this.name = d.name();
         }
+
+        this.weight = 1;
+        this.timeout = -1;
+        this.count = -1;
     }
 
     public static List<Thread> getExtraThreads() {
@@ -127,6 +134,43 @@ public abstract class AbstractTest {
 
     public File getWorkspace() {
         return workspace;
+    }
+
+    @ConfigArgGet
+    public int getWeight() {
+        return weight;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = "1",
+            desc = "The likelihood of the execution of a test in a thread.")
+    public AbstractTest setWeight(String weight) {
+        this.weight = Integer.parseInt(weight);
+        return this;
+    }
+
+    @ConfigArgGet
+    public long getTimeout() {
+        return timeout;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = "-1",
+            desc = "How long a test will run before it will be interrupted and marked as failed. Expressed in seconds. " +
+                    "When it equals -1, it means the timeout is not set and the global default, 180, will be taken into consideration.")
+    public AbstractTest setTimeout(String timeout) {
+        long t = Long.parseLong(timeout);
+        this.timeout = t > 0? t * 1000 : -1;
+        return this;
+    }
+
+    @ConfigArgGet
+    public long getCount() {
+        return count;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = "-1", desc = "Maximum number of executions of a test. When it equals -1, it means the count is not set.")
+    public AbstractTest setCount(String count) {
+        this.count = Long.parseLong(count);
+        return this;
     }
 
     public Benchmark benchmark() { return this.benchmark; }
@@ -197,7 +241,12 @@ public abstract class AbstractTest {
         newInstance.logger = logger();
         newInstance.benchmark = this.benchmark.clone();
         newInstance.setShowSteps(Boolean.toString(this.getShowSteps()));
+        newInstance.setCount(Long.toString(this.count));
+        newInstance.setTimeout(Long.toString(this.timeout / 1000));
+        newInstance.setWeight(Integer.toString(this.weight));
+
         newInstance.setWorkspace(this.getWorkspace());
+
         return newInstance;
     }
 

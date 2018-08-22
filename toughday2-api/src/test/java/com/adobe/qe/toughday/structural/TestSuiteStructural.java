@@ -21,10 +21,8 @@ import org.junit.experimental.categories.Category;
 import org.reflections.Reflections;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
-/**
- * Created by tuicu on 13/06/16.
- */
 @Category(TestTDConstraints.class)
 public class TestSuiteStructural extends TestCase {
 
@@ -32,7 +30,9 @@ public class TestSuiteStructural extends TestCase {
         Reflections reflections = new Reflections("");
         TestSuite suite = new TestSuite();
 
-        for(Class TDtestClass : reflections.getSubTypesOf(AbstractTest.class)) {
+        Set<Class<? extends AbstractTest>> testClasses = reflections.getSubTypesOf(AbstractTest.class);
+        testClasses.add(AbstractTest.class);
+        for(Class TDtestClass : testClasses) {
             suite.addTest(new TestConstructor("test", TDtestClass));
             for (Method method : TDtestClass.getDeclaredMethods()) {
                 if (method.getAnnotation(ConfigArgSet.class) != null) {
@@ -50,7 +50,9 @@ public class TestSuiteStructural extends TestCase {
             }
         }
 
-        for(Class TDpublisherClass : reflections.getSubTypesOf(Publisher.class)) {
+        Set<Class<? extends Publisher>> publisherClasses = reflections.getSubTypesOf(Publisher.class);
+        publisherClasses.add(Publisher.class);
+        for(Class TDpublisherClass : publisherClasses) {
             suite.addTest(new TestConstructor("test", TDpublisherClass));
             for (Method method : TDpublisherClass.getDeclaredMethods()) {
                 if (method.getAnnotation(ConfigArgSet.class) != null) {

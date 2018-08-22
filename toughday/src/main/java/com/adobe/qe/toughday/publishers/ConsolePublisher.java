@@ -112,9 +112,10 @@ public class ConsolePublisher extends Publisher {
         final String FORMAT = "%-37s | ";
         // "clear" screen
         if (begun && clearScreen) {
-            for (int i=0; i < nrStats + extraLines.get(); i++ ) {
-                System.out.print("\33[1A\33[2K");
-            }
+//            for (int i=0; i < nrStats + extraLines.get(); i++ ) {
+//                System.out.print("\33[1A\33[2K");
+//            }
+            System.out.print(String.format("%c[%dA", 0x1B, nrStats + extraLines.get()));
         }
 
         for (String testName : results.keySet()) {

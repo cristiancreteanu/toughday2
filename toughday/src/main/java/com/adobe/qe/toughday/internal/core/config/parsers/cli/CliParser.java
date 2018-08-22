@@ -537,12 +537,6 @@ public class CliParser implements ConfigurationParser {
                             annotation.desc());
                 }
             }
-            if(AbstractTest.class.isAssignableFrom(klass)) {
-                printClassProperty("weight", false, "1", "The weight of this test");
-                printClassProperty("timeout", false, String.valueOf(GlobalArgs.DEFAULT_TIMEOUT),
-                        "How long a test will run before it will be interrupted and marked as failed. Expressed in seconds");
-                printClassProperty("count", false, "none", "The approximate number of times this test should run");
-            }
         }
     }
 

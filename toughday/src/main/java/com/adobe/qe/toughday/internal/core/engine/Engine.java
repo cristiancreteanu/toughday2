@@ -243,16 +243,7 @@ public class Engine {
                         method.invoke(obj));
             }
         }
-        if(AbstractTest.class.isAssignableFrom(objectClass)) {
-            AbstractTest test = (AbstractTest) obj;
 
-            Long count = testSuite.getCount(test);
-            Long timeout = testSuite.getTimeout(test);
-            Integer weight = testSuite.getWeightMap().get(test);
-            printObjectProperty(out, "weight",  weight != null ? weight : 1);
-            printObjectProperty(out, "timeout", timeout != null ? timeout : GlobalArgs.DEFAULT_TIMEOUT);
-            printObjectProperty(out, "count", count != null ? count : "none");
-        }
         out.println();
         out.println();
     }
@@ -396,13 +387,13 @@ public class Engine {
             try {
                 int randomNumber = _rnd.nextInt(testSuite.getTotalWeight());
                 for (AbstractTest test : testSuite.getTests()) {
-                    int testWeight = testSuite.getWeightMap().get(test);
+                    int testWeight = test.getWeight();
 
                     long testRuns = counts.get(test).get();
-                    Long maxRuns   = testSuite.getCount(test);
+                    Long maxRuns = test.getCount();
 
                     //If max runs was exceeded for a test
-                    if (null != maxRuns && testRuns > maxRuns) {
+                    if (maxRuns >= 0 && testRuns > maxRuns) {
                         //Try to acquire the lock for removing the test from the suite
                         engineSync.readLock().unlock();
                         engineSync.writeLock().lock();
