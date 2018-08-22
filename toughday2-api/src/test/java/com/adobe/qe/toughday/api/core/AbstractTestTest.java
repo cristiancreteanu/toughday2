@@ -206,4 +206,37 @@ public class AbstractTestTest {
         Assert.assertEquals(args, child1.getGlobalArgs());
         Assert.assertEquals(args, child2.getGlobalArgs());
     }
+
+
+    @Test
+    public void testChooseGlobalTimeout() {
+        MockTest test = new MockTest();
+        GlobalArgs globalArgs = Mockito.mock(GlobalArgs.class);
+        Mockito.when(globalArgs.getTimeout()).thenReturn(180L);
+
+        Long testTimeout = test.getTimeout();
+        Assert.assertEquals(testTimeout >= 0 ? testTimeout : globalArgs.getTimeout(), 180L);
+    }
+
+    @Test
+    public void testChooseGlobalTimeoutAgain() {
+        MockTest test = new MockTest();
+        GlobalArgs globalArgs = Mockito.mock(GlobalArgs.class);
+        Mockito.when(globalArgs.getTimeout()).thenReturn(180L);
+
+        test.setTimeout("-5");
+        Long testTimeout = test.getTimeout();
+        Assert.assertEquals(testTimeout >= 0 ? testTimeout : globalArgs.getTimeout(), 180L);
+    }
+
+    @Test
+    public void testChooseSetTimeout() {
+        MockTest test = new MockTest();
+        GlobalArgs globalArgs = Mockito.mock(GlobalArgs.class);
+        Mockito.when(globalArgs.getTimeout()).thenReturn(180L);
+        
+        test.setTimeout("1");
+        Long testTimeout = test.getTimeout();
+        Assert.assertEquals(testTimeout >= 0 ? testTimeout : globalArgs.getTimeout(), 1000);
+    }
 }

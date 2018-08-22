@@ -1,4 +1,4 @@
-package com.adobe.qe.toughday.structural;
+package com.adobe.qe.toughday.mocks;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.AbstractTestRunner;
