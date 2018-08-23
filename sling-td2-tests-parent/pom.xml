@@ -4,12 +4,12 @@
 
     <parent>
         <groupId>com.adobe.qe</groupId>
-        <artifactId>sling-td2-tests-parent</artifactId>
-        <version>0.9.3-SNAPSHOT</version>
+        <artifactId>toughday2-tests-parent</artifactId>
+        <version>0.9.2</version>
     </parent>
 
     <groupId>com.adobe.qe</groupId>
-    <artifactId>aem-td2-tests-parent</artifactId>
+    <artifactId>sling-td2-tests-parent</artifactId>
     <version>0.9.3-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -48,7 +48,7 @@
     <dependencies>
         <dependency>
             <groupId>com.adobe.qe</groupId>
-            <artifactId>aem-td2-core-tests</artifactId>
+            <artifactId>sling-td2</artifactId>
             <version>0.9.3-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>

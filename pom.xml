@@ -38,6 +38,8 @@
 	<modules>
 		<module>toughday2-api</module>
 		<module>toughday2-tests-parent</module>
+		<module>sling-td2</module>
+		<module>sling-td2-tests-parent</module>
 		<module>aem-td2-core-tests</module>
 		<module>toughday_sample</module>
 		<module>toughday</module>

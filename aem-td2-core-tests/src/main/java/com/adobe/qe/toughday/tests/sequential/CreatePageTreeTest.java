@@ -16,14 +16,12 @@ import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.FluentLogging;
 import com.adobe.qe.toughday.tests.composite.AuthoringTreeTest;
 import com.adobe.qe.toughday.tests.samplecontent.SampleContent;
-import com.adobe.qe.toughday.tests.utils.SlingClientsProxyFactory;
 import com.adobe.qe.toughday.tests.utils.TreePhaser;
 import com.adobe.qe.toughday.tests.utils.WcmUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.Level;
-import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.util.FormEntityBuilder;
 
 import java.util.UUID;

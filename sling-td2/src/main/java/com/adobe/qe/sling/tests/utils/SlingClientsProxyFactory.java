@@ -9,7 +9,7 @@ the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTA
 OF ANY KIND, either express or implied. See the License for the specific language
 governing permissions and limitations under the License.
 */
-package com.adobe.qe.toughday.tests.utils;
+package com.adobe.qe.sling.tests.utils;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
@@ -22,6 +22,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.sling.testing.clients.ClientException;
 import org.apache.sling.testing.clients.SlingClient;
 import org.apache.sling.testing.clients.SlingHttpResponse;
+import org.mockito.Mockito;
 import org.mockito.stubbing.Answer;
 
 import java.util.List;
@@ -33,7 +34,7 @@ public class SlingClientsProxyFactory implements ProxyFactory<SlingClient> {
     @Override
     public SlingClient createProxy(SlingClient target, AbstractTest test, Benchmark benchmark) {
         try {
-            SlingClient slingClientProxy = spy(target);
+            SlingClient slingClientProxy = Mockito.spy(target);
             SlingClientProxy proxy = target.adaptTo(SlingClientProxy.class);
             proxy.setTest(test);
             proxy.setTarget(target);
