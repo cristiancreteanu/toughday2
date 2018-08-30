@@ -11,14 +11,14 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.*;
 import com.adobe.qe.toughday.api.core.benchmark.TestResult;
 import com.adobe.qe.toughday.internal.core.benckmark.AdHocTest;
 import com.adobe.qe.toughday.mocks.MockTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
-
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +28,11 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class RunMapImplTest {
 
     private RunMapImpl runMap;
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
 
     @Before
     public void before() {
@@ -174,7 +179,7 @@ public class RunMapImplTest {
         TestResult testResult = createTestResult(test, status);
         runMap.addTest(test);
 
-        runMap.record(testResult);
+            runMap.record(testResult);
 
         Assert.assertEquals(1, runMap.getCurrentTestResults().size());
         TestResult[] testResults = runMap.getCurrentTestResults().toArray(new TestResult[1]);
@@ -185,7 +190,7 @@ public class RunMapImplTest {
             Assert.assertEquals(1, testStatistics.getTotalRuns());
             Assert.assertEquals(0, testStatistics.getFailRuns());
             Assert.assertEquals(0, testStatistics.getSkippedRuns());
-            Assert.assertTrue(testStatistics.getMinDuration() >= 40 && testStatistics.getMinDuration() < 50);
+            Assert.assertTrue(testStatistics.getMinDuration() >= 30 && testStatistics.getMinDuration() < 50);
             Assert.assertTrue(testStatistics.getMaxDuration() >= 40 && testStatistics.getMaxDuration() < 50);
             Assert.assertTrue(testStatistics.getAverageDuration() >= 40 && testStatistics.getAverageDuration() < 50);
             Assert.assertTrue(testStatistics.getMedianDuration() >= 40 && testStatistics.getMedianDuration() < 50);
@@ -391,5 +396,11 @@ public class RunMapImplTest {
         Assert.assertEquals(test3, cloneTests[2]);
         Assert.assertEquals(0, clone.getCurrentTestResults().size());
         Assert.assertEquals(0, clone.getRecord(test1).getTotalRuns());
+    }
+
+    @After
+    public void deleteLogs()  {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

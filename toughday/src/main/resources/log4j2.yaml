@@ -11,7 +11,7 @@ Configuration:
 
         RollingFile:
           - name: CoreFile
-            fileName: "logs/toughday_${date:yyyy-MM-dd'T'HH-mm}.log"
+            fileName: "${sys:logFileName}/logs_${date:yyyy-MM-dd'T'HH-mm}/toughday.log"
             filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
             PatternLayout:
                 Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p: %m%n"
@@ -19,7 +19,7 @@ Configuration:
                 SizeBasedTriggeringPolicy:
                   size: 250 MB
           - name: TestsFile
-            fileName: "logs/toughday_tests_${date:yyyy-MM-dd'T'HH-mm}.log"
+            fileName: "${sys:logFileName}/logs_${date:yyyy-MM-dd'T'HH-mm}/toughday_tests.log"
             filePattern: "logs/$${date:yyyy-MM}/application-%d{MM-dd-yyyy}-%i.log.gz"
             PatternLayout:
                 Pattern: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p: %m%n"

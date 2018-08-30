@@ -14,6 +14,7 @@ package com.adobe.qe.toughday.internal.core.config;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.Publisher;
+import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.parsers.yaml.GenerateYamlConfiguration;
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
 import com.adobe.qe.toughday.internal.core.TestSuite;
@@ -28,16 +29,22 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.Appender;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.reflections.Reflections;
 
+import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -56,6 +63,7 @@ public class Configuration {
     private RunMode runMode;
     private PublishMode publishMode;
     private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
+    private static String TIMESTAMP = Timestamp.START_TIME;
 
     private void handleExtensions(ConfigParams configParams) {
 
@@ -176,7 +184,7 @@ public class Configuration {
 
 
     public Configuration(String[] cmdLineArgs)
-            throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException {
+            throws IllegalAccessException, InstantiationException, InvocationTargetException, NoSuchMethodException, IOException {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
         ConfigParams copyOfConfigParams = ConfigParams.deepClone(configParams);
         Map<String, Class> items = new HashMap<>();
@@ -193,6 +201,9 @@ public class Configuration {
         }
 
         this.globalArgs = createObject(GlobalArgs.class, globalArgsMeta);
+
+        configureLogPath(globalArgs.getLogPath());
+
         applyLogLevel(globalArgs.getLogLevel());
 
         this.runMode = getRunMode(configParams);
@@ -333,6 +344,30 @@ public class Configuration {
             generateYaml.createYamlConfigurationFile();
         }
 
+    }
+
+    private void configureLogPath(String logPath) throws IOException {
+        if (!logPath.equals(".")) {
+            final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+            final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+
+            for (Map.Entry<String, Appender> appenderEntry : config.getAppenders().entrySet()) {
+                appenderEntry.getValue().stop();
+            }
+
+            File newFolder = new File(logPath + "/logs_" + TIMESTAMP + "/");
+            File folder = new File("logs_" + TIMESTAMP + "/");
+
+            Path movefrom = FileSystems.getDefault().getPath(folder.getPath());
+            Path target = FileSystems.getDefault().getPath(newFolder.getPath());
+
+            Files.move(movefrom, target, StandardCopyOption.REPLACE_EXISTING);
+
+            for (Map.Entry<String, Appender> appenderEntry : config.getAppenders().entrySet()) {
+                appenderEntry.getValue().start();
+            }
+            ctx.reconfigure();
+        }
     }
 
     /**

@@ -23,9 +23,16 @@ import org.apache.logging.log4j.Logger;
  * Main class. Creates a Configuration and an engine and runs the tests.
  */
 public class Main {
-    private static final Logger LOG = LogManager.getLogger(Main.class);
+    private static final Logger LOG;
+
+    static {
+        System.setProperty("logFileName", ".");
+        LOG = LogManager.getLogger(Main.class);
+    }
 
     public static void main(String[] args) {
+
+
         CliParser cliParser = new CliParser();
         System.out.println();
 

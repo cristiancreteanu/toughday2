@@ -29,4 +29,5 @@ public interface GlobalArgs {
     boolean getSaveConfig();
     boolean getShowSteps();
     boolean getHostValidationEnabled();
+    String getLogPath();
 }

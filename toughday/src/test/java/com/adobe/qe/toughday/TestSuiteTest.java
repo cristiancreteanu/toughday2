@@ -1,16 +1,21 @@
 package com.adobe.qe.toughday;
 
-import org.junit.Before;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.internal.core.TestSuite;
-import org.junit.Assert;
-import org.junit.Test;
 
 public class TestSuiteTest {
     private TestSuite suite;
     private int totalWeight;
     private long totalTimeout;
     private long totalCount;
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
 
     @Before
     public void before() {
@@ -128,5 +133,11 @@ public class TestSuiteTest {
         suite.replaceName(test, "h");
 
         Assert.assertTrue(suite.contains(test.getName()));
+    }
+
+    @After
+    public void deleteLogs()  {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

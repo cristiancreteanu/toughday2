@@ -11,17 +11,23 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.api.core;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import com.adobe.qe.toughday.api.core.runnermocks.MockTest;
 import com.adobe.qe.toughday.internal.core.UUIDTestId;
-import org.junit.Assert;
-import org.junit.Test;
-import org.mockito.Mock;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 import org.mockito.Mockito;
 
 import java.io.File;
 
 public class AbstractTestTest {
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
 
     @Test
     public void testsWithSameIDAreEqual() {
@@ -40,6 +46,7 @@ public class AbstractTestTest {
     @Test
     public void testCloneOfATestIsEqual() {
         AbstractTest test = new MockTest();
+        test.setGlobalArgs(Mockito.mock(GlobalArgs.class));
         AbstractTest cloneTest = test.clone();
 
         Assert.assertTrue(test.equals(cloneTest));
@@ -138,6 +145,7 @@ public class AbstractTestTest {
         Assert.assertNotNull(cloneTest.benchmark()); //TODO verify equality
         Assert.assertEquals(test.logger(), cloneTest.logger());
         Assert.assertEquals(test.getWorkspace(), cloneTest.getWorkspace());
+
     }
 
     @Test
@@ -238,5 +246,11 @@ public class AbstractTestTest {
         test.setTimeout("1");
         Long testTimeout = test.getTimeout();
         Assert.assertEquals(testTimeout >= 0 ? testTimeout : globalArgs.getTimeout(), 1000);
+    }
+
+    @After
+    public  void deleteFiles() {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

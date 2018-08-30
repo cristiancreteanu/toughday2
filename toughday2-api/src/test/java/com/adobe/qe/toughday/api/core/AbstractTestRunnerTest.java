@@ -11,16 +11,24 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.api.core;
 
+import com.adobe.qe.toughday.LogFileEraser;
+import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import com.adobe.qe.toughday.api.core.runnermocks.MockInheritanceTest;
 import com.adobe.qe.toughday.api.core.runnermocks.MockTest;
 import com.adobe.qe.toughday.api.core.runnermocks.MockTestRunner;
-import org.junit.Assert;
-import org.junit.Test;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 import org.mockito.Mockito;
 
 import java.util.List;
 
 public class AbstractTestRunnerTest {
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
 
     @Test
     public void testExecutionOrder() {
@@ -38,6 +46,7 @@ public class AbstractTestRunnerTest {
     public void testExecutionOrderFailBefore() {
         MockTest test = new MockTest();
         test.doFailBefore();
+        test.setGlobalArgs(Mockito.mock(GlobalArgs.class));
         execute(test, MockTestRunner.BASE_BEFORE_METHOD, true);
 
         List<String> executedMethods = test.getExecutedMethods();
@@ -131,6 +140,7 @@ public class AbstractTestRunnerTest {
     public void testInheritanceExecutionOrderFailBefore() {
         MockTest test = new MockInheritanceTest();
         test.doFailBefore();
+        test.setGlobalArgs(Mockito.mock(GlobalArgs.class));
         execute(test, MockTestRunner.BASE_BEFORE_METHOD, true);
 
         List<String> executedMethods = test.getExecutedMethods();
@@ -144,6 +154,7 @@ public class AbstractTestRunnerTest {
     public void testInheritanceExecutionOrderFailSubclassBefore() {
         MockInheritanceTest test = new MockInheritanceTest();
         test.doFailSubclassBefore();
+        test.setGlobalArgs(Mockito.mock(GlobalArgs.class));
         execute(test, MockTestRunner.SUBCLASS_BEFORE_METHOD, true);
 
         List<String> executedMethods = test.getExecutedMethods();
@@ -155,7 +166,7 @@ public class AbstractTestRunnerTest {
     }
 
     @Test
-    public void testInheritanceExecutionOrderFailTest() {
+        public void testInheritanceExecutionOrderFailTest() {
         MockInheritanceTest test = new MockInheritanceTest();
         test.doFailTest();
         execute(test, null, true); //since the test method is not executed, because it is overriden, then there will be no exception
@@ -232,5 +243,11 @@ public class AbstractTestRunnerTest {
         }
         if (expectedErrorMessage != null) Assert.assertTrue("Expected an exception with message \"" + expectedErrorMessage + "\"", exceptionCaught);
         Mockito.verify(runMap, Mockito.times(1)).record(Mockito.any());
+    }
+
+    @After
+    public void deleteFile()  {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

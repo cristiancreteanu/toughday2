@@ -15,15 +15,20 @@ import com.adobe.qe.toughday.api.annotations.After;
 import com.adobe.qe.toughday.api.annotations.Before;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.AbstractTestRunner;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.simple.SimpleLogger;
+import org.apache.logging.log4j.util.PropertiesUtil;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class MockTest extends AbstractTest {
 
     private List<String> executedMethods = new ArrayList<>();
     private List<AbstractTest> children = new ArrayList<>();
+    private static Logger logger;
 
     boolean failBefore;
     boolean failTest;

@@ -11,10 +11,14 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.structural;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.internal.core.benckmark.AdHocTest;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.AfterClass;
 import org.junit.experimental.categories.Category;
 
 import java.lang.reflect.Constructor;
@@ -49,5 +53,10 @@ public class TestConstructor extends TestCase {
         } catch (NoSuchMethodException e) {
             fail("ToughDay2 class \"" + TdClass.getName() + "\" doesn't have a public constructor with no arguments, or it is not public");
         }
+    }
+
+    @AfterClass
+    public static void deleteFile()  {
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

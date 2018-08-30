@@ -1,12 +1,16 @@
 package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.Appender;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.*;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class TestObjectWithRequiredField {
@@ -14,6 +18,16 @@ public class TestObjectWithRequiredField {
 
     @BeforeClass
     public static void onlyOnce() {
+        System.setProperty("logFileName", ".");
+
+        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
+        final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
+        ctx.reconfigure();
+
+        for (Map.Entry<String, Appender> appenderEntry : config.getAppenders().entrySet()) {
+            appenderEntry.getValue().start();
+        }
+
         ReflectionsContainer.getInstance().getTestClasses().put("MockTestRequiredField", MockTestRequiredField.class);
         ReflectionsContainer.getInstance().getTestClasses().put("MockTestTwoRequiredFields", MockTestTwoRequiredFields.class);
     }
@@ -24,18 +38,18 @@ public class TestObjectWithRequiredField {
     }
 
     @Test
-    public void testSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         new Configuration(cmdLineArgs.toArray(new String[0]));
     }
 
     @Test
-    public void addSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException {
+    public void addSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, InterruptedException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestRequiredField", "name=RandomTestName"));
         new Configuration(cmdLineArgs.toArray(new String[0]));
     }
 
     @Test
-    public void addSimpleTwo() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void addSimpleTwo() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwoRequiredFields", "name=RandomTestName", "mock=Something"));
         new Configuration(cmdLineArgs.toArray(new String[0]));
     }
@@ -87,14 +101,14 @@ public class TestObjectWithRequiredField {
     }
 
     @Test
-    public void configPass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void configPass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestRequiredField", "name=RandomTestName"));
         cmdLineArgs.addAll(Arrays.asList("--config", "RandomTestName", "name=RandomTestNameAgain"));
         new Configuration(cmdLineArgs.toArray(new String[0]));
     }
 
     @Test
-    public void configPassTwo() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void configPassTwo() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwoRequiredFields", "name=RandomTestName", "mock=Something"));
         cmdLineArgs.addAll(Arrays.asList("--config", "RandomTestName", "name=RandomTestNameAgain"));
         new Configuration(cmdLineArgs.toArray(new String[0]));
@@ -113,7 +127,7 @@ public class TestObjectWithRequiredField {
     }
 
     @Test
-    public void excludePass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void excludePass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestRequiredField", "name=SomeName"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestRequiredField", "name=RandomTestName"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "RandomTestName"));
@@ -126,7 +140,9 @@ public class TestObjectWithRequiredField {
     }
 
     @AfterClass
-    public static void afterAll() {
-        new File("toughday_" + new SimpleDateFormat("yyyy-MM-dd'T'HH-mm").format(new Date()) + ".yaml").delete();
+    public static void deleteFiles() {
+        new File("toughday_" + Timestamp.START_TIME + ".yaml").delete();
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

@@ -15,6 +15,7 @@ import com.adobe.qe.toughday.api.annotations.Name;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.core.config.GlobalArgs;
+import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.UUIDTestId;
 import com.adobe.qe.toughday.api.annotations.labels.NotNull;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
@@ -31,7 +32,6 @@ import org.apache.logging.log4j.core.config.LoggerConfig;
 import org.apache.logging.log4j.core.layout.PatternLayout;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -41,7 +41,6 @@ import java.util.*;
  */
 public abstract class AbstractTest {
     protected static List<Thread> extraThreads = Collections.synchronizedList(new ArrayList<Thread>());
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
 
     private @NotNull TestId id;
     private String name;
@@ -261,12 +260,11 @@ public abstract class AbstractTest {
         String clazzLoggerName = clazz.getName() + "#" + testName;
 
         Level logLevel = System.getProperty("toughday.log.level") != null ? Level.valueOf(System.getProperty("toughday.log.level")) : Level.INFO;
-        final String timestamp = TIME_STAMP_FORMAT.format(new Date());
         final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
         final org.apache.logging.log4j.core.config.Configuration config = ctx.getConfiguration();
         Layout layout = PatternLayout.createLayout("%d{yyyy-MM-dd HH:mm:ss.SSS} %-5p %c{1}:%L - %m%n", null, config,
                 null, null, true, false, null, null);
-        Appender appender = FileAppender.createAppender(String.format("logs/toughday_%s_%s.log", testName, timestamp),
+        Appender appender = FileAppender.createAppender(String.format(System.getProperty("logFileName") + "/logs_%s/toughday_%s.log", Timestamp.START_TIME, testName),
                 "true", "false", "File", "true", "false", "false", "-1", layout, null, "false", null, config);
         appender.start();
         config.addAppender(appender);

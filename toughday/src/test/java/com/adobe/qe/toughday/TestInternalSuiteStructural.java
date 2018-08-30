@@ -20,12 +20,17 @@ import com.adobe.qe.toughday.structural.TestConfigSetAnnotatedMethod;
 import com.adobe.qe.toughday.structural.TestConstructor;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 
+import java.io.IOException;
 import java.lang.reflect.Method;
 
 public class TestInternalSuiteStructural extends TestCase {
 
-    public static TestSuite suite() {
+    public static TestSuite suite() throws IOException {
+        System.setProperty("logFileName", ".");
+
         TestSuite suite = new TestSuite();
 
         for (Class TDMetricClass : ReflectionsContainer.getSubTypesOf(Metric.class)) {

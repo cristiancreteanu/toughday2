@@ -6,6 +6,7 @@
         <groupId>com.adobe.qe</groupId>
         <artifactId>sling-td2-tests-parent</artifactId>
         <version>0.9.3-SNAPSHOT</version>
+        <relativePath>../sling-td2-tests-parent/pom.xml</relativePath>
     </parent>
 
     <groupId>com.adobe.qe</groupId>

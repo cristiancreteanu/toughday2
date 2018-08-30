@@ -12,7 +12,9 @@ governing permissions and limitations under the License.
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
+import com.adobe.qe.toughday.internal.core.config.Configuration;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.introspector.Property;
@@ -24,9 +26,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +41,7 @@ public class GenerateYamlConfiguration {
 
     private static final String DEFAULT_YAML_CONFIGURATION_FILENAME = "toughday_";
     private static final String DEFAULT_YAML_EXTENSION = ".yaml";
-    private static final SimpleDateFormat TIME_STAMP_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH-mm");
+    private static final String TIMESTAMP = Timestamp.START_TIME;
 
     public GenerateYamlConfiguration(ConfigParams configParams, Map<String, Class> items) {
         this.configParams = configParams;
@@ -138,8 +138,7 @@ public class GenerateYamlConfiguration {
      */
     public void createYamlConfigurationFile() {
 
-        final String timestamp = TIME_STAMP_FORMAT.format(new Date());
-        final String filename = DEFAULT_YAML_CONFIGURATION_FILENAME + timestamp + DEFAULT_YAML_EXTENSION;
+        final String filename = DEFAULT_YAML_CONFIGURATION_FILENAME + TIMESTAMP + DEFAULT_YAML_EXTENSION;
 
         FileWriter fileWriter = null;
         try {

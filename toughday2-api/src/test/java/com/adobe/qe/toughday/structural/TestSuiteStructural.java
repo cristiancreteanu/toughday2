@@ -11,12 +11,16 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.structural;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.Publisher;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.AfterClass;
 import org.junit.experimental.categories.Category;
 import org.reflections.Reflections;
 
@@ -66,5 +70,10 @@ public class TestSuiteStructural extends TestCase {
             }
         }
         return suite;
+    }
+
+    @AfterClass
+    public static void deleteFile()  {
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

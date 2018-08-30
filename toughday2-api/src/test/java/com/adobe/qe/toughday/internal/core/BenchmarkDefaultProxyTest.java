@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 package com.adobe.qe.toughday.internal.core;
 
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.SkippedTestException;
 import com.adobe.qe.toughday.api.core.benchmark.Benchmark;
@@ -21,9 +22,9 @@ import com.adobe.qe.toughday.api.core.runnermocks.MockTest;
 import com.adobe.qe.toughday.internal.core.benchmarkmocks.MockWorker;
 import com.adobe.qe.toughday.internal.core.benckmark.BenchmarkImpl;
 import com.adobe.qe.toughday.mocks.MockRunMap;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 import org.mockito.Mockito;
 
 import java.util.Arrays;
@@ -306,7 +307,7 @@ public class BenchmarkDefaultProxyTest {
         Assert.assertEquals(1, runMap.getResults().size());
         TestResult result = runMap.getResults().get(0);
 
-        Assert.assertTrue("Duration is not in range", result.getDuration() >= expectedDuration && result.getDuration() < expectedDuration + eps);
+        Assert.assertTrue("Duration is not in range", result.getDuration() >= expectedDuration - eps && result.getDuration() < expectedDuration + eps);
         Assert.assertEquals("Incorrect name", test.getFullName() + "." + STEP_NAME, result.getTest().getFullName());
         Assert.assertEquals("Incorrect Thread ID", Thread.currentThread().getId(), result.getThreadId());
         Assert.assertEquals("Incorrect Thread Name", Thread.currentThread().getName(), result.getThreadName());
@@ -316,5 +317,11 @@ public class BenchmarkDefaultProxyTest {
         } else {
             Assert.assertNull("No exception should be thrown", caughtException);
         }
+    }
+
+    @After
+    public void deleteLogs()  {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

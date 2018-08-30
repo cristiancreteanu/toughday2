@@ -11,8 +11,12 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.structural;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.AfterClass;
 import org.junit.experimental.categories.Category;
 
 import java.lang.reflect.Method;
@@ -45,5 +49,10 @@ public class TestConfigGetAnnotatedMethod extends TestCase {
     public void testArguments() {
         assertTrue( "ToughDay2 config get method \"" + TdConfigAnnotatedMethod + "\" must have no parameters",
                 TdConfigAnnotatedMethod.getParameterTypes().length == 0);
+    }
+
+    @AfterClass
+    public static void deleteFile()  {
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

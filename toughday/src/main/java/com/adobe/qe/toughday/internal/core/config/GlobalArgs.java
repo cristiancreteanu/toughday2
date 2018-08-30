@@ -41,6 +41,7 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     public static final Level DEFAULT_LOG_LEVEL = Level.valueOf(DEFAULT_LOG_LEVEL_STRING);
     public static final String DEFAULT_DRY_RUN = "false";
     public static final String DEFAULT_SAVE_CONFIG = "true";
+    public static final String DEFAULT_LOG_PATH = ".";
     private String host;
     private int port;
     private String user;
@@ -58,6 +59,7 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     private boolean saveConfig = Boolean.parseBoolean(DEFAULT_SAVE_CONFIG);
     private boolean showSteps = false;
     private boolean hostValidationEnabled = true;
+    private String logPath;
 
     /**
      * Constructor
@@ -349,5 +351,25 @@ public class GlobalArgs implements com.adobe.qe.toughday.api.core.config.GlobalA
     @ConfigArgGet
     public boolean getHostValidationEnabled() {
         return this.hostValidationEnabled;
+    }
+
+    @ConfigArgGet
+    public String getLogPath() {
+        return logPath;
+    }
+
+    @ConfigArgSet(required = false, defaultValue = DEFAULT_LOG_PATH, desc = "The path where the logs folder will be created.")
+    public void setLogPath(String logPath) {
+        if (!logPath.equals("/") && logPath.endsWith("/")) {
+            logPath = logPath.substring(0, logPath.length() - 1);
+        }
+
+        if (logPath.startsWith("~")) {
+            logPath = System.getProperty("user.home") + logPath.substring(1);
+        }
+
+        System.setProperty("logFileName", logPath);
+
+        this.logPath = logPath;
     }
 }

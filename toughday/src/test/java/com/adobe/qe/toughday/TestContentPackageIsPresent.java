@@ -12,16 +12,28 @@ governing permissions and limitations under the License.
 package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
-import org.junit.Assert;
-import org.junit.Test;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
 
 /**
  * Created by tuicu on 11/01/17.
  */
 public class TestContentPackageIsPresent {
 
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
+
     @Test
     public void test() {
         Assert.assertNotNull("Tough Day Content Package is not in jar!", ReflectionsContainer.getInstance().getToughdayContentPackage());
+    }
+
+    @After
+    public void deleteLogs() {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }

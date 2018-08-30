@@ -11,16 +11,24 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core;
 
+import com.adobe.qe.toughday.LogFileEraser;
 import com.adobe.qe.toughday.api.core.TestId;
+import com.adobe.qe.toughday.api.core.config.GlobalArgs;
 import com.adobe.qe.toughday.api.core.runnermocks.MockTest;
 import com.adobe.qe.toughday.internal.core.benckmark.AdHocTest;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
+import org.junit.*;
+import org.mockito.Mockito;
 
 public class AdHocTestTest {
 
     private MockTest test;
+
+    @BeforeClass
+    public static void beforeAll() {
+        System.setProperty("logFileName", ".");
+    }
 
     @Before
     public void before() {
@@ -31,6 +39,7 @@ public class AdHocTestTest {
     public void testEquality() {
         AdHocTest adHocTest1 = new AdHocTest(test, "Test");
         Assert.assertTrue(adHocTest1.equals(adHocTest1));
+        adHocTest1.setGlobalArgs(Mockito.mock(GlobalArgs.class));
 
         AdHocTest adHocTest2 = new AdHocTest(test, "Test");
         Assert.assertTrue(adHocTest1.equals(adHocTest2));
@@ -55,4 +64,9 @@ public class AdHocTestTest {
         Assert.assertEquals(adHocTest2.hashCode(), testId.hashCode());
     }
 
+    @After
+    public void deleteLogs() {
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
+    }
 }
