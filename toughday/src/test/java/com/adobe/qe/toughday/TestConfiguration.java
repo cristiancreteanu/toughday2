@@ -5,7 +5,6 @@ import com.adobe.qe.toughday.internal.core.config.Configuration;
 import org.junit.*;
 
 import java.io.File;
-import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,13 +27,13 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testSimple() throws Exception {
         new Configuration(cmdLineArgs.toArray(new String[0]));
 
     }
 
     @Test
-    public void testAdd() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testAdd() throws Exception {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
         Assert.assertTrue((new Configuration(cmdLineArgs.toArray(new String[0]))).getTestSuite().contains("MockTest"));
     }
@@ -62,7 +61,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testConfigAfterAddPass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testConfigAfterAddPass() throws Exception {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest", "count=5"));
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "timeout=6"));
         Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
@@ -139,7 +138,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testAddConfigExclude() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testAddConfigExclude() throws Exception {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest", "weight=5"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwin", "count=5"));
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTestTwin", "timeout=10"));
@@ -165,7 +164,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testConfigItem() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testConfigItem() throws Exception {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--config", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
@@ -191,7 +190,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testExcludeItem() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public void testExcludeItem() throws Exception {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
