@@ -110,8 +110,11 @@ public class ConstantLoad implements RunMode {
     @Override
     public void finishExecutionAndAwait() {
         scheduler.finishExecution();
-        for(AsyncTestWorker testWorker : testWorkers) {
-            testWorker.finishExecution();
+
+        synchronized (testWorkers) {
+            for(AsyncTestWorker testWorker : testWorkers) {
+                testWorker.finishExecution();
+            }
         }
 
         boolean allExited = false;
@@ -121,13 +124,16 @@ public class ConstantLoad implements RunMode {
             } catch (InterruptedException e) {
             }
             allExited = true;
-            for (AsyncTestWorker testWorker : testWorkers) {
-                if (!testWorker.hasExited()) {
-                    if(!testWorker.getMutex().tryLock())
-                        continue;
-                    allExited = false;
-                    testWorker.getWorkerThread().interrupt();
-                    testWorker.getMutex().unlock();
+
+            synchronized (testWorkers) {
+                for (AsyncTestWorker testWorker : testWorkers) {
+                    if (!testWorker.hasExited()) {
+                        if(!testWorker.getMutex().tryLock())
+                            continue;
+                        allExited = false;
+                        testWorker.getWorkerThread().interrupt();
+                        testWorker.getMutex().unlock();
+                    }
                 }
             }
         }
@@ -161,7 +167,6 @@ public class ConstantLoad implements RunMode {
             mutex.lock();
             currentTest = null;
             exited = true;
-            testWorkers.remove(this);
             testCache.add(test);
             Thread.interrupted();
             mutex.unlock();
