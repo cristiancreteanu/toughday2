@@ -6,6 +6,8 @@ import org.junit.*;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.internal.core.TestSuite;
 
+import java.util.ArrayList;
+
 public class TestSuiteTest {
     private TestSuite suite;
     private int totalWeight;
@@ -61,16 +63,18 @@ public class TestSuiteTest {
     public void testRemove() {
         AbstractTest abstractTest = suite.getTest("e");
         Assert.assertTrue(suite.contains(abstractTest.getName()));
-        suite.remove(abstractTest.getName());
+        Assert.assertEquals(suite.remove(abstractTest.getName()), 4);
+        update(abstractTest, '-');
 
-        totalCount -= abstractTest.getCount();
-        totalTimeout -= abstractTest.getTimeout();
-        totalWeight -= abstractTest.getWeight();
-        Assert.assertTrue(!suite.contains(abstractTest.getName()));
+        abstractTest = suite.getTest("a");
+        Assert.assertTrue(suite.contains(abstractTest.getName()));
+        Assert.assertEquals(suite.remove(abstractTest.getName()), 0);
+        update(abstractTest, '-');
 
-        testTotalWeight();
-        testTimeout();
-        testCount();
+        abstractTest = suite.getTest("c");
+        Assert.assertTrue(suite.contains(abstractTest.getName()));
+        Assert.assertEquals(suite.remove(abstractTest.getName()), 1);
+        update(abstractTest, '-');
     }
 
     @Test
@@ -79,15 +83,21 @@ public class TestSuiteTest {
         Assert.assertTrue(!suite.contains(abstractTest.getName()));
 
         suite.add(abstractTest);
+        update(abstractTest, '+');
 
-        totalCount += abstractTest.getCount();
-        totalTimeout += abstractTest.getTimeout();
-        totalWeight += abstractTest.getWeight();
-        Assert.assertTrue(suite.contains(abstractTest.getName()));
+        abstractTest = (new MockTest()).setWeight(Integer.toString(1)).setCount(Long.toString(10)).setTimeout(Long.toString(1)).setName("g");
+        suite.add(abstractTest);
+        update(abstractTest, '+');
 
-        testTotalWeight();
-        testTimeout();
-        testCount();
+        abstractTest = (new MockTest()).setWeight(Integer.toString(12)).setCount(Long.toString(101)).setTimeout(Long.toString(13)).setName("h");
+        suite.add(abstractTest, 3);
+        update(abstractTest, '+');
+        Assert.assertEquals(abstractTest, ((ArrayList)suite.getTests()).get(3));
+
+        abstractTest = (new MockTest()).setWeight(Integer.toString(2)).setCount(Long.toString(11)).setTimeout(Long.toString(3)).setName("i");
+        suite.add(abstractTest, 0);
+        update(abstractTest, '+');
+        Assert.assertEquals(abstractTest, ((ArrayList)suite.getTests()).get(0));
     }
 
     @Test
@@ -112,27 +122,23 @@ public class TestSuiteTest {
         testCount();
     }
 
+    private void update(AbstractTest test, char op) {
+        if (op == '-') {
+            totalCount -= test.getCount();
+            totalTimeout -= test.getTimeout();
+            totalWeight -= test.getWeight();
+            Assert.assertTrue(!suite.contains(test.getName()));
+        } else {
+            totalCount += test.getCount();
+            totalTimeout += test.getTimeout();
+            totalWeight += test.getWeight();
+            Assert.assertTrue(suite.contains(test.getName()));
 
-    @Test
-    public void testReplaceWeight() {
-        AbstractTest test = suite.getTest("a");
-
-        totalWeight -= test.getWeight();
-
-        suite.replaceWeight("a", 201);
-
-        totalWeight += 201;
+        }
 
         testTotalWeight();
-    }
-
-    @Test
-    public void testReplaceName() {
-        AbstractTest test = suite.getTest("d");
-
-        suite.replaceName(test, "h");
-
-        Assert.assertTrue(suite.contains(test.getName()));
+        testTimeout();
+        testCount();
     }
 
     @After

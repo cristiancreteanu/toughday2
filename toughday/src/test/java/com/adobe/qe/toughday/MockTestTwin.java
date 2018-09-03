@@ -2,18 +2,16 @@ package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.AbstractTestRunner;
-import java.util.ArrayList;
-import org.apache.logging.log4j.Logger;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MockTest extends AbstractTest {
+public class MockTestTwin extends AbstractTest {
     private List<AbstractTest> noChildren = new ArrayList<>();
 
     @Override
     public List<AbstractTest> getChildren() {
         return noChildren;
-
     }
 
     @Override
@@ -23,11 +21,6 @@ public class MockTest extends AbstractTest {
 
     @Override
     public AbstractTest newInstance() {
-        return null;
-    }
-
-    @Override
-    public Logger logger() {
         return null;
     }
 }

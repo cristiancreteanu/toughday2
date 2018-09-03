@@ -11,8 +11,6 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core.config;
 
-import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
-
 import java.util.Map;
 
 /**
@@ -73,7 +71,7 @@ public enum Actions implements ConfigAction {
                 throw new IllegalArgumentException("--exclude cannot have properties for identifier: " + identifier);
             }
 
-            configParams.exclude(identifier);
+            configParams.excludeItem(identifier);
         }
 
         @Override

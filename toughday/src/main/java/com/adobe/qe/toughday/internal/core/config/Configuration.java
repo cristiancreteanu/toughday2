@@ -62,20 +62,24 @@ public class Configuration {
     private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
+    private boolean defaultSuiteAddedFromConfigExclude = false;
+    private boolean anyMetricAdded = false;
+    private boolean anyPublisherAdded = false;
+    private boolean allTestsExcluded = false;
     private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
     private static String TIMESTAMP = Timestamp.START_TIME;
 
     private void handleExtensions(ConfigParams configParams) {
-
         List<String> extensionList = new ArrayList<>();
-        List<ConfigParams.ClassMetaObject> itemsToAddCopy = new ArrayList<>(configParams.getItemsToAdd());
-        //List<String> itemsToExcludeCopy = new ArrayList<>(configParams.getItemsToExclude());
 
         // look for extension jar files that should be loaded.
-        for (ConfigParams.ClassMetaObject itemToAdd : itemsToAddCopy) {
-            if (itemToAdd.getClassName().endsWith(".jar")) {
-                configParams.getItemsToAdd().remove(itemToAdd);
-                extensionList.add(itemToAdd.getClassName());
+        Iterator<Map.Entry<Actions, ConfigParams.MetaObject>> metaObjectIterator = configParams.getItems().iterator();
+        while (metaObjectIterator.hasNext()) {
+            Map.Entry<Actions, ConfigParams.MetaObject> entry = metaObjectIterator.next();
+
+            if (entry.getKey() == Actions.ADD && ((ConfigParams.ClassMetaObject)entry.getValue()).getClassName().endsWith(".jar")) {
+                extensionList.add(((ConfigParams.ClassMetaObject)entry.getValue()).getClassName());
+                metaObjectIterator.remove();
             }
         }
 
@@ -188,7 +192,6 @@ public class Configuration {
         ConfigParams configParams = collectConfigurations(cmdLineArgs);
         ConfigParams copyOfConfigParams = ConfigParams.deepClone(configParams);
         Map<String, Class> items = new HashMap<>();
-        boolean anyMetricAdded = false;
 
         // we should load extensions before any configuration object is created.
         handleExtensions(configParams);
@@ -214,51 +217,22 @@ public class Configuration {
             items.put(abstractTest.getName(), abstractTest.getClass());
         }
 
-        // add tests,publishers and metrics
-        for (ConfigParams.ClassMetaObject itemToAdd : configParams.getItemsToAdd()) {
-            if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
-                AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClass(itemToAdd.getClassName()), itemToAdd.getParameters());
-
-                suite.add(test);
-                items.put(test.getName(), test.getClass());
-                checkInvalidArgs(itemToAdd.getParameters());
-            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemToAdd.getClassName())) {
-                Publisher publisher = createObject(
-                        ReflectionsContainer.getInstance().getPublisherClass(itemToAdd.getClassName()),
-                        itemToAdd.getParameters());
-                items.put(publisher.getName(), publisher.getClass());
-
-                checkInvalidArgs(itemToAdd.getParameters());
-                this.globalArgs.addPublisher(publisher);
-            } else if (ReflectionsContainer.getInstance().isMetricClass(itemToAdd.getClassName())) {
-                Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClass(itemToAdd.getClassName()),
-                        itemToAdd.getParameters());
-                items.put(metric.getName(), metric.getClass());
-
-                checkInvalidArgs(itemToAdd.getParameters());
-                this.globalArgs.addMetric(metric);
-                anyMetricAdded = true;
-            } else if (itemToAdd.getClassName().equals("BASICMetrics")) {
-                Collection<Metric> basicMetrics = Metric.basicMetrics;
-                for (Metric metric : basicMetrics) {
-                    this.globalArgs.addMetric(metric);
-                    items.put(metric.getName(), metric.getClass());
-                }
-                anyMetricAdded = true;
-            } else if (itemToAdd.getClassName().equals("DEFAULTMetrics")) {
-                Collection<Metric> defaultMetrics = Metric.defaultMetrics;
-                for (Metric metric : defaultMetrics) {
-                    this.globalArgs.addMetric(metric);
-                    items.put(metric.getName(), metric.getClass());
-                }
-                anyMetricAdded = true;
-            } else {
-                throw new IllegalArgumentException("Unknown publisher, test or metric class: " + itemToAdd.getClassName());
+        for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
+            switch (item.getKey()) {
+                case ADD:
+                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items);
+                    break;
+                case CONFIG:
+                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items);
+                    break;
+                case EXCLUDE:
+                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName());
+                    break;
             }
         }
 
         // Add default publishers if none is specified
-        if (globalArgs.getPublishers().size() == 0) {
+        if (!anyPublisherAdded) {
             Publisher publisher = createObject(ConsolePublisher.class, new HashMap<String, Object>());
             items.put(publisher.getName(), publisher.getClass());
             this.globalArgs.addPublisher(publisher);
@@ -270,7 +244,7 @@ public class Configuration {
         }
 
         // Add a default suite of tests if no test is added or no predefined suite is choosen.
-        if (suite.getTests().size() == 0) {
+        if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
             // Replace the empty suite with the default predefined suite if no test has been configured,
             // either by selecting a suite or manually using --add
             this.suite = predefinedSuites.getDefaultSuite();
@@ -285,54 +259,6 @@ public class Configuration {
             }
         }
 
-        // Add and configure tests to the suite
-        for (ConfigParams.NamedMetaObject itemMeta : configParams.getItemsToConfig()) {
-            if (suite.contains(itemMeta.getName())) {
-                AbstractTest testObject = suite.getTest(itemMeta.getName());
-                if ( itemMeta.getParameters().containsKey("name")) {
-                    suite.replaceName(testObject, String.valueOf(itemMeta.getParameters().remove("name")));
-                }
-                if (itemMeta.getParameters().containsKey("weight")) {
-                    suite.replaceWeight(testObject.getName(), (Integer) (itemMeta.getParameters().remove("weight")));
-                }
-
-                setObjectProperties(testObject, itemMeta.getParameters(), false);
-                items.put(testObject.getName(), testObject.getClass());
-
-            } else if (globalArgs.containsPublisher(itemMeta.getName())) {
-                Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
-                String name = publisherObject.getName();
-                setObjectProperties(publisherObject, itemMeta.getParameters(), false);
-                if (!name.equals(publisherObject.getName())) {
-                    this.getGlobalArgs().updatePublisherName(name, publisherObject.getName());
-                }
-            } else if (globalArgs.containsMetric(itemMeta.getName())) {
-                Metric metricObject = globalArgs.getMetric(itemMeta.getName());
-                String name = metricObject.getName();
-                setObjectProperties(metricObject, itemMeta.getParameters(), false);
-                if (!name.equals(metricObject.getName())) {
-                    this.getGlobalArgs().updateMetricName(name, metricObject.getName());
-                }
-            } else {
-                throw new IllegalStateException("No test/publisher/metric found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
-            }
-
-            checkInvalidArgs(itemMeta.getParameters());
-        }
-
-        // Exclude tests/publishers/metrics
-        for (String itemName : configParams.getItemsToExclude()) {
-            if (suite.contains(itemName)) {
-                suite.remove(itemName);
-            } else if (globalArgs.containsPublisher(itemName)) {
-                globalArgs.removePublisher(itemName);
-            } else if (getGlobalArgs().containsMetric(itemName)) {
-                globalArgs.removeMetric(itemName);
-            } else {
-                throw new IllegalStateException("No test/publisher/metric found with name \"" + itemName + "\", so we can't exclude it.");
-            }
-        }
-
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);
@@ -343,7 +269,128 @@ public class Configuration {
             GenerateYamlConfiguration generateYaml = new GenerateYamlConfiguration(copyOfConfigParams, items);
             generateYaml.createYamlConfigurationFile();
         }
+    }
 
+    private void addItem(ConfigParams.ClassMetaObject itemToAdd, Map<String, Class> items) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
+            if (defaultSuiteAddedFromConfigExclude) {
+                throw new IllegalStateException("Configuration/exclusion of test ahead of addition");
+            }
+            allTestsExcluded = false;
+
+            AbstractTest test = createObject(ReflectionsContainer.getInstance().getTestClass(itemToAdd.getClassName()), itemToAdd.getParameters());
+            suite.add(test);
+            items.put(test.getName(), test.getClass());
+            checkInvalidArgs(itemToAdd.getParameters());
+        } else if (ReflectionsContainer.getInstance().isPublisherClass(itemToAdd.getClassName())) {
+            Publisher publisher = createObject(
+                    ReflectionsContainer.getInstance().getPublisherClass(itemToAdd.getClassName()),
+                    itemToAdd.getParameters());
+            items.put(publisher.getName(), publisher.getClass());
+
+            checkInvalidArgs(itemToAdd.getParameters());
+            this.globalArgs.addPublisher(publisher);
+            anyPublisherAdded = true;
+        } else if (ReflectionsContainer.getInstance().isMetricClass(itemToAdd.getClassName())) {
+            Metric metric = createObject(ReflectionsContainer.getInstance().getMetricClass(itemToAdd.getClassName()),
+                    itemToAdd.getParameters());
+            items.put(metric.getName(), metric.getClass());
+
+            checkInvalidArgs(itemToAdd.getParameters());
+            this.globalArgs.addMetric(metric);
+            anyMetricAdded = true;
+        } else if (itemToAdd.getClassName().equals("BASICMetrics")) {
+            Collection<Metric> basicMetrics = Metric.basicMetrics;
+            for (Metric metric : basicMetrics) {
+                this.globalArgs.addMetric(metric);
+                items.put(metric.getName(), metric.getClass());
+            }
+            anyMetricAdded = true;
+        } else if (itemToAdd.getClassName().equals("DEFAULTMetrics")) {
+            Collection<Metric> defaultMetrics = Metric.defaultMetrics;
+
+            for (Metric metric : defaultMetrics) {
+                this.globalArgs.addMetric(metric);
+                items.put(metric.getName(), metric.getClass());
+            }
+            anyMetricAdded = true;
+        } else {
+            throw new IllegalArgumentException("Unknown publisher, test or metric class: " + itemToAdd.getClassName());
+        }
+    }
+
+    private void configItem(ConfigParams.NamedMetaObject itemMeta, Map<String, Class> items) throws InvocationTargetException, IllegalAccessException {
+        // if the suite does not contain the provided name, it might be
+        // a publisher/metric (class) name OR, in case no tests have been added,
+        // the name of a test from the default suite
+        // if the latter is the case, the default suite has to be added in the configuration
+        // defaultSuiteAddedFromConfigExclude will mark this occurrence and, if it is set to
+        // true, attempting to --add a test after this will cause an exception to be thrown
+        if (!suite.contains(itemMeta.getName())
+                && !ReflectionsContainer.getInstance().isMetricClass(itemMeta.getName())
+                && !ReflectionsContainer.getInstance().isPublisherClass(itemMeta.getName())
+                && !globalArgs.containsPublisher(itemMeta.getName())
+                && !globalArgs.containsMetric(itemMeta.getName())
+                && !allTestsExcluded
+                && suite.getTests().isEmpty()) {
+            this.suite = predefinedSuites.getDefaultSuite();
+            defaultSuiteAddedFromConfigExclude = true;
+        }
+
+        if (suite.contains(itemMeta.getName())) {
+
+            //check if all were excluded
+            AbstractTest testObject = suite.getTest(itemMeta.getName());
+            int index = suite.remove(testObject);
+            setObjectProperties(testObject, itemMeta.getParameters(), false);
+            suite.add(testObject, index);
+            items.put(testObject.getName(), testObject.getClass());
+
+        } else if (globalArgs.containsPublisher(itemMeta.getName())) {
+            Publisher publisherObject = globalArgs.getPublisher(itemMeta.getName());
+            String name = publisherObject.getName();
+            setObjectProperties(publisherObject, itemMeta.getParameters(), false);
+            if (!name.equals(publisherObject.getName())) {
+                this.getGlobalArgs().updatePublisherName(name, publisherObject.getName());
+            }
+
+            items.put(name, publisherObject.getClass());
+        } else if (globalArgs.containsMetric(itemMeta.getName())) {
+            Metric metricObject = globalArgs.getMetric(itemMeta.getName());
+            String name = metricObject.getName();
+            setObjectProperties(metricObject, itemMeta.getParameters(), false);
+            if (!name.equals(metricObject.getName())) {
+                this.getGlobalArgs().updateMetricName(name, metricObject.getName());
+            }
+
+            items.put(name, metricObject.getClass());
+        } else {
+            throw new IllegalStateException("No test/publisher/metric found with name \"" + itemMeta.getName() + "\", so we can't configure it.");
+        }
+    }
+
+    private void excludeItem(String itemName) {
+        if (!suite.contains(itemName) && !allTestsExcluded && suite.getTests().isEmpty()
+                && !ReflectionsContainer.getInstance().isPublisherClass(itemName)
+                && !ReflectionsContainer.getInstance().isMetricClass(itemName)
+                && !globalArgs.containsMetric(itemName)
+                && !globalArgs.containsPublisher(itemName)) {
+            this.suite = predefinedSuites.getDefaultSuite();
+            defaultSuiteAddedFromConfigExclude = true;
+        }
+
+        if (suite.contains(itemName)) {
+            suite.remove(itemName);
+            if (suite.getTests().isEmpty()) {
+                allTestsExcluded = true;
+            }
+        } else if (globalArgs.containsPublisher(itemName)) {
+            globalArgs.removePublisher(itemName);
+        } else if (getGlobalArgs().containsMetric(itemName)) {
+            globalArgs.removeMetric(itemName);
+        } else {
+            throw new IllegalStateException("No test/publisher/metric found with name \"" + itemName + "\", so we can't exclude it.");
+        }
     }
 
     private void configureLogPath(String logPath) throws IOException {

@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.config.Actions;
 import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
@@ -83,43 +84,54 @@ public class GenerateYamlConfiguration {
 
     // creates a list of actions for each item(tests, publishers, metrics, extensions)
     private void createActionsForItems() {
-        // create add actions
-        for (ConfigParams.ClassMetaObject item : configParams.getItemsToAdd()) {
-            YamlDumpAddAction addAction = new YamlDumpAddAction(item.getClassName(), item.getParameters());
-            if (ReflectionsContainer.getInstance().isTestClass(item.getClassName())) {
-                yamlTestActions.add(addAction);
-            } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
-                yamlPublisherActions.add(addAction);
-            } else if (ReflectionsContainer.getInstance().isMetricClass(item.getClassName())
-                    || item.getClassName().equals("BASICMetrics") || item.getClassName().equals("DEFAULTMetrics")){
-                yamlMetricActions.add(addAction);
-            } else if (item.getClassName().endsWith(".jar")) {
-                yamlExtensionActions.add(addAction);
+        for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
+            switch (item.getKey()) {
+                case ADD:
+                    addAction((ConfigParams.ClassMetaObject)item.getValue());
+                    break;
+                case CONFIG:
+                    configAction((ConfigParams.NamedMetaObject)item.getValue());
+                    break;
+                case EXCLUDE:
+                    excludeAction(((ConfigParams.NamedMetaObject)item.getValue()).getName());
+                    break;
             }
         }
+    }
 
-        // create config actions
-        for (ConfigParams.NamedMetaObject item : configParams.getItemsToConfig()) {
-            YamlDumpConfigAction configAction = new YamlDumpConfigAction(item.getName(), item.getParameters());
-            if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
-                yamlTestActions.add(configAction);
-            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
-                yamlPublisherActions.add(configAction);
-            } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
-                yamlMetricActions.add(configAction);
-            }
+    private void addAction(ConfigParams.ClassMetaObject item) {
+        YamlDumpAddAction addAction = new YamlDumpAddAction(item.getClassName(), item.getParameters());
+        if (ReflectionsContainer.getInstance().isTestClass(item.getClassName())) {
+            yamlTestActions.add(addAction);
+        } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
+            yamlPublisherActions.add(addAction);
+        } else if (ReflectionsContainer.getInstance().isMetricClass(item.getClassName())
+                || item.getClassName().equals("BASICMetrics") || item.getClassName().equals("DEFAULTMetrics")){
+            yamlMetricActions.add(addAction);
+        } else if (item.getClassName().endsWith(".jar")) {
+            yamlExtensionActions.add(addAction);
         }
+    }
 
-        // create exclude actions
-        for (String item : configParams.getItemsToExclude()) {
-            YamlDumpExcludeAction excludeAction = new YamlDumpExcludeAction(item);
-            if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item).getSimpleName())) {
-                yamlTestActions.add(excludeAction);
-            } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
-                yamlPublisherActions.add(excludeAction);
-            } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item).getSimpleName())) {
-                yamlMetricActions.add(excludeAction);
-            }
+    private void configAction(ConfigParams.NamedMetaObject item) {
+        YamlDumpConfigAction configAction = new YamlDumpConfigAction(item.getName(), item.getParameters());
+        if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            yamlTestActions.add(configAction);
+        } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            yamlPublisherActions.add(configAction);
+        } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            yamlMetricActions.add(configAction);
+        }
+    }
+
+    private void excludeAction(String item) {
+        YamlDumpExcludeAction excludeAction = new YamlDumpExcludeAction(item);
+        if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item).getSimpleName())) {
+            yamlTestActions.add(excludeAction);
+        } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
+            yamlPublisherActions.add(excludeAction);
+        } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item).getSimpleName())) {
+            yamlMetricActions.add(excludeAction);
         }
     }
 

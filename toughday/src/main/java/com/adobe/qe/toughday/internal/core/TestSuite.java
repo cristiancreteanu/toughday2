@@ -25,7 +25,7 @@ public class TestSuite {
     private List<SuiteSetup> setupStep;
     private String description = "";
     private List<String> tags = new ArrayList<>();
-    private List<AbstractTest> orderedTests;
+    private ArrayList<AbstractTest> orderedTests;
     private HashMap<String, AbstractTest> nameMap = new HashMap<>();
     private int totalWeight;
 
@@ -44,38 +44,19 @@ public class TestSuite {
      * @return this object. (builder pattern)
      */
     public TestSuite add(AbstractTest test) {
+        return add(test, orderedTests.size());
+    }
+
+    public TestSuite add(AbstractTest test, int index) {
+        if (nameMap.containsKey(test.getName())) {
+            throw new IllegalArgumentException("Suite already contains a test named: \"" + test.getName() + "\". " +
+                    "Please provide a different name using the \"name\" property.");
+        }
+
         nameMap.put(test.getName(), test);
-        orderedTests.add(test);
+        orderedTests.add(index, test);
         totalWeight += test.getWeight();
-        return this;
-    }
 
-    /**
-     * Method for replacing the weight for a test
-     * @param testName
-     * @param weight
-     * @return
-     */
-    public TestSuite replaceWeight(String testName, int weight) {
-//        if (contains(testName)) {
-            AbstractTest test = nameMap.get(testName);
-            totalWeight -= test.getWeight();
-            test.setWeight(Integer.toString(weight));
-            totalWeight += weight;
-//            }
-        return this;
-    }
-
-    /**
-     * Method for replacing the name of a test inside the suite.
-     * @param abstractTest
-     * @param newTestName
-     * @return
-     */
-    public TestSuite replaceName(AbstractTest abstractTest, String newTestName) {
-        nameMap.remove(abstractTest.getName());
-        abstractTest.setName(newTestName);
-        nameMap.put(newTestName, abstractTest);
         return this;
     }
 
@@ -239,19 +220,27 @@ public class TestSuite {
      * Method for removing a test given it's name
      * @param testName
      */
-    public void remove(String testName) {
+    public int remove(String testName) {
         AbstractTest test = nameMap.get(testName);
-        remove(test);
+        return remove(test);
     }
 
     /**
      * Method for removing a test
      * @param test
      */
-    public void remove(AbstractTest test) {
+    public int remove(AbstractTest test) {
         AbstractTest previous = nameMap.remove(test.getName());
-        orderedTests.remove(test);
         totalWeight -= (previous == null? 0 : previous.getWeight());
+
+        for (int i = 0; i < orderedTests.size(); ++i) {
+            if (orderedTests.get(i).equals(test)) {
+                orderedTests.remove(test);
+                return i;
+            }
+        }
+
+        throw new IllegalStateException("Test not found in the suite.");
     }
 
     /**

@@ -15,10 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.io.*;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * An object that has the configuration params parsed, but still in String form.
@@ -26,6 +23,11 @@ import java.util.Map;
  */
 public class ConfigParams implements Serializable {
     private static final Logger LOGGER = LogManager.getLogger(ConfigParams.class);
+    
+    private Map<String, Object> globalParams = new HashMap<>();
+    private Map<String, Object> publishModeParams = new HashMap<>();
+    private Map<String, Object> runModeParams = new HashMap<>();
+    private List<Map.Entry<Actions, MetaObject>> items = new ArrayList<>();
 
     public static class MetaObject  implements Serializable {
         private Map<String, Object> parameters;
@@ -84,12 +86,6 @@ public class ConfigParams implements Serializable {
         }
     }
 
-    private Map<String, Object> globalParams = new HashMap<>();
-    private Map<String, Object> publishModeParams = new HashMap<>();
-    private Map<String, Object> runModeParams = new HashMap<>();
-    private List<ClassMetaObject> itemsToAdd = new ArrayList<>();
-    private List<NamedMetaObject> itemsToConfig = new ArrayList<>();
-    private List<String> itemsToExclude = new ArrayList<>();
 
     public void setGlobalParams(Map<String, Object> globalParams) {
         this.globalParams = globalParams;
@@ -104,15 +100,15 @@ public class ConfigParams implements Serializable {
     }
 
     public void configItem(String testName, Map<String, Object> params) {
-        itemsToConfig.add(new NamedMetaObject(testName, params));
+        items.add(new AbstractMap.SimpleEntry<>(Actions.CONFIG, new NamedMetaObject(testName, params)));
     }
 
     public void addItem(String itemName, Map<String, Object> params) {
-        itemsToAdd.add(new ClassMetaObject(itemName, params));
+        items.add(new AbstractMap.SimpleEntry<>(Actions.ADD, new ClassMetaObject(itemName, params)));
     }
 
-    public void exclude(String testName) {
-        itemsToExclude.add(testName);
+    public void excludeItem(String itemName) {
+        items.add(new AbstractMap.SimpleEntry<>(Actions.EXCLUDE, new NamedMetaObject(itemName, null)));
     }
 
 
@@ -124,19 +120,9 @@ public class ConfigParams implements Serializable {
 
     public Map<String, Object> getRunModeParams() { return runModeParams; }
 
-    public List<String> getItemsToExclude() { return itemsToExclude; }
-
-    public List<NamedMetaObject> getItemsToConfig() {
-        return itemsToConfig;
-    }
-
-    public List<ClassMetaObject> getItemsToAdd() { return itemsToAdd;};
-
     public void merge(ConfigParams other) {
         globalParams.putAll(other.getGlobalParams());
-        itemsToAdd.addAll(other.getItemsToAdd());
-        itemsToExclude.addAll(other.getItemsToExclude());
-        itemsToConfig.addAll(other.getItemsToConfig());
+        items.addAll(other.items);
 
         if(other.runModeParams.containsKey("type"))
             this.runModeParams.clear();
@@ -145,5 +131,9 @@ public class ConfigParams implements Serializable {
         if(other.publishModeParams.containsKey("type"))
             this.publishModeParams.clear();
         this.publishModeParams.putAll(other.publishModeParams);
+    }
+
+    public List<Map.Entry<Actions, MetaObject>> getItems() {
+        return items;
     }
 }
