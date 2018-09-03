@@ -1,15 +1,18 @@
 package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.*;
 
 import java.io.File;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 
 public class TestConfiguration {
     private ArrayList<String> cmdLineArgs;
@@ -19,6 +22,8 @@ public class TestConfiguration {
     public static void onlyOnce() {
         reflections.getTestClasses().put("MockTest", MockTest.class);
         reflections.getTestClasses().put("MockTestTwin", MockTestTwin.class);
+
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
     }
 
     @Before
@@ -27,13 +32,13 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testSimple() throws Exception {
+    public void testSimple() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         new Configuration(cmdLineArgs.toArray(new String[0]));
 
     }
 
     @Test
-    public void testAdd() throws Exception {
+    public void testAdd() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
         Assert.assertTrue((new Configuration(cmdLineArgs.toArray(new String[0]))).getTestSuite().contains("MockTest"));
     }
@@ -61,7 +66,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testConfigAfterAddPass() throws Exception {
+    public void testConfigAfterAddPass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest", "count=5"));
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "timeout=6"));
         Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
@@ -138,7 +143,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testAddConfigExclude() throws Exception {
+    public void testAddConfigExclude() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest", "weight=5"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwin", "count=5"));
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTestTwin", "timeout=10"));
@@ -164,7 +169,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testConfigItem() throws Exception {
+    public void testConfigItem() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--config", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
@@ -190,7 +195,7 @@ public class TestConfiguration {
     }
 
     @Test
-    public void testExcludeItem() throws Exception {
+    public void testExcludeItem() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
@@ -217,6 +222,8 @@ public class TestConfiguration {
 
     @AfterClass
     public static void afterAll() {
-        new File("toughday_" + new SimpleDateFormat("yyyy-MM-dd'T'HH-mm").format(new Date()) + ".yaml").delete();
+        new File("toughday_" + Timestamp.START_TIME + ".yaml").delete();
+        ((LoggerContext) LogManager.getContext(false)).reconfigure();
+        LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }
 }
