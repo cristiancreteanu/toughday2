@@ -19,6 +19,7 @@ import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.engine.AsyncEngineWorker;
 import com.adobe.qe.toughday.internal.core.engine.AsyncTestWorker;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
@@ -39,6 +40,9 @@ public class ConstantLoad implements RunMode {
 
     private static final String DEFAULT_LOAD_STRING = "50";
     private static final int DEFAULT_LOAD = Integer.parseInt(DEFAULT_LOAD_STRING);
+    private static final String DEFAULT_INTERVAL_STRING = "1s";
+    private static final long DEFAULT_INTERVAL = 1000;
+
     private AtomicBoolean loggedWarning = new AtomicBoolean(false);
 
     private ExecutorService executorService = Executors.newCachedThreadPool();
@@ -46,6 +50,11 @@ public class ConstantLoad implements RunMode {
     private AsyncTestWorkerScheduler scheduler;
     private final List<RunMap> runMaps = new ArrayList<>();
     private int load = DEFAULT_LOAD;
+    private int start = DEFAULT_LOAD;
+    private int end = DEFAULT_LOAD;
+    private long interval = DEFAULT_INTERVAL;
+    private int rate;
+
     private TestCache testCache;
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
@@ -53,6 +62,47 @@ public class ConstantLoad implements RunMode {
 
     @ConfigArgGet
     public int getLoad() { return this.load; }
+
+    @ConfigArgGet
+    public int getStart() {
+        return start;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
+            defaultValue = DEFAULT_LOAD_STRING)
+    public void setStart(String start) {
+        this.start = Integer.valueOf(start);
+    }
+
+    @ConfigArgGet
+    public int getRate() {
+        return rate;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of users added per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
+    public void setRate(String rate) {
+        this.rate = Integer.valueOf(rate);
+    }
+
+    @ConfigArgGet
+    public long getInterval() {
+        return interval;
+    }
+
+    @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
+    public void setTimeUnit(String interval) {
+        this.interval = GlobalArgs.parseDurationToSeconds(interval);
+    }
+
+    @ConfigArgGet
+    public int getEnd() {
+        return end;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = DEFAULT_LOAD_STRING)
+    public void setEnd(String end) {
+        this.end = Integer.valueOf(end);
+    }
 
     private static class TestCache {
         public Map<TestId, Queue<AbstractTest>> cache = new HashMap<>();
@@ -209,7 +259,6 @@ public class ConstantLoad implements RunMode {
 
                         nextRound.add(localNextTest);
                     }
-
 
                     for (int i = 0; i < load && !isFinished(); i++) {
                         AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
