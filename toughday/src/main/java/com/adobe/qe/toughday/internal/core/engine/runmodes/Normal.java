@@ -41,7 +41,7 @@ public class Normal implements RunMode {
 
     private ExecutorService testsExecutorService;
 
-    private final List<AsyncTestWorker> testWorkers = new ArrayList<>();
+    private final List<AsyncTestWorker> testWorkers = Collections.synchronizedList(new LinkedList<>());
     private final List<AsyncTestWorker> testWorkersToRemove = Collections.synchronizedList(new ArrayList<>());
     private final List<RunMap> runMaps = new ArrayList<>();
 
@@ -51,19 +51,17 @@ public class Normal implements RunMode {
     private int rate;
     private long waitTime = DEFAULT_WAIT_TIME;
     private long interval = DEFAULT_INTERVAL;
-    private int createdThreads = 0;
+    private int activeThreads = 0;
 
     @ConfigArgGet
     public int getConcurrency() {
         return concurrency;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
+    @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use",
+            defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
     public void setConcurrency(String concurrencyString) {
-        // tre sa ma asigur daca asta e ok cu order
         this.concurrency = Integer.parseInt(concurrencyString);
-        this.start = Integer.parseInt(concurrencyString);
-        this.end = Integer.parseInt(concurrencyString);
     }
 
     @ConfigArgGet
@@ -83,7 +81,7 @@ public class Normal implements RunMode {
     }
 
     @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
-            defaultValue = DEFAULT_CONCURRENCY_STRING)
+            defaultValue = "-1")
     public void setStart(String start) {
         this.start = Integer.valueOf(start);
     }
@@ -113,7 +111,7 @@ public class Normal implements RunMode {
         return end;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = DEFAULT_CONCURRENCY_STRING)
+    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = "-1")
     public void setEnd(String end) {
         this.end = Integer.valueOf(end);
     }
@@ -124,95 +122,113 @@ public class Normal implements RunMode {
         TestSuite testSuite = configuration.getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
         testsExecutorService = Executors.newFixedThreadPool(concurrency);
-        ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
-
-        rampUp(engine, testSuite, globalArgs, addWorkerScheduler);
-        rampDown();
-    }
-
-    private void rampUp(Engine engine, TestSuite testSuite, GlobalArgs globalArgs,
-                        ScheduledExecutorService addWorkerScheduler) {
-        // Create the test worker threads
-        // if start was provided, then it will create 'start' workers to begin with
-        // otherwise, start == concurrency, so it will create 'concurrency' workers
-        for (int i = 0; i < start; i++) {
-            addWorkerToThreadPool(testsExecutorService, engine, testSuite);
-        }
 
         // if no rate was provided, we'll create/remove one user at fixed rate,
         // namely every 'interval' milliseconds
-        if (rate == -1) {
-            interval = (long) Math.floor(1.0 * globalArgs.getDuration()
-                    / (concurrency == start? concurrency : concurrency - start));  // to replace with phase duration
-            rate = 1;
+        if (start != -1 && end != -1) {
+            if (rate == -1) {
+                interval = (long)Math.floor(1000.0 * globalArgs.getDuration()
+                        / (start < end? end - start : start - end));  // to replace with phase duration
+                rate = 1;
+            }
+            concurrency = start;
         }
 
+        // Create the test worker threads
+        // if start was provided, then it will create 'start' workers to begin with
+        // otherwise, start == concurrency, so it will create 'concurrency' workers
+        for (int i = 0; i < concurrency; i++) {
+            addWorkerToThreadPool(testsExecutorService, engine, testSuite);
+        }
+
+        rampUp(engine, testSuite);
+        rampDown();
+    }
+
+    private void rampUp(Engine engine, TestSuite testSuite) {
         // every 'interval' milliseconds, we'll create 'rate' workers
-        addWorkerScheduler.scheduleAtFixedRate(() -> {
-            if (createdThreads >= concurrency) {
-                addWorkerScheduler.shutdown();
-            }
-
-            for (int i = 0; i < rate; ++i) {
-                addWorkerToThreadPool(testsExecutorService, engine, testSuite);
-            }
-
-        }, interval, interval, TimeUnit.MILLISECONDS);
+        if (start < end) {
+            ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
+            addWorkerScheduler.scheduleAtFixedRate(() -> {
+                for (int i = 0; i < rate; ++i) {
+                    if (activeThreads >= end) {
+                        addWorkerScheduler.shutdownNow();
+                    } else {
+                        addWorkerToThreadPool(testsExecutorService, engine, testSuite);
+                    }
+                }
+            }, 0, interval, TimeUnit.MILLISECONDS);
+        }
     }
 
     private void rampDown() throws InterruptedException {
         // if the 'end' was specified by the user
-        if (end < concurrency) {  //////////////////trebuie sa fac end si start sa fie egale cu concurrency cand nu sunt specificate
+        if (end < start) {  //////////////////trebuie sa fac end si start sa fie egale cu concurrency cand nu sunt specificate
+//            Thread.sleep(1000);
+            ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
+            long s = System.currentTimeMillis();
             ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
-            int threadsToStop, toRemove;
 
-            threadsToStop = (concurrency - testWorkersToRemove.size() < end ? concurrency - end : testWorkersToRemove.size());
-            toRemove = rate;
-
-            ListIterator<AsyncTestWorker> testWorkerIterator = testWorkersToRemove.listIterator(testWorkersToRemove.size());
-            while (testWorkerIterator.hasPrevious() && threadsToStop > 0) {
-                AsyncTestWorker testWorker = testWorkerIterator.previous();
-
-                testWorker.getWorkerThread().interrupt();
-                testWorkerIterator.remove();
-                --threadsToStop;
-                --toRemove;
-
-                if (toRemove == 0) {
-                    Thread.sleep(interval);
-                    toRemove = rate;
-                }
-            }
-
-            executor.setCorePoolSize(executor.getCorePoolSize() - threadsToStop);
-            executor.setMaximumPoolSize(executor.getCorePoolSize());
+//            threadsToStop = (start - testWorkersToRemove.size() < end ? start - end : testWorkersToRemove.size());
+//            toRemove = rate;
+//
+//            ListIterator<AsyncTestWorker> testWorkerIterator = testWorkersToRemove.listIterator(testWorkersToRemove.size());
+//            while (testWorkerIterator.hasPrevious() && threadsToStop > 0) {
+//                AsyncTestWorker testWorker = testWorkerIterator.previous();
+//
+//                testWorker.getWorkerThread().interrupt();
+//                testWorkerIterator.remove();
+//                --threadsToStop;
+//                --toRemove;
+//                --activeThreads;
+//
+//                System.out.println(activeThreads);
+//
+//                if (toRemove == 0) {
+//                    Thread.sleep(interval);
+//                    toRemove = rate;
+//                }
+//            }
+//
+//            executor.setCorePoolSize(executor.getCorePoolSize() - threadsToStop);
+//            executor.setMaximumPoolSize(executor.getCorePoolSize());
 
             // if all the idle threads were interrupted, but there are still active threads
             // that need to be interrupted
-            if (executor.getCorePoolSize() != end) {
-                testWorkerIterator = testWorkers.listIterator(testWorkers.size());
-                toRemove = rate;
-                while (testWorkerIterator.hasPrevious()) {
-                    AsyncTestWorker testWorker = testWorkerIterator.previous();
+//            if (executor.getCorePoolSize() != end) {
+            removeWorkerScheduler.scheduleAtFixedRate(() -> {
+                Iterator<AsyncTestWorker> testWorkerIterator = testWorkers.iterator();
+                int toRemove = rate;
 
-                    if (testWorker.isFinished()) {
+                while (testWorkerIterator.hasNext()) {
+                    if (activeThreads <= end) {
+                        removeWorkerScheduler.shutdownNow();
+                    } else {
+                        AsyncTestWorker testWorker = testWorkerIterator.next();
+
+                        // hmmmmm.. i wonder
+                        if (testWorker.isFinished()) {
+                            continue;
+                        }
+
+                        testWorker.getWorkerThread().interrupt();
                         testWorkerIterator.remove();
-                        continue;
-                    }
+                        --toRemove;
+                        --activeThreads;
 
-                    testWorker.getWorkerThread().interrupt();
-                    testWorkerIterator.remove();
-                    --toRemove;
+                        System.out.println(activeThreads);
 
-                    if (toRemove == 0) {
-                        Thread.sleep(interval);
-                        toRemove = rate;
-                        executor.setCorePoolSize(executor.getCorePoolSize() - rate);
-                        executor.setMaximumPoolSize(executor.getCorePoolSize());
+                        if (toRemove == 0) {
+                            executor.setCorePoolSize(executor.getCorePoolSize() - rate);
+                            executor.setMaximumPoolSize(executor.getCorePoolSize());
+                            break;
+                        }
                     }
                 }
-            }
+            }, 0, interval, TimeUnit.MILLISECONDS);
+//            }
 
+            System.out.println(System.currentTimeMillis() - s);
         }
     }
 
@@ -221,12 +237,12 @@ public class Normal implements RunMode {
         try {
             testsExecutorService.execute(testWorker);
         } catch (OutOfMemoryError e) {
-            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(createdThreads) + ".");
+            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
             return false;
         }
         synchronized (testWorkers) {
             testWorkers.add(testWorker);
-            createdThreads++;
+            activeThreads++;
         }
         synchronized (runMaps) {
             runMaps.add(testWorker.getLocalRunMap());
@@ -260,8 +276,11 @@ public class Normal implements RunMode {
 
     @Override
     public void finishExecutionAndAwait() {
-        for (AsyncTestWorker testWorker : testWorkers) {
-            testWorker.finishExecution();
+        long start = System.currentTimeMillis();
+        synchronized (testWorkers) {
+            for (AsyncTestWorker testWorker : testWorkers) {
+                testWorker.finishExecution();
+            }
         }
 
         boolean allExited = false;
@@ -271,17 +290,22 @@ public class Normal implements RunMode {
             } catch (InterruptedException e) {
             }
             allExited = true;
-            for (AsyncTestWorker testWorker : testWorkers) {
-                if (!testWorker.hasExited()) {
-                    if(!testWorker.getMutex().tryLock()) {
-                        continue;
+            synchronized (testWorkers) {
+                for (AsyncTestWorker testWorker : testWorkers) {
+                    if (!testWorker.hasExited()) {
+                        if(!testWorker.getMutex().tryLock()) {
+                            continue;
+                        }
+                        allExited = false;
+
+                        testWorker.getWorkerThread().interrupt();
+                        testWorker.getMutex().unlock();
                     }
-                    allExited = false;
-                    testWorker.getWorkerThread().interrupt();
-                    testWorker.getMutex().unlock();
                 }
             }
         }
+
+//        System.out.println((System.currentTimeMillis() - start));
 
     }
 

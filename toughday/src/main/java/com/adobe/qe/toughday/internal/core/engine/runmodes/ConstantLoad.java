@@ -24,6 +24,7 @@ import com.adobe.qe.toughday.internal.core.engine.AsyncEngineWorker;
 import com.adobe.qe.toughday.internal.core.engine.AsyncTestWorker;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
+import org.apache.commons.lang3.mutable.MutableLong;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,6 +55,7 @@ public class ConstantLoad implements RunMode {
     private int end = DEFAULT_LOAD;
     private long interval = DEFAULT_INTERVAL;
     private int rate;
+    private int currentLoad;
 
     private TestCache testCache;
 
@@ -69,7 +71,7 @@ public class ConstantLoad implements RunMode {
     }
 
     @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
-            defaultValue = DEFAULT_LOAD_STRING)
+            defaultValue = "-1")
     public void setStart(String start) {
         this.start = Integer.valueOf(start);
     }
@@ -99,7 +101,7 @@ public class ConstantLoad implements RunMode {
         return end;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = DEFAULT_LOAD_STRING)
+    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = "-1")
     public void setEnd(String end) {
         this.end = Integer.valueOf(end);
     }
@@ -127,6 +129,10 @@ public class ConstantLoad implements RunMode {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         this.testCache = new TestCache(testSuite);
+
+        if (start != -1 && end != -1) {
+            load = start > end? start : end;
+        }
 
         for(int i = 0; i < load; i++) {
             synchronized (runMaps) {
@@ -238,51 +244,107 @@ public class ConstantLoad implements RunMode {
         @Override
         public void run() {
             try {
+                currentLoad = start;
+                MutableLong secondsUntilLoadIncreaseOrDecrease = new MutableLong(interval);
+
+                //the difference from the beginning load to the end one
+                int loadDifference = start > end? start - end : end - start;
+
+                // if the rate was not specified and either start or end were
+                if (rate == -1 && start != -1 && end != -1) {
+                    // suppose load will increase by second
+                    secondsUntilLoadIncreaseOrDecrease.setValue(1);
+                    rate = (int)Math.floor(1.0 * secondsUntilLoadIncreaseOrDecrease.getValue() * loadDifference
+                            / engine.getGlobalArgs().getDuration());
+
+                    // if the rate becomes too small, increase the interval at which the load is increased
+                    while (rate < 1) {
+                        secondsUntilLoadIncreaseOrDecrease.increment();
+                        rate = (int)Math.floor(1.0 * secondsUntilLoadIncreaseOrDecrease.getValue() * loadDifference
+                                / engine.getGlobalArgs().getDuration());
+                    }
+
+                    interval = secondsUntilLoadIncreaseOrDecrease.getValue();
+                }
+
                 while (!isFinished()) {
-                    ArrayList<AbstractTest> nextRound = new ArrayList<>();
-                    long start = System.nanoTime();
-                    for (int i = 0; i < load; i++) {
-                        AbstractTest nextTest = Engine.getNextTest(engine.getConfiguration().getTestSuite(),
-                                engine.getCounts(),
-                                engine.getEngineSync());
-                        if (null == nextTest) {
-                            LOG.info("Constant load scheduler thread finished, because there were no more tests to execute.");
-                            this.finishExecution();
-                            return;
-                        }
+                    // run the current run with the current load
+                    runRound();
 
-                        //Use a cache test if available
-                        AbstractTest localNextTest = testCache.getCachedValue(nextTest.getId());
-                        if(localNextTest == null) {
-                            localNextTest = nextTest.clone();
-                        }
+                    secondsUntilLoadIncreaseOrDecrease.decrement();
 
-                        nextRound.add(localNextTest);
-                    }
+                    // ramp up the load if 'start' was specified
+                    rampUp(secondsUntilLoadIncreaseOrDecrease);
 
-                    for (int i = 0; i < load && !isFinished(); i++) {
-                        AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
-                        try {
-                            executorService.execute(worker);
-                        } catch (OutOfMemoryError e) {
-                            if (!loggedWarning.getAndSet(true)) {
-                                LOG.warn("The desired load could not be achieved. We are creating as many threads as possible.");
-                            }
-                            break;
-                        }
-                        synchronized (testWorkers) {
-                            testWorkers.add(worker);
-                        }
-                    }
-
-                    //TODO use this
-                    long elapsed = System.nanoTime() - start;
-                    Thread.sleep(1000);
+                    // ramp down the load if 'end' was specified
+                    rampDown(secondsUntilLoadIncreaseOrDecrease);
                 }
             } catch (InterruptedException e) {
                 finishExecution();
                 LOG.warn("Constant load scheduler thread was interrupted.");
             }
+        }
+
+        private void rampUp(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+            if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad < end) {
+                secondsUntilLoadIncreaseOrDecrease.setValue(interval);
+                currentLoad += rate;
+
+                if (currentLoad > end) {
+                    currentLoad = end;
+                }
+            }
+        }
+
+        private void rampDown(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+            if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad > end) {
+                secondsUntilLoadIncreaseOrDecrease.setValue(interval);
+                currentLoad -= rate;
+
+                if (currentLoad < end) {
+                    currentLoad = end;
+                }
+            }
+        }
+
+        private void runRound() throws InterruptedException {
+            ArrayList<AbstractTest> nextRound = new ArrayList<>();
+            for (int i = 0; i < currentLoad; i++) {
+                AbstractTest nextTest = Engine.getNextTest(engine.getConfiguration().getTestSuite(),
+                        engine.getCounts(),
+                        engine.getEngineSync());
+                if (null == nextTest) {
+                    LOG.info("Constant load scheduler thread finished, because there were no more tests to execute.");
+                    this.finishExecution();
+                    return;
+                }
+
+                //Use a cache test if available
+                AbstractTest localNextTest = testCache.getCachedValue(nextTest.getId());
+                if(localNextTest == null) {
+                    localNextTest = nextTest.clone();
+                }
+
+                nextRound.add(localNextTest);
+            }
+
+            for (int i = 0; i < currentLoad && !isFinished(); i++) {
+                AsyncTestWorkerImpl worker = new AsyncTestWorkerImpl(nextRound.get(i), runMaps.get(i));
+                try {
+                    executorService.execute(worker);
+                } catch (OutOfMemoryError e) {
+                    if (!loggedWarning.getAndSet(true)) {
+                        LOG.warn("The desired load could not be achieved. We are creating as many threads as possible.");
+                    }
+                    break;
+                }
+                synchronized (testWorkers) {
+                    testWorkers.add(worker);
+                }
+            }
+
+            //TODO use this
+            Thread.sleep(1000);
         }
     }
 
