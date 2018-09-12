@@ -27,9 +27,6 @@ import java.util.concurrent.*;
 
 @Description(desc = "Runs tests normally.")
 public class Normal implements RunMode {
-
-    private List<AsyncTestWorker> removed = new ArrayList<>();
-
     private static final Logger LOG = LoggerFactory.getLogger(Normal.class);
 
     private static final String DEFAULT_CONCURRENCY_STRING = "200";
@@ -44,7 +41,7 @@ public class Normal implements RunMode {
     private ExecutorService testsExecutorService;
 
     private final List<AsyncTestWorker> testWorkers = Collections.synchronizedList(new LinkedList<>());
-    private final List<AsyncTestWorker> testWorkersToRemove = Collections.synchronizedList(new ArrayList<>());
+    private final List<AsyncTestWorker> idleTestWorkers = Collections.synchronizedList(new ArrayList<>());
     private final List<RunMap> runMaps = new ArrayList<>();
 
     private int start = DEFAULT_CONCURRENCY;
@@ -167,15 +164,13 @@ public class Normal implements RunMode {
     private void rampDown() throws InterruptedException {
         // if the 'end' was specified by the user
         if (end < start) {  //////////////////trebuie sa fac end si start sa fie egale cu concurrency cand nu sunt specificate
-//            Thread.sleep(1000);
             ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
-            long s = System.currentTimeMillis();
             ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
 
-//            threadsToStop = (start - testWorkersToRemove.size() < end ? start - end : testWorkersToRemove.size());
+//            threadsToStop = (start - idleTestWorkers.size() < end ? start - end : idleTestWorkers.size());
 //            toRemove = rate;
 //
-//            ListIterator<AsyncTestWorker> testWorkerIterator = testWorkersToRemove.listIterator(testWorkersToRemove.size());
+//            ListIterator<AsyncTestWorker> testWorkerIterator = idleTestWorkers.listIterator(idleTestWorkers.size());
 //            while (testWorkerIterator.hasPrevious() && threadsToStop > 0) {
 //                AsyncTestWorker testWorker = testWorkerIterator.previous();
 //
@@ -222,14 +217,11 @@ public class Normal implements RunMode {
 
                             testWorker.finishExecution();
                             testWorker.getWorkerThread().interrupt();
-                            removed.add(testWorker);
                             testWorker.getMutex().unlock();
                         }
                         testWorkerIterator.remove();
                         --toRemove;
                         --activeThreads;
-
-//                        System.out.println(activeThreads);
 
                         if (toRemove == 0) {
                             executor.setCorePoolSize(executor.getCorePoolSize() - rate);
@@ -242,7 +234,6 @@ public class Normal implements RunMode {
             }, 0, interval, TimeUnit.MILLISECONDS);
 //            }
 
-//            System.out.println(System.currentTimeMillis() - s);
         }
     }
 
@@ -290,7 +281,6 @@ public class Normal implements RunMode {
 
     @Override
     public void finishExecutionAndAwait() {
-        long start = System.currentTimeMillis();
         synchronized (testWorkers) {
             for (AsyncTestWorker testWorker : testWorkers) {
                 testWorker.finishExecution();
@@ -365,7 +355,7 @@ public class Normal implements RunMode {
                     if (null == currentTest) {
                         LOG.info("Thread " + workerThread + " died! :(");
                         this.finishExecution();
-                        testWorkersToRemove.add(this);
+                        idleTestWorkers.add(this);
 
                         continue;
                     }
