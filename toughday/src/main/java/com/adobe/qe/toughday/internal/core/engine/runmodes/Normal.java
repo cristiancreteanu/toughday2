@@ -154,7 +154,6 @@ public class Normal implements RunMode {
                         addWorkerScheduler.shutdownNow();
                     } else {
                         addWorkerToThreadPool(testsExecutorService, engine, testSuite);
-                        testsExecutorService.execute(testWorkers.get(0).getWorkerThread());
                     }
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
