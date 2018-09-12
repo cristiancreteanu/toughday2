@@ -47,7 +47,7 @@ public class Normal implements RunMode {
 
     private int start = DEFAULT_CONCURRENCY;
     private int end = DEFAULT_CONCURRENCY;
-    private int concurrency = DEFAULT_CONCURRENCY;
+     int concurrency = DEFAULT_CONCURRENCY;
     private int rate;
     private long waitTime = DEFAULT_WAIT_TIME;
     private long interval = DEFAULT_INTERVAL;
@@ -102,7 +102,7 @@ public class Normal implements RunMode {
     }
 
     @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
-    public void setTimeUnit(String interval) {
+    public void setInterval(String interval) {
         this.interval = GlobalArgs.parseDurationToSeconds(interval);
     }
 
@@ -216,7 +216,7 @@ public class Normal implements RunMode {
                         --toRemove;
                         --activeThreads;
 
-                        System.out.println(activeThreads);
+//                        System.out.println(activeThreads);
 
                         if (toRemove == 0) {
                             executor.setCorePoolSize(executor.getCorePoolSize() - rate);
@@ -228,7 +228,7 @@ public class Normal implements RunMode {
             }, 0, interval, TimeUnit.MILLISECONDS);
 //            }
 
-            System.out.println(System.currentTimeMillis() - s);
+//            System.out.println(System.currentTimeMillis() - s);
         }
     }
 
@@ -397,4 +397,6 @@ public class Normal implements RunMode {
             return exited;
         }
     }
+
+
  }

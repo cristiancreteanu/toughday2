@@ -92,7 +92,7 @@ public class ConstantLoad implements RunMode {
     }
 
     @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
-    public void setTimeUnit(String interval) {
+    public void setInterval(String interval) {
         this.interval = GlobalArgs.parseDurationToSeconds(interval);
     }
 
