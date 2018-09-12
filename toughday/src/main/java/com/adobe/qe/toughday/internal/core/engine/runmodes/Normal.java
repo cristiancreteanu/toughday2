@@ -28,6 +28,8 @@ import java.util.concurrent.*;
 @Description(desc = "Runs tests normally.")
 public class Normal implements RunMode {
 
+    private List<AsyncTestWorker> removed = new ArrayList<>();
+
     private static final Logger LOG = LoggerFactory.getLogger(Normal.class);
 
     private static final String DEFAULT_CONCURRENCY_STRING = "200";
@@ -47,7 +49,7 @@ public class Normal implements RunMode {
 
     private int start = DEFAULT_CONCURRENCY;
     private int end = DEFAULT_CONCURRENCY;
-     int concurrency = DEFAULT_CONCURRENCY;
+    private int concurrency = DEFAULT_CONCURRENCY;
     private int rate;
     private long waitTime = DEFAULT_WAIT_TIME;
     private long interval = DEFAULT_INTERVAL;
@@ -155,6 +157,7 @@ public class Normal implements RunMode {
                         addWorkerScheduler.shutdownNow();
                     } else {
                         addWorkerToThreadPool(testsExecutorService, engine, testSuite);
+                        testsExecutorService.execute(testWorkers.get(0).getWorkerThread());
                     }
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
@@ -203,6 +206,7 @@ public class Normal implements RunMode {
                 while (testWorkerIterator.hasNext()) {
                     if (activeThreads <= end) {
                         removeWorkerScheduler.shutdownNow();
+                        break;
                     } else {
                         AsyncTestWorker testWorker = testWorkerIterator.next();
 
@@ -211,7 +215,16 @@ public class Normal implements RunMode {
                             continue;
                         }
 
-                        testWorker.getWorkerThread().interrupt();
+                        if (!testWorker.hasExited()) {
+                            if(!testWorker.getMutex().tryLock()) {
+                                continue;
+                            }
+
+                            testWorker.finishExecution();
+                            testWorker.getWorkerThread().interrupt();
+                            removed.add(testWorker);
+                            testWorker.getMutex().unlock();
+                        }
                         testWorkerIterator.remove();
                         --toRemove;
                         --activeThreads;
@@ -225,6 +238,7 @@ public class Normal implements RunMode {
                         }
                     }
                 }
+
             }, 0, interval, TimeUnit.MILLISECONDS);
 //            }
 
@@ -304,9 +318,6 @@ public class Normal implements RunMode {
                 }
             }
         }
-
-//        System.out.println((System.currentTimeMillis() - start));
-
     }
 
     @Override
