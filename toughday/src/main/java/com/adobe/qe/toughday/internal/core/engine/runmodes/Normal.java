@@ -29,6 +29,8 @@ import java.util.concurrent.*;
 public class Normal implements RunMode {
     private static final Logger LOG = LoggerFactory.getLogger(Normal.class);
 
+    private static final int EPS = 1;
+
     private static final String DEFAULT_CONCURRENCY_STRING = "200";
     private static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
 
@@ -116,7 +118,7 @@ public class Normal implements RunMode {
     }
 
     @Override
-    public void runTests(Engine engine) throws Exception {
+    public void runTests(Engine engine) {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
@@ -127,7 +129,7 @@ public class Normal implements RunMode {
         // we'll also create all the workers from the beginning
         if (start != -1 && end != -1) {  // if start and end were provided
             if (rate == -1) {
-                interval = (long)Math.floor(1000.0 * globalArgs.getDuration()
+                interval = (long)Math.floor(1000.0 * (globalArgs.getDuration() - EPS)
                         / (start < end? end - start : start - end));  // to replace with phase duration
                 rate = 1;
             }
@@ -140,13 +142,17 @@ public class Normal implements RunMode {
         }
 
         // Execute the test worker threads
-        // if start was provided, then it will create 'start' workers to begin with
-        // otherwise, start == concurrency, so it will create 'concurrency' workers
+        // if start was provided, then it will create 'start' (whose value is
+        // assigned to 'concurrency') workers to begin with
+        // otherwise, it will create 'concurrency' workers
         for (int i = 0; i < concurrency; i++) {
             executeNextWorker();
         }
 
+        // execute 'rate' workers every 'interval'
         rampUp();
+
+        // interrupt 'rate' workers every 'interval'
         rampDown();
     }
 
@@ -236,6 +242,7 @@ public class Normal implements RunMode {
                             continue;
                         }
 
+
                         if (!testWorker.hasExited()) {
                             if(!testWorker.getMutex().tryLock()) {
                                 continue;
@@ -244,15 +251,16 @@ public class Normal implements RunMode {
                             testWorker.finishExecution();
                             testWorker.getWorkerThread().interrupt();
                             testWorker.getMutex().unlock();
-                        }
-                        testWorkerIterator.remove();
-                        --toRemove;
-                        --activeThreads;
 
-                        if (toRemove == 0) {
-                            executor.setCorePoolSize(executor.getCorePoolSize() - rate);
-                            executor.setMaximumPoolSize(executor.getCorePoolSize());
-                            break;
+                            testWorkerIterator.remove();
+                            --toRemove;
+                            --activeThreads;
+
+                            if (toRemove == 0) {
+                                executor.setCorePoolSize(executor.getCorePoolSize() - rate);
+                                executor.setMaximumPoolSize(executor.getCorePoolSize());
+                                break;
+                            }
                         }
                     }
                 }
