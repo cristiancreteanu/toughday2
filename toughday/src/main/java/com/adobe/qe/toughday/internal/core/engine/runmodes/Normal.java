@@ -131,17 +131,54 @@ public class Normal implements RunMode {
                 rate = 1;
             }
             concurrency = start;
+
+            for (int i = 0; i < Math.max(start, end); ++i) {
+                AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
+                synchronized (testWorkers) {
+                    testWorkers.add(testWorker);
+                }
+                synchronized (runMaps) {
+                    runMaps.add(testWorker.getLocalRunMap());
+                }
+            }
+        } else {
+            for (int i = 0; i < concurrency; ++i) {
+                AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
+                synchronized (testWorkers) {
+                    testWorkers.add(testWorker);
+                }
+                synchronized (runMaps) {
+                    runMaps.add(testWorker.getLocalRunMap());
+                }
+            }
         }
 
         // Create the test worker threads
         // if start was provided, then it will create 'start' workers to begin with
         // otherwise, start == concurrency, so it will create 'concurrency' workers
         for (int i = 0; i < concurrency; i++) {
-            addWorkerToThreadPool(testsExecutorService, engine, testSuite);
+            try {
+                testsExecutorService.execute(testWorkers.get(i));
+                activeThreads++;
+            } catch (OutOfMemoryError e) {
+                LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
+            }
         }
 
         rampUp(engine, testSuite);
         rampDown();
+    }
+
+    private void createWorkers(int size, Engine engine, TestSuite testSuite) {
+        for (int i = 0; i < size; ++i) {
+            AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
+            synchronized (testWorkers) {
+                testWorkers.add(testWorker);
+            }
+            synchronized (runMaps) {
+                runMaps.add(testWorker.getLocalRunMap());
+            }
+        }
     }
 
     private void rampUp(Engine engine, TestSuite testSuite) {
@@ -150,19 +187,25 @@ public class Normal implements RunMode {
             ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             addWorkerScheduler.scheduleAtFixedRate(() -> {
                 for (int i = 0; i < rate; ++i) {
+                    System.out.println(activeThreads);
                     if (activeThreads >= end) {
                         addWorkerScheduler.shutdownNow();
                     } else {
-                        addWorkerToThreadPool(testsExecutorService, engine, testSuite);
+                        try {
+                            testsExecutorService.execute(testWorkers.get(activeThreads));
+                            activeThreads++;
+                        } catch (OutOfMemoryError e) {
+                            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
+                        }
                     }
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
         }
     }
 
-    private void rampDown() throws InterruptedException {
-        // if the 'end' was specified by the user
-        if (end < start) {  //////////////////trebuie sa fac end si start sa fie egale cu concurrency cand nu sunt specificate
+    private void rampDown() {
+        // every 'interval' milliseconds, we'll stop 'rate' workers
+        if (end < start) {
             ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
 
@@ -234,25 +277,6 @@ public class Normal implements RunMode {
 //            }
 
         }
-    }
-
-    private boolean addWorkerToThreadPool(ExecutorService testsExecutorService, Engine engine, TestSuite testSuite) {
-        AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
-        try {
-            testsExecutorService.execute(testWorker);
-        } catch (OutOfMemoryError e) {
-            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
-            return false;
-        }
-        synchronized (testWorkers) {
-            testWorkers.add(testWorker);
-            activeThreads++;
-        }
-        synchronized (runMaps) {
-            runMaps.add(testWorker.getLocalRunMap());
-        }
-
-        return true;
     }
 
     public RunContext getRunContext() {
