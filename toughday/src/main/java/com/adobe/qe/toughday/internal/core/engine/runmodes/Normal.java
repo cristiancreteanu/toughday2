@@ -104,7 +104,7 @@ public class Normal implements RunMode {
 
     @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
     public void setInterval(String interval) {
-        this.interval = GlobalArgs.parseDurationToSeconds(interval);
+        this.interval = GlobalArgs.parseDurationToSeconds(interval) * 1000;
     }
 
     @ConfigArgGet
@@ -183,8 +183,15 @@ public class Normal implements RunMode {
             ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             addWorkerScheduler.scheduleAtFixedRate(() -> {
                 for (int i = 0; i < rate; ++i) {
+                    // if all the workers have been created
                     if (activeThreads >= end) {
                         addWorkerScheduler.shutdownNow();
+
+                        // mark workers as finished
+                        for(AsyncTestWorker testWorker : testWorkers) {
+                            testWorker.finishExecution();
+                        }
+                        break;
                     } else {
                         executeNextWorker();
                     }
@@ -199,75 +206,54 @@ public class Normal implements RunMode {
             ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
 
-//            threadsToStop = (start - idleTestWorkers.size() < end ? start - end : idleTestWorkers.size());
-//            toRemove = rate;
-//
-//            ListIterator<AsyncTestWorker> testWorkerIterator = idleTestWorkers.listIterator(idleTestWorkers.size());
-//            while (testWorkerIterator.hasPrevious() && threadsToStop > 0) {
-//                AsyncTestWorker testWorker = testWorkerIterator.previous();
-//
-//                testWorker.getWorkerThread().interrupt();
-//                testWorkerIterator.remove();
-//                --threadsToStop;
-//                --toRemove;
-//                --activeThreads;
-//
-//                System.out.println(activeThreads);
-//
-//                if (toRemove == 0) {
-//                    Thread.sleep(interval);
-//                    toRemove = rate;
-//                }
-//            }
-//
-//            executor.setCorePoolSize(executor.getCorePoolSize() - threadsToStop);
-//            executor.setMaximumPoolSize(executor.getCorePoolSize());
-
-            // if all the idle threads were interrupted, but there are still active threads
-            // that need to be interrupted
-//            if (executor.getCorePoolSize() != end) {
             removeWorkerScheduler.scheduleAtFixedRate(() -> {
                 Iterator<AsyncTestWorker> testWorkerIterator = testWorkers.iterator();
                 int toRemove = rate;
 
-                while (testWorkerIterator.hasNext()) {
-                    if (activeThreads <= end) {
-                        removeWorkerScheduler.shutdownNow();
-                        break;
-                    } else {
-                        AsyncTestWorker testWorker = testWorkerIterator.next();
+                // stop when 'rate' workers have been removed
+                // might need more than one iteration of the testWorkers list
+                while (toRemove != 0) {
+                    while (testWorkerIterator.hasNext()) {
+                        // if all the workers have been removed
+                        if (activeThreads <= end) {
+                            removeWorkerScheduler.shutdownNow();
 
-                        // hmmmmm.. i wonder
-                        if (testWorker.isFinished()) {
-                            continue;
-                        }
-
-
-                        if (!testWorker.hasExited()) {
-                            if(!testWorker.getMutex().tryLock()) {
-                                continue;
+                            // mark all the workers as finished, so the timeout checker will stop the execution
+                            for(AsyncTestWorker testWorker : testWorkers) {
+                                testWorker.finishExecution();
                             }
+                            break;
+                        } else {
+                            AsyncTestWorker testWorker = testWorkerIterator.next();
 
-                            testWorker.finishExecution();
-                            testWorker.getWorkerThread().interrupt();
-                            testWorker.getMutex().unlock();
+                            if (!testWorker.hasExited()) {
+                                if(!testWorker.getMutex().tryLock()) {
+                                    continue;
+                                }
 
-                            testWorkerIterator.remove();
-                            --toRemove;
-                            --activeThreads;
+                                testWorker.finishExecution();
+                                testWorker.getWorkerThread().interrupt();
+                                testWorker.getMutex().unlock();
 
-                            if (toRemove == 0) {
-                                executor.setCorePoolSize(executor.getCorePoolSize() - rate);
-                                executor.setMaximumPoolSize(executor.getCorePoolSize());
-                                break;
+                                // remove the stopped worker
+                                testWorkerIterator.remove();
+                                --toRemove;
+                                --activeThreads;
+
+                                // if rate users have been removed, update the thread pool
+                                if (toRemove == 0) {
+                                    executor.setCorePoolSize(executor.getCorePoolSize() - rate);
+                                    executor.setMaximumPoolSize(executor.getCorePoolSize());
+                                    break;
+                                }
                             }
                         }
                     }
+
+                    // go back to the beginning
+                    testWorkerIterator = testWorkers.iterator();
                 }
-
             }, 0, interval, TimeUnit.MILLISECONDS);
-//            }
-
         }
     }
 

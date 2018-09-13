@@ -286,17 +286,30 @@ public class ConstantLoad implements RunMode {
         }
 
         private void rampUp(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+            if (currentLoad == end) {
+                finishExecution();
+            }
+
+            // if 'interval' has passed and the current load is still below 'end',
+            // increase the current load
             if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad < end) {
                 secondsUntilLoadIncreaseOrDecrease.setValue(interval);
                 currentLoad += rate;
-
+                
                 if (currentLoad > end) {
                     currentLoad = end;
+                    finishExecution();
                 }
             }
         }
 
         private void rampDown(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+            if (currentLoad == end) {
+                finishExecution();
+            }
+
+            // if 'interval' has passed and the currentLoad is still above 'end',
+            // decrease the current load
             if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad > end) {
                 secondsUntilLoadIncreaseOrDecrease.setValue(interval);
                 currentLoad -= rate;
