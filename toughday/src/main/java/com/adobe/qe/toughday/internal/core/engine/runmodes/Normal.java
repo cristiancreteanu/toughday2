@@ -124,49 +124,39 @@ public class Normal implements RunMode {
 
         // if no rate was provided, we'll create/remove one user at fixed rate,
         // namely every 'interval' milliseconds
-        if (start != -1 && end != -1) {
+        // we'll also create all the workers from the beginning
+        if (start != -1 && end != -1) {  // if start and end were provided
             if (rate == -1) {
                 interval = (long)Math.floor(1000.0 * globalArgs.getDuration()
                         / (start < end? end - start : start - end));  // to replace with phase duration
                 rate = 1;
             }
+
             concurrency = start;
 
-            for (int i = 0; i < Math.max(start, end); ++i) {
-                AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
-                synchronized (testWorkers) {
-                    testWorkers.add(testWorker);
-                }
-                synchronized (runMaps) {
-                    runMaps.add(testWorker.getLocalRunMap());
-                }
-            }
-        } else {
-            for (int i = 0; i < concurrency; ++i) {
-                AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
-                synchronized (testWorkers) {
-                    testWorkers.add(testWorker);
-                }
-                synchronized (runMaps) {
-                    runMaps.add(testWorker.getLocalRunMap());
-                }
-            }
+            createWorkers(Math.max(start, end), engine, testSuite);
+        } else {  // if start and end weren't provided
+            createWorkers(concurrency, engine, testSuite);
         }
 
-        // Create the test worker threads
+        // Execute the test worker threads
         // if start was provided, then it will create 'start' workers to begin with
         // otherwise, start == concurrency, so it will create 'concurrency' workers
         for (int i = 0; i < concurrency; i++) {
-            try {
-                testsExecutorService.execute(testWorkers.get(i));
-                activeThreads++;
-            } catch (OutOfMemoryError e) {
-                LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
-            }
+            executeNextWorker();
         }
 
-        rampUp(engine, testSuite);
+        rampUp();
         rampDown();
+    }
+
+    private void executeNextWorker() {
+        try {
+            testsExecutorService.execute(testWorkers.get(activeThreads));
+            activeThreads++;
+        } catch (OutOfMemoryError e) {
+            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
+        }
     }
 
     private void createWorkers(int size, Engine engine, TestSuite testSuite) {
@@ -181,22 +171,16 @@ public class Normal implements RunMode {
         }
     }
 
-    private void rampUp(Engine engine, TestSuite testSuite) {
+    private void rampUp() {
         // every 'interval' milliseconds, we'll create 'rate' workers
         if (start < end) {
             ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             addWorkerScheduler.scheduleAtFixedRate(() -> {
                 for (int i = 0; i < rate; ++i) {
-                    System.out.println(activeThreads);
                     if (activeThreads >= end) {
                         addWorkerScheduler.shutdownNow();
                     } else {
-                        try {
-                            testsExecutorService.execute(testWorkers.get(activeThreads));
-                            activeThreads++;
-                        } catch (OutOfMemoryError e) {
-                            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
-                        }
+                        executeNextWorker();
                     }
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
