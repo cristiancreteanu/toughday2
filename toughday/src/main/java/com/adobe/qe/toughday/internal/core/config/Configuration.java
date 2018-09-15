@@ -496,15 +496,6 @@ public class Configuration {
     public static <T> T createObject(Class<? extends T> classObject, Map<String, Object> args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException, NoSuchMethodException {
 
-        // check that no invalid argument vas provided
-        List<Object> validArgs = new ArrayList<>();
-        for (Method method : classObject.getMethods()) {
-            if (method.getAnnotation(ConfigArgSet.class) != null) {
-                validArgs.add(propertyFromMethod(method.getName()));
-            }
-        }
-        checkInvalidArgs(args, validArgs); // issue separat
-
         Constructor constructor = null;
         try {
             constructor = classObject.getConstructor(null);
@@ -539,7 +530,7 @@ public class Configuration {
         return testSuite;
     }
 
-    private static void checkInvalidArgs(Map<String, Object> args, List<Object>... whitelisted) {
+    private void checkInvalidArgs(Map<String, Object> args, List<Object>... whitelisted) {
         Map<String, Object> argsCopy = new HashMap<>();
         argsCopy.putAll(args);
         args = argsCopy;
@@ -618,8 +609,6 @@ public class Configuration {
         if (publishModeClass == null) {
             throw new IllegalStateException("A publish mode with type \"" + type + "\" does not exist");
         }
-
-        publishModeParams.remove("type");
 
         return createObject(publishModeClass, publishModeParams);
     }
