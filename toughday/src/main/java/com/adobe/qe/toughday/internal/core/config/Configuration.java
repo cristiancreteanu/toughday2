@@ -569,6 +569,16 @@ public class Configuration {
             throw new IllegalStateException("Cannot configure only one limit (start/end) for a run mode.");
         }
 
+        if (runModeParams.containsKey("type") && runModeParams.get("type").equals("normal")
+                && runModeParams.containsKey("load")) {
+            throw new IllegalStateException("Cannot configure load for Normal mode.");
+        }
+
+        if (runModeParams.containsKey("type") && runModeParams.get("type").equals("constantload")
+                && runModeParams.containsKey("concurrency")) {
+            throw new IllegalStateException("Cannod configure concurrency for Constant Load mode");
+        }
+
         // check that all numeric values are positive
 
         String type = runModeParams.size() != 0 ? String.valueOf(runModeParams.get("type")) : DEFAULT_RUN_MODE;
