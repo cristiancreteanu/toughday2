@@ -244,40 +244,42 @@ public class ConstantLoad implements RunMode {
         @Override
         public void run() {
             try {
-                currentLoad = start;
-                MutableLong secondsUntilLoadIncreaseOrDecrease = new MutableLong(interval);
+                currentLoad = load;
+                MutableLong secondsLeft = new MutableLong(interval);
 
-                //the difference from the beginning load to the end one
-                int loadDifference = start > end? start - end : end - start;
-
-                // if the rate was not specified and either start or end were
+                // if the rate was not specified and start and end were
                 if (rate == -1 && start != -1 && end != -1) {
+                    currentLoad = start;
+
+                    //the difference from the beginning load to the end one
+                    int loadDifference = Math.abs(end - start);
+
                     // suppose load will increase by second
-                    secondsUntilLoadIncreaseOrDecrease.setValue(1);
-                    rate = (int)Math.floor(1.0 * secondsUntilLoadIncreaseOrDecrease.getValue() * loadDifference
+                    secondsLeft.setValue(1);
+                    rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
                             / engine.getGlobalArgs().getDuration());
 
                     // if the rate becomes too small, increase the interval at which the load is increased
                     while (rate < 1) {
-                        secondsUntilLoadIncreaseOrDecrease.increment();
-                        rate = (int)Math.floor(1.0 * secondsUntilLoadIncreaseOrDecrease.getValue() * loadDifference
+                        secondsLeft.increment();
+                        rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
                                 / engine.getGlobalArgs().getDuration());
                     }
 
-                    interval = secondsUntilLoadIncreaseOrDecrease.getValue();
+                    interval = secondsLeft.getValue();
                 }
 
                 while (!isFinished()) {
                     // run the current run with the current load
                     runRound();
 
-                    secondsUntilLoadIncreaseOrDecrease.decrement();
+                    secondsLeft.decrement();
 
                     // ramp up the load if 'start' was specified
-                    rampUp(secondsUntilLoadIncreaseOrDecrease);
+                    rampUp(secondsLeft);
 
                     // ramp down the load if 'end' was specified
-                    rampDown(secondsUntilLoadIncreaseOrDecrease);
+                    rampDown(secondsLeft);
                 }
             } catch (InterruptedException e) {
                 finishExecution();
@@ -285,34 +287,35 @@ public class ConstantLoad implements RunMode {
             }
         }
 
-        private void rampUp(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+        private void rampUp(MutableLong secondsLeft) {
             if (currentLoad == end) {
                 finishExecution();
             }
 
             // if 'interval' has passed and the current load is still below 'end',
             // increase the current load
-            if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad < end) {
-                secondsUntilLoadIncreaseOrDecrease.setValue(interval);
+            if (secondsLeft.getValue() == 0 && end != -1 && currentLoad < end) {
+                secondsLeft.setValue(interval);
                 currentLoad += rate;
-                
+                LOG.debug("Current load: " + currentLoad);
+
                 if (currentLoad > end) {
                     currentLoad = end;
-                    finishExecution();
                 }
             }
         }
 
-        private void rampDown(MutableLong secondsUntilLoadIncreaseOrDecrease) {
+        private void rampDown(MutableLong secondsLeft) {
             if (currentLoad == end) {
                 finishExecution();
             }
 
             // if 'interval' has passed and the currentLoad is still above 'end',
             // decrease the current load
-            if (secondsUntilLoadIncreaseOrDecrease.getValue() == 0 && currentLoad > end) {
-                secondsUntilLoadIncreaseOrDecrease.setValue(interval);
+            if (secondsLeft.getValue() == 0 && end != -1 && currentLoad > end) {
+                secondsLeft.setValue(interval);
                 currentLoad -= rate;
+                LOG.debug("Current load: " + currentLoad);
 
                 if (currentLoad < end) {
                     currentLoad = end;
@@ -332,7 +335,7 @@ public class ConstantLoad implements RunMode {
                     return;
                 }
 
-                //Use a cache test if available
+                // Use a cache test if available
                 AbstractTest localNextTest = testCache.getCachedValue(nextTest.getId());
                 if(localNextTest == null) {
                     localNextTest = nextTest.clone();

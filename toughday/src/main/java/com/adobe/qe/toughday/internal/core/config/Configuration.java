@@ -503,7 +503,7 @@ public class Configuration {
                 validArgs.add(propertyFromMethod(method.getName()));
             }
         }
-        checkInvalidArgs(args, validArgs);
+        checkInvalidArgs(args, validArgs); // issue separat
 
         Constructor constructor = null;
         try {
@@ -578,6 +578,8 @@ public class Configuration {
             throw new IllegalStateException("Cannot configure only one limit (start/end) for a run mode.");
         }
 
+        // check that all numeric values are positive
+
         String type = runModeParams.size() != 0 ? String.valueOf(runModeParams.get("type")) : DEFAULT_RUN_MODE;
         Class<? extends RunMode> runModeClass = ReflectionsContainer.getInstance().getRunModeClasses().get(type);
 
@@ -586,8 +588,21 @@ public class Configuration {
         }
 
         runModeParams.remove("type");
+        Map<String, Object> runModeParamsCopy = new HashMap<>(runModeParams);
 
-        return createObject(runModeClass, runModeParams);
+        RunMode runMode = createObject(runModeClass, runModeParams);
+
+        for (Map.Entry<String, Object> entry : runModeParamsCopy.entrySet()) {
+            try {
+                if (Long.valueOf(entry.getValue().toString()) < 0) {
+                    throw new IllegalArgumentException(entry.getKey().toUpperCase() + " cannot be negative.");
+                }
+            } catch (NumberFormatException e) {
+                // do nothing
+            }
+        }
+
+        return runMode;
     }
 
     private PublishMode getPublishMode(ConfigParams configParams)

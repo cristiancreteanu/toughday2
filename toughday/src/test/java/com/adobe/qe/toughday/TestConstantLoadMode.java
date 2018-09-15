@@ -2,6 +2,7 @@ package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
+import com.adobe.qe.toughday.internal.core.engine.Engine;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.ConstantLoad;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
@@ -11,6 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class TestConstantLoadMode {
     private ArrayList<String> cmdLineArgs;
@@ -123,9 +126,107 @@ public class TestConstantLoadMode {
         Assert.assertEquals(((ConstantLoad)configuration.getRunMode()).getInterval(), 60);
     }
 
-    @AfterClass
-    public static void after() {
+    @Test
+    public void runLoad() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList("--runmode", "type=constantload"));
+        Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        Engine engine = new Engine(configuration);
+
+        Assert.assertEquals(configuration.getRunMode().getClass(), ConstantLoad.class);
+
+        ConstantLoad runMode = (ConstantLoad) configuration.getRunMode();
+        runMode.runTests(engine);
+
+        Assert.assertEquals(runMode.getRunContext().getRunMaps().size(), 50);
+        Assert.assertEquals(runMode.getExecutorService().getClass(), ThreadPoolExecutor.class);
+
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) runMode.getExecutorService();
+        Thread.sleep(2000);
+
+        runMode.finishExecutionAndAwait();
+
+        Assert.assertTrue(runMode.getRunContext().isRunFinished());
+
+        threadPoolExecutor.shutdownNow();
+        threadPoolExecutor.awaitTermination(0, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void runStartEndDuration() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList("--runmode", "type=constantload", "start=10", "end=60", "--duration=5s"));
+        Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        Engine engine = new Engine(configuration);
+
+        Assert.assertEquals(configuration.getRunMode().getClass(), ConstantLoad.class);
+
+        ConstantLoad runMode = (ConstantLoad) configuration.getRunMode();
+        runMode.runTests(engine);
+
+        Assert.assertEquals(runMode.getRunContext().getRunMaps().size(), 60);
+        Assert.assertEquals(runMode.getExecutorService().getClass(), ThreadPoolExecutor.class);
+
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) runMode.getExecutorService();
+        Thread.sleep(6000);
+
+        Assert.assertTrue(runMode.getRunContext().isRunFinished());
+
+        threadPoolExecutor.shutdownNow();
+        threadPoolExecutor.awaitTermination(0, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void runStartEndRate() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList("--runmode", "type=constantload", "start=10", "end=60", "rate=10"));
+        Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        Engine engine = new Engine(configuration);
+
+        Assert.assertEquals(configuration.getRunMode().getClass(), ConstantLoad.class);
+
+        ConstantLoad runMode = (ConstantLoad) configuration.getRunMode();
+        runMode.runTests(engine);
+
+        Assert.assertEquals(runMode.getRunContext().getRunMaps().size(), 60);
+        Assert.assertEquals(runMode.getExecutorService().getClass(), ThreadPoolExecutor.class);
+
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) runMode.getExecutorService();
+        Thread.sleep(6000);
+
+        Assert.assertTrue(runMode.getRunContext().isRunFinished());
+
+        threadPoolExecutor.shutdownNow();
+        threadPoolExecutor.awaitTermination(0, TimeUnit.MILLISECONDS);
+    }
+
+    @Test
+    public void runStartEndRateInterval() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList("--runmode", "type=constantload", "start=10", "end=60", "rate=30", "interval=2s"));
+        Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        Engine engine = new Engine(configuration);
+
+        Assert.assertEquals(configuration.getRunMode().getClass(), ConstantLoad.class);
+
+        ConstantLoad runMode = (ConstantLoad) configuration.getRunMode();
+        runMode.runTests(engine);
+
+        Assert.assertEquals(runMode.getRunContext().getRunMaps().size(), 60);
+        Assert.assertEquals(runMode.getExecutorService().getClass(), ThreadPoolExecutor.class);
+
+        ThreadPoolExecutor threadPoolExecutor = (ThreadPoolExecutor) runMode.getExecutorService();
+        Thread.sleep(5000);
+
+        Assert.assertTrue(runMode.getRunContext().isRunFinished());
+
+        threadPoolExecutor.shutdownNow();
+        threadPoolExecutor.awaitTermination(0, TimeUnit.MILLISECONDS);
+    }
+
+    @After
+    public void after() {
         new File("toughday_" + Timestamp.START_TIME + ".yaml").delete();
+    }
+
+    @AfterClass
+    public static void deleteLogs() {
         ((LoggerContext) LogManager.getContext(false)).reconfigure();
         LogFileEraser.deteleFiles(((LoggerContext) LogManager.getContext(false)).getConfiguration());
     }

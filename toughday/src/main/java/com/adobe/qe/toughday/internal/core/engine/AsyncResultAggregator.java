@@ -96,7 +96,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
 
-                if (!isFinished()) {
+                if (!isFinished()) { // de facut un pull request cu asta
                     engine.getPublishMode().publishIntermediateResults(results);
                 }
 

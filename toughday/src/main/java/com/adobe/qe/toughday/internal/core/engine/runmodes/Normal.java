@@ -117,12 +117,16 @@ public class Normal implements RunMode {
         this.end = Integer.valueOf(end);
     }
 
+    public int getActiveThreads() {
+        return activeThreads;
+    }
+
     @Override
     public void runTests(Engine engine) {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
-        testsExecutorService = Executors.newFixedThreadPool(concurrency);
+        testsExecutorService = Executors.newCachedThreadPool();
 
         // if no rate was provided, we'll create/remove one user at fixed rate,
         // namely every 'interval' milliseconds
@@ -210,48 +214,30 @@ public class Normal implements RunMode {
                 Iterator<AsyncTestWorker> testWorkerIterator = testWorkers.iterator();
                 int toRemove = rate;
 
-                // stop when 'rate' workers have been removed
-                // might need more than one iteration of the testWorkers list
-                while (toRemove != 0) {
-                    while (testWorkerIterator.hasNext()) {
-                        // if all the workers have been removed
-                        if (activeThreads <= end) {
-                            removeWorkerScheduler.shutdownNow();
+                while (testWorkerIterator.hasNext()) {
+                    // if all the workers have been removed
+                    if (activeThreads <= end) {
+                        removeWorkerScheduler.shutdownNow();
 
-                            // mark all the workers as finished, so the timeout checker will stop the execution
-                            for(AsyncTestWorker testWorker : testWorkers) {
-                                testWorker.finishExecution();
-                            }
+                        // mark all the workers as finished, so the timeout checker will stop the execution
+                        for(AsyncTestWorker testWorker : testWorkers) {
+                            testWorker.finishExecution();
+                        }
+                        break;
+                    } else {
+                        AsyncTestWorker testWorker = testWorkerIterator.next();
+                        testWorker.finishExecution();
+
+                        // remove the stopped worker
+                        testWorkerIterator.remove();
+                        --toRemove;
+                        --activeThreads;
+
+                        // if rate users have been removed
+                        if (toRemove == 0) {
                             break;
-                        } else {
-                            AsyncTestWorker testWorker = testWorkerIterator.next();
-
-                            if (!testWorker.hasExited()) {
-                                if(!testWorker.getMutex().tryLock()) {
-                                    continue;
-                                }
-
-                                testWorker.finishExecution();
-                                testWorker.getWorkerThread().interrupt();
-                                testWorker.getMutex().unlock();
-
-                                // remove the stopped worker
-                                testWorkerIterator.remove();
-                                --toRemove;
-                                --activeThreads;
-
-                                // if rate users have been removed, update the thread pool
-                                if (toRemove == 0) {
-                                    executor.setCorePoolSize(executor.getCorePoolSize() - rate);
-                                    executor.setMaximumPoolSize(executor.getCorePoolSize());
-                                    break;
-                                }
-                            }
                         }
                     }
-
-                    // go back to the beginning
-                    testWorkerIterator = testWorkers.iterator();
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
         }
