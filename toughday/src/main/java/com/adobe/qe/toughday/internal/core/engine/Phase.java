@@ -9,7 +9,7 @@ public class Phase {
     private static final String DEFAULT_MEASURABILITY = "true";
 
     private String name;
-    private boolean measurability;
+    private boolean measurabile;
     private String useconfig;
     private long duration;
 
@@ -27,14 +27,14 @@ public class Phase {
     }
 
     @ConfigArgGet
-    public boolean getMeasurability() {
-        return measurability;
+    public boolean getMeasurable() {
+        return measurabile;
     }
 
     @ConfigArgSet(required = false, desc = "Option to specify whether the metrics of this phase will be taken into consideration",
         defaultValue = DEFAULT_MEASURABILITY)
-    public void setMeasurability(String measurability) {
-        this.measurability = Boolean.valueOf(measurability);
+    public void setMeasurable(String measurability) {
+        this.measurabile = Boolean.valueOf(measurability);
     }
 
     @ConfigArgGet

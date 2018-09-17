@@ -61,6 +61,7 @@ public class YamlParser implements ConfigurationParser {
             try {
                 Constructor constructor = new Constructor(YamlConfiguration.class);
                 TypeDescription yamlParserDesc = new TypeDescription(YamlConfiguration.class);
+                yamlParserDesc.putListPropertyType("phases", YamlParsePhase.class);
                 yamlParserDesc.putListPropertyType("tests", YamlParseAction.class);
                 yamlParserDesc.putListPropertyType("publishers", YamlParseAction.class);
                 yamlParserDesc.putListPropertyType("metrics", YamlParseAction.class);
