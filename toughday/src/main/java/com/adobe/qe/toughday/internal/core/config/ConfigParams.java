@@ -94,6 +94,10 @@ public class ConfigParams implements Serializable {
         this.globalParams = globalParams;
     }
 
+    public void setPhasesParams(List<Map<String, Object>> phasesParams) {
+        this.phasesParams = phasesParams;
+    }
+
     public void setPublishModeParams(Map<String, Object> publishModeParams) {
         this.publishModeParams = publishModeParams;
     }

@@ -27,12 +27,12 @@ public class Phase {
     }
 
     @ConfigArgGet
-    public boolean isMeasurability() {
+    public boolean getMeasurability() {
         return measurability;
     }
 
     @ConfigArgSet(required = false, desc = "Option to specify whether the metrics of this phase will be taken into consideration",
-    defaultValue = DEFAULT_MEASURABILITY)
+        defaultValue = DEFAULT_MEASURABILITY)
     public void setMeasurability(String measurability) {
         this.measurability = Boolean.valueOf(measurability);
     }

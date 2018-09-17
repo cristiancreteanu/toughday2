@@ -11,8 +11,10 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
+import com.adobe.qe.toughday.internal.core.config.Actions;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -59,8 +61,22 @@ public class YamlConfiguration {
         }
     }
 
-    public void setPhases(List<YamlParseAction> phases) {
+    public void setPhases(List<Map<String, Object>> phases) {
+        List<Map.Entry<Actions, ConfigParams.MetaObject>> items;
+        for (Map<String, Object> phase : phases) {
+            if (phase.containsKey("tests")) {
+                for (Map<String, Object> metaObject : (ArrayList<Map<String, Object>>)phase.get("tests")) {
+                    Map<String, Object> properties = (Map<String, Object>) metaObject.remove("properties");
+                    Map.Entry<String, Object> action = (Map.Entry<String, Object>) metaObject.entrySet().iterator().next();
 
+                    switch (action.getKey()) {
+                        case "add":
+                            items.add()
+                    }
+                }
+            }
+        }
+        configParams.setPhasesParams(phases);
     }
 
     public ConfigParams getConfigParams() {
