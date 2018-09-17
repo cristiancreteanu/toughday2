@@ -59,6 +59,10 @@ public class YamlConfiguration {
         }
     }
 
+    public void setPhases(List<YamlParseAction> phases) {
+
+    }
+
     public ConfigParams getConfigParams() {
         return configParams;
     }

@@ -243,7 +243,7 @@ public class CliParser implements ConfigurationParser {
                 } else if(Actions.isAction(arg)) {
                     Actions action = Actions.fromString(arg);
                     String identifier = cmdLineArgs[i + 1];
-                    HashMap<String, Object> args = parseObjectProperties(i+2, cmdLineArgs);
+                    HashMap<String, Object> args = parseObjectProperties(i + 2, cmdLineArgs);
 
                     // this will be removed/changed when Metrics and Publishers become local to phases
                     Set<String> metricsOrPublishersIdentifiers = configParams.getMetricsOrPublishersIdentifiers();
@@ -260,9 +260,9 @@ public class CliParser implements ConfigurationParser {
                     }
                     action.apply(configParams, identifier, args);
                 } else if (arg.equals("publishmode")) {
-                    configParams.setPublishModeParams(parseObjectProperties(i+1, cmdLineArgs));
+                    configParams.setPublishModeParams(parseObjectProperties(i + 1, cmdLineArgs));
                 } else if (arg.equals("runmode")) {
-                    configParams.setRunModeParams(parseObjectProperties(i+1, cmdLineArgs));
+                    configParams.setRunModeParams(parseObjectProperties(i + 1, cmdLineArgs));
                 } else {
                     String[] res = parseProperty(arg);
                     String key = res[0];

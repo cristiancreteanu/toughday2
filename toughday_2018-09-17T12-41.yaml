@@ -1,0 +1,8 @@
+globals:
+  dryrun: true
+  host: localhost
+phases:
+- measurability: true
+  tests:
+  - add: CreateUserTest
+  name: ceva

@@ -159,6 +159,7 @@ public class ConfigParams implements Serializable {
     public void merge(ConfigParams other) {
         globalParams.putAll(other.getGlobalParams());
         items.addAll(other.items);
+        phasesParams.addAll(other.phasesParams);
 
         if(other.runModeParams.containsKey("type"))
             this.runModeParams.clear();

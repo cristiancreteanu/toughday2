@@ -87,24 +87,43 @@ public class GenerateYamlConfiguration {
     // creates a list of actions for each item(tests, publishers, metrics, extensions)
     private void createActionsForItems() {
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
-            switch (item.getKey()) {
-                case ADD:
-                    addAction((ConfigParams.ClassMetaObject)item.getValue());
-                    break;
-                case CONFIG:
-                    configAction((ConfigParams.NamedMetaObject)item.getValue());
-                    break;
-                case EXCLUDE:
-                    excludeAction(((ConfigParams.NamedMetaObject)item.getValue()).getName());
-                    break;
+            chooseAction(item, 0);
+        }
+
+        List<Map<String, Object>> phasesParams = getPhases();
+        for (int i = 0; i < phasesParams.size(); ++i) {
+            phasesParams.get(i).put("tests", new ArrayList<YamlDumpAction>());
+
+            for (Map.Entry<Actions, ConfigParams.MetaObject> item : (ArrayList<Map.Entry<Actions, ConfigParams.MetaObject>>)phasesParams.get(i).get("items")) {
+                chooseAction(item, i);
             }
+
+            phasesParams.get(i).remove("items");
         }
     }
 
-    private void addAction(ConfigParams.ClassMetaObject item) {
+    private void chooseAction(Map.Entry<Actions, ConfigParams.MetaObject> item, int index) {
+        switch (item.getKey()) {
+            case ADD:
+                addAction((ConfigParams.ClassMetaObject)item.getValue(), index + 1);
+                break;
+            case CONFIG:
+                configAction((ConfigParams.NamedMetaObject)item.getValue(), index + 1);
+                break;
+            case EXCLUDE:
+                excludeAction(((ConfigParams.NamedMetaObject)item.getValue()).getName(), index + 1);
+                break;
+        }
+    }
+
+    private void addAction(ConfigParams.ClassMetaObject item, int index) {
         YamlDumpAddAction addAction = new YamlDumpAddAction(item.getClassName(), item.getParameters());
         if (ReflectionsContainer.getInstance().isTestClass(item.getClassName())) {
-            yamlTestActions.add(addAction);
+            if (index == 0) {
+                yamlTestActions.add(addAction);
+            } else {
+                ((List)getPhases().get(index - 1).get("tests")).add(addAction);
+            }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
             yamlPublisherActions.add(addAction);
         } else if (ReflectionsContainer.getInstance().isMetricClass(item.getClassName())
@@ -115,10 +134,14 @@ public class GenerateYamlConfiguration {
         }
     }
 
-    private void configAction(ConfigParams.NamedMetaObject item) {
+    private void configAction(ConfigParams.NamedMetaObject item, int index) {
         YamlDumpConfigAction configAction = new YamlDumpConfigAction(item.getName(), item.getParameters());
         if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
-            yamlTestActions.add(configAction);
+            if (index == 0) {
+                yamlTestActions.add(configAction);
+            } else {
+                ((List)getPhases().get(index).get("tests")).add(configAction);
+            }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
             yamlPublisherActions.add(configAction);
         } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
@@ -126,10 +149,14 @@ public class GenerateYamlConfiguration {
         }
     }
 
-    private void excludeAction(String item) {
+    private void excludeAction(String item, int index) {
         YamlDumpExcludeAction excludeAction = new YamlDumpExcludeAction(item);
         if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item).getSimpleName())) {
-            yamlTestActions.add(excludeAction);
+            if (index == 0) {
+                yamlTestActions.add(excludeAction);
+            } else {
+                ((List)getPhases().get(index).get("tests")).add(excludeAction);
+            }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
             yamlPublisherActions.add(excludeAction);
         } else if (ReflectionsContainer.getInstance().isMetricClass(itemsIdentifiers.get(item).getSimpleName())) {
