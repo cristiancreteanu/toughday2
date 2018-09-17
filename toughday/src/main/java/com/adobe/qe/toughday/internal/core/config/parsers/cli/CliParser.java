@@ -239,7 +239,7 @@ public class CliParser implements ConfigurationParser {
                 String arg = cmdLineArgs[i].substring(2);
                 if (arg.equals("phase")) {
                     HashMap<String, Object> args = parseObjectProperties(i + 1, cmdLineArgs);
-                    configParams.createPhasewWithParams(args);
+                    configParams.createPhasewWithProperties(args);
                 } else if(Actions.isAction(arg)) {
                     Actions action = Actions.fromString(arg);
                     String identifier = cmdLineArgs[i + 1];

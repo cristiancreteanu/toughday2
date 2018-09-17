@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An object that has the configuration params parsed, but still in String form.
@@ -24,7 +25,7 @@ import java.util.*;
 public class ConfigParams implements Serializable {
     private static final Logger LOGGER = LogManager.getLogger(ConfigParams.class);
 
-    private List<Map<String, Object>> phasesParams = new ArrayList<>();
+    private List<PhaseParams> phasesParams = new ArrayList<>();
     private Map<String, Object> globalParams = new HashMap<>();
     private Map<String, Object> publishModeParams = new HashMap<>();
     private Map<String, Object> runModeParams = new HashMap<>();
@@ -70,6 +71,50 @@ public class ConfigParams implements Serializable {
         }
     }
 
+    public static class PhaseParams implements Serializable {
+        Map<String, Object> properties;
+        Map<String, Object> runmode;
+        private List<Map.Entry<Actions, MetaObject>> tests = new ArrayList<>();
+
+        public Map<String, Object> getProperties() {
+            return properties;
+        }
+
+        public void setProperties(Map<String, Object> properties) {
+            this.properties = properties;
+        }
+
+        public Map<String, Object> getRunmode() {
+            return runmode;
+        }
+
+        public void setRunmode(Map<String, Object> runmode) {
+            this.runmode = runmode;
+        }
+
+        public List<Map.Entry<Actions, MetaObject>> getTests() {
+            return tests;
+        }
+
+        public void setTests(List<Map.Entry<Actions, MetaObject>> tests) {
+            this.tests = tests;
+        }
+
+        public Map<String, Object> toHashMap() {
+            Map<String, Object> allProperties = new HashMap<>(properties);
+
+            if (runmode != null) {
+                allProperties.put("runmode", runmode);
+            }
+
+            if (tests != null) {
+                allProperties.put("tests", tests);
+            }
+
+            return allProperties;
+        }
+    }
+
     /** Creates a copy of the object.
      * @param object
      * @return
@@ -94,7 +139,7 @@ public class ConfigParams implements Serializable {
         this.globalParams = globalParams;
     }
 
-    public void setPhasesParams(List<Map<String, Object>> phasesParams) {
+    public void setPhasesParams(List<PhaseParams> phasesParams) {
         this.phasesParams = phasesParams;
     }
 
@@ -104,14 +149,16 @@ public class ConfigParams implements Serializable {
 
     public void setRunModeParams(Map<String, Object> runModeParams) {
         if (phasesParams.size() > 0) {
-            phasesParams.get(phasesParams.size() - 1).put("runmode", runModeParams);
+            phasesParams.get(phasesParams.size() - 1).setRunmode(runModeParams);
         } else {
             this.runModeParams = runModeParams;
         }
     }
 
-    public void createPhasewWithParams(Map<String, Object> phaseParams) {
-        phasesParams.add(phaseParams);
+    public void createPhasewWithProperties(Map<String, Object> properties) {
+        PhaseParams phase = new PhaseParams();
+        phase.setProperties(properties);
+        phasesParams.add(phase);
     }
 
     public void addItem(String itemName, Map<String, Object> params) {
@@ -137,18 +184,13 @@ public class ConfigParams implements Serializable {
 
     private void addToItemsOrLastPhase(Map.Entry<Actions, MetaObject> newEntry, String identifier) {
         if (!metricsOrPublishersIdentifiers.contains(identifier) && !phasesParams.isEmpty()) {
-            if (!phasesParams.get(phasesParams.size() - 1).containsKey("items")) {
-                phasesParams.get(phasesParams.size() - 1).put("items",
-                        new ArrayList<>(Collections.singletonList(newEntry)));
-            } else {
-                ((ArrayList)(phasesParams.get(phasesParams.size() - 1).get("items"))).add(newEntry);
-            }
+            phasesParams.get(phasesParams.size() - 1).getTests().add(newEntry);
         } else {
             items.add(newEntry);
         }
     }
 
-    public List<Map<String, Object>> getPhasesParams() {
+    public List<PhaseParams> getPhasesParams() {
         return phasesParams;
     }
 

@@ -28,8 +28,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class GenerateYamlConfiguration {
 
@@ -39,6 +41,7 @@ public class GenerateYamlConfiguration {
     private java.util.List<YamlDumpAction> yamlPublisherActions;
     private List<YamlDumpAction> yamlMetricActions;
     private List<YamlDumpAction> yamlExtensionActions;
+    private List<YamlDumpPhase> yamlDumpPhases;
 
     private static final String DEFAULT_YAML_CONFIGURATION_FILENAME = "toughday_";
     private static final String DEFAULT_YAML_EXTENSION = ".yaml";
@@ -51,6 +54,7 @@ public class GenerateYamlConfiguration {
         yamlPublisherActions = new ArrayList<>();
         yamlMetricActions = new ArrayList<>();
         yamlExtensionActions = new ArrayList<>();
+        yamlDumpPhases = new ArrayList<>();
         createActionsForItems();
     }
 
@@ -60,7 +64,9 @@ public class GenerateYamlConfiguration {
         return globals;
     }
 
-    public List<Map<String, Object>> getPhases() { return configParams.getPhasesParams(); }
+    public List<YamlDumpPhase> getPhases() {
+        return yamlDumpPhases;
+    }
 
     public Map<String, Object> getPublishmode() {
         return configParams.getPublishModeParams();
@@ -90,15 +96,14 @@ public class GenerateYamlConfiguration {
             chooseAction(item, 0);
         }
 
-        List<Map<String, Object>> phasesParams = getPhases();
+        List<ConfigParams.PhaseParams> phasesParams = configParams.getPhasesParams();
         for (int i = 0; i < phasesParams.size(); ++i) {
-            phasesParams.get(i).put("tests", new ArrayList<YamlDumpAction>());
+            YamlDumpPhase yamlParsePhase = new YamlDumpPhase(phasesParams.get(i).getProperties(), phasesParams.get(i).getRunmode());
+            yamlDumpPhases.add(yamlParsePhase);
 
-            for (Map.Entry<Actions, ConfigParams.MetaObject> item : (ArrayList<Map.Entry<Actions, ConfigParams.MetaObject>>)phasesParams.get(i).get("items")) {
+            for (Map.Entry<Actions, ConfigParams.MetaObject> item : phasesParams.get(i).getTests()) {
                 chooseAction(item, i);
             }
-
-            phasesParams.get(i).remove("items");
         }
     }
 
@@ -122,7 +127,7 @@ public class GenerateYamlConfiguration {
             if (index == 0) {
                 yamlTestActions.add(addAction);
             } else {
-                ((List)getPhases().get(index - 1).get("tests")).add(addAction);
+                yamlDumpPhases.get(index - 1).getTests().add(addAction);
             }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
             yamlPublisherActions.add(addAction);
@@ -140,7 +145,7 @@ public class GenerateYamlConfiguration {
             if (index == 0) {
                 yamlTestActions.add(configAction);
             } else {
-                ((List)getPhases().get(index).get("tests")).add(configAction);
+                yamlDumpPhases.get(index - 1).getTests().add(configAction);
             }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
             yamlPublisherActions.add(configAction);
@@ -155,7 +160,7 @@ public class GenerateYamlConfiguration {
             if (index == 0) {
                 yamlTestActions.add(excludeAction);
             } else {
-                ((List)getPhases().get(index).get("tests")).add(excludeAction);
+                yamlDumpPhases.get(index - 1).getTests().add(excludeAction);
             }
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
             yamlPublisherActions.add(excludeAction);
@@ -204,6 +209,9 @@ public class GenerateYamlConfiguration {
 
                 Method method = null;
                 try {
+                    if (propertyValue == null) {
+                        propertyValue = "";
+                    }
                     method = propertyValue.getClass().getMethod("isEmpty");
                 } catch (NoSuchMethodException e) { }
 

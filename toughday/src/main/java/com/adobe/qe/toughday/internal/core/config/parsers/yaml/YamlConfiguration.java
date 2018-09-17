@@ -64,20 +64,20 @@ public class YamlConfiguration {
 
     public void setPhases(List<YamlParsePhase> phases) {
         for (YamlParsePhase yamlParsePhase : phases) {
-            Map<String, Object> phase = new HashMap<>();
+            ConfigParams.PhaseParams phase = new ConfigParams.PhaseParams();
             if (yamlParsePhase.getName() != null) {
-                phase.put("name", yamlParsePhase.getName());
-            }
-
-            if (yamlParsePhase.getRunmode() != null) {
-                phase.put("runmode", yamlParsePhase.getRunmode());
+                phase.getProperties().put("name", yamlParsePhase.getName());
             }
 
             if (yamlParsePhase.getMeasurable() != null) {
-                phase.put("measurable", yamlParsePhase.getMeasurable());
+                phase.getProperties().put("measurable", yamlParsePhase.getMeasurable());
             }
 
             configParams.getPhasesParams().add(phase);
+
+            if (yamlParsePhase.getRunmode() != null) {
+                setRunmode(yamlParsePhase.getRunmode());
+            }
 
             if (yamlParsePhase.getTests() != null) {
                 setTests(yamlParsePhase.getTests());

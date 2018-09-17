@@ -33,8 +33,8 @@ public class Phase {
 
     @ConfigArgSet(required = false, desc = "Option to specify whether the metrics of this phase will be taken into consideration",
         defaultValue = DEFAULT_MEASURABILITY)
-    public void setMeasurable(String measurability) {
-        this.measurabile = Boolean.valueOf(measurability);
+    public void setMeasurable(String measurabile) {
+        this.measurabile = Boolean.valueOf(measurabile);
     }
 
     @ConfigArgGet
