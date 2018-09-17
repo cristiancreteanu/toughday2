@@ -23,11 +23,14 @@ import java.util.*;
  */
 public class ConfigParams implements Serializable {
     private static final Logger LOGGER = LogManager.getLogger(ConfigParams.class);
-    
+
+    private List<Map<String, Object>> phasesParams = new ArrayList<>();
     private Map<String, Object> globalParams = new HashMap<>();
     private Map<String, Object> publishModeParams = new HashMap<>();
     private Map<String, Object> runModeParams = new HashMap<>();
     private List<Map.Entry<Actions, MetaObject>> items = new ArrayList<>();
+
+    private Set<String> metricsOrPublishersIdentifiers = new HashSet<>();
 
     public static class MetaObject  implements Serializable {
         private Map<String, Object> parameters;
@@ -96,21 +99,54 @@ public class ConfigParams implements Serializable {
     }
 
     public void setRunModeParams(Map<String, Object> runModeParams) {
-        this.runModeParams = runModeParams;
+        if (phasesParams.size() > 0) {
+            phasesParams.get(phasesParams.size() - 1).put("runmode", runModeParams);
+        } else {
+            this.runModeParams = runModeParams;
+        }
     }
 
-    public void configItem(String testName, Map<String, Object> params) {
-        items.add(new AbstractMap.SimpleEntry<>(Actions.CONFIG, new NamedMetaObject(testName, params)));
+    public void createPhasewWithParams(Map<String, Object> phaseParams) {
+        phasesParams.add(phaseParams);
     }
 
     public void addItem(String itemName, Map<String, Object> params) {
-        items.add(new AbstractMap.SimpleEntry<>(Actions.ADD, new ClassMetaObject(itemName, params)));
+        Map.Entry<Actions, MetaObject> newEntry = new AbstractMap.SimpleEntry<>(Actions.ADD,
+                new ClassMetaObject(itemName, params));
+
+        addToItemsOrLastPhase(newEntry, itemName);
+    }
+
+    public void configItem(String itemName, Map<String, Object> params) {
+        Map.Entry<Actions, MetaObject> newEntry = new AbstractMap.SimpleEntry<>(Actions.CONFIG,
+                new NamedMetaObject(itemName, params));
+
+        addToItemsOrLastPhase(newEntry, itemName);
     }
 
     public void excludeItem(String itemName) {
-        items.add(new AbstractMap.SimpleEntry<>(Actions.EXCLUDE, new NamedMetaObject(itemName, null)));
+        Map.Entry<Actions, MetaObject> newEntry = new AbstractMap.SimpleEntry<>(Actions.EXCLUDE,
+                new NamedMetaObject(itemName, null));
+
+        addToItemsOrLastPhase(newEntry, itemName);
     }
 
+    private void addToItemsOrLastPhase(Map.Entry<Actions, MetaObject> newEntry, String identifier) {
+        if (!metricsOrPublishersIdentifiers.contains(identifier) && !phasesParams.isEmpty()) {
+            if (!phasesParams.get(phasesParams.size() - 1).containsKey("items")) {
+                phasesParams.get(phasesParams.size() - 1).put("items",
+                        new ArrayList<>(Collections.singletonList(newEntry)));
+            } else {
+                ((ArrayList)(phasesParams.get(phasesParams.size() - 1).get("items"))).add(newEntry);
+            }
+        } else {
+            items.add(newEntry);
+        }
+    }
+
+    public List<Map<String, Object>> getPhasesParams() {
+        return phasesParams;
+    }
 
     public Map<String, Object> getGlobalParams(){
         return globalParams;
@@ -135,5 +171,9 @@ public class ConfigParams implements Serializable {
 
     public List<Map.Entry<Actions, MetaObject>> getItems() {
         return items;
+    }
+
+    public Set<String> getMetricsOrPublishersIdentifiers() {
+        return metricsOrPublishersIdentifiers;
     }
 }

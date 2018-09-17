@@ -56,7 +56,8 @@ public class Engine {
     private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private PublishMode publishMode;
-    private RunMode runMode;
+    private List<Phase> phases = new ArrayList<>();
+    private RunMode currentRunmode;
     private volatile boolean testsRunning;
 
     /**
@@ -71,8 +72,8 @@ public class Engine {
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         this.configuration = configuration;
         this.globalArgs = configuration.getGlobalArgs();
-        this.runMode = configuration.getRunMode();
         this.publishMode = configuration.getPublishMode();
+        this.phases = configuration.getPhases();
 
         //TODO find a better way to do this
         publishMode.setEngine(this);
@@ -318,17 +319,15 @@ public class Engine {
         publishMode.getGlobalRunMap().reinitStartTimes();
 
         // Create the result aggregator thread
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, runMode.getRunContext());
-        engineExecutorService.execute(resultAggregator);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this);
 
         // Create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), runMode.getRunContext(), Thread.currentThread());
-        engineExecutorService.execute(timeoutChecker);
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread());
 
         Thread shutdownHook = new Thread() {
             public void run() {
                 try {
-                    runMode.finishExecutionAndAwait();
+                    currentRunmode.finishExecutionAndAwait();
                     String finishTime = Engine.getCurrentDateTime();
 
                     // interrupt extra test threads
@@ -342,7 +341,7 @@ public class Engine {
                     timeoutChecker.finishExecution();
                     resultAggregator.finishExecution();
                     resultAggregator.aggregateResults();
-                    shutdownAndAwaitTermination(runMode.getExecutorService());
+                    shutdownAndAwaitTermination(currentRunmode.getExecutorService());
                     shutdownAndAwaitTermination(engineExecutorService);
                     publishMode.publish(getGlobalRunMap().getCurrentTestResults());
                     publishMode.publishFinalResults(resultAggregator.filterResults());
@@ -356,12 +355,35 @@ public class Engine {
         };
 
         Runtime.getRuntime().addShutdownHook(shutdownHook);
-        this.testsRunning = true;
-        runMode.runTests(this);
 
-        // This thread sleeps until the duration
+        long timePassed = 0;
         try {
-            Thread.sleep(globalArgs.getDuration() * 1000L);
+            for (Phase phase : phases) {
+                currentRunmode = phase.getRunMode();
+                long currentDuration = phase.getDuration();
+
+                // to check if this is ok, with runningTests and synchronization
+                resultAggregator.setContext(currentRunmode.getRunContext());
+                timeoutChecker.setContext(currentRunmode.getRunContext());
+                if (!this.testsRunning) {
+                    testsRunning = true;
+                    engineExecutorService.execute(resultAggregator);
+                    engineExecutorService.execute(timeoutChecker);
+                }
+                currentRunmode.runTests(this);
+
+                if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
+                    if (currentDuration < globalArgs.getDuration() - timePassed) {
+                        Thread.sleep(currentDuration * 1000L);
+
+                        phase.getRunMode().finishExecutionAndAwait();
+                        timePassed += currentDuration;
+                    } else {
+                        Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
+                        break;
+                    }
+                }
+            }
         } catch (InterruptedException e) {
             LOG.info("Engine Interrupted", e);
         } finally {

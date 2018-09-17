@@ -20,6 +20,7 @@ import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
 import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.config.parsers.cli.CliParser;
 import com.adobe.qe.toughday.internal.core.config.parsers.yaml.YamlParser;
+import com.adobe.qe.toughday.internal.core.engine.Phase;
 import com.adobe.qe.toughday.internal.core.engine.PublishMode;
 import com.adobe.qe.toughday.internal.core.engine.RunMode;
 import com.adobe.qe.toughday.metrics.Metric;
@@ -57,17 +58,19 @@ public class Configuration {
 
     private static final String DEFAULT_RUN_MODE = "normal";
     private static final String DEFAULT_PUBLISH_MODE = "simple";
+    private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
+    private static String TIMESTAMP = Timestamp.START_TIME;
+
     PredefinedSuites predefinedSuites = new PredefinedSuites();
     private GlobalArgs globalArgs;
     private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
+    private List<Phase> phases = new ArrayList<>();
     private boolean defaultSuiteAddedFromConfigExclude = false;
     private boolean anyMetricAdded = false;
     private boolean anyPublisherAdded = false;
     private boolean allTestsExcluded = false;
-    private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
-    private static String TIMESTAMP = Timestamp.START_TIME;
 
     private void handleExtensions(ConfigParams configParams) {
         List<String> extensionList = new ArrayList<>();
@@ -660,6 +663,10 @@ public class Configuration {
     private ConfigurationParser getConfigurationParser(String[] args) {
         //TODO Insert logic here to select from other types of parsers
         return new CliParser();
+    }
+
+    public List<Phase> getPhases() {
+        return phases;
     }
 
     public static Map<Object, HashSet<String>> getRequiredFieldsForClassAdded() {

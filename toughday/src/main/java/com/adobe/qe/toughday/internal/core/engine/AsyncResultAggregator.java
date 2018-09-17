@@ -30,11 +30,9 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
 
     /**
      * Constructor.
-     * @param context list of test workers from this engine.
      */
-    public AsyncResultAggregator(Engine engine, RunMode.RunContext context) {
+    public AsyncResultAggregator(Engine engine) {
         this.engine = engine;
-        this.context = context;
     }
 
     /**
@@ -118,4 +116,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
         }
     }
 
+    public void setContext(RunMode.RunContext context) {
+        this.context = context;
+    }
 }

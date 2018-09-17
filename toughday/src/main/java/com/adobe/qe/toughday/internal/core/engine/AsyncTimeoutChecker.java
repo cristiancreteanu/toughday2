@@ -30,12 +30,10 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
     /**
      * Constructor.
      * @param testSuite
-     * @param context list of test workers from this engine.
      */
-    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, RunMode.RunContext context, Thread mainThread) {
+    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread) {
         this.engine = engine;
         this.mainThread = mainThread;
-        this.context = context;
         this.testSuite = testSuite;
         minTimeout = engine.getGlobalArgs().getTimeout();
         for(AbstractTest test : testSuite.getTests()) {
@@ -103,5 +101,9 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
         } catch (Throwable e) {
             Engine.LOG.error("Unexpected exception caught", e);
         }
+    }
+
+    public void setContext(RunMode.RunContext context) {
+        this.context = context;
     }
 }

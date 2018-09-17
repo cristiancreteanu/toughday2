@@ -39,6 +39,7 @@ import java.util.*;
  * Parser for the command line arguments. It also prints the help message.
  */
 public class CliParser implements ConfigurationParser {
+    public final static List<Object> parserArgs = new ArrayList<>();
     private static final Logger LOGGER = LogManager.getLogger(CliParser.class);
 
     private static final String HELP_HEADER_FORMAT_WITH_TAGS = "   %-42s %-75s %-20s   %s";
@@ -50,7 +51,7 @@ public class CliParser implements ConfigurationParser {
     private static final String SUITE_HELP_HEADER = String.format("   %-40s %-40s   %s", "Suite", "Tags", "Description");
     private static Map<Integer, Map<String, ConfigArgSet>> availableGlobalArgs = new HashMap<>();
     private static List<ParserArgHelp> parserArgHelps = new ArrayList<>();
-    public final static List<Object> parserArgs = new ArrayList<>();
+
 
     public static final List<String> availableHelpOptions = Collections.unmodifiableList(
             new ArrayList<String>() {{
@@ -236,10 +237,27 @@ public class CliParser implements ConfigurationParser {
         for (int i = 0; i < cmdLineArgs.length; i++) {
             if (cmdLineArgs[i].startsWith("--")) {
                 String arg = cmdLineArgs[i].substring(2);
-                if(Actions.isAction(arg)) {
+                if (arg.equals("phase")) {
+                    HashMap<String, Object> args = parseObjectProperties(i + 1, cmdLineArgs);
+                    configParams.createPhasewWithParams(args);
+                } else if(Actions.isAction(arg)) {
                     Actions action = Actions.fromString(arg);
                     String identifier = cmdLineArgs[i + 1];
                     HashMap<String, Object> args = parseObjectProperties(i+2, cmdLineArgs);
+
+                    // this will be removed/changed when Metrics and Publishers become local to phases
+                    Set<String> metricsOrPublishersIdentifiers = configParams.getMetricsOrPublishersIdentifiers();
+                    if (ReflectionsContainer.getInstance().isMetricClass(identifier)
+                            || ReflectionsContainer.getInstance().isPublisherClass(identifier)) {
+                        metricsOrPublishersIdentifiers.add(identifier);
+                        if (args.containsKey("name")) {
+                            metricsOrPublishersIdentifiers.add(args.get("name").toString());
+                        }
+                    } else if (metricsOrPublishersIdentifiers.contains(identifier)) {
+                        if (args.containsKey("name")) {
+                            metricsOrPublishersIdentifiers.add(args.get("name").toString());
+                        }
+                    }
                     action.apply(configParams, identifier, args);
                 } else if (arg.equals("publishmode")) {
                     configParams.setPublishModeParams(parseObjectProperties(i+1, cmdLineArgs));
