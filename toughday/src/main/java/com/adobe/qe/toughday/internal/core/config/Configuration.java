@@ -212,7 +212,7 @@ public class Configuration {
 
         applyLogLevel(globalArgs.getLogLevel());
 
-        this.runMode = getRunMode(configParams);
+        this.runMode = getRunMode(configParams.getRunModeParams());
         this.publishMode = getPublishMode(configParams);
         suite = getTestSuite(globalArgsMeta);
 
@@ -223,13 +223,13 @@ public class Configuration {
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             switch (item.getKey()) {
                 case ADD:
-                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items);
+                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, this.suite);
                     break;
                 case CONFIG:
-                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items);
+                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, this.suite);
                     break;
                 case EXCLUDE:
-                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName());
+                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), this.suite);
                     break;
             }
         }
@@ -262,20 +262,53 @@ public class Configuration {
             }
         }
 
+        // configuring phases
         for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
+            if (phaseParams.getProperties().get("name") != null) {
+                if (ConfigParams.PhaseParams.namedPhases.containsKey(phaseParams.getProperties().get("name").toString())) {
+                    throw new IllegalArgumentException("There is already a phase named \"" + phaseParams.getProperties().get("name") + "\".");
+                }
+
+                ConfigParams.PhaseParams.namedPhases.put(phaseParams.getProperties().get("name").toString(), phaseParams);
+            }
+        }
+
+        for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
+            defaultSuiteAddedFromConfigExclude = false;
+            allTestsExcluded = false;
+
+            if (phaseParams.getProperties().get("useconfig") != null) {
+                if (!ConfigParams.PhaseParams.namedPhases.containsKey(phaseParams.getProperties().get("useconfig").toString())) {
+                    throw new IllegalArgumentException("Could not find phase named \"" +
+                            phaseParams.getProperties().get("useconfig") + "\".");
+                }
+
+                phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(phaseParams.getProperties().get("useconfig").toString()));
+            }
+
+            TestSuite suite = new TestSuite();
+
             for (Map.Entry<Actions, ConfigParams.MetaObject> test : phaseParams.getTests()) {
                 switch (test.getKey()) {
                     case ADD:
-                        addItem((ConfigParams.ClassMetaObject) test.getValue(), items);
+                        addItem((ConfigParams.ClassMetaObject) test.getValue(), items, suite);
                         break;
                     case CONFIG:
-                        configItem((ConfigParams.NamedMetaObject) test.getValue(), items);
+                        configItem((ConfigParams.NamedMetaObject) test.getValue(), items, suite);
                         break;
                     case EXCLUDE:
-                        excludeItem(((ConfigParams.NamedMetaObject)test.getValue()).getName());
+                        excludeItem(((ConfigParams.NamedMetaObject)test.getValue()).getName(), suite);
                         break;
                 }
             }
+
+            if (!defaultSuiteAddedFromConfigExclude && suite.getTests().isEmpty()) {
+                suite = this.suite;
+            }
+
+            RunMode runMode = getRunMode(phaseParams.getRunmode());
+
+            phases.add(new Phase(phaseParams.getProperties(), suite, runMode));
         }
 
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
@@ -290,7 +323,11 @@ public class Configuration {
         }
     }
 
-    private void addItem(ConfigParams.ClassMetaObject itemToAdd, Map<String, Class> items) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private void createPhases() {
+
+    }
+
+    private void addItem(ConfigParams.ClassMetaObject itemToAdd, Map<String, Class> items, TestSuite suite) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
             if (defaultSuiteAddedFromConfigExclude) {
                 throw new IllegalStateException("Configuration/exclusion of test ahead of addition");
@@ -338,7 +375,7 @@ public class Configuration {
         }
     }
 
-    private void configItem(ConfigParams.NamedMetaObject itemMeta, Map<String, Class> items) throws InvocationTargetException, IllegalAccessException {
+    private void configItem(ConfigParams.NamedMetaObject itemMeta, Map<String, Class> items, TestSuite suite) throws InvocationTargetException, IllegalAccessException {
         // if the suite does not contain the provided name, it might be
         // a publisher/metric (class) name OR, in case no tests have been added,
         // the name of a test from the default suite
@@ -388,7 +425,7 @@ public class Configuration {
         }
     }
 
-    private void excludeItem(String itemName) {
+    private void excludeItem(String itemName, TestSuite suite) {
         if (!suite.contains(itemName) && !allTestsExcluded && suite.getTests().isEmpty()
                 && !ReflectionsContainer.getInstance().isPublisherClass(itemName)
                 && !ReflectionsContainer.getInstance().isMetricClass(itemName)
@@ -571,9 +608,8 @@ public class Configuration {
     }
 
 
-    private RunMode getRunMode(ConfigParams configParams)
+    private RunMode getRunMode(Map<String, Object> runModeParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Map<String, Object> runModeParams = configParams.getRunModeParams();
         if (runModeParams.size() != 0 && !runModeParams.containsKey("type")) {
             throw new IllegalStateException("The Run mode doesn't have a type");
         }

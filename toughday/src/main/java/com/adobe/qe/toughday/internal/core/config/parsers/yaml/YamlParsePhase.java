@@ -6,6 +6,7 @@ import java.util.Map;
 public class YamlParsePhase {
     private String name;
     private Boolean measurabile;
+    private String useconfig;
     private List<YamlParseAction> tests;
     private Map<String, Object> runmode;
 
@@ -39,5 +40,13 @@ public class YamlParsePhase {
 
     public void setRunmode(Map<String, Object> runmode) {
         this.runmode = runmode;
+    }
+
+    public String getUseconfig() {
+        return useconfig;
+    }
+
+    public void setUseconfig(String useconfig) {
+        this.useconfig = useconfig;
     }
 }

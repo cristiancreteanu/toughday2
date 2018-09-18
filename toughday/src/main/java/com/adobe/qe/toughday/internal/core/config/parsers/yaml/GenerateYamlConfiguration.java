@@ -95,8 +95,8 @@ public class GenerateYamlConfiguration {
 
         List<ConfigParams.PhaseParams> phasesParams = configParams.getPhasesParams();
         for (int i = 0; i < phasesParams.size(); ++i) {
-            YamlDumpPhase yamlParsePhase = new YamlDumpPhase(phasesParams.get(i).getProperties(), phasesParams.get(i).getRunmode());
-            yamlDumpPhases.add(yamlParsePhase);
+            YamlDumpPhase yamlDumpPhase = new YamlDumpPhase(phasesParams.get(i).getProperties(), phasesParams.get(i).getRunmode());
+            yamlDumpPhases.add(yamlDumpPhase);
 
             for (Map.Entry<Actions, ConfigParams.MetaObject> item : phasesParams.get(i).getTests()) {
                 chooseAction(item, i);

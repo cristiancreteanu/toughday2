@@ -35,6 +35,7 @@ public class YamlDumpPhase {
     }
 
     public String getUseconfig() {
+
         return useconfig != null ? useconfig : "";
     }
 

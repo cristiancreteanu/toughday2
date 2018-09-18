@@ -71,8 +71,9 @@ public class ConfigParams implements Serializable {
     }
 
     public static class PhaseParams implements Serializable {
-        Map<String, Object> properties;
-        Map<String, Object> runmode;
+        public static Map<String, PhaseParams> namedPhases = new HashMap<>();
+        private Map<String, Object> properties = new HashMap<>();
+        private Map<String, Object> runmode = new HashMap<>();
         private List<Map.Entry<Actions, MetaObject>> tests = new ArrayList<>();
 
         public Map<String, Object> getProperties() {
@@ -81,6 +82,10 @@ public class ConfigParams implements Serializable {
 
         public void setProperties(Map<String, Object> properties) {
             this.properties = properties;
+
+            if (properties.get("name").toString() != null) {
+                namedPhases.put(properties.get("name").toString(), this);
+            }
         }
 
         public Map<String, Object> getRunmode() {
@@ -96,6 +101,32 @@ public class ConfigParams implements Serializable {
         }
 
         public void setTests(List<Map.Entry<Actions, MetaObject>> tests) {
+            this.tests = tests;
+        }
+
+        public void merge(PhaseParams phaseParams) {
+            properties.remove("useconfig");
+
+            String useconfig = phaseParams.properties.get("useconfig") != null ? phaseParams.getProperties().get("useconfig").toString() : null;
+
+            if (useconfig != null && !namedPhases.containsKey(useconfig)) {
+                throw new IllegalArgumentException("Could not find phase named \"" +
+                        phaseParams.getProperties().get("useconfig") + "\".");
+            } else if (useconfig != null) {
+                phaseParams.merge(namedPhases.get(useconfig));
+            }
+
+            Map<String, Object> props = deepClone(phaseParams.properties);
+            props.remove("name");
+            this.properties.putAll(props);
+
+            if (!runmode.isEmpty()) {
+                this.runmode = phaseParams.runmode;
+            }
+
+            List<Map.Entry<Actions, MetaObject>> tests = new ArrayList<>(phaseParams.tests);
+            tests.addAll(this.tests);
+
             this.tests = tests;
         }
     }

@@ -2,22 +2,29 @@ package com.adobe.qe.toughday.internal.core.engine;
 
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.internal.core.TestSuite;
-import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
+
+import java.util.Map;
 
 public class Phase {
     private static final String DEFAULT_MEASURABILITY = "true";
 
     private String name;
-    private boolean measurabile;
+    private Boolean measurable;
     private String useconfig;
-    private long duration;
+    private Long duration;
 
     private TestSuite testSuite;
     private RunMode runMode;
 
-    public Phase(ConfigParams.PhaseParams phaseParams) {
+    public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode) {
+        name = properties.containsKey("name") ? properties.get("name").toString() : "";
+        measurable = properties.containsKey("measurable") ? Boolean.valueOf(properties.get("measurable").toString()) : null;
+        useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : "";
+        duration = properties.containsKey("duration") ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
+
 
     }
 
@@ -33,13 +40,13 @@ public class Phase {
 
     @ConfigArgGet
     public boolean getMeasurable() {
-        return measurabile;
+        return measurable;
     }
 
     @ConfigArgSet(required = false, desc = "Option to specify whether the metrics of this phase will be taken into consideration",
         defaultValue = DEFAULT_MEASURABILITY)
     public void setMeasurable(String measurabile) {
-        this.measurabile = Boolean.valueOf(measurabile);
+        this.measurable = Boolean.valueOf(measurabile);
     }
 
     @ConfigArgGet
