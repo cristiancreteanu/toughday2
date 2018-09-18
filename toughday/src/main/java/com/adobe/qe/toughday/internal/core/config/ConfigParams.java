@@ -82,10 +82,6 @@ public class ConfigParams implements Serializable {
 
         public void setProperties(Map<String, Object> properties) {
             this.properties = properties;
-
-            if (properties.get("name").toString() != null) {
-                namedPhases.put(properties.get("name").toString(), this);
-            }
         }
 
         public Map<String, Object> getRunmode() {
@@ -104,23 +100,27 @@ public class ConfigParams implements Serializable {
             this.tests = tests;
         }
 
-        public void merge(PhaseParams phaseParams) {
-            properties.remove("useconfig");
-
+        public void merge(PhaseParams phaseParams, Set<String> checked) { // de adaugat verificare daca e loop
             String useconfig = phaseParams.properties.get("useconfig") != null ? phaseParams.getProperties().get("useconfig").toString() : null;
 
             if (useconfig != null && !namedPhases.containsKey(useconfig)) {
                 throw new IllegalArgumentException("Could not find phase named \"" +
                         phaseParams.getProperties().get("useconfig") + "\".");
             } else if (useconfig != null) {
-                phaseParams.merge(namedPhases.get(useconfig));
+                if (checked.contains(useconfig)) {
+                    throw new IllegalArgumentException("Trying to use the configuration of another phase results in loop.");
+                }
+
+                checked.add(useconfig);
+                phaseParams.merge(namedPhases.get(useconfig), checked);
             }
 
             Map<String, Object> props = deepClone(phaseParams.properties);
             props.remove("name");
             this.properties.putAll(props);
+            properties.remove("useconfig");
 
-            if (!runmode.isEmpty()) {
+            if (runmode.isEmpty()) {
                 this.runmode = phaseParams.runmode;
             }
 

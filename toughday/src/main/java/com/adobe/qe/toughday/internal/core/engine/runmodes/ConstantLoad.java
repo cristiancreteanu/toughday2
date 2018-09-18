@@ -75,7 +75,7 @@ public class ConstantLoad implements RunMode {
     @Override
     public void runTests(Engine engine) throws Exception {
         Configuration configuration = engine.getConfiguration();
-        TestSuite testSuite = configuration.getTestSuite();
+        TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
         this.testCache = new TestCache(testSuite);
 
         for(int i = 0; i < load; i++) {

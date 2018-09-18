@@ -69,7 +69,7 @@ public class Normal implements RunMode {
     @Override
     public void runTests(Engine engine) throws Exception {
         Configuration configuration = engine.getConfiguration();
-        TestSuite testSuite = configuration.getTestSuite();
+        TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
         testsExecutorService = Executors.newFixedThreadPool(concurrency);
 

@@ -25,7 +25,8 @@ public class Phase {
         useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : "";
         duration = properties.containsKey("duration") ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
 
-
+        this.testSuite = testSuite;
+        this.runMode = runMode;
     }
 
     @ConfigArgGet
@@ -60,7 +61,7 @@ public class Phase {
     }
 
     @ConfigArgGet
-    public long getDuration() {
+    public Long getDuration() {
         return duration;
     }
 

@@ -58,6 +58,7 @@ public class Engine {
     private PublishMode publishMode;
     private List<Phase> phases = new ArrayList<>();
     private RunMode currentRunmode;
+    private Phase currentPhase;
     private volatile boolean testsRunning;
 
     /**
@@ -78,8 +79,10 @@ public class Engine {
         //TODO find a better way to do this
         publishMode.setEngine(this);
 
-        for(AbstractTest test : configuration.getTestSuite().getTests()) {
-            add(test);
+        for (Phase phase : phases) {
+            for(AbstractTest test : phase.getTestSuite().getTests()) {
+                add(test);
+            }
         }
     }
 
@@ -306,7 +309,7 @@ public class Engine {
         
         TestSuite testSuite = configuration.getTestSuite();
 
-        // Run the setup step of the suite
+//         Run the setup step of the suite
         for (SuiteSetup setupStep : testSuite.getSetupStep()) {
             setupStep.setup();
         }
@@ -360,7 +363,7 @@ public class Engine {
         try {
             for (Phase phase : phases) {
                 currentRunmode = phase.getRunMode();
-                long currentDuration = phase.getDuration();
+                Long currentDuration = phase.getDuration();
 
                 // to check if this is ok, with runningTests and synchronization
                 resultAggregator.setContext(currentRunmode.getRunContext());
@@ -370,6 +373,8 @@ public class Engine {
                     engineExecutorService.execute(resultAggregator);
                     engineExecutorService.execute(timeoutChecker);
                 }
+
+                currentPhase = phase;
                 currentRunmode.runTests(this);
 
                 if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
@@ -467,5 +472,9 @@ public class Engine {
             // Preserve interrupt status
             Thread.currentThread().interrupt();
         }
+    }
+
+    public Phase getCurrentPhase() {
+        return currentPhase;
     }
 }

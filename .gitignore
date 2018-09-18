@@ -8,3 +8,5 @@ target/
 workspace/
 dependency-reduced-pom.xml
 .DS_Store
+results.raw.csv
+toughday_20*.yaml

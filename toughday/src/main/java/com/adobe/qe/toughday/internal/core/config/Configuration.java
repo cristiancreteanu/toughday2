@@ -262,7 +262,23 @@ public class Configuration {
             }
         }
 
-        // configuring phases
+        createPhases(configParams, items);
+
+        checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
+        for (AbstractTest test : suite.getTests()) {
+            test.setGlobalArgs(this.globalArgs);
+        }
+
+        // Check if we should create a configuration file for this run.
+        if (this.getGlobalArgs().getSaveConfig()) {
+            GenerateYamlConfiguration generateYaml = new GenerateYamlConfiguration(copyOfConfigParams, items);
+            generateYaml.createYamlConfigurationFile();
+        }
+    }
+
+    private void createPhases(ConfigParams configParams, Map<String, Class> items) throws NoSuchMethodException,
+            InstantiationException, IllegalAccessException, InvocationTargetException {
+
         for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
             if (phaseParams.getProperties().get("name") != null) {
                 if (ConfigParams.PhaseParams.namedPhases.containsKey(phaseParams.getProperties().get("name").toString())) {
@@ -277,13 +293,25 @@ public class Configuration {
             defaultSuiteAddedFromConfigExclude = false;
             allTestsExcluded = false;
 
+            String useconfig = null;
             if (phaseParams.getProperties().get("useconfig") != null) {
-                if (!ConfigParams.PhaseParams.namedPhases.containsKey(phaseParams.getProperties().get("useconfig").toString())) {
-                    throw new IllegalArgumentException("Could not find phase named \"" +
-                            phaseParams.getProperties().get("useconfig") + "\".");
+                useconfig = phaseParams.getProperties().get("useconfig").toString();
+                if (!ConfigParams.PhaseParams.namedPhases.containsKey(useconfig)) {
+                    throw new IllegalArgumentException("Could not find phase named \"" + useconfig + "\".");
                 }
 
-                phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(phaseParams.getProperties().get("useconfig").toString()));
+                String name = null;
+                if (phaseParams.getProperties().get("name") != null) {
+                    name = phaseParams.getProperties().get("name").toString();
+                }
+
+                if (name != null) {
+                    phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
+                            new HashSet<>(Arrays.asList(name, useconfig)));
+                } else {
+                    phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
+                            new HashSet<>(Collections.singletonList(useconfig)));
+                }
             }
 
             TestSuite suite = new TestSuite();
@@ -310,21 +338,6 @@ public class Configuration {
 
             phases.add(new Phase(phaseParams.getProperties(), suite, runMode));
         }
-
-        checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
-        for (AbstractTest test : suite.getTests()) {
-            test.setGlobalArgs(this.globalArgs);
-        }
-
-        // Check if we should create a configuration file for this run.
-        if (this.getGlobalArgs().getSaveConfig()) {
-            GenerateYamlConfiguration generateYaml = new GenerateYamlConfiguration(copyOfConfigParams, items);
-            generateYaml.createYamlConfigurationFile();
-        }
-    }
-
-    private void createPhases() {
-
     }
 
     private void addItem(ConfigParams.ClassMetaObject itemToAdd, Map<String, Class> items, TestSuite suite) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
