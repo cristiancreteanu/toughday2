@@ -11,7 +11,6 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
-import com.adobe.qe.toughday.internal.core.config.Actions;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.ConfigurationParser;
 import com.adobe.qe.toughday.internal.core.config.ParserArgHelp;
@@ -20,7 +19,6 @@ import org.yaml.snakeyaml.Yaml;
 import org.yaml.snakeyaml.constructor.Constructor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.util.Map;
 
 /**
  * Created by tuicu on 26/12/16.

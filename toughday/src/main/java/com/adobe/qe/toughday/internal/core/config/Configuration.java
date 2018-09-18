@@ -262,6 +262,22 @@ public class Configuration {
             }
         }
 
+        for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
+            for (Map.Entry<Actions, ConfigParams.MetaObject> test : phaseParams.getTests()) {
+                switch (test.getKey()) {
+                    case ADD:
+                        addItem((ConfigParams.ClassMetaObject) test.getValue(), items);
+                        break;
+                    case CONFIG:
+                        configItem((ConfigParams.NamedMetaObject) test.getValue(), items);
+                        break;
+                    case EXCLUDE:
+                        excludeItem(((ConfigParams.NamedMetaObject)test.getValue()).getName());
+                        break;
+                }
+            }
+        }
+
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
         for (AbstractTest test : suite.getTests()) {
             test.setGlobalArgs(this.globalArgs);

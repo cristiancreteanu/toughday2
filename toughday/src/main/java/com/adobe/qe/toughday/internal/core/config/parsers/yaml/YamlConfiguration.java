@@ -11,11 +11,8 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
-import com.adobe.qe.toughday.internal.core.config.Actions;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 

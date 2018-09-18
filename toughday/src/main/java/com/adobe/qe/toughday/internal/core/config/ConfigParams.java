@@ -16,7 +16,6 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.*;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * An object that has the configuration params parsed, but still in String form.
@@ -98,20 +97,6 @@ public class ConfigParams implements Serializable {
 
         public void setTests(List<Map.Entry<Actions, MetaObject>> tests) {
             this.tests = tests;
-        }
-
-        public Map<String, Object> toHashMap() {
-            Map<String, Object> allProperties = new HashMap<>(properties);
-
-            if (runmode != null) {
-                allProperties.put("runmode", runmode);
-            }
-
-            if (tests != null) {
-                allProperties.put("tests", tests);
-            }
-
-            return allProperties;
         }
     }
 

@@ -1,8 +1,5 @@
 package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
-import com.adobe.qe.toughday.internal.core.config.Actions;
-import com.adobe.qe.toughday.internal.core.config.ConfigParams;
-
 import java.util.List;
 import java.util.Map;
 

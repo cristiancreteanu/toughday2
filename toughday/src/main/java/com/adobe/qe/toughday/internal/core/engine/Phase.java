@@ -3,6 +3,7 @@ package com.adobe.qe.toughday.internal.core.engine;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.core.TestSuite;
+import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 
 public class Phase {
@@ -15,6 +16,10 @@ public class Phase {
 
     private TestSuite testSuite;
     private RunMode runMode;
+
+    public Phase(ConfigParams.PhaseParams phaseParams) {
+
+    }
 
     @ConfigArgGet
     public String getName() {
