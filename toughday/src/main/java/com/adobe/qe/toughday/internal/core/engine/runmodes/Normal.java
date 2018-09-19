@@ -45,6 +45,8 @@ public class Normal implements RunMode {
     private int concurrency = DEFAULT_CONCURRENCY;
     private long waitTime = DEFAULT_WAIT_TIME;
 
+    private Boolean measurable = true;
+
     @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
     public void setConcurrency(String concurrencyString) {
         this.concurrency = Integer.parseInt(concurrencyString);
@@ -71,6 +73,7 @@ public class Normal implements RunMode {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
+        this.measurable = engine.getCurrentPhase().getMeasurable();
         testsExecutorService = Executors.newFixedThreadPool(concurrency);
 
         // Create the test worker threads
@@ -110,6 +113,11 @@ public class Normal implements RunMode {
                         return false;
                 }
                 return true;
+            }
+
+            @Override
+            public Boolean isMeasurable() {
+                return measurable;
             }
         };
     }

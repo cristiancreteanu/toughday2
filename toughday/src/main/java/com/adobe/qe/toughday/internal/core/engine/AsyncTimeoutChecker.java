@@ -26,16 +26,18 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
     private RunMode.RunContext context;
     private long minTimeout;
     private TestSuite testSuite;
+    private RunMode.RunContext finalContext;
 
     /**
      * Constructor.
      * @param testSuite
      */
-    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread) {
+    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread, RunMode.RunContext finalContext) {
         this.engine = engine;
         this.mainThread = mainThread;
         this.testSuite = testSuite;
-        minTimeout = engine.getGlobalArgs().getTimeout();
+        this.finalContext = finalContext;
+        this.minTimeout = engine.getGlobalArgs().getTimeout();
         for(AbstractTest test : testSuite.getTests()) {
             if(test.getTimeout() < 0) {
                 continue;
@@ -88,12 +90,15 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
                         interruptWorkerIfTimeout(worker);
                     }
                 }
-//                if (context.isRunFinished()) {
-//                    this.finishExecution();
-//                    if(engine.areTestsRunning()) {
-//                        mainThread.interrupt();
-//                    }
-//                }
+                if (context.isRunFinished()) {
+                    if (context == finalContext) {
+                        this.finishExecution();
+                    }
+
+                    if(engine.areTestsRunning()) {
+                        mainThread.interrupt();
+                    }
+                }
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

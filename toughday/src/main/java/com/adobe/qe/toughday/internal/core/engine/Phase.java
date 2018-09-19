@@ -20,7 +20,7 @@ public class Phase {
 
     public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode) {
         name = properties.containsKey("name") ? properties.get("name").toString() : "";
-        measurable = properties.containsKey("measurable") ? Boolean.valueOf(properties.get("measurable").toString()) : null;
+        measurable = properties.containsKey("measurable") ? Boolean.valueOf(properties.get("measurable").toString()) : true;
         useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : "";
         duration = properties.containsKey("duration") ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
 
@@ -39,7 +39,7 @@ public class Phase {
     }
 
     @ConfigArgGet
-    public boolean getMeasurable() {
+    public Boolean getMeasurable() {
         return measurable;
     }
 

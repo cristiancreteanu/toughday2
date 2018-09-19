@@ -48,6 +48,8 @@ public class ConstantLoad implements RunMode {
     private int load = DEFAULT_LOAD;
     private TestCache testCache;
 
+    private Boolean measurable = true;
+
     @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
     public void setLoad(String load) { this.load = Integer.parseInt(load); }
 
@@ -77,6 +79,7 @@ public class ConstantLoad implements RunMode {
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
         this.testCache = new TestCache(testSuite);
+        this.measurable = engine.getCurrentPhase().getMeasurable();
 
         for(int i = 0; i < load; i++) {
             synchronized (runMaps) {
@@ -103,6 +106,11 @@ public class ConstantLoad implements RunMode {
             @Override
             public boolean isRunFinished() {
                 return scheduler.isFinished();
+            }
+
+            @Override
+            public Boolean isMeasurable() {
+                return measurable;
             }
         };
     }

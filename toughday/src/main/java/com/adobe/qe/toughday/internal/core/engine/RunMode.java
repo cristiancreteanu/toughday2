@@ -29,5 +29,6 @@ public interface RunMode {
         Collection<AsyncTestWorker> getTestWorkers();
         Collection<RunMap> getRunMaps();
         boolean isRunFinished();
+        Boolean isMeasurable();
     }
 }

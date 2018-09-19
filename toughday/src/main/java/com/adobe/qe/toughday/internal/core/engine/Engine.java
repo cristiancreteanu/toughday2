@@ -323,10 +323,10 @@ public class Engine {
         publishMode.getGlobalRunMap().reinitStartTimes(); // s ar putea sa fie nevoie sa folosesc asta si prin alte parti
 
         // Create the result aggregator thread
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, phases.get(phases.size() - 1).getRunMode().getRunContext());
 
         // Create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread());
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread(), phases.get(phases.size() - 1).getRunMode().getRunContext());
 
         Thread shutdownHook = new Thread() {
             public void run() {
@@ -379,27 +379,26 @@ public class Engine {
                 timeoutChecker.setContext(currentRunmode.getRunContext());
                 testsRunning = true;
 
-                if (resultAggregator.isFinished()) {
-                    engineExecutorService.execute(resultAggregator);
-                }
-
-                if (timeoutChecker.isFinished()) {
-                    engineExecutorService.execute(timeoutChecker);
-                }
-
                 currentPhase = phase;
                 currentRunmode.runTests(this);
+                long start = System.currentTimeMillis();
 
-                if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
-                    if (currentDuration < globalArgs.getDuration() - timePassed) {
-                        Thread.sleep(currentDuration * 1000L);
+                try {
+                    if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
+                        if (currentDuration < globalArgs.getDuration() - timePassed) {
+                            Thread.sleep(currentDuration * 1000L);
 
-                        phase.getRunMode().finishExecutionAndAwait();
-                        timePassed += currentDuration;
-                    } else {
-                        Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
-                        break;
+                            phase.getRunMode().finishExecutionAndAwait();
+                            timePassed += currentDuration;
+                        } else {
+                            Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
+                            break;
+                        }
                     }
+                } catch (InterruptedException e) {
+                    LOG.info("Phase interrupted.");
+                    long elapsed = System.currentTimeMillis() - start;
+                    timePassed = timePassed - currentDuration + elapsed;
                 }
             }
         } catch (InterruptedException e) {

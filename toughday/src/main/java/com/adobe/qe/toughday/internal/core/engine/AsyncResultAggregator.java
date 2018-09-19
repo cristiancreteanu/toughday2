@@ -27,18 +27,20 @@ import java.util.concurrent.atomic.AtomicLong;
 public class AsyncResultAggregator extends AsyncEngineWorker {
     private final Engine engine;
     private RunMode.RunContext context;
+    private RunMode.RunContext finalContext;
 
     /**
      * Constructor.
      */
-    public AsyncResultAggregator(Engine engine) {
+    public AsyncResultAggregator(Engine engine, RunMode.RunContext finalContext) {
         this.engine = engine;
+        this.finalContext = finalContext;
     }
 
     /**
      * Method aggregating results.
      */
-    public void aggregateResults() {
+    public boolean aggregateResults() {
         Collection<RunMap> localRunMaps = context.getRunMaps();
         synchronized (localRunMaps) {
             for (RunMap localRunMap : localRunMaps) {
@@ -50,7 +52,8 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
             }
         }
-//        return context.isRunFinished();
+
+        return context == finalContext && context.isRunFinished();
     }
 
     // creates a map containing the results of the metrics that are going to be published
@@ -86,13 +89,17 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
 
                 long start = System.nanoTime();
-                aggregateResults();
-//                if (testsFinished) {
-//                    this.finishExecution();
-//                }
+                boolean testsFinished = aggregateResults();
+                if (testsFinished) {
+                    this.finishExecution();
+                }
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
-                engine.getPublishMode().publishIntermediateResults(results);
+
+                if (context.isMeasurable()) {
+                    engine.getPublishMode().publishIntermediateResults(results);
+                }
+
                 ((RunMapImpl)engine.getPublishMode().getGlobalRunMap()).clearCurrentTestResults();
                 elapsed = (System.nanoTime() - start) / 1000000l;
             }
