@@ -83,9 +83,9 @@ public abstract class Publisher {
      * Publish aggregated final report
      * @param results Map from test name to metrics
      */
-    public void publishAggregatedFinal(Map<String, List<MetricResult>> results) {
+    public void publishAggregatedFinal(Map<String, List<MetricResult>> results, String message) {
         if(aggregatedPublish) {
-            doPublishAggregatedFinal(results);
+            doPublishAggregatedFinal(results, message);
         }
     }
 
@@ -109,7 +109,7 @@ public abstract class Publisher {
      * Publish aggregated final report
      * @param results Map from test name to metrics
      */
-    protected abstract void doPublishAggregatedFinal(Map<String, List<MetricResult>> results);
+    protected abstract void doPublishAggregatedFinal(Map<String, List<MetricResult>> results, String message);
 
     /**
      * Publish raw data

@@ -24,6 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.CharBuffer;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -46,6 +47,16 @@ public class ConsolePublisher extends Publisher {
     @ConfigArgSet(required = false, defaultValue = "false", desc = "Enable the raw result publishing")
     public void setRawPublish(String rawPublish) {
         super.setRawPublish(rawPublish);
+    }
+
+    @ConfigArgSet(required = false, defaultValue = "true", desc = "Clear the screen before printing each stat")
+    public void setClear(String clearScreen) {
+        this.clearScreen = Boolean.parseBoolean(clearScreen);
+    }
+
+    @ConfigArgGet
+    public boolean getClear() {
+        return this.clearScreen;
     }
 
     class CleanerThread extends Thread {
@@ -73,8 +84,8 @@ public class ConsolePublisher extends Publisher {
                         extraLines.incrementAndGet();
                     }
                 }
-            } catch (IOException e) {
-            } catch (InterruptedException e) {
+            } catch (IOException | InterruptedException e) {
+                // nop
             }
         }
     }
@@ -87,15 +98,6 @@ public class ConsolePublisher extends Publisher {
         this.cleaner.start();
     }
 
-    @ConfigArgSet(required = false, defaultValue = "true", desc = "Clear the screen before printing each stat")
-    public void setClear(String clearScreen) {
-        this.clearScreen = Boolean.parseBoolean(clearScreen);
-    }
-
-    @ConfigArgGet
-    public boolean getClear() {
-        return this.clearScreen;
-    }
 
     private void alignMetrics() {
         System.out.println();
@@ -111,6 +113,11 @@ public class ConsolePublisher extends Publisher {
         int nrStats = results.size() * nrLinesPerTest;
         final String FORMAT = "%-37s | ";
         // "clear" screen
+        if (!begun) {
+            System.out.println();
+            System.out.println("********************************************************************");
+        }
+
         if (begun && clearScreen) {
 //            for (int i=0; i < nrStats + extraLines.get(); i++ ) {
 //                System.out.print("\33[1A\33[2K");
@@ -154,12 +161,20 @@ public class ConsolePublisher extends Publisher {
     }
 
     @Override
-    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results, String message) {
         this.clearScreen = false;
+        int spaces = message.length() > 68 ? 0 : (68 - message.length()) / 2;
         System.out.println("********************************************************************");
-        System.out.println("                       FINAL RESULTS");
+        System.out.println(CharBuffer.allocate(spaces).toString().replace('\0', ' ') + message);
+//        System.out.println("                       FINAL RESULTS");
         System.out.println("********************************************************************");
         publishAggregated(results);
+        System.out.println("********************************************************************");
+        System.out.println();
+        System.out.println();
+
+        this.begun = false;
+        this.clearScreen = true;
     }
 
     @Override

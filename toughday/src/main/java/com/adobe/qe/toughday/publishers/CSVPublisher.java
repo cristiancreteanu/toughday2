@@ -113,7 +113,7 @@ public class CSVPublisher extends Publisher {
     }
 
     @Override
-    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
+    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results, String message) {
         publishAggregated(results);
     }
 

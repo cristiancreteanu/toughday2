@@ -99,7 +99,7 @@ public class GenerateYamlConfiguration {
             yamlDumpPhases.add(yamlDumpPhase);
 
             for (Map.Entry<Actions, ConfigParams.MetaObject> item : phasesParams.get(i).getTests()) {
-                chooseAction(item, i);
+                chooseAction(item, i + 1);
             }
         }
     }
@@ -107,13 +107,13 @@ public class GenerateYamlConfiguration {
     private void chooseAction(Map.Entry<Actions, ConfigParams.MetaObject> item, int index) {
         switch (item.getKey()) {
             case ADD:
-                addAction((ConfigParams.ClassMetaObject)item.getValue(), index + 1);
+                addAction((ConfigParams.ClassMetaObject)item.getValue(), index);
                 break;
             case CONFIG:
-                configAction((ConfigParams.NamedMetaObject)item.getValue(), index + 1);
+                configAction((ConfigParams.NamedMetaObject)item.getValue(), index);
                 break;
             case EXCLUDE:
-                excludeAction(((ConfigParams.NamedMetaObject)item.getValue()).getName(), index + 1);
+                excludeAction(((ConfigParams.NamedMetaObject)item.getValue()).getName(), index);
                 break;
         }
     }

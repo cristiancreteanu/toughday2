@@ -53,7 +53,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
             }
         }
 
-        return context == finalContext && context.isRunFinished();
+        return context.isRunFinished();
     }
 
     // creates a map containing the results of the metrics that are going to be published
@@ -90,13 +90,13 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
 
                 long start = System.nanoTime();
                 boolean testsFinished = aggregateResults();
-                if (testsFinished) {
+                if (testsFinished && context == finalContext) {
                     this.finishExecution();
                 }
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
 
-                if (context.isMeasurable()) {
+                if (context.isMeasurable() && !testsFinished) {
                     engine.getPublishMode().publishIntermediateResults(results);
                 }
 

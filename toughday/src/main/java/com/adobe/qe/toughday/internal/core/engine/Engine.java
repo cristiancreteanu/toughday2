@@ -323,10 +323,11 @@ public class Engine {
         publishMode.getGlobalRunMap().reinitStartTimes(); // s ar putea sa fie nevoie sa folosesc asta si prin alte parti
 
         // Create the result aggregator thread
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, phases.get(phases.size() - 1).getRunMode().getRunContext());
+        RunMode.RunContext finalContext = phases.get(phases.size() - 1).getRunMode().getRunContext();
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, finalContext);
 
         // Create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread(), phases.get(phases.size() - 1).getRunMode().getRunContext());
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread(), finalContext);
 
         Thread shutdownHook = new Thread() {
             public void run() {
@@ -348,7 +349,9 @@ public class Engine {
                     shutdownAndAwaitTermination(currentRunmode.getExecutorService());
                     shutdownAndAwaitTermination(engineExecutorService);
                     publishMode.publish(getGlobalRunMap().getCurrentTestResults());
-                    publishMode.publishFinalResults(resultAggregator.filterResults());
+
+                    //what if it is not runnable? i should be the last measurable context
+                    publishMode.publishFinalResults(resultAggregator.filterResults(), "FINAL RESULTS");
                 } catch (Throwable e) {
                     System.out.println("Exception in shutdown hook!");
                     e.printStackTrace();
@@ -364,7 +367,8 @@ public class Engine {
         engineExecutorService.execute(resultAggregator);
         engineExecutorService.execute(timeoutChecker);
         try {
-            for (Phase phase : phases) {
+            for (int i = 0; i < phases.size(); ++i) {
+                Phase phase = phases.get(i);
                 counts.clear();
                 publishMode.getGlobalRunMap().clear();
                 for(AbstractTest test : phase.getTestSuite().getTests()) {
@@ -387,8 +391,8 @@ public class Engine {
                     if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
                         if (currentDuration < globalArgs.getDuration() - timePassed) {
                             Thread.sleep(currentDuration * 1000L);
-
                             phase.getRunMode().finishExecutionAndAwait();
+
                             timePassed += currentDuration;
                         } else {
                             Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
@@ -399,6 +403,13 @@ public class Engine {
                     LOG.info("Phase interrupted.");
                     long elapsed = System.currentTimeMillis() - start;
                     timePassed = timePassed - currentDuration + elapsed;
+                }
+
+                if (currentRunmode.getRunContext() != finalContext && currentRunmode.getRunContext().isMeasurable()) {
+                    while (!currentRunmode.getRunContext().isRunFinished()) {
+                        // do nothing
+                    }
+                    publishMode.publishFinalResults(resultAggregator.filterResults(), "PHASE " + (i + 1));
                 }
             }
         } catch (InterruptedException e) {

@@ -46,6 +46,7 @@ public class Normal implements RunMode {
     private long waitTime = DEFAULT_WAIT_TIME;
 
     private Boolean measurable = true;
+    private RunContext context = null;
 
     @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
     public void setConcurrency(String concurrencyString) {
@@ -95,31 +96,35 @@ public class Normal implements RunMode {
     }
 
     public RunContext getRunContext() {
-        return new RunContext() {
-            @Override
-            public Collection<AsyncTestWorker> getTestWorkers() {
-                return testWorkers;
-            }
-
-            @Override
-            public Collection<RunMap> getRunMaps() {
-                return runMaps;
-            }
-
-            @Override
-            public boolean isRunFinished() {
-                for(AsyncTestWorker testWorker : testWorkers) {
-                    if (!testWorker.isFinished())
-                        return false;
+        if (context == null) {
+            context = new RunContext() {
+                @Override
+                public Collection<AsyncTestWorker> getTestWorkers() {
+                    return testWorkers;
                 }
-                return true;
-            }
 
-            @Override
-            public Boolean isMeasurable() {
-                return measurable;
-            }
-        };
+                @Override
+                public Collection<RunMap> getRunMaps() {
+                    return runMaps;
+                }
+
+                @Override
+                public boolean isRunFinished() {
+                    for(AsyncTestWorker testWorker : testWorkers) {
+                        if (!testWorker.isFinished())
+                            return false;
+                    }
+                    return true;
+                }
+
+                @Override
+                public Boolean isMeasurable() {
+                    return measurable;
+                }
+            };
+        }
+
+        return context;
     }
 
     @Override
