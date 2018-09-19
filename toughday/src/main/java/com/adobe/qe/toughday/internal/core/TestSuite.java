@@ -60,10 +60,6 @@ public class TestSuite {
         return this;
     }
 
-    /**
-     * Getter for the setup step.
-     * @return a SetupStep object if configured, null otherwise.
-     */
     public TestSuite addAll(TestSuite testSuite) {
         this.setupStep.addAll(testSuite.setupStep);
         this.orderedTests.addAll(testSuite.orderedTests);

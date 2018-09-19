@@ -79,11 +79,11 @@ public class Engine {
         //TODO find a better way to do this
         publishMode.setEngine(this);
 
-        for (Phase phase : phases) {
-            for(AbstractTest test : phase.getTestSuite().getTests()) {
-                add(test);
-            }
-        }
+//        for (Phase phase : phases) {
+//            for(AbstractTest test : phase.getTestSuite().getTests()) {
+//                add(test);
+//            }
+//        }
     }
 
     /**
@@ -306,20 +306,21 @@ public class Engine {
             printConfiguration(this.getConfiguration(), System.out);
             return;
         }
-        
-        TestSuite testSuite = configuration.getTestSuite();
 
 //         Run the setup step of the suite
-        for (SuiteSetup setupStep : testSuite.getSetupStep()) {
-            setupStep.setup();
-        }
 
         //TODO move this to a better place while keeping in mind to preserve the execution order.
-        for(AbstractTest test : testSuite.getTests()) {
-            runSetup(test);
+        for (Phase phase : phases) {
+            for (SuiteSetup setupStep : phase.getTestSuite().getSetupStep()) {
+                setupStep.setup();
+            }
+
+            for(AbstractTest test : phase.getTestSuite().getTests()) {
+                runSetup(test);
+            }
         }
 
-        publishMode.getGlobalRunMap().reinitStartTimes();
+        publishMode.getGlobalRunMap().reinitStartTimes(); // s ar putea sa fie nevoie sa folosesc asta si prin alte parti
 
         // Create the result aggregator thread
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this);
@@ -360,17 +361,29 @@ public class Engine {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         long timePassed = 0;
+        engineExecutorService.execute(resultAggregator);
+        engineExecutorService.execute(timeoutChecker);
         try {
             for (Phase phase : phases) {
+                counts.clear();
+                publishMode.getGlobalRunMap().clear();
+                for(AbstractTest test : phase.getTestSuite().getTests()) {
+                    add(test);
+                }
+
                 currentRunmode = phase.getRunMode();
                 Long currentDuration = phase.getDuration();
 
                 // to check if this is ok, with runningTests and synchronization
                 resultAggregator.setContext(currentRunmode.getRunContext());
                 timeoutChecker.setContext(currentRunmode.getRunContext());
-                if (!this.testsRunning) {
-                    testsRunning = true;
+                testsRunning = true;
+
+                if (resultAggregator.isFinished()) {
                     engineExecutorService.execute(resultAggregator);
+                }
+
+                if (timeoutChecker.isFinished()) {
                     engineExecutorService.execute(timeoutChecker);
                 }
 

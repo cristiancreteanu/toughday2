@@ -334,6 +334,10 @@ public class Configuration {
                 suite = this.suite;
             }
 
+            for (AbstractTest test : suite.getTests()) {
+                test.setGlobalArgs(globalArgs);
+            }
+
             RunMode runMode = getRunMode(phaseParams.getRunmode());
 
             phases.add(new Phase(phaseParams.getProperties(), suite, runMode));

@@ -38,7 +38,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
     /**
      * Method aggregating results.
      */
-    public boolean aggregateResults() {
+    public void aggregateResults() {
         Collection<RunMap> localRunMaps = context.getRunMaps();
         synchronized (localRunMaps) {
             for (RunMap localRunMap : localRunMaps) {
@@ -50,7 +50,7 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
             }
         }
-        return context.isRunFinished();
+//        return context.isRunFinished();
     }
 
     // creates a map containing the results of the metrics that are going to be published
@@ -77,7 +77,6 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
         try {
             long elapsed = 0;
             while (!isFinished()) {
-
                 long sleepMillis = Engine.RESULT_AGGREATION_DELAY - elapsed;
                 if(sleepMillis > 0) {
                     Thread.sleep(sleepMillis);
@@ -87,10 +86,10 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
 
                 long start = System.nanoTime();
-                boolean testsFinished = aggregateResults();
-                if (testsFinished) {
-                    this.finishExecution();
-                }
+                aggregateResults();
+//                if (testsFinished) {
+//                    this.finishExecution();
+//                }
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
                 engine.getPublishMode().publishIntermediateResults(results);
