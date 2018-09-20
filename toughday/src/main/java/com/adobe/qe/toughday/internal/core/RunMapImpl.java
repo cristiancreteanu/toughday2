@@ -82,18 +82,6 @@ public class RunMapImpl implements RunMap {
         }
     }
 
-    public void clear() {
-        try {
-            runMapLock.writeLock().lock();
-            runMap.clear();
-            orderedTests.clear();
-            currentTestResults.clear();
-        } finally {
-            runMapLock.writeLock().unlock();
-        }
-    }
-
-
     public TestStatistics getRecord(AbstractTest test) {
         runMapLock.readLock().lock();
         try {
