@@ -580,7 +580,7 @@ public class CliParser implements ConfigurationParser {
                 System.out.printf("\t%-32s\r\n", test.getFullName() + " [" + test.getClass().getSimpleName() + "]");
                 if (withTestProperties) {
                     try {
-                        Engine.printObject(testSuite, System.out, test);
+                        Engine.printObject(System.out, test);
                     } catch (Exception e) {
                         LOGGER.error("Exception while printing the test suite.", e);
                     }

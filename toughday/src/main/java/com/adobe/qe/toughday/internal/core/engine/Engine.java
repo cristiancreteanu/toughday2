@@ -169,36 +169,45 @@ public class Engine {
         }
     }
 
-    ////////////////////////////////////////asta trebuie modificata
     public static void printConfiguration(Configuration configuration, PrintStream out) throws InvocationTargetException, IllegalAccessException {
+        out.println();
         out.println("#################### Configuration ######################");
         out.println("Global configuration:");
-        printObject(configuration.getTestSuite(), out, configuration.getGlobalArgs());
+        printObject(out, configuration.getGlobalArgs());
 
+        out.println("Publishers:");
+        for (Publisher publisher : configuration.getGlobalArgs().getPublishers()) {
+            printObject(out, publisher);
+        }
+
+        out.println("Metrics:");
+        for (Metric metric : configuration.getGlobalArgs().getMetrics()) {
+            printObject(out, metric);
+        }
+        
+        int i = 1;
         for (Phase phase : configuration.getPhases()) {
+            out.println("######################## Phase " + i + " ########################");
+            ++i;
+
+            out.println("Phase configuration: ");
+            printObject(out, phase);
 
             out.println("Run mode configuration: ");
-            printObject(phase.getTestSuite(), out, phase.getRunMode());
+            printObject(out, phase.getRunMode());
 
             out.println("Publish mode configuration: ");
-            printObject(phase.getTestSuite(), out, phase.getPublishMode());
+            printObject(out, phase.getPublishMode());
 
             out.println("Tests:");
             for (AbstractTest test : phase.getTestSuite().getTests()) {
-                printObject(phase.getTestSuite(), out, test);
-            }
-
-            out.println("Publishers:");
-            for (Publisher publisher : configuration.getGlobalArgs().getPublishers()) {
-                printObject(phase.getTestSuite(), out, publisher);
-            }
-
-            out.println("Metrics:");
-            for (Metric metric : configuration.getGlobalArgs().getMetrics()) {
-                printObject(phase.getTestSuite(), out, metric);
+                printObject(out, test);
             }
 
             out.println("#########################################################");
+
+            out.println();
+            out.println();
         }
     }
 
@@ -220,7 +229,7 @@ public class Engine {
         logGlobal("Finished installing ToughDay 2 Content Package.");
     }
 
-    public static void printObject(TestSuite testSuite, PrintStream out, Object obj)
+    public static void printObject(PrintStream out, Object obj)
             throws InvocationTargetException, IllegalAccessException {
         Class objectClass = obj.getClass();
         out.println("- Configuration for object of class " + objectClass.getSimpleName()+" ["+objectClass.getName()+"]");
