@@ -26,21 +26,19 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 public class AsyncResultAggregator extends AsyncEngineWorker {
     private final Engine engine;
-    private RunMode.RunContext context;
-    private RunMode.RunContext finalContext;
 
     /**
      * Constructor.
      */
-    public AsyncResultAggregator(Engine engine, RunMode.RunContext finalContext) {
+    public AsyncResultAggregator(Engine engine) {
         this.engine = engine;
-        this.finalContext = finalContext;
     }
 
     /**
      * Method aggregating results.
      */
     public boolean aggregateResults() {
+        RunMode.RunContext context = engine.getCurrentPhase().getRunMode().getRunContext();
         Collection<RunMap> localRunMaps = context.getRunMaps();
         synchronized (localRunMaps) {
             for (RunMap localRunMap : localRunMaps) {
@@ -89,14 +87,12 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                 }
 
                 long start = System.nanoTime();
-                boolean testsFinished = aggregateResults();
-                if (testsFinished && context == finalContext) {
-                    this.finishExecution();
-                }
+                boolean testsFinishedInPhase = aggregateResults();
+
                 Map<String, List<MetricResult>> results = filterResults();
                 engine.getPublishMode().publish(engine.getGlobalRunMap().getCurrentTestResults());
 
-                if (context.isMeasurable() && !testsFinished) {
+                if (engine.getCurrentPhase().getMeasurable() && !testsFinishedInPhase) {
                     engine.getPublishMode().publishIntermediateResults(results);
                 }
 
@@ -120,9 +116,5 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
         for(Publisher publisher : engine.getGlobalArgs().getPublishers()) {
             publisher.finish();
         }
-    }
-
-    public void setContext(RunMode.RunContext context) {
-        this.context = context;
     }
 }

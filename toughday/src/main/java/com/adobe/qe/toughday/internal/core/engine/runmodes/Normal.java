@@ -116,11 +116,6 @@ public class Normal implements RunMode {
                     }
                     return true;
                 }
-
-                @Override
-                public Boolean isMeasurable() {
-                    return measurable;
-                }
             };
         }
 

@@ -57,7 +57,6 @@ public class Engine {
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private PublishMode publishMode;
     private List<Phase> phases = new ArrayList<>();
-    private RunMode currentRunmode;
     private Phase currentPhase;
     private volatile boolean testsRunning;
 
@@ -307,32 +306,30 @@ public class Engine {
             return;
         }
 
-//         Run the setup step of the suite
-
         //TODO move this to a better place while keeping in mind to preserve the execution order.
-        for (Phase phase : phases) {
-            for (SuiteSetup setupStep : phase.getTestSuite().getSetupStep()) {
-                setupStep.setup();
-            }
-
-            for(AbstractTest test : phase.getTestSuite().getTests()) {
-                runSetup(test);
-            }
-        }
+//        for (Phase phase : phases) { // de mutat inainte de executia unei faze
+//            for (SuiteSetup setupStep : phase.getTestSuite().getSetupStep()) {
+//                setupStep.setup();
+//            }
+//
+//            for(AbstractTest test : phase.getTestSuite().getTests()) {
+//                runSetup(test);
+//            }
+//        }
 
         publishMode.getGlobalRunMap().reinitStartTimes(); // s ar putea sa fie nevoie sa folosesc asta si prin alte parti
 
         // Create the result aggregator thread
         RunMode.RunContext finalContext = phases.get(phases.size() - 1).getRunMode().getRunContext();
-        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this, finalContext);
+        AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this);
 
         // Create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread(), finalContext);
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread());
 
         Thread shutdownHook = new Thread() {
             public void run() {
                 try {
-                    currentRunmode.finishExecutionAndAwait();
+                    currentPhase.getRunMode().finishExecutionAndAwait();
                     String finishTime = Engine.getCurrentDateTime();
 
                     // interrupt extra test threads
@@ -346,12 +343,12 @@ public class Engine {
                     timeoutChecker.finishExecution();
                     resultAggregator.finishExecution();
                     resultAggregator.aggregateResults();
-                    shutdownAndAwaitTermination(currentRunmode.getExecutorService());
+                    shutdownAndAwaitTermination(currentPhase.getRunMode().getExecutorService());
                     shutdownAndAwaitTermination(engineExecutorService);
                     publishMode.publish(getGlobalRunMap().getCurrentTestResults());
 
                     //what if it is not runnable? i should be the last measurable context
-                    publishMode.publishFinalResults(resultAggregator.filterResults(), "FINAL RESULTS");
+                    publishMode.publishFinalResults(resultAggregator.filterResults());
                 } catch (Throwable e) {
                     System.out.println("Exception in shutdown hook!");
                     e.printStackTrace();
@@ -366,61 +363,64 @@ public class Engine {
         long timePassed = 0;
         engineExecutorService.execute(resultAggregator);
         engineExecutorService.execute(timeoutChecker);
-        try {
-            for (int i = 0; i < phases.size(); ++i) {
-                Phase phase = phases.get(i);
-                counts.clear();
-                publishMode.getGlobalRunMap().clear();
-                for(AbstractTest test : phase.getTestSuite().getTests()) {
-                    add(test);
-                }
 
-                currentRunmode = phase.getRunMode();
-                Long currentDuration = phase.getDuration();
+        for (Phase phase : phases) {
+            counts.clear();
+            publishMode.getGlobalRunMap().clear(); // de reinstantiat, fara clear
 
-                // to check if this is ok, with runningTests and synchronization
-                resultAggregator.setContext(currentRunmode.getRunContext());
-                timeoutChecker.setContext(currentRunmode.getRunContext());
-                testsRunning = true;
-
-                currentPhase = phase;
-                currentRunmode.runTests(this);
-                long start = System.currentTimeMillis();
-
-                try {
-                    if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
-                        if (currentDuration < globalArgs.getDuration() - timePassed) {
-                            Thread.sleep(currentDuration * 1000L);
-                            phase.getRunMode().finishExecutionAndAwait();
-
-                            timePassed += currentDuration;
-                        } else {
-                            Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
-                            break;
-                        }
-                    }
-                } catch (InterruptedException e) {
-                    LOG.info("Phase interrupted.");
-                    long elapsed = System.currentTimeMillis() - start;
-                    timePassed = timePassed - currentDuration + elapsed;
-                }
-
-                if (currentRunmode.getRunContext() != finalContext && currentRunmode.getRunContext().isMeasurable()) {
-                    while (!currentRunmode.getRunContext().isRunFinished()) {
-                        // do nothing
-                    }
-                    publishMode.publishFinalResults(resultAggregator.filterResults(), "PHASE " + (i + 1));
-                }
+            // Run the setup step of the suite
+            for (SuiteSetup setupStep : phase.getTestSuite().getSetupStep()) {
+                setupStep.setup();
             }
-        } catch (InterruptedException e) {
-            LOG.info("Engine Interrupted", e);
-        } finally {
-            testsRunning = false;
-            Runtime.getRuntime().removeShutdownHook(shutdownHook);
-            shutdownHook.run();
-        }
-    }
 
+            for (AbstractTest test : phase.getTestSuite().getTests()) {
+                runSetup(test);
+            }
+
+            for (AbstractTest test : phase.getTestSuite().getTests()) {
+                add(test);
+            }
+
+            RunMode currentRunmode = phase.getRunMode();
+            Long currentDuration = phase.getDuration();
+
+            testsRunning = true;
+            currentPhase = phase;
+            currentRunmode.runTests(this);
+            long start = System.currentTimeMillis();
+
+            try {
+                if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
+                    if (currentDuration < globalArgs.getDuration() - timePassed) {
+                        Thread.sleep(currentDuration * 1000L);
+                        phase.getRunMode().finishExecutionAndAwait();
+
+                        timePassed += currentDuration;
+                    } else {
+                        Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
+                        break;
+                    }
+                }
+            } catch (InterruptedException e) {
+                LOG.info("Phase interrupted.");
+                long elapsed = System.currentTimeMillis() - start;
+                timePassed = timePassed - currentDuration + elapsed;
+            }
+
+            if (currentPhase.getMeasurable()) {
+                shutdownAndAwaitTermination(phase.getRunMode().getExecutorService());
+                resultAggregator.aggregateResults();
+                publishMode.publishFinalResults(resultAggregator.filterResults());
+            }
+        }
+
+        testsRunning = false;
+        timeoutChecker.finishExecution();
+        resultAggregator.finishExecution();
+        shutdownAndAwaitTermination(currentPhase.getRunMode().getExecutorService());
+        shutdownAndAwaitTermination(engineExecutorService);
+        Runtime.getRuntime().removeShutdownHook(shutdownHook);
+    }
 
     public ReentrantReadWriteLock getEngineSync() {
         return engineSync;

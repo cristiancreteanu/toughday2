@@ -23,20 +23,17 @@ import java.util.Collection;
 public class AsyncTimeoutChecker extends AsyncEngineWorker {
     private Engine engine;
     private final Thread mainThread;
-    private RunMode.RunContext context;
     private long minTimeout;
     private TestSuite testSuite;
-    private RunMode.RunContext finalContext;
 
     /**
      * Constructor.
      * @param testSuite
      */
-    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread, RunMode.RunContext finalContext) {
+    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread) {
         this.engine = engine;
         this.mainThread = mainThread;
         this.testSuite = testSuite;
-        this.finalContext = finalContext;
         this.minTimeout = engine.getGlobalArgs().getTimeout();
         for(AbstractTest test : testSuite.getTests()) {
             if(test.getTimeout() < 0) {
@@ -84,6 +81,7 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
         try {
             while(!isFinished()) {
                 Thread.sleep(Math.round(Math.ceil(minTimeout * Engine.TIMEOUT_CHECK_FACTOR)));
+                RunMode.RunContext context = engine.getCurrentPhase().getRunMode().getRunContext();
                 Collection<AsyncTestWorker> testWorkers = context.getTestWorkers();
                 synchronized (testWorkers) {
                     for (AsyncTestWorker worker : testWorkers) {
@@ -91,10 +89,6 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
                     }
                 }
                 if (context.isRunFinished()) {
-                    if (context == finalContext) {
-                        this.finishExecution();
-                    }
-
                     if(engine.areTestsRunning()) {
                         mainThread.interrupt();
                     }
@@ -106,9 +100,5 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
         } catch (Throwable e) {
             Engine.LOG.error("Unexpected exception caught", e);
         }
-    }
-
-    public void setContext(RunMode.RunContext context) {
-        this.context = context;
     }
 }

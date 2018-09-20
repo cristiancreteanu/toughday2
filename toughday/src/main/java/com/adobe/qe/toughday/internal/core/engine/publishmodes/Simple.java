@@ -40,9 +40,9 @@ public class Simple extends PublishMode {
     }
 
     @Override
-    public void publishFinalResults(Map<String, List<MetricResult>> results, String message) {
+    public void publishFinalResults(Map<String, List<MetricResult>> results) {
         for (Publisher publisher : engine.getGlobalArgs().getPublishers()) {
-            publisher.publishAggregatedFinal(results, message);
+            publisher.publishAggregatedFinal(results);
         }
     }
 }

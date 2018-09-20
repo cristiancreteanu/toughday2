@@ -43,7 +43,7 @@ public abstract class PublishMode {
 
     public abstract void publishIntermediateResults(Map<String, List<MetricResult>> results);
 
-    public abstract void publishFinalResults(Map<String, List<MetricResult>> results, String message);
+    public abstract void publishFinalResults(Map<String, List<MetricResult>> results);
 
     public abstract void publish(Collection<TestResult> testResults);
 }

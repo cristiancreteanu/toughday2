@@ -107,11 +107,6 @@ public class ConstantLoad implements RunMode {
             public boolean isRunFinished() {
                 return scheduler.isFinished();
             }
-
-            @Override
-            public Boolean isMeasurable() {
-                return measurable;
-            }
         };
     }
 
@@ -200,7 +195,7 @@ public class ConstantLoad implements RunMode {
                     ArrayList<AbstractTest> nextRound = new ArrayList<>();
                     long start = System.nanoTime();
                     for (int i = 0; i < load; i++) {
-                        AbstractTest nextTest = Engine.getNextTest(engine.getConfiguration().getTestSuite(),
+                        AbstractTest nextTest = Engine.getNextTest(engine.getCurrentPhase().getTestSuite(),
                                 engine.getCounts(),
                                 engine.getEngineSync());
                         if (null == nextTest) {

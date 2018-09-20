@@ -42,6 +42,7 @@ public class ConsolePublisher extends Publisher {
     private final CleanerThread cleaner;
     private Scanner sc;
     private AtomicInteger extraLines;
+    private String asterisks = null;
 
 
     @ConfigArgSet(required = false, defaultValue = "false", desc = "Enable the raw result publishing")
@@ -114,8 +115,16 @@ public class ConsolePublisher extends Publisher {
         final String FORMAT = "%-37s | ";
         // "clear" screen
         if (!begun) {
+            if (asterisks == null) {
+                // this wil have to be changed when metrics become local to phases probably
+                // maybe change asterisks depending on the number of metrics per phase
+                int metricsPerLine = nrMetrics < 3 ? nrMetrics : METRICS_PER_LINE_LIMIT;
+
+                // 35 asterisks for the test name, 40 for each metric, -1 because there will be one extra space left
+                asterisks = CharBuffer.allocate(35 + 40 * metricsPerLine - 1).toString().replace('\0', '*');
+            }
             System.out.println();
-            System.out.println("********************************************************************");
+            System.out.println(asterisks);
         }
 
         if (begun && clearScreen) {
@@ -161,16 +170,17 @@ public class ConsolePublisher extends Publisher {
     }
 
     @Override
-    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results, String message) {
+    protected void doPublishAggregatedFinal(Map<String, List<MetricResult>> results) {
         this.clearScreen = false;
-        int spaces = message.length() > 68 ? 0 : (68 - message.length()) / 2;
-        System.out.println("********************************************************************");
+        String message = "FINAL RESULTS";
+        int spaces = message.length() > asterisks.length() ? 0 : (asterisks.length() - message.length()) / 2;
+        System.out.println(asterisks);
         System.out.println(CharBuffer.allocate(spaces).toString().replace('\0', ' ') + message);
-//        System.out.println("                       FINAL RESULTS");
-        System.out.println("********************************************************************");
+        System.out.println(asterisks);
         publishAggregated(results);
-        System.out.println("********************************************************************");
+        System.out.println(asterisks);
         System.out.println();
+        System.out.println("___");
         System.out.println();
 
         this.begun = false;
