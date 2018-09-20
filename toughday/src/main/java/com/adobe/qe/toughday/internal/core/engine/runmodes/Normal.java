@@ -41,11 +41,11 @@ public class Normal implements RunMode {
 
     private final List<AsyncTestWorker> testWorkers = new ArrayList<>();
     private final List<RunMap> runMaps = new ArrayList<>();
+    private Phase phase;
 
     private int concurrency = DEFAULT_CONCURRENCY;
     private long waitTime = DEFAULT_WAIT_TIME;
 
-    private Boolean measurable = true;
     private RunContext context = null;
 
     @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
@@ -71,15 +71,13 @@ public class Normal implements RunMode {
 
     @Override
     public void runTests(Engine engine) throws Exception {
-        Configuration configuration = engine.getConfiguration();
-        TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
-        GlobalArgs globalArgs = configuration.getGlobalArgs();
-        this.measurable = engine.getCurrentPhase().getMeasurable();
+        this.phase = engine.getCurrentPhase();
+        TestSuite testSuite = phase.getTestSuite();
         testsExecutorService = Executors.newFixedThreadPool(concurrency);
 
         // Create the test worker threads
         for (int i = 0; i < concurrency; i++) {
-            AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
+            AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, phase, testSuite, phase.getPublishMode().getRunMap().newInstance());
             try {
                 testsExecutorService.execute(testWorker);
             } catch (OutOfMemoryError e) {
@@ -159,6 +157,7 @@ public class Normal implements RunMode {
         private HashMap<TestId, AbstractTest> localTests;
         private TestSuite testSuite;
         private RunMap localRunMap;
+        private Phase phase;
         private boolean exited = false;
 
         /**
@@ -168,7 +167,8 @@ public class Normal implements RunMode {
          * @param testSuite   the test suite
          * @param localRunMap a deep clone a the global run map.
          */
-        public AsyncTestWorkerImpl(Engine engine, TestSuite testSuite, RunMap localRunMap) {
+        public AsyncTestWorkerImpl(Engine engine, Phase phase, TestSuite testSuite, RunMap localRunMap) {
+            this.phase = phase;
             this.engine = engine;
             this.testSuite = testSuite;
             localTests = new HashMap<>();
@@ -189,7 +189,7 @@ public class Normal implements RunMode {
             mutex.lock();
             try {
                 while(!isFinished()) {
-                    currentTest = Engine.getNextTest(this.testSuite, engine.getCounts(), engine.getEngineSync());
+                    currentTest = Engine.getNextTest(this.testSuite, phase.getCounts(), engine.getEngineSync());
                     // if no test available, finish
                     if (null == currentTest) {
                         LOG.info("Thread " + workerThread + " died! :(");

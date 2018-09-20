@@ -2,10 +2,13 @@ package com.adobe.qe.toughday.internal.core.engine;
 
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
+import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 
+import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Phase {
     private static final String DEFAULT_MEASURABILITY = "true";
@@ -17,8 +20,10 @@ public class Phase {
 
     private TestSuite testSuite;
     private RunMode runMode;
+    private PublishMode publishMode;
+    private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
 
-    public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode) {
+    public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode, PublishMode publishMode) {
         name = properties.containsKey("name") ? properties.get("name").toString() : "";
         measurable = properties.containsKey("measurable") ? Boolean.valueOf(properties.get("measurable").toString()) : true;
         useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : "";
@@ -26,6 +31,11 @@ public class Phase {
 
         this.testSuite = testSuite;
         this.runMode = runMode;
+        this.publishMode = publishMode;
+
+        for (AbstractTest test : this.testSuite.getTests()) {
+            counts.put(test, new AtomicLong(0));
+        }
     }
 
     @ConfigArgGet
@@ -75,5 +85,13 @@ public class Phase {
 
     public RunMode getRunMode() {
         return runMode;
+    }
+
+    public PublishMode getPublishMode() {
+        return publishMode;
+    }
+
+    public Map<AbstractTest, AtomicLong> getCounts() {
+        return counts;
     }
 }

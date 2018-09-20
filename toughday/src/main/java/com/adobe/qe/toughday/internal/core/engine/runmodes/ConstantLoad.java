@@ -19,10 +19,7 @@ import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
-import com.adobe.qe.toughday.internal.core.engine.AsyncEngineWorker;
-import com.adobe.qe.toughday.internal.core.engine.AsyncTestWorker;
-import com.adobe.qe.toughday.internal.core.engine.Engine;
-import com.adobe.qe.toughday.internal.core.engine.RunMode;
+import com.adobe.qe.toughday.internal.core.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +44,7 @@ public class ConstantLoad implements RunMode {
     private final List<RunMap> runMaps = new ArrayList<>();
     private int load = DEFAULT_LOAD;
     private TestCache testCache;
+    private Phase phase;
 
     private Boolean measurable = true;
 
@@ -75,15 +73,15 @@ public class ConstantLoad implements RunMode {
     }
 
     @Override
-    public void runTests(Engine engine) throws Exception {
-        Configuration configuration = engine.getConfiguration();
-        TestSuite testSuite = engine.getCurrentPhase().getTestSuite();
+    public void runTests(Engine engine) {
+        this.phase = engine.getCurrentPhase();
+        TestSuite testSuite = phase.getTestSuite();
         this.testCache = new TestCache(testSuite);
-        this.measurable = engine.getCurrentPhase().getMeasurable();
+        this.measurable = phase.getMeasurable();
 
         for(int i = 0; i < load; i++) {
             synchronized (runMaps) {
-                runMaps.add(engine.getGlobalRunMap().newInstance());
+                runMaps.add(phase.getPublishMode().getRunMap().newInstance());
             }
         }
 
@@ -195,8 +193,8 @@ public class ConstantLoad implements RunMode {
                     ArrayList<AbstractTest> nextRound = new ArrayList<>();
                     long start = System.nanoTime();
                     for (int i = 0; i < load; i++) {
-                        AbstractTest nextTest = Engine.getNextTest(engine.getCurrentPhase().getTestSuite(),
-                                engine.getCounts(),
+                        AbstractTest nextTest = Engine.getNextTest(phase.getTestSuite(),
+                                phase.getCounts(),
                                 engine.getEngineSync());
                         if (null == nextTest) {
                             LOG.info("Constant load scheduler thread finished, because there were no more tests to execute.");

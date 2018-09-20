@@ -339,34 +339,40 @@ public class Configuration {
             }
 
             RunMode runMode = getRunMode(phaseParams.getRunmode());
+            PublishMode publishMode = getPublishMode(configParams); // temporar asta
 
-            phases.add(new Phase(phaseParams.getProperties(), suite, runMode));
+
+            phases.add(new Phase(phaseParams.getProperties(), suite, runMode, publishMode));
         }
 
         // daca nu am durata globala, ce fac?
         List<Phase> phasesWithoutDuration = new ArrayList<>();
         long durationLeft = globalArgs.getDuration();
         for (Phase phase : phases) {
-            if (durationLeft < 0) {
-                throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
+            if (phase.getDuration() == null) {
+                phasesWithoutDuration.add(phase);
             } else {
-                if (phase.getDuration() == null) {
-                    phasesWithoutDuration.add(phase);
-                } else {
-                    durationLeft -= phase.getDuration();
-                }
+                durationLeft -= phase.getDuration();
             }
-        }
-        if (durationLeft < 0) {
-            throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
+
         }
 
-        long durationPerPhase = durationLeft / phasesWithoutDuration.size();
-        if (durationPerPhase < 1) {
-            throw new IllegalArgumentException("The duration left for the phases for which it is not specified is too small. Please make sure there is enough time left for those, as well.");
-        }
-        for (Phase phase : phasesWithoutDuration) {
-            phase.setDuration(String.valueOf(durationPerPhase));
+        if (phasesWithoutDuration.size() != 0) {
+            if (configParams.getGlobalParams().get("duration") == null) {
+                throw new IllegalArgumentException("There are phases without a specified duration, yet the global duration is not privided either.");
+            }
+
+            if (durationLeft < 0) {
+                throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
+            }
+
+            long durationPerPhase = durationLeft / phasesWithoutDuration.size();
+            if (durationPerPhase < 1) {
+                throw new IllegalArgumentException("The duration left for the phases for which it is not specified is too small. Please make sure there is enough time left for those, as well.");
+            }
+            for (Phase phase : phasesWithoutDuration) {
+                phase.setDuration(String.valueOf(durationPerPhase));
+            }
         }
     }
 
