@@ -23,24 +23,13 @@ import java.util.Collection;
 public class AsyncTimeoutChecker extends AsyncEngineWorker {
     private Engine engine;
     private final Thread mainThread;
-    private long minTimeout;
-    private TestSuite testSuite;
 
     /**
      * Constructor.
-     * @param testSuite
      */
-    public AsyncTimeoutChecker(Engine engine, TestSuite testSuite, Thread mainThread) {
+    public AsyncTimeoutChecker(Engine engine, Thread mainThread) {
         this.engine = engine;
         this.mainThread = mainThread;
-        this.testSuite = testSuite;
-        this.minTimeout = engine.getGlobalArgs().getTimeout();
-        for(AbstractTest test : testSuite.getTests()) {
-            if(test.getTimeout() < 0) {
-                continue;
-            }
-            minTimeout = Math.min(minTimeout, test.getTimeout());
-        }
     }
 
     /**
@@ -80,8 +69,9 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
     public void run() {
         try {
             while(!isFinished()) {
-                Thread.sleep(Math.round(Math.ceil(minTimeout * Engine.TIMEOUT_CHECK_FACTOR)));
-                RunMode.RunContext context = engine.getCurrentPhase().getRunMode().getRunContext();
+                Phase phase = engine.getCurrentPhase();
+                Thread.sleep(Math.round(Math.ceil(phase.getTestSuite().getMinTimeout() * Engine.TIMEOUT_CHECK_FACTOR)));
+                RunMode.RunContext context =  phase.getRunMode().getRunContext();
                 Collection<AsyncTestWorker> testWorkers = context.getTestWorkers();
                 synchronized (testWorkers) {
                     for (AsyncTestWorker worker : testWorkers) {

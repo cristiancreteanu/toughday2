@@ -184,7 +184,7 @@ public class Engine {
         for (Metric metric : configuration.getGlobalArgs().getMetrics()) {
             printObject(out, metric);
         }
-        
+
         int i = 1;
         for (Phase phase : configuration.getPhases()) {
             out.println("######################## Phase " + i + " ########################");
@@ -307,7 +307,7 @@ public class Engine {
         AsyncResultAggregator resultAggregator = new AsyncResultAggregator(this);
 
         // Create the timeout checker thread
-        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, configuration.getTestSuite(), Thread.currentThread());
+        AsyncTimeoutChecker timeoutChecker = new AsyncTimeoutChecker(this, Thread.currentThread());
 
         Thread shutdownHook = new Thread() {
             public void run() {
@@ -348,6 +348,7 @@ public class Engine {
         engineExecutorService.execute(timeoutChecker);
 
         for (Phase phase : phases) {
+            testsRunning = true;
             currentPhase = phase;
             currentPhase.getPublishMode().getRunMap().reinitStartTimes();
 
@@ -367,7 +368,6 @@ public class Engine {
             RunMode currentRunmode = phase.getRunMode();
             Long currentDuration = phase.getDuration();
 
-            testsRunning = true;
             currentRunmode.runTests(this);
             long start = System.currentTimeMillis();
 
@@ -375,11 +375,11 @@ public class Engine {
                 if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
                     if (currentDuration < globalArgs.getDuration() - timePassed) {
                         Thread.sleep(currentDuration * 1000L);
-                        phase.getRunMode().finishExecutionAndAwait();
 
                         timePassed += currentDuration;
                     } else {
                         Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
+                        phase.getRunMode().finishExecutionAndAwait();
                         break;
                     }
                 }
@@ -387,8 +387,10 @@ public class Engine {
                 LOG.info("Phase interrupted.");
                 long elapsed = System.currentTimeMillis() - start;
                 timePassed = timePassed - currentDuration + elapsed;
+
             }
 
+            phase.getRunMode().finishExecutionAndAwait();
             if (currentPhase.getMeasurable()) {
                 shutdownAndAwaitTermination(phase.getRunMode().getExecutorService());
                 resultAggregator.aggregateResults();

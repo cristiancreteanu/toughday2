@@ -63,7 +63,6 @@ public class Configuration {
 
     PredefinedSuites predefinedSuites = new PredefinedSuites();
     private GlobalArgs globalArgs;
-    private TestSuite suite;
     private RunMode runMode;
     private PublishMode publishMode;
     private List<Phase> phases = new ArrayList<>();
@@ -214,22 +213,22 @@ public class Configuration {
 
         this.runMode = getRunMode(configParams.getRunModeParams());
         this.publishMode = getPublishMode(configParams);
-        suite = getTestSuite(globalArgsMeta);
+        TestSuite globalSuite = getTestSuite(globalArgsMeta);
 
-        for (AbstractTest abstractTest : suite.getTests()) {
-            items.put(abstractTest.getName(), abstractTest.getClass());
-        }
+//        for (AbstractTest abstractTest : suite.getTests()) {
+//            items.put(abstractTest.getName(), abstractTest.getClass());
+//        }
 
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             switch (item.getKey()) {
                 case ADD:
-                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, this.suite);
+                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, null);
                     break;
                 case CONFIG:
-                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, this.suite);
+                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, null);
                     break;
                 case EXCLUDE:
-                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), this.suite);
+                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), null);
                     break;
             }
         }
@@ -246,13 +245,6 @@ public class Configuration {
             this.globalArgs.addPublisher(publisher);
         }
 
-        // Add a default suite of tests if no test is added or no predefined suite is choosen.
-        if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
-            // Replace the empty suite with the default predefined suite if no test has been configured,
-            // either by selecting a suite or manually using --add
-            this.suite = predefinedSuites.getDefaultSuite();
-        }
-
         // Add default metrics if no metric is specified.
         // TODO add better fix here?
         if (!anyMetricAdded) {
@@ -262,12 +254,9 @@ public class Configuration {
             }
         }
 
-        createPhases(configParams, items);
+        createPhases(configParams, globalSuite, items);
 
         checkInvalidArgs(globalArgsMeta, CliParser.parserArgs);
-        for (AbstractTest test : suite.getTests()) {
-            test.setGlobalArgs(this.globalArgs);
-        }
 
         // Check if we should create a configuration file for this run.
         if (this.getGlobalArgs().getSaveConfig()) {
@@ -276,7 +265,7 @@ public class Configuration {
         }
     }
 
-    private void createPhases(ConfigParams configParams, Map<String, Class> items) throws NoSuchMethodException,
+    private void createPhases(ConfigParams configParams, TestSuite globalSuite, Map<String, Class> items) throws NoSuchMethodException,
             InstantiationException, IllegalAccessException, InvocationTargetException {
 
         for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
@@ -315,6 +304,7 @@ public class Configuration {
             }
 
             TestSuite suite = new TestSuite();
+            suite.addAll(globalSuite); // oare trebuie clonate aici?
 
             for (Map.Entry<Actions, ConfigParams.MetaObject> test : phaseParams.getTests()) {
                 switch (test.getKey()) {
@@ -330,8 +320,11 @@ public class Configuration {
                 }
             }
 
-            if (!defaultSuiteAddedFromConfigExclude && suite.getTests().isEmpty()) {
-                suite = this.suite;
+            // Add a default suite of tests if no test is added or no predefined suite is chosen.
+            if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
+                // Replace the empty suite with the default predefined suite if no test has been configured,
+                // either by selecting a suite or manually using --add
+                suite = predefinedSuites.getDefaultSuite(); // hmmm.. oare?
             }
 
             for (AbstractTest test : suite.getTests()) {
@@ -340,6 +333,15 @@ public class Configuration {
 
             RunMode runMode = getRunMode(phaseParams.getRunmode());
             PublishMode publishMode = getPublishMode(configParams); // temporar asta
+
+            suite.setMinTimeout(globalArgs.getTimeout());
+            for (AbstractTest test : suite.getTests()) {
+                if(test.getTimeout() < 0) {
+                    continue;
+                }
+
+                suite.setMinTimeout(Math.min(suite.getMinTimeout(), test.getTimeout()));
+            }
 
 
             phases.add(new Phase(phaseParams.getProperties(), suite, runMode, publishMode));
@@ -377,7 +379,7 @@ public class Configuration {
     }
 
     private void addItem(ConfigParams.ClassMetaObject itemToAdd, Map<String, Class> items, TestSuite suite) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName())) {
+        if (ReflectionsContainer.getInstance().isTestClass(itemToAdd.getClassName()) && suite != null) {
             if (defaultSuiteAddedFromConfigExclude) {
                 throw new IllegalStateException("Configuration/exclusion of test ahead of addition");
             }
@@ -431,18 +433,18 @@ public class Configuration {
         // if the latter is the case, the default suite has to be added in the configuration
         // defaultSuiteAddedFromConfigExclude will mark this occurrence and, if it is set to
         // true, attempting to --add a test after this will cause an exception to be thrown
-        if (!suite.contains(itemMeta.getName())
+        if (suite != null && !suite.contains(itemMeta.getName())
                 && !ReflectionsContainer.getInstance().isMetricClass(itemMeta.getName())
                 && !ReflectionsContainer.getInstance().isPublisherClass(itemMeta.getName())
                 && !globalArgs.containsPublisher(itemMeta.getName())
                 && !globalArgs.containsMetric(itemMeta.getName())
                 && !allTestsExcluded
                 && suite.getTests().isEmpty()) {
-            this.suite = predefinedSuites.getDefaultSuite();
+            suite = predefinedSuites.getDefaultSuite();
             defaultSuiteAddedFromConfigExclude = true;
         }
 
-        if (suite.contains(itemMeta.getName())) {
+        if (suite != null && suite.contains(itemMeta.getName())) {
 
             //check if all were excluded
             AbstractTest testObject = suite.getTest(itemMeta.getName());
@@ -475,16 +477,16 @@ public class Configuration {
     }
 
     private void excludeItem(String itemName, TestSuite suite) {
-        if (!suite.contains(itemName) && !allTestsExcluded && suite.getTests().isEmpty()
+        if (suite != null && !suite.contains(itemName) && !allTestsExcluded && suite.getTests().isEmpty()
                 && !ReflectionsContainer.getInstance().isPublisherClass(itemName)
                 && !ReflectionsContainer.getInstance().isMetricClass(itemName)
                 && !globalArgs.containsMetric(itemName)
                 && !globalArgs.containsPublisher(itemName)) {
-            this.suite = predefinedSuites.getDefaultSuite();
+            suite = predefinedSuites.getDefaultSuite();
             defaultSuiteAddedFromConfigExclude = true;
         }
 
-        if (suite.contains(itemName)) {
+        if (suite != null && suite.contains(itemName)) {
             suite.remove(itemName);
             if (suite.getTests().isEmpty()) {
                 allTestsExcluded = true;
@@ -717,15 +719,6 @@ public class Configuration {
      */
     public HashMap<String, TestSuite> getPredefinedSuites() {
         return predefinedSuites;
-    }
-
-    /**
-     * Getter for the suite
-     *
-     * @return
-     */
-    public TestSuite getTestSuite() {
-        return suite;
     }
 
     /**

@@ -40,7 +40,7 @@ public class TestConfiguration {
     @Test
     public void testAdd() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertTrue((new Configuration(cmdLineArgs.toArray(new String[0]))).getTestSuite().contains("MockTest"));
+        Assert.assertTrue((new Configuration(cmdLineArgs.toArray(new String[0]))).getPhases().iterator().next().getTestSuite().contains("MockTest"));
     }
 
     @Test
@@ -71,24 +71,24 @@ public class TestConfiguration {
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "timeout=6"));
         Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
 
-        Assert.assertEquals(configuration.getTestSuite().getTest("MockTest").getCount(), 5);
-        Assert.assertEquals(configuration.getTestSuite().getTest("MockTest").getTimeout(), 6000);
-        Assert.assertEquals(configuration.getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getTestSuite().getTotalWeight(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getCount(), 5);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getTimeout(), 6000);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 1);
 
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "count=10"));
         configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
 
-        Assert.assertEquals(configuration.getTestSuite().getTest("MockTest").getCount(), 10);
-        Assert.assertEquals(configuration.getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getTestSuite().getTotalWeight(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getCount(), 10);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 1);
 
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "weight=20"));
         configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
 
-        Assert.assertEquals(configuration.getTestSuite().getTest("MockTest").getWeight(), 20);
-        Assert.assertEquals(configuration.getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getTestSuite().getTotalWeight(), 20);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getWeight(), 20);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 20);
     }
 
     @Test
@@ -150,8 +150,8 @@ public class TestConfiguration {
         cmdLineArgs.addAll(Arrays.asList("--exclude", "MockTestTwin"));
         Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
 
-        Assert.assertEquals(configuration.getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getTestSuite().getTest("MockTest").getWeight(), 5);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getWeight(), 5);
     }
 
     @Test
@@ -173,25 +173,25 @@ public class TestConfiguration {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--config", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "CSVPublisher"));
         cmdLineArgs.addAll(Arrays.asList("--config", "CSVPublisher", "name=pub"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "Median"));
         cmdLineArgs.addAll(Arrays.asList("--config", "Median"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "Average"));
         cmdLineArgs.addAll(Arrays.asList("--config", "Average", "name=med"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwin"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
     }
 
     @Test
@@ -199,25 +199,25 @@ public class TestConfiguration {
         cmdLineArgs.addAll(Arrays.asList("--add", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "ConsolePublisher"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size();
+        new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size();
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "CSVPublisher", "name=pub"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "pub"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "Median"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "Median"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
 
         cmdLineArgs = new ArrayList<>(Collections.singletonList("--host=localhost"));
         cmdLineArgs.addAll(Arrays.asList("--add", "Average", "name=med"));
         cmdLineArgs.addAll(Arrays.asList("--exclude", "med"));
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTestTwin"));
-        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().iterator().next().getTestSuite().getTests().size(), 1);
     }
 
     @AfterClass
