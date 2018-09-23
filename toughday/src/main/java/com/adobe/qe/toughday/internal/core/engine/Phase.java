@@ -24,10 +24,10 @@ public class Phase {
     private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
 
     public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode, PublishMode publishMode) {
-        name = properties.containsKey("name") ? properties.get("name").toString() : "";
-        measurable = properties.containsKey("measurable") ? Boolean.valueOf(properties.get("measurable").toString()) : true;
-        useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : "";
-        duration = properties.containsKey("duration") ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
+        name = properties.get("name") != null ? properties.get("name").toString() : "";
+        measurable = properties.get("measurable") != null ? Boolean.valueOf(properties.get("measurable").toString()) : true;
+        useconfig = properties.get("useconfig") != null ? properties.get("useconfig").toString() : "";
+        duration = properties.get("duration") != null ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
 
         this.testSuite = testSuite;
         this.runMode = runMode;
@@ -74,9 +74,11 @@ public class Phase {
         return duration;
     }
 
-    @ConfigArgSet(required = false, desc = "The duration of the current phase.", defaultValue = GlobalArgs.DEFAULT_DURATION)
+    @ConfigArgSet(required = false, desc = "The duration of the current phase.")
     public void setDuration(String duration) {
-        this.duration = GlobalArgs.parseDurationToSeconds(duration);
+        if (duration != null) {
+            this.duration = GlobalArgs.parseDurationToSeconds(duration);
+        }
     }
 
     public TestSuite getTestSuite() {

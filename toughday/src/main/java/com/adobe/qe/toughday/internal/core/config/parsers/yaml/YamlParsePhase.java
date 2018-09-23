@@ -5,10 +5,11 @@ import java.util.Map;
 
 public class YamlParsePhase {
     private String name;
-    private Boolean measurabile;
+    private Boolean measurable;
     private String useconfig;
     private List<YamlParseAction> tests;
     private Map<String, Object> runmode;
+    private Map<String, Object> publishmode;
 
     public String getName() {
         return name;
@@ -19,11 +20,11 @@ public class YamlParsePhase {
     }
 
     public Boolean getMeasurable() {
-        return measurabile;
+        return measurable;
     }
 
     public void setMeasurable(Boolean measurable) {
-        this.measurabile = measurable;
+        this.measurable = measurable;
     }
 
     public List<YamlParseAction> getTests() {
@@ -48,5 +49,13 @@ public class YamlParsePhase {
 
     public void setUseconfig(String useconfig) {
         this.useconfig = useconfig;
+    }
+
+    public Map<String, Object> getPublishmode() {
+        return publishmode;
+    }
+
+    public void setPublishmode(Map<String, Object> publishmode) {
+        this.publishmode = publishmode;
     }
 }

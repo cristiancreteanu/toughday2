@@ -74,6 +74,7 @@ public class ConfigParams implements Serializable {
         public static Map<String, PhaseParams> namedPhases = new HashMap<>();
         private Map<String, Object> properties = new HashMap<>();
         private Map<String, Object> runmode = new HashMap<>();
+        private Map<String, Object> publishmode = new HashMap<>();
         private List<Map.Entry<Actions, MetaObject>> tests = new ArrayList<>();
 
         public Map<String, Object> getProperties() {
@@ -100,13 +101,36 @@ public class ConfigParams implements Serializable {
             this.tests = tests;
         }
 
-        public void merge(PhaseParams phaseParams, Set<String> checked) { // de adaugat verificare daca e loop
+        public Map<String, Object> getPublishmode() {
+            return publishmode;
+        }
+
+        public void setPublishmode(Map<String, Object> publishmode) {
+            this.publishmode = publishmode;
+        }
+
+        /**
+         * Method for taking the configuration of another phase
+         *
+         * In case the phase from which the configuration is to be taken also has
+         * "useconfig" set, it will be prioritised, its configuration will be updated accordingly
+         * before continuing with the phase for which the method was first called
+         *
+         * "useconfig" will be removed from the phase once it has been computed
+         *
+         * It also detects possible loops caused by the "useconfig" functionality
+         * @param phaseParams
+         * @param checked - a set with the names of the phases we passed through since the first call
+         */
+        public void merge(PhaseParams phaseParams, Set<String> checked) {
             String useconfig = phaseParams.properties.get("useconfig") != null ? phaseParams.getProperties().get("useconfig").toString() : null;
 
             if (useconfig != null && !namedPhases.containsKey(useconfig)) {
                 throw new IllegalArgumentException("Could not find phase named \"" +
                         phaseParams.getProperties().get("useconfig") + "\".");
             } else if (useconfig != null) {
+            // if the phase params from which the configuration is to be taken also has
+            // "useconfig" set, then call the method recursively for @phaseParams
                 if (checked.contains(useconfig)) {
                     throw new IllegalArgumentException("Trying to use the configuration of another phase results in loop.");
                 }
@@ -117,9 +141,11 @@ public class ConfigParams implements Serializable {
 
             Map<String, Object> props = deepClone(phaseParams.properties);
             props.remove("name");
-            this.properties.putAll(props);
+            props.putAll(this.properties);
+            this.properties = props;
             properties.remove("useconfig");
 
+            // take the run mode configuration
             if (runmode.isEmpty()) {
                 this.runmode = phaseParams.runmode;
             }
@@ -160,7 +186,11 @@ public class ConfigParams implements Serializable {
     }
 
     public void setPublishModeParams(Map<String, Object> publishModeParams) {
-        this.publishModeParams = publishModeParams;
+        if (phasesParams.size() > 0) {
+            phasesParams.get(phasesParams.size() - 1).setPublishmode(publishModeParams);
+        } else {
+            this.publishModeParams = publishModeParams;
+        }
     }
 
     public void setRunModeParams(Map<String, Object> runModeParams) {

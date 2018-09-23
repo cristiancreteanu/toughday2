@@ -39,6 +39,8 @@ public class GenerateYamlConfiguration {
     private List<YamlDumpAction> yamlMetricActions;
     private List<YamlDumpAction> yamlExtensionActions;
     private List<YamlDumpPhase> yamlDumpPhases;
+    private List<YamlDumpAction> yamlTestActions;
+    private boolean globalTests;
 
     private static final String DEFAULT_YAML_CONFIGURATION_FILENAME = "toughday_";
     private static final String DEFAULT_YAML_EXTENSION = ".yaml";
@@ -51,6 +53,7 @@ public class GenerateYamlConfiguration {
         yamlMetricActions = new ArrayList<>();
         yamlExtensionActions = new ArrayList<>();
         yamlDumpPhases = new ArrayList<>();
+        yamlTestActions = new ArrayList<>();
         createActionsForItems();
     }
 
@@ -58,10 +61,6 @@ public class GenerateYamlConfiguration {
         Map<String, Object> globals = configParams.getGlobalParams();
         globals.remove("configfile");
         return globals;
-    }
-
-    public List<YamlDumpPhase> getPhases() {
-        return yamlDumpPhases.size() != 1? yamlDumpPhases : new ArrayList<>();
     }
 
     public Map<String, Object> getPublishmode() {
@@ -73,7 +72,11 @@ public class GenerateYamlConfiguration {
     }
 
     public List<YamlDumpAction> getTests() {
-        return yamlDumpPhases.size() == 1? yamlDumpPhases.iterator().next().getTests() : new ArrayList<>();
+        if (globalTests) {
+            return yamlTestActions;
+        }
+
+        return yamlDumpPhases.size() == 1? yamlDumpPhases.iterator().next().getTests() : yamlTestActions;
     }
 
     public List<YamlDumpAction> getPublishers() {
@@ -86,15 +89,33 @@ public class GenerateYamlConfiguration {
 
     public List<YamlDumpAction> getExtensions() { return yamlExtensionActions; }
 
+    public List<YamlDumpPhase> getPhases() {
+        if (globalTests) {
+            return yamlDumpPhases;
+        }
+
+        return yamlDumpPhases.size() != 1? yamlDumpPhases : new ArrayList<>();
+    }
+
     // creates a list of actions for each item(tests, publishers, metrics, extensions)
     private void createActionsForItems() {
+
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             chooseAction(item, 0);
+
+            if (!configParams.getMetricsOrPublishersIdentifiers().contains(item)) {
+                globalTests = true;
+            }
+        }
+
+        if (configParams.getPhasesParams().isEmpty()) {
+            globalTests = false;
         }
 
         List<ConfigParams.PhaseParams> phasesParams = configParams.getPhasesParams();
         for (int i = 0; i < phasesParams.size(); ++i) {
-            YamlDumpPhase yamlDumpPhase = new YamlDumpPhase(phasesParams.get(i).getProperties(), phasesParams.get(i).getRunmode());
+            ConfigParams.PhaseParams phaseParams = phasesParams.get(i);
+            YamlDumpPhase yamlDumpPhase = new YamlDumpPhase(phaseParams.getProperties(), phaseParams.getRunmode(), phaseParams.getPublishmode());
             yamlDumpPhases.add(yamlDumpPhase);
 
             for (Map.Entry<Actions, ConfigParams.MetaObject> item : phasesParams.get(i).getTests()) {
@@ -120,6 +141,11 @@ public class GenerateYamlConfiguration {
     private void addAction(ConfigParams.ClassMetaObject item, int index) {
         YamlDumpAddAction addAction = new YamlDumpAddAction(item.getClassName(), item.getParameters());
         if (ReflectionsContainer.getInstance().isTestClass(item.getClassName())) {
+            if (index == 0) {
+                yamlTestActions.add(addAction);
+                return;
+            }
+
             yamlDumpPhases.get(index - 1).getTests().add(addAction);
         } else if (ReflectionsContainer.getInstance().isPublisherClass(item.getClassName())) {
             yamlPublisherActions.add(addAction);
@@ -134,6 +160,11 @@ public class GenerateYamlConfiguration {
     private void configAction(ConfigParams.NamedMetaObject item, int index) {
         YamlDumpConfigAction configAction = new YamlDumpConfigAction(item.getName(), item.getParameters());
         if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
+            if (index == 0) {
+                yamlTestActions.add(configAction);
+                return;
+            }
+
             yamlDumpPhases.get(index - 1).getTests().add(configAction);
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item.getName()).getSimpleName())) {
             yamlPublisherActions.add(configAction);
@@ -145,6 +176,11 @@ public class GenerateYamlConfiguration {
     private void excludeAction(String item, int index) {
         YamlDumpExcludeAction excludeAction = new YamlDumpExcludeAction(item);
         if (ReflectionsContainer.getInstance().isTestClass(itemsIdentifiers.get(item).getSimpleName())) {
+            if (index == 0) {
+                yamlTestActions.add(excludeAction);
+                return;
+            }
+
             yamlDumpPhases.get(index - 1).getTests().add(excludeAction);
         } else if (ReflectionsContainer.getInstance().isPublisherClass(itemsIdentifiers.get(item).getSimpleName())) {
             yamlPublisherActions.add(excludeAction);

@@ -81,6 +81,10 @@ public class YamlConfiguration {
                 setRunmode(yamlParsePhase.getRunmode());
             }
 
+            if (yamlParsePhase.getPublishmode() != null) {
+                setPublishmode(yamlParsePhase.getPublishmode());
+            }
+
             if (yamlParsePhase.getTests() != null) {
                 setTests(yamlParsePhase.getTests());
             }

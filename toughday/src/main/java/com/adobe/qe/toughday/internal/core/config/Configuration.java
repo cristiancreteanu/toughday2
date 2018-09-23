@@ -14,6 +14,7 @@ package com.adobe.qe.toughday.internal.core.config;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
 import com.adobe.qe.toughday.api.core.AbstractTest;
 import com.adobe.qe.toughday.api.core.Publisher;
+import com.adobe.qe.toughday.api.core.RunMap;
 import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.parsers.yaml.GenerateYamlConfiguration;
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
@@ -65,6 +66,7 @@ public class Configuration {
     private GlobalArgs globalArgs;
     private RunMode runMode;
     private PublishMode publishMode;
+    private TestSuite globalSuite;
     private List<Phase> phases = new ArrayList<>();
     private boolean defaultSuiteAddedFromConfigExclude = false;
     private boolean anyMetricAdded = false;
@@ -212,9 +214,10 @@ public class Configuration {
         applyLogLevel(globalArgs.getLogLevel());
 
         this.runMode = getRunMode(configParams.getRunModeParams());
-        this.publishMode = getPublishMode(configParams);
-        TestSuite globalSuite = getTestSuite(globalArgsMeta);
+        this.publishMode = getPublishMode(configParams.getPublishModeParams()   );
+        globalSuite = getTestSuite(globalArgsMeta);
 
+        ///////////////DE VERIFICAT DACA E OK AICI
 //        for (AbstractTest abstractTest : suite.getTests()) {
 //            items.put(abstractTest.getName(), abstractTest.getClass());
 //        }
@@ -222,13 +225,13 @@ public class Configuration {
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             switch (item.getKey()) {
                 case ADD:
-                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, null);
+                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, globalSuite);
                     break;
                 case CONFIG:
-                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, null);
+                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, globalSuite);
                     break;
                 case EXCLUDE:
-                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), null);
+                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), globalSuite);
                     break;
             }
         }
@@ -268,6 +271,25 @@ public class Configuration {
     private void createPhases(ConfigParams configParams, TestSuite globalSuite, Map<String, Class> items) throws NoSuchMethodException,
             InstantiationException, IllegalAccessException, InvocationTargetException {
 
+        // if there were no phases configured, create a phase that has the global configuration
+        if (configParams.getPhasesParams().isEmpty()) {
+            for (AbstractTest test : globalSuite.getTests()) {
+                test.setGlobalArgs(globalArgs);
+            }
+            RunMode runMode = getRunMode(configParams.getRunModeParams());
+            PublishMode publishMode = getPublishMode(configParams.getPublishModeParams());
+
+            // here all tests could've been excluded
+            if (globalSuite.getTests().isEmpty()) {
+                phases.add(new Phase(new HashMap<>(), predefinedSuites.getDefaultSuite(), runMode, publishMode));
+                return;
+            }
+
+            phases.add(new Phase(new HashMap<>(), globalSuite, runMode, publishMode));
+            return;
+        }
+
+        // map names to phases to keep track of them
         for (ConfigParams.PhaseParams phaseParams : configParams.getPhasesParams()) {
             if (phaseParams.getProperties().get("name") != null) {
                 if (ConfigParams.PhaseParams.namedPhases.containsKey(phaseParams.getProperties().get("name").toString())) {
@@ -304,7 +326,9 @@ public class Configuration {
             }
 
             TestSuite suite = new TestSuite();
-            suite.addAll(globalSuite); // oare trebuie clonate aici?
+            for (AbstractTest test : globalSuite.getTests()) {
+                suite.add(test.clone());
+            }
 
             for (Map.Entry<Actions, ConfigParams.MetaObject> test : phaseParams.getTests()) {
                 switch (test.getKey()) {
@@ -331,8 +355,16 @@ public class Configuration {
                 test.setGlobalArgs(globalArgs);
             }
 
+            if (phaseParams.getRunmode() == null) {
+                phaseParams.setRunmode(configParams.getRunModeParams());
+            }
+
+            if (phaseParams.getPublishmode() == null) {
+                phaseParams.setPublishmode(configParams.getPublishModeParams());
+            }
+
             RunMode runMode = getRunMode(phaseParams.getRunmode());
-            PublishMode publishMode = getPublishMode(configParams); // temporar asta
+            PublishMode publishMode = getPublishMode(phaseParams.getPublishmode()); // temporar asta
 
             suite.setMinTimeout(globalArgs.getTimeout());
             for (AbstractTest test : suite.getTests()) {
@@ -360,9 +392,9 @@ public class Configuration {
         }
 
         if (phasesWithoutDuration.size() != 0) {
-            if (configParams.getGlobalParams().get("duration") == null) {
-                throw new IllegalArgumentException("There are phases without a specified duration, yet the global duration is not privided either.");
-            }
+//            if (configParams.getGlobalParams().get("duration") == null) {
+//                throw new IllegalArgumentException("There are phases without a specified duration, yet the global duration is not privided either.");
+//            }
 
             if (durationLeft < 0) {
                 throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
@@ -373,7 +405,7 @@ public class Configuration {
                 throw new IllegalArgumentException("The duration left for the phases for which it is not specified is too small. Please make sure there is enough time left for those, as well.");
             }
             for (Phase phase : phasesWithoutDuration) {
-                phase.setDuration(String.valueOf(durationPerPhase));
+                phase.setDuration(String.valueOf(durationPerPhase) + "s");
             }
         }
     }
@@ -676,9 +708,8 @@ public class Configuration {
         return createObject(runModeClass, runModeParams);
     }
 
-    private PublishMode getPublishMode(ConfigParams configParams)
+    private PublishMode getPublishMode(Map<String, Object> publishModeParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
-        Map<String, Object> publishModeParams = configParams.getPublishModeParams();
         if (publishModeParams.size() != 0 && !publishModeParams.containsKey("type")) {
             throw new IllegalStateException("The Publish mode doesn't have a type");
         }
@@ -765,5 +796,9 @@ public class Configuration {
 
     public static Map<Object, HashSet<String>> getRequiredFieldsForClassAdded() {
         return requiredFieldsForClassAdded;
+    }
+
+    public TestSuite getTestSuite() {
+        return globalSuite;
     }
 }

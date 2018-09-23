@@ -10,12 +10,14 @@ public class YamlDumpPhase {
     private String useconfig;
     private List<YamlDumpAction> tests = new ArrayList<>();
     private Map<String, Object> runmode;
+    private Map<String, Object> publishmode;
 
-    public YamlDumpPhase(Map<String, Object> properties, Map<String, Object> runmode) {
+    public YamlDumpPhase(Map<String, Object> properties, Map<String, Object> runmode, Map<String, Object> publishmode) {
         this.name = properties.containsKey("name") ? properties.get("name").toString() : null;
         this.measurable = properties.containsKey("measurable") ? (Boolean)(properties.get("measurable")) : null;
         this.useconfig = properties.containsKey("useconfig") ? properties.get("useconfig").toString() : null;
         this.runmode = runmode;
+        this.publishmode = publishmode;
     }
 
     public String getName() {
@@ -57,5 +59,13 @@ public class YamlDumpPhase {
 
     public void setRunmode(Map<String, Object> runmode) {
         this.runmode = runmode;
+    }
+
+    public Map<String, Object> getPublishmode() {
+        return publishmode;
+    }
+
+    public void setPublishmode(Map<String, Object> publishmode) {
+        this.publishmode = publishmode;
     }
 }
