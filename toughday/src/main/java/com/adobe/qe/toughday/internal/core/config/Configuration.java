@@ -62,13 +62,13 @@ public class Configuration {
     private static Map<Object, HashSet<String>> requiredFieldsForClassAdded = new HashMap<>();
     private static String TIMESTAMP = Timestamp.START_TIME;
 
-    PredefinedSuites predefinedSuites = new PredefinedSuites();
+    private PredefinedSuites predefinedSuites = new PredefinedSuites();
     private GlobalArgs globalArgs;
     private RunMode runMode;
     private PublishMode publishMode;
     private TestSuite globalSuite;
     private List<Phase> phases = new ArrayList<>();
-    Set<Phase> phasesWithoutDuration = new HashSet<>();
+    private Set<Phase> phasesWithoutDuration = new HashSet<>();
     private boolean defaultSuiteAddedFromConfigExclude = false;
     private boolean anyMetricAdded = false;
     private boolean anyPublisherAdded = false;
