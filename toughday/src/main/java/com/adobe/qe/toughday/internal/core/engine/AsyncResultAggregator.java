@@ -86,18 +86,25 @@ public class AsyncResultAggregator extends AsyncEngineWorker {
                             " This may affect the results that you are seeing.");
                 }
 
-                long start = System.nanoTime();
-                boolean testsFinishedInPhase = aggregateResults();
+                try {
+                    engine.getCurrentPhaseLock().readLock().lock();
 
-                Map<String, List<MetricResult>> results = filterResults();
-                engine.getCurrentPhase().getPublishMode().publish(engine.getCurrentPhase().getPublishMode().getRunMap().getCurrentTestResults());
+                    long start = System.nanoTime();
+                    boolean testsFinishedInPhase = aggregateResults();
 
-                if (engine.getCurrentPhase().getMeasurable() && !testsFinishedInPhase) {
-                    engine.getCurrentPhase().getPublishMode().publishIntermediateResults(results);
+                    Phase phase = engine.getCurrentPhase();
+                    Map<String, List<MetricResult>> results = filterResults();
+                    phase.getPublishMode().publish(phase.getPublishMode().getRunMap().getCurrentTestResults());
+
+                    if (phase.getMeasurable() && !testsFinishedInPhase) {
+                        phase.getPublishMode().publishIntermediateResults(results);
+                    }
+
+                    ((RunMapImpl)phase.getPublishMode().getRunMap()).clearCurrentTestResults();
+                    elapsed = (System.nanoTime() - start) / 1000000l;
+                } finally {
+                    engine.getCurrentPhaseLock().readLock().unlock();
                 }
-
-                ((RunMapImpl)engine.getCurrentPhase().getPublishMode().getRunMap()).clearCurrentTestResults();
-                elapsed = (System.nanoTime() - start) / 1000000l;
             }
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();

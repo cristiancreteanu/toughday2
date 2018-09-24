@@ -69,19 +69,32 @@ public class AsyncTimeoutChecker extends AsyncEngineWorker {
     public void run() {
         try {
             while(!isFinished()) {
-                Phase phase = engine.getCurrentPhase();
-                Thread.sleep(Math.round(Math.ceil(phase.getTestSuite().getMinTimeout() * Engine.TIMEOUT_CHECK_FACTOR)));
-                RunMode.RunContext context =  phase.getRunMode().getRunContext();
-                Collection<AsyncTestWorker> testWorkers = context.getTestWorkers();
-                synchronized (testWorkers) {
-                    for (AsyncTestWorker worker : testWorkers) {
-                        interruptWorkerIfTimeout(worker);
-                    }
+                long minTimeout = engine.getGlobalArgs().getTimeout();
+                try {
+                    engine.getCurrentPhaseLock().readLock().lock();
+                    minTimeout = engine.getCurrentPhase().getTestSuite().getMinTimeout();
+                } finally {
+                    engine.getCurrentPhaseLock().readLock().unlock();
                 }
-                if (context.isRunFinished()) {
-                    if(engine.areTestsRunning()) {
-                        mainThread.interrupt();
+
+                try {
+                    Thread.sleep(Math.round(Math.ceil(minTimeout * Engine.TIMEOUT_CHECK_FACTOR)));
+
+                    engine.getCurrentPhaseLock().readLock().lock();
+                    RunMode.RunContext context =  engine.getCurrentPhase().getRunMode().getRunContext();
+                    Collection<AsyncTestWorker> testWorkers = context.getTestWorkers();
+                    synchronized (testWorkers) {
+                        for (AsyncTestWorker worker : testWorkers) {
+                            interruptWorkerIfTimeout(worker);
+                        }
                     }
+                    if (context.isRunFinished()) {
+                        if(engine.areTestsRunning() && mainThread.getState() == Thread.State.TIMED_WAITING) {
+                            mainThread.interrupt();
+                        }
+                    }
+                } finally {
+                    engine.getCurrentPhaseLock().readLock().unlock();
                 }
             }
         } catch (InterruptedException e) {

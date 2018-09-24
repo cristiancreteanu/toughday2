@@ -38,6 +38,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
@@ -57,7 +58,7 @@ public class Engine {
     private final ReentrantReadWriteLock engineSync = new ReentrantReadWriteLock();
     private List<Phase> phases;
     private Phase currentPhase;
-    private final ReentrantLock phaseChange = new ReentrantLock();
+    private final ReadWriteLock currentPhaseLock = new ReentrantReadWriteLock();
     private volatile boolean testsRunning;
 
     /**
@@ -349,7 +350,15 @@ public class Engine {
 
         for (Phase phase : phases) {
             testsRunning = true;
-            currentPhase = phase;
+
+            try {
+                currentPhaseLock.writeLock().lock();
+                currentPhase = phase;
+            } finally {
+                currentPhaseLock.writeLock().unlock();
+            }
+
+
             currentPhase.getPublishMode().getRunMap().reinitStartTimes();
 
             // Run the setup step of the suite
@@ -483,5 +492,9 @@ public class Engine {
 
     public Phase getCurrentPhase() {
         return currentPhase;
+    }
+
+    public ReadWriteLock getCurrentPhaseLock() {
+        return currentPhaseLock;
     }
 }
