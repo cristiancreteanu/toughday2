@@ -27,9 +27,7 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class GenerateYamlConfiguration {
 
@@ -38,8 +36,8 @@ public class GenerateYamlConfiguration {
     private java.util.List<YamlDumpAction> yamlPublisherActions;
     private List<YamlDumpAction> yamlMetricActions;
     private List<YamlDumpAction> yamlExtensionActions;
-    private List<YamlDumpPhase> yamlDumpPhases;
     private List<YamlDumpAction> yamlTestActions;
+    private List<YamlDumpPhase> yamlDumpPhases;
     private boolean globalTests;
 
     private static final String DEFAULT_YAML_CONFIGURATION_FILENAME = "toughday_";
@@ -271,7 +269,5 @@ public class GenerateYamlConfiguration {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
-
 }

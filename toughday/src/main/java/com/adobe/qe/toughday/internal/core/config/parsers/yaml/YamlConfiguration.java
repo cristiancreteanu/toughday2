@@ -61,6 +61,7 @@ public class YamlConfiguration {
     }
 
     public void setPhases(List<YamlParsePhase> phases) {
+        configParams.setGlobalLevel(false);
         for (YamlParsePhase yamlParsePhase : phases) {
             ConfigParams.PhaseParams phase = new ConfigParams.PhaseParams();
             if (yamlParsePhase.getName() != null) {
@@ -89,6 +90,7 @@ public class YamlConfiguration {
                 setTests(yamlParsePhase.getTests());
             }
         }
+        configParams.setGlobalLevel(true);
     }
 
     public ConfigParams getConfigParams() {

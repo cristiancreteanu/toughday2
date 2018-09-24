@@ -31,6 +31,7 @@ public class ConfigParams implements Serializable {
     private List<Map.Entry<Actions, MetaObject>> items = new ArrayList<>();
 
     private Set<String> metricsOrPublishersIdentifiers = new HashSet<>();
+    private boolean globalLevel = true;
 
     public static class MetaObject  implements Serializable {
         private Map<String, Object> parameters;
@@ -186,7 +187,7 @@ public class ConfigParams implements Serializable {
     }
 
     public void setPublishModeParams(Map<String, Object> publishModeParams) {
-        if (phasesParams.size() > 0) {
+        if (!globalLevel) {
             phasesParams.get(phasesParams.size() - 1).setPublishmode(publishModeParams);
         } else {
             this.publishModeParams = publishModeParams;
@@ -194,7 +195,7 @@ public class ConfigParams implements Serializable {
     }
 
     public void setRunModeParams(Map<String, Object> runModeParams) {
-        if (phasesParams.size() > 0) {
+        if (!globalLevel) {
             phasesParams.get(phasesParams.size() - 1).setRunmode(runModeParams);
         } else {
             this.runModeParams = runModeParams;
@@ -229,7 +230,7 @@ public class ConfigParams implements Serializable {
     }
 
     private void addToItemsOrLastPhase(Map.Entry<Actions, MetaObject> newEntry, String identifier) {
-        if (!metricsOrPublishersIdentifiers.contains(identifier) && !phasesParams.isEmpty()) {
+        if (!metricsOrPublishersIdentifiers.contains(identifier) && !globalLevel) {
             phasesParams.get(phasesParams.size() - 1).getTests().add(newEntry);
         } else {
             items.add(newEntry);
@@ -268,5 +269,13 @@ public class ConfigParams implements Serializable {
 
     public Set<String> getMetricsOrPublishersIdentifiers() {
         return metricsOrPublishersIdentifiers;
+    }
+
+    public boolean isGlobalLevel() {
+        return globalLevel;
+    }
+
+    public void setGlobalLevel(boolean globalLevel) {
+        this.globalLevel = globalLevel;
     }
 }
