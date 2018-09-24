@@ -151,7 +151,8 @@ public class ConfigParams implements Serializable {
                 this.runmode = phaseParams.runmode;
             }
 
-            List<Map.Entry<Actions, MetaObject>> tests = new ArrayList<>(phaseParams.tests);
+
+            List<Map.Entry<Actions, MetaObject>> tests = deepClone(phaseParams.tests);
             tests.addAll(this.tests);
 
             this.tests = tests;

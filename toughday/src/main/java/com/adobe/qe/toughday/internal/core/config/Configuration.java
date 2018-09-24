@@ -391,14 +391,11 @@ public class Configuration {
             }
         }
 
-        if (phasesWithoutDuration.size() != 0) {
-//            if (configParams.getGlobalParams().get("duration") == null) {
-//                throw new IllegalArgumentException("There are phases without a specified duration, yet the global duration is not privided either.");
-//            }
+        if (durationLeft < 0) {
+            throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
+        }
 
-            if (durationLeft < 0) {
-                throw new IllegalArgumentException("The sum of the phase durations is greater than the global one.");
-            }
+        if (phasesWithoutDuration.size() != 0) {
 
             long durationPerPhase = durationLeft / phasesWithoutDuration.size();
             if (durationPerPhase < 1) {
@@ -689,7 +686,6 @@ public class Configuration {
 
         throw new IllegalStateException("There are invalid properties in the configuration. Please check thoughday.log.");
     }
-
 
     private RunMode getRunMode(Map<String, Object> runModeParams)
             throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
