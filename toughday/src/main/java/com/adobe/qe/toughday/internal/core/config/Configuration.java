@@ -68,6 +68,7 @@ public class Configuration {
     private PublishMode publishMode;
     private TestSuite globalSuite;
     private List<Phase> phases = new ArrayList<>();
+    Set<Phase> phasesWithoutDuration = new HashSet<>();
     private boolean defaultSuiteAddedFromConfigExclude = false;
     private boolean anyMetricAdded = false;
     private boolean anyPublisherAdded = false;
@@ -379,8 +380,6 @@ public class Configuration {
             phases.add(new Phase(phaseParams.getProperties(), suite, runMode, publishMode));
         }
 
-        // daca nu am durata globala, ce fac?
-        List<Phase> phasesWithoutDuration = new ArrayList<>();
         long durationLeft = globalArgs.getDuration();
         for (Phase phase : phases) {
             if (phase.getDuration() == null) {
@@ -388,7 +387,6 @@ public class Configuration {
             } else {
                 durationLeft -= phase.getDuration();
             }
-
         }
 
         if (phasesWithoutDuration.size() != 0) {
@@ -800,5 +798,9 @@ public class Configuration {
 
     public TestSuite getTestSuite() {
         return globalSuite;
+    }
+
+    public Set<Phase> getPhasesWithoutDuration() {
+        return phasesWithoutDuration;
     }
 }

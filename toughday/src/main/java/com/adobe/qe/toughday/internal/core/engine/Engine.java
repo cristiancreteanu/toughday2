@@ -345,6 +345,7 @@ public class Engine {
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
         long timePassed = 0;
+        Set<Phase> phasesWithoutDuration = configuration.getPhasesWithoutDuration();
         engineExecutorService.execute(resultAggregator);
         engineExecutorService.execute(timeoutChecker);
 
@@ -358,7 +359,7 @@ public class Engine {
                 currentPhaseLock.writeLock().unlock();
             }
 
-
+            phasesWithoutDuration.remove(phase);
             currentPhase.getPublishMode().getRunMap().reinitStartTimes();
 
             // Run the setup step of the suite
@@ -376,6 +377,8 @@ public class Engine {
 
             RunMode currentRunmode = phase.getRunMode();
             Long currentDuration = phase.getDuration();
+
+            System.out.println(currentDuration);
 
             currentRunmode.runTests(this);
             long start = System.currentTimeMillis();
@@ -396,6 +399,13 @@ public class Engine {
                 LOG.info("Phase interrupted.");
                 long elapsed = System.currentTimeMillis() - start;
                 timePassed = timePassed - currentDuration + elapsed;
+
+                if (!phasesWithoutDuration.isEmpty()) {
+                long timeToDistributePerPhase = (currentDuration - elapsed / 1000) / phasesWithoutDuration.size();
+                    for (Phase phaseWithoutDuration : configuration.getPhasesWithoutDuration()) {
+                        phaseWithoutDuration.setDuration(phaseWithoutDuration.getDuration() + timeToDistributePerPhase + "s");
+                    }
+                }
 
             }
 
