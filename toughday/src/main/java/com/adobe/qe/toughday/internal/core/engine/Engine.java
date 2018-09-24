@@ -378,22 +378,18 @@ public class Engine {
             RunMode currentRunmode = phase.getRunMode();
             Long currentDuration = phase.getDuration();
 
-            System.out.println(currentDuration);
-
             currentRunmode.runTests(this);
             long start = System.currentTimeMillis();
 
             try {
-                if (currentDuration > 0) { // zic sa seted durata la -1 initial si daca nu e data, o calculez dupa rata si intervala
-                    if (currentDuration < globalArgs.getDuration() - timePassed) {
-                        Thread.sleep(currentDuration * 1000L);
+                if (currentDuration < globalArgs.getDuration() - timePassed) {
+                    Thread.sleep(currentDuration * 1000L);
 
-                        timePassed += currentDuration;
-                    } else {
-                        Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
-                        phase.getRunMode().finishExecutionAndAwait();
-                        break;
-                    }
+                    timePassed += currentDuration;
+                } else {
+                    Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
+                    phase.getRunMode().finishExecutionAndAwait();
+                    break;
                 }
             } catch (InterruptedException e) {
                 LOG.info("Phase interrupted.");
@@ -406,7 +402,6 @@ public class Engine {
                         phaseWithoutDuration.setDuration(phaseWithoutDuration.getDuration() + timeToDistributePerPhase + "s");
                     }
                 }
-
             }
 
             phase.getRunMode().finishExecutionAndAwait();

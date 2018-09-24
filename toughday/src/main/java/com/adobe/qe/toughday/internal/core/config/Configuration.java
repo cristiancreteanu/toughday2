@@ -218,11 +218,6 @@ public class Configuration {
         this.publishMode = getPublishMode(configParams.getPublishModeParams()   );
         globalSuite = getTestSuite(globalArgsMeta);
 
-        ///////////////DE VERIFICAT DACA E OK AICI
-//        for (AbstractTest abstractTest : suite.getTests()) {
-//            items.put(abstractTest.getName(), abstractTest.getClass());
-//        }
-
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             switch (item.getKey()) {
                 case ADD:
@@ -274,19 +269,21 @@ public class Configuration {
 
         // if there were no phases configured, create a phase that has the global configuration
         if (configParams.getPhasesParams().isEmpty()) {
+            // here all tests could've been excluded
+            if (globalSuite.getTests().isEmpty()) {
+                globalSuite = predefinedSuites.getDefaultSuite();
+            }
+
             for (AbstractTest test : globalSuite.getTests()) {
                 test.setGlobalArgs(globalArgs);
+                items.put(test.getName(), test.getClass());
             }
             RunMode runMode = getRunMode(configParams.getRunModeParams());
             PublishMode publishMode = getPublishMode(configParams.getPublishModeParams());
 
-            // here all tests could've been excluded
-            if (globalSuite.getTests().isEmpty()) {
-                phases.add(new Phase(new HashMap<>(), predefinedSuites.getDefaultSuite(), runMode, publishMode));
-                return;
-            }
-
             phases.add(new Phase(new HashMap<>(), globalSuite, runMode, publishMode));
+            configureDurationForPhases();
+
             return;
         }
 
@@ -349,11 +346,12 @@ public class Configuration {
             if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
                 // Replace the empty suite with the default predefined suite if no test has been configured,
                 // either by selecting a suite or manually using --add
-                suite = predefinedSuites.getDefaultSuite(); // hmmm.. oare?
+                suite = predefinedSuites.getDefaultSuite();
             }
 
             for (AbstractTest test : suite.getTests()) {
                 test.setGlobalArgs(globalArgs);
+                items.put(test.getName(), test.getClass());
             }
 
             if (phaseParams.getRunmode() == null) {
@@ -365,7 +363,7 @@ public class Configuration {
             }
 
             RunMode runMode = getRunMode(phaseParams.getRunmode());
-            PublishMode publishMode = getPublishMode(phaseParams.getPublishmode()); // temporar asta
+            PublishMode publishMode = getPublishMode(phaseParams.getPublishmode());
 
             suite.setMinTimeout(globalArgs.getTimeout());
             for (AbstractTest test : suite.getTests()) {
@@ -380,6 +378,10 @@ public class Configuration {
             phases.add(new Phase(phaseParams.getProperties(), suite, runMode, publishMode));
         }
 
+        configureDurationForPhases();
+    }
+
+    private void configureDurationForPhases() {
         long durationLeft = globalArgs.getDuration();
         for (Phase phase : phases) {
             if (phase.getDuration() == null) {
