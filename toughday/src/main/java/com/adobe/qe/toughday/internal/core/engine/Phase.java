@@ -23,21 +23,6 @@ public class Phase {
     private PublishMode publishMode;
     private Map<AbstractTest, AtomicLong> counts = new HashMap<>();
 
-    public Phase(Map<String, Object> properties, TestSuite testSuite, RunMode runMode, PublishMode publishMode) {
-        name = properties.get("name") != null ? properties.get("name").toString() : "";
-        measurable = properties.get("measurable") != null ? Boolean.valueOf(properties.get("measurable").toString()) : true;
-        useconfig = properties.get("useconfig") != null ? properties.get("useconfig").toString() : "";
-        duration = properties.get("duration") != null ? GlobalArgs.parseDurationToSeconds(properties.get("duration").toString()) : null;
-
-        this.testSuite = testSuite;
-        this.runMode = runMode;
-        this.publishMode = publishMode;
-
-        for (AbstractTest test : this.testSuite.getTests()) {
-            counts.put(test, new AtomicLong(0));
-        }
-    }
-
     @ConfigArgGet
     public String getName() {
         return name;
@@ -95,5 +80,17 @@ public class Phase {
 
     public Map<AbstractTest, AtomicLong> getCounts() {
         return counts;
+    }
+
+    public void setTestSuite(TestSuite testSuite) {
+        this.testSuite = testSuite;
+    }
+
+    public void setRunMode(RunMode runMode) {
+        this.runMode = runMode;
+    }
+
+    public void setPublishMode(PublishMode publishMode) {
+        this.publishMode = publishMode;
     }
 }

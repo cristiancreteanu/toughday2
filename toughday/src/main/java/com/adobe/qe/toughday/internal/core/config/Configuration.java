@@ -48,6 +48,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
@@ -281,7 +282,23 @@ public class Configuration {
             RunMode runMode = getRunMode(configParams.getRunModeParams());
             PublishMode publishMode = getPublishMode(configParams.getPublishModeParams());
 
-            phases.add(new Phase(new HashMap<>(), globalSuite, runMode, publishMode));
+            Phase phase = createObject(Phase.class, new HashMap<>());
+            phase.setRunMode(runMode);
+            phase.setPublishMode(publishMode);
+            phase.setTestSuite(globalSuite);
+
+            phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
+            for (AbstractTest test : phase.getTestSuite().getTests()) {
+                phase.getCounts().put(test, new AtomicLong(0));
+
+                if (test.getTimeout() < 0) {
+                    continue;
+                }
+
+                phase.getTestSuite().setMinTimeout(Math.min(phase.getTestSuite().getMinTimeout(), test.getTimeout()));
+            }
+
+            phases.add(phase);
             configureDurationForPhases();
 
             return;
@@ -365,17 +382,24 @@ public class Configuration {
             RunMode runMode = getRunMode(new HashMap<>(phaseParams.getRunmode()));
             PublishMode publishMode = getPublishMode(new HashMap<>(phaseParams.getPublishmode()));
 
-            suite.setMinTimeout(globalArgs.getTimeout());
-            for (AbstractTest test : suite.getTests()) {
+            Phase phase = createObject(Phase.class, phaseParams.getProperties());
+            checkInvalidArgs(phaseParams.getProperties());
+            phase.setTestSuite(suite);
+            phase.setRunMode(runMode);
+            phase.setPublishMode(publishMode);
+
+            phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
+            for(AbstractTest test : phase.getTestSuite().getTests()) {
+                phase.getCounts().put(test, new AtomicLong(0));
+
                 if(test.getTimeout() < 0) {
                     continue;
                 }
 
-                suite.setMinTimeout(Math.min(suite.getMinTimeout(), test.getTimeout()));
+                phase.getTestSuite().setMinTimeout(Math.min(phase.getTestSuite().getMinTimeout(), test.getTimeout()));
             }
 
-
-            phases.add(new Phase(phaseParams.getProperties(), suite, runMode, publishMode));
+            phases.add(phase);
         }
 
         configureDurationForPhases();
