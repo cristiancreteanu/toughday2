@@ -10,7 +10,6 @@ import com.adobe.qe.toughday.internal.core.engine.publishmodes.Intervals;
 import com.adobe.qe.toughday.internal.core.engine.publishmodes.Simple;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.ConstantLoad;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.Normal;
-import com.sun.tools.internal.jxc.ap.Const;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.*;

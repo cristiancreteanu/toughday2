@@ -113,14 +113,18 @@ public class ConfigParams implements Serializable {
         /**
          * Method for taking the configuration of another phase
          *
-         * In case the phase from which the configuration is to be taken also has
-         * "useconfig" set, it will be prioritised, its configuration will be updated accordingly
-         * before continuing with the phase for which the method was first called
+         * @param phaseParams - the parameters of the phase to take the configuration from
+         * In case the phase corresponding to phaseParams also has "useconfig" set,
+         * the method will be called recursively for phaseParams in order to try to
+         * take the configuration from its own "useconfig". The process repeats until
+         * a phase that does not have "useconfig" set is found. Once it is found, the
+         * configuration is taken over by the current phase and the process returns to the last
+         * recursive call, when the configuration is again taken from the phase that was
+         * previously configured, and so on.
          *
          * "useconfig" will be removed from the phase once it has been computed
          *
          * It also detects possible loops caused by the "useconfig" functionality
-         * @param phaseParams
          * @param checked - a set with the names of the phases we passed through since the first call
          */
         public void merge(PhaseParams phaseParams, Set<String> checked) {

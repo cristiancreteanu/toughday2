@@ -219,19 +219,7 @@ public class Configuration {
         this.publishMode = getPublishMode(new HashMap<>(configParams.getPublishModeParams()));
         globalSuite = getTestSuite(globalArgsMeta);
 
-        for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
-            switch (item.getKey()) {
-                case ADD:
-                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, globalSuite);
-                    break;
-                case CONFIG:
-                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, globalSuite);
-                    break;
-                case EXCLUDE:
-                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), globalSuite);
-                    break;
-            }
-        }
+        convertActionItems(configParams.getItems(), items, globalSuite);
 
         // Add default publishers if none is specified
         if (!anyPublisherAdded) {
@@ -319,45 +307,14 @@ public class Configuration {
             defaultSuiteAddedFromConfigExclude = false;
             allTestsExcluded = false;
 
-            String useconfig = null;
-            if (phaseParams.getProperties().get("useconfig") != null) {
-                useconfig = phaseParams.getProperties().get("useconfig").toString();
-                if (!ConfigParams.PhaseParams.namedPhases.containsKey(useconfig)) {
-                    throw new IllegalArgumentException("Could not find phase named \"" + useconfig + "\".");
-                }
-
-                String name = null;
-                if (phaseParams.getProperties().get("name") != null) {
-                    name = phaseParams.getProperties().get("name").toString();
-                }
-
-                if (name != null) {
-                    phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
-                            new HashSet<>(Arrays.asList(name, useconfig)));
-                } else {
-                    phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
-                            new HashSet<>(Collections.singletonList(useconfig)));
-                }
-            }
+            getConfigurationFromAnotherPhase(phaseParams);
 
             TestSuite suite = new TestSuite();
             for (AbstractTest test : globalSuite.getTests()) {
                 suite.add(test.clone());
             }
 
-            for (Map.Entry<Actions, ConfigParams.MetaObject> test : phaseParams.getTests()) {
-                switch (test.getKey()) {
-                    case ADD:
-                        addItem((ConfigParams.ClassMetaObject) test.getValue(), items, suite);
-                        break;
-                    case CONFIG:
-                        configItem((ConfigParams.NamedMetaObject) test.getValue(), items, suite);
-                        break;
-                    case EXCLUDE:
-                        excludeItem(((ConfigParams.NamedMetaObject)test.getValue()).getName(), suite);
-                        break;
-                }
-            }
+            convertActionItems(phaseParams.getTests(), items, suite);
 
             // Add a default suite of tests if no test is added or no predefined suite is chosen.
             if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
@@ -379,30 +336,75 @@ public class Configuration {
                 phaseParams.setPublishmode(configParams.getPublishModeParams());
             }
 
-            RunMode runMode = getRunMode(new HashMap<>(phaseParams.getRunmode()));
-            PublishMode publishMode = getPublishMode(new HashMap<>(phaseParams.getPublishmode()));
-
-            Phase phase = createObject(Phase.class, phaseParams.getProperties());
-            checkInvalidArgs(phaseParams.getProperties());
-            phase.setTestSuite(suite);
-            phase.setRunMode(runMode);
-            phase.setPublishMode(publishMode);
-
-            phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
-            for(AbstractTest test : phase.getTestSuite().getTests()) {
-                phase.getCounts().put(test, new AtomicLong(0));
-
-                if(test.getTimeout() < 0) {
-                    continue;
-                }
-
-                phase.getTestSuite().setMinTimeout(Math.min(phase.getTestSuite().getMinTimeout(), test.getTimeout()));
-            }
+            Phase phase = createPhase(phaseParams, suite);
 
             phases.add(phase);
         }
 
         configureDurationForPhases();
+    }
+
+    private Phase createPhase(ConfigParams.PhaseParams phaseParams, TestSuite suite) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        RunMode runMode = getRunMode(new HashMap<>(phaseParams.getRunmode()));
+        PublishMode publishMode = getPublishMode(new HashMap<>(phaseParams.getPublishmode()));
+        Phase phase = createObject(Phase.class, phaseParams.getProperties());
+        checkInvalidArgs(phaseParams.getProperties());
+        phase.setTestSuite(suite);
+        phase.setRunMode(runMode);
+        phase.setPublishMode(publishMode);
+
+        phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
+        for(AbstractTest test : phase.getTestSuite().getTests()) {
+            phase.getCounts().put(test, new AtomicLong(0));
+
+            if(test.getTimeout() < 0) {
+                continue;
+            }
+
+            phase.getTestSuite().setMinTimeout(Math.min(phase.getTestSuite().getMinTimeout(), test.getTimeout()));
+        }
+
+        return phase;
+    }
+
+    private void getConfigurationFromAnotherPhase(ConfigParams.PhaseParams phaseParams) {
+        String useconfig = null;
+        if (phaseParams.getProperties().get("useconfig") != null) {
+            useconfig = phaseParams.getProperties().get("useconfig").toString();
+            if (!ConfigParams.PhaseParams.namedPhases.containsKey(useconfig)) {
+                throw new IllegalArgumentException("Could not find phase named \"" + useconfig + "\".");
+            }
+
+            String name = null;
+            if (phaseParams.getProperties().get("name") != null) {
+                name = phaseParams.getProperties().get("name").toString();
+            }
+
+            if (name != null) {
+                phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
+                        new HashSet<>(Arrays.asList(name, useconfig)));
+            } else {
+                phaseParams.merge(ConfigParams.PhaseParams.namedPhases.get(useconfig),
+                        new HashSet<>(Collections.singletonList(useconfig)));
+            }
+        }
+    }
+
+    private void convertActionItems(List<Map.Entry<Actions, ConfigParams.MetaObject>> actionItems,
+                                    Map<String, Class> items, TestSuite testSuite) throws InvocationTargetException, IllegalAccessException, NoSuchMethodException, InstantiationException {
+        for (Map.Entry<Actions, ConfigParams.MetaObject> item : actionItems) {
+            switch (item.getKey()) {
+                case ADD:
+                    addItem((ConfigParams.ClassMetaObject) item.getValue(), items, testSuite);
+                    break;
+                case CONFIG:
+                    configItem((ConfigParams.NamedMetaObject) item.getValue(), items, testSuite);
+                    break;
+                case EXCLUDE:
+                    excludeItem(((ConfigParams.NamedMetaObject)item.getValue()).getName(), testSuite);
+                    break;
+            }
+        }
     }
 
     private void configureDurationForPhases() {
