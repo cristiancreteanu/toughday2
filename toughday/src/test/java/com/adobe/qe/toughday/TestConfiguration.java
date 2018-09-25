@@ -1,6 +1,7 @@
 package com.adobe.qe.toughday;
 
 import com.adobe.qe.toughday.internal.core.ReflectionsContainer;
+import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
@@ -77,26 +78,26 @@ public class TestConfiguration {
     public void testConfigAfterAddPass() throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, IOException {
         cmdLineArgs.addAll(Arrays.asList("--add", "MockTest", "count=5"));
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "timeout=6"));
-        Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        Phase phase = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().get(0);
 
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getCount(), 5);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getTimeout(), 6000);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 1);
+        Assert.assertEquals(phase.getTestSuite().getTest("MockTest").getCount(), 5);
+        Assert.assertEquals(phase.getTestSuite().getTest("MockTest").getTimeout(), 6000);
+        Assert.assertEquals(phase.getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(phase.getTestSuite().getTotalWeight(), 1);
 
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "count=10"));
-        configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        phase = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().get(0);
 
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getCount(), 10);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 1);
+        Assert.assertEquals(phase.getTestSuite().getTest("MockTest").getCount(), 10);
+        Assert.assertEquals(phase.getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(phase.getTestSuite().getTotalWeight(), 1);
 
         cmdLineArgs.addAll(Arrays.asList("--config", "MockTest", "weight=20"));
-        configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+        phase = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases().get(0);
 
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTest("MockTest").getWeight(), 20);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTests().size(), 1);
-        Assert.assertEquals(configuration.getPhases().iterator().next().getTestSuite().getTotalWeight(), 20);
+        Assert.assertEquals(phase.getTestSuite().getTest("MockTest").getWeight(), 20);
+        Assert.assertEquals(phase.getTestSuite().getTests().size(), 1);
+        Assert.assertEquals(phase.getTestSuite().getTotalWeight(), 20);
     }
 
     @Test
@@ -317,11 +318,48 @@ public class TestConfiguration {
     }
 
     @Test
+    public void testPhaseSuite() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList(("--host=localhost --phase --add MockTest name=mock1 --config mock1 weight=10 " +
+                "--add MockTest name=mock2 weight=10 --exclude mock2 --add MockTest --config mock1 timeout=1 " +
+                "--config MockTest name=mock3 --config mock3 weight=5 count=10 " +
+                "--phase --add MockTest").split(" ")));
+        List<Phase> phases = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases();
+
+        TestSuite testSuite = phases.get(0).getTestSuite();
+        Assert.assertEquals(testSuite.getTests().size(), 2);
+        Assert.assertNotNull(testSuite.getTest("mock1"));
+        Assert.assertEquals(testSuite.getTest("mock1").getWeight(), 10);
+        Assert.assertEquals(testSuite.getTest("mock1").getTimeout(), 1000);
+        Assert.assertNotNull(testSuite.getTest("mock3"));
+        Assert.assertEquals(testSuite.getTest("mock3").getWeight(), 5);
+        Assert.assertEquals(testSuite.getTest("mock3").getCount(), 10);
+        Assert.assertEquals(testSuite.getTotalWeight(), 15);
+
+        testSuite = phases.get(1).getTestSuite();
+        Assert.assertEquals(testSuite.getTotalWeight(), 1);
+        Assert.assertNotNull(testSuite.getTest("MockTest"));
+        Assert.assertEquals(testSuite.getTest("MockTest").getWeight(), 1);
+        Assert.assertEquals(testSuite.getTest("MockTest").getCount(), -1);
+        Assert.assertEquals(testSuite.getTest("MockTest").getTimeout(), -1);
+    }
+
+    @Test
     public void testPhasesDurationTooLong() {
         try {
             cmdLineArgs.addAll(Arrays.asList("--host=localhost --duration=10s --phase duration=5s --phase duration=10s".split(" ")));
             new Configuration(cmdLineArgs.toArray(new String[0]));
             Assert.fail("The sum of the durations of phases should not exceed the global one.");
+        } catch (Exception e) {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testPhasesDurationLeftTooShort() {
+        try {
+            cmdLineArgs.addAll(Arrays.asList("--host=localhost --duration=10s --phase --phase duration=9s --phase".split(" ")));
+            new Configuration(cmdLineArgs.toArray(new String[0]));
+            Assert.fail("There should be enough time left to divide between the phases that have no duration.");
         } catch (Exception e) {
             Assert.assertTrue(true);
         }
@@ -446,6 +484,30 @@ public class TestConfiguration {
 
         Assert.assertEquals(phases.get(1).getTestSuite().getTests().size(), 2);
         Assert.assertEquals(phases.get(2).getTestSuite().getTests().size(), 3);
+    }
+
+    @Test
+    public void testConfigBeforeAddPhases() {
+        try {
+            cmdLineArgs.addAll(Arrays.asList(("--host=localhost --phase --add MockTest --config MockTestTwin name=twin " +
+                    "--add MockTestTwin --phase --add MockTest").split(" ")));
+            new Configuration(cmdLineArgs.toArray(new String[0]));
+            Assert.fail("Should not be afle to --config before --add.");
+        } catch (Exception e) {
+            Assert.assertTrue(true);
+        }
+    }
+
+    @Test
+    public void testExcludeBeforeAddPhases() {
+        try {
+            cmdLineArgs.addAll(Arrays.asList(("--host=localhost --phase --add MockTest --exclude MockTestTwin " +
+                    "--add MockTestTwin --phase --add MockTest").split(" ")));
+            new Configuration(cmdLineArgs.toArray(new String[0]));
+            Assert.fail("Should not be afle to --exclude before --add.");
+        } catch (Exception e) {
+            Assert.assertTrue(true);
+        }
     }
 
     @After
