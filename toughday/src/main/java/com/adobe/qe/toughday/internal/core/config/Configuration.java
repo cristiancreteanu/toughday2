@@ -559,16 +559,6 @@ public class Configuration {
             throw new IllegalStateException("The Run mode doesn't have a type");
         }
 
-        if ((runModeParams.containsKey("start") || runModeParams.containsKey("end"))
-                && (runModeParams.containsKey("load") || runModeParams.containsKey("concurrency"))) {
-            throw new IllegalStateException("A run mode cannot be configured with both start/end and concurrency/load.");
-        }
-
-        if ((runModeParams.containsKey("start") && !runModeParams.containsKey("end"))
-                || (runModeParams.containsKey("end") && !runModeParams.containsKey("start"))) {
-            throw new IllegalStateException("Cannot configure only one limit (start/end) for a run mode.");
-        }
-
         if (runModeParams.containsKey("type") && runModeParams.get("type").equals("normal")
                 && runModeParams.containsKey("load")) {
             throw new IllegalStateException("Cannot configure load for Normal mode.");
@@ -576,7 +566,7 @@ public class Configuration {
 
         if (runModeParams.containsKey("type") && runModeParams.get("type").equals("constantload")
                 && runModeParams.containsKey("concurrency")) {
-            throw new IllegalStateException("Cannod configure concurrency for Constant Load mode");
+            throw new IllegalStateException("Cannot configure concurrency for Constant Load mode");
         }
 
         // check that all numeric values are positive
@@ -589,19 +579,8 @@ public class Configuration {
         }
 
         runModeParams.remove("type");
-        Map<String, Object> runModeParamsCopy = new HashMap<>(runModeParams);
 
         RunMode runMode = createObject(runModeClass, runModeParams);
-
-        for (Map.Entry<String, Object> entry : runModeParamsCopy.entrySet()) {
-            try {
-                if (Long.valueOf(entry.getValue().toString()) < 0) {
-                    throw new IllegalArgumentException(entry.getKey().toUpperCase() + " cannot be negative.");
-                }
-            } catch (NumberFormatException e) {
-                // do nothing
-            }
-        }
 
         return runMode;
     }

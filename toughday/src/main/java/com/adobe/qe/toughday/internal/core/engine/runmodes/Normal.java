@@ -62,6 +62,7 @@ public class Normal implements RunMode {
     @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use",
             defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
     public void setConcurrency(String concurrencyString) {
+        checkNotNegative(Long.parseLong(concurrencyString), "concurrency");
         this.concurrency = Integer.parseInt(concurrencyString);
     }
 
@@ -73,6 +74,7 @@ public class Normal implements RunMode {
     @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
             defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
     public void setWaitTime(String waitTime) {
+        checkNotNegative(Long.parseLong(waitTime), "waittime");
         this.waitTime = Integer.parseInt(waitTime);
     }
 
@@ -84,6 +86,9 @@ public class Normal implements RunMode {
     @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
             defaultValue = "-1")
     public void setStart(String start) {
+        if (!start.equals("-1")) {
+            checkNotNegative(Long.parseLong(start), "start");
+        }
         this.start = Integer.valueOf(start);
     }
 
@@ -92,8 +97,11 @@ public class Normal implements RunMode {
         return rate;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of users added per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
+    @ConfigArgSet(required = false, desc = "The number of threads added per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
     public void setRate(String rate) {
+        if (!rate.equals("-1")) {
+            checkNotNegative(Long.parseLong(rate), "rate");
+        }
         this.rate = Integer.valueOf(rate);
     }
 
@@ -112,8 +120,11 @@ public class Normal implements RunMode {
         return end;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = "-1")
+    @ConfigArgSet(required = false, desc = "The maximum number of threads the thread pool can reach.", defaultValue = "-1")
     public void setEnd(String end) {
+        if (!end.equals("-1")) {
+            checkNotNegative(Long.parseLong(end), "end");
+        }
         this.end = Integer.valueOf(end);
     }
 
@@ -121,8 +132,30 @@ public class Normal implements RunMode {
         return activeThreads;
     }
 
+    private void checkNotNegative(long param, String property) {
+        if (param < 0) {
+            throw new IllegalArgumentException("Property " + property + " incorrectly configured as negative.");
+        }
+    }
+
+    private void checkInvalidArgs() {
+        if ((start != -1 && end == -1) || (start == -1 && end != -1)) {
+            throw new IllegalArgumentException("Cannot configure only one limit (start/end) for Normal mode.");
+        }
+
+        if (isVariableConcurrency() && concurrency != DEFAULT_CONCURRENCY) {
+            throw new IllegalArgumentException("Normal mode cannot be configured with both start/end and concurrency.");
+        }
+    }
+
+    private boolean isVariableConcurrency() {
+        return start != -1 && end != -1;
+    }
+
     @Override
     public void runTests(Engine engine) {
+        checkInvalidArgs();
+
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         GlobalArgs globalArgs = configuration.getGlobalArgs();
@@ -131,7 +164,7 @@ public class Normal implements RunMode {
         // if no rate was provided, we'll create/remove one user at fixed rate,
         // namely every 'interval' milliseconds
         // we'll also create all the workers from the beginning
-        if (start != -1 && end != -1) {  // if start and end were provided
+        if (isVariableConcurrency()) {  // if start and end were provided
             if (rate == -1) {
                 interval = (long)Math.floor(1000.0 * (globalArgs.getDuration() - EPS)
                         / (start < end? end - start : start - end));  // to replace with phase duration

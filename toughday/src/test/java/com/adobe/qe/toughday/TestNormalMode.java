@@ -1,9 +1,18 @@
+/*
+Copyright 2015 Adobe. All rights reserved.
+This file is licensed to you under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License. You may obtain a copy
+of the License at http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software distributed under
+the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS
+OF ANY KIND, either express or implied. See the License for the specific language
+governing permissions and limitations under the License.
+*/
 package com.adobe.qe.toughday;
 
-import com.adobe.qe.toughday.internal.core.TestSuite;
 import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
-import com.adobe.qe.toughday.internal.core.engine.AsyncTestWorker;
 import com.adobe.qe.toughday.internal.core.engine.Engine;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.Normal;
 import org.apache.logging.log4j.LogManager;
@@ -11,19 +20,16 @@ import org.apache.logging.log4j.core.LoggerContext;
 import org.junit.*;
 
 import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-public class TestNormalMode { // de extins cu teste pe threads
+public class TestNormalMode {
     private ArrayList<String> cmdLineArgs;
     @BeforeClass
-    public static void onlyOnce() throws NoSuchMethodException {
+    public static void onlyOnce() {
         System.setProperty("logFileName", ".");
         ((LoggerContext) LogManager.getContext(false)).reconfigure();
     }
@@ -77,7 +83,8 @@ public class TestNormalMode { // de extins cu teste pe threads
     public void testNormalStartConcurrency() {
         cmdLineArgs.addAll(Arrays.asList("--duration=20s", "--runmode", "type=normal", "start=10", "concurrency=100"));
         try{
-            new Configuration(cmdLineArgs.toArray(new String[0]));
+            Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+            configuration.getRunMode().runTests(new Engine(configuration));
             Assert.fail("Should not be able to have both start/end and concurrency.");
         } catch (Exception e) {
             Assert.assertTrue(true);
@@ -88,7 +95,8 @@ public class TestNormalMode { // de extins cu teste pe threads
     public void testNormalEndConcurrency() {
         cmdLineArgs.addAll(Arrays.asList("--duration=20s", "--runmode", "type=normal", "end=50", "concurrency=100"));
         try{
-            new Configuration(cmdLineArgs.toArray(new String[0]));
+            Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+            configuration.getRunMode().runTests(new Engine(configuration));
             Assert.fail("Should not be able to have both start/end and concurrency.");
         } catch (Exception e) {
             Assert.assertTrue(true);
@@ -100,6 +108,7 @@ public class TestNormalMode { // de extins cu teste pe threads
         cmdLineArgs.addAll(Arrays.asList("--duration=20s", "--runmode", "type=normal", "start=10", "end=50", "concurrency=100"));
         try{
             Configuration configuration = new Configuration(cmdLineArgs.toArray(new String[0]));
+            configuration.getRunMode().runTests(new Engine(configuration));
             Assert.fail("Should not be able to have both start/end and concurrency.");
         } catch (Exception e) {
             Assert.assertTrue(true);
@@ -169,7 +178,6 @@ public class TestNormalMode { // de extins cu teste pe threads
         Normal runMode = (Normal) configuration.getRunMode();
         runMode.runTests(engine);
 
-        runMode.runTests(engine);
         Thread.sleep(4000);
 
         Assert.assertEquals(runMode.getExecutorService().getClass(), ThreadPoolExecutor.class);
@@ -192,7 +200,6 @@ public class TestNormalMode { // de extins cu teste pe threads
         Assert.assertEquals(configuration.getRunMode().getClass(), Normal.class);
 
         Normal runMode = (Normal) configuration.getRunMode();
-        runMode.runTests(engine);
 
         Assert.assertEquals(runMode.getRate(), 25);
         Assert.assertEquals(runMode.getInterval(), 1000);
@@ -220,7 +227,6 @@ public class TestNormalMode { // de extins cu teste pe threads
         Assert.assertEquals(configuration.getRunMode().getClass(), Normal.class);
 
         Normal runMode = (Normal) configuration.getRunMode();
-        runMode.runTests(engine);
 
         Assert.assertEquals(runMode.getRate(), 10);
         Assert.assertEquals(runMode.getInterval(), 1000);

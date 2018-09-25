@@ -60,7 +60,10 @@ public class ConstantLoad implements RunMode {
     private TestCache testCache;
 
     @ConfigArgSet(required = false, defaultValue = DEFAULT_LOAD_STRING, desc = "Set the load, in requests per second for the \"constantload\" runmode.")
-    public void setLoad(String load) { this.load = Integer.parseInt(load); }
+    public void setLoad(String load) {
+        checkNotNegative(Long.parseLong(load), "load");
+        this.load = Integer.parseInt(load);
+    }
 
     @ConfigArgGet
     public int getLoad() { return this.load; }
@@ -70,9 +73,12 @@ public class ConstantLoad implements RunMode {
         return start;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
+    @ConfigArgSet(required = false, desc = "The load to start ramping up from. Will rise to the number specified by \"concurrency\".",
             defaultValue = "-1")
     public void setStart(String start) {
+        if (!start.equals("-1")) {
+            checkNotNegative(Long.parseLong(start), "start");
+        }
         this.start = Integer.valueOf(start);
     }
 
@@ -81,8 +87,11 @@ public class ConstantLoad implements RunMode {
         return rate;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of users added per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
+    @ConfigArgSet(required = false, desc = "The increase in load per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
     public void setRate(String rate) {
+        if (!rate.equals("-1")) {
+            checkNotNegative(Long.parseLong(rate), "rate");
+        }
         this.rate = Integer.valueOf(rate);
     }
 
@@ -91,7 +100,7 @@ public class ConstantLoad implements RunMode {
         return interval;
     }
 
-    @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
+    @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add increase the load.", defaultValue = DEFAULT_INTERVAL_STRING)
     public void setInterval(String interval) {
         this.interval = GlobalArgs.parseDurationToSeconds(interval);
     }
@@ -101,8 +110,11 @@ public class ConstantLoad implements RunMode {
         return end;
     }
 
-    @ConfigArgSet(required = false, desc = "The number of threads to keep running.", defaultValue = "-1")
+    @ConfigArgSet(required = false, desc = "The maximum value that load reaches.", defaultValue = "-1")
     public void setEnd(String end) {
+        if (!end.equals("-1")) {
+            checkNotNegative(Long.parseLong(end), "end");
+        }
         this.end = Integer.valueOf(end);
     }
 
@@ -124,14 +136,36 @@ public class ConstantLoad implements RunMode {
         }
     }
 
+    private boolean isVariableLoad() {
+        return start != -1 && end != -1;
+    }
+
+    private void checkNotNegative(long param, String property) {
+        if (param < 0) {
+            throw new IllegalArgumentException("Property " + property + " incorrectly configured as negative.");
+        }
+    }
+
+    private void checkInvalidArgs() {
+        if ((start != -1 && end == -1) || (start == -1 && end != -1)) {
+            throw new IllegalArgumentException("Cannot configure only one limit (start/end) for Constant Load mode.");
+        }
+
+        if (isVariableLoad() && load != DEFAULT_LOAD) {
+            throw new IllegalArgumentException("Constant Load mode cannot be configured with both start/end and load.");
+        }
+    }
+
     @Override
-    public void runTests(Engine engine) throws Exception {
+    public void runTests(Engine engine) {
+        checkInvalidArgs();
+
         Configuration configuration = engine.getConfiguration();
         TestSuite testSuite = configuration.getTestSuite();
         this.testCache = new TestCache(testSuite);
 
-        if (start != -1 && end != -1) {
-            load = start > end? start : end;
+        if (isVariableLoad()) {
+            load = Math.max(start, end);
         }
 
         for(int i = 0; i < load; i++) {
@@ -241,6 +275,25 @@ public class ConstantLoad implements RunMode {
             this.engine = engine;
         }
 
+        private void configureRateAndInterval(MutableLong secondsLeft) {
+            //the difference from the beginning load to the end one
+            int loadDifference = Math.abs(end - start);
+
+            // suppose load will increase by second
+            secondsLeft.setValue(1);
+            rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
+                    / engine.getGlobalArgs().getDuration());
+
+            // if the rate becomes too small, increase the interval at which the load is increased
+            while (rate < 1) {
+                secondsLeft.increment();
+                rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
+                        / engine.getGlobalArgs().getDuration());
+            }
+
+            interval = secondsLeft.getValue();
+        }
+
         @Override
         public void run() {
             try {
@@ -248,25 +301,9 @@ public class ConstantLoad implements RunMode {
                 MutableLong secondsLeft = new MutableLong(interval);
 
                 // if the rate was not specified and start and end were
-                if (rate == -1 && start != -1 && end != -1) {
+                if (rate == -1 && isVariableLoad()) {
                     currentLoad = start;
-
-                    //the difference from the beginning load to the end one
-                    int loadDifference = Math.abs(end - start);
-
-                    // suppose load will increase by second
-                    secondsLeft.setValue(1);
-                    rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
-                            / engine.getGlobalArgs().getDuration());
-
-                    // if the rate becomes too small, increase the interval at which the load is increased
-                    while (rate < 1) {
-                        secondsLeft.increment();
-                        rate = (int)Math.floor(1.0 * secondsLeft.getValue() * loadDifference
-                                / engine.getGlobalArgs().getDuration());
-                    }
-
-                    interval = secondsLeft.getValue();
+                    configureRateAndInterval(secondsLeft);
                 }
 
                 while (!isFinished()) {
