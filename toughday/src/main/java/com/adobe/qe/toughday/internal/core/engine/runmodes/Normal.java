@@ -41,9 +41,10 @@ public class Normal implements RunMode {
     private static final long DEFAULT_INTERVAL = 1000;
 
     private ExecutorService testsExecutorService;
+    private ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
 
     private final List<AsyncTestWorker> testWorkers = Collections.synchronizedList(new LinkedList<>());
-    private final List<AsyncTestWorker> idleTestWorkers = Collections.synchronizedList(new ArrayList<>());
     private final List<RunMap> runMaps = new ArrayList<>();
 
     private int start = DEFAULT_CONCURRENCY;
@@ -172,10 +173,6 @@ public class Normal implements RunMode {
             }
 
             concurrency = start;
-
-            createWorkers(Math.max(start, end), engine, testSuite);
-        } else {  // if start and end weren't provided
-            createWorkers(concurrency, engine, testSuite);
         }
 
         // Execute the test worker threads
@@ -183,41 +180,38 @@ public class Normal implements RunMode {
         // assigned to 'concurrency') workers to begin with
         // otherwise, it will create 'concurrency' workers
         for (int i = 0; i < concurrency; i++) {
-            executeNextWorker();
+            createAndExecuteWorker(engine, testSuite);
         }
 
         // execute 'rate' workers every 'interval'
-        rampUp();
+        rampUp(engine, testSuite);
 
         // interrupt 'rate' workers every 'interval'
         rampDown();
     }
 
-    private void executeNextWorker() {
-        try {
-            testsExecutorService.execute(testWorkers.get(activeThreads));
+
+
+    private void createAndExecuteWorker(Engine engine, TestSuite testSuite) {
+        AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
+        synchronized (testWorkers) {
+            testWorkers.add(testWorker);
             activeThreads++;
+        }
+        synchronized (runMaps) {
+            runMaps.add(testWorker.getLocalRunMap());
+        }
+
+        try {
+            testsExecutorService.execute(testWorker);
         } catch (OutOfMemoryError e) {
             LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
         }
     }
 
-    private void createWorkers(int size, Engine engine, TestSuite testSuite) {
-        for (int i = 0; i < size; ++i) {
-            AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, testSuite, engine.getGlobalRunMap().newInstance());
-            synchronized (testWorkers) {
-                testWorkers.add(testWorker);
-            }
-            synchronized (runMaps) {
-                runMaps.add(testWorker.getLocalRunMap());
-            }
-        }
-    }
-
-    private void rampUp() {
+    private void rampUp(Engine engine, TestSuite testSuite) {
         // every 'interval' milliseconds, we'll create 'rate' workers
         if (start < end) {
-            ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             addWorkerScheduler.scheduleAtFixedRate(() -> {
                 for (int i = 0; i < rate; ++i) {
                     // if all the workers have been created
@@ -230,7 +224,7 @@ public class Normal implements RunMode {
                         }
                         break;
                     } else {
-                        executeNextWorker();
+                        createAndExecuteWorker(engine, testSuite);
                     }
                 }
             }, 0, interval, TimeUnit.MILLISECONDS);
@@ -240,7 +234,6 @@ public class Normal implements RunMode {
     private void rampDown() {
         // every 'interval' milliseconds, we'll stop 'rate' workers
         if (end < start) {
-            ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
             ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
 
             removeWorkerScheduler.scheduleAtFixedRate(() -> {
@@ -301,6 +294,14 @@ public class Normal implements RunMode {
 
     @Override
     public void finishExecutionAndAwait() {
+        if (!addWorkerScheduler.isShutdown()) {
+            addWorkerScheduler.shutdownNow();
+        }
+
+        if(!removeWorkerScheduler.isShutdown()) {
+            removeWorkerScheduler.shutdownNow();
+        }
+
         synchronized (testWorkers) {
             for (AsyncTestWorker testWorker : testWorkers) {
                 testWorker.finishExecution();
@@ -375,7 +376,6 @@ public class Normal implements RunMode {
                     if (null == currentTest) {
                         LOG.info("Thread " + workerThread + " died! :(");
                         this.finishExecution();
-                        idleTestWorkers.add(this);
 
                         continue;
                     }
