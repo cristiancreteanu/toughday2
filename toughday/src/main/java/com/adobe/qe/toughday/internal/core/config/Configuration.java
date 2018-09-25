@@ -214,8 +214,8 @@ public class Configuration {
 
         applyLogLevel(globalArgs.getLogLevel());
 
-        this.runMode = getRunMode(configParams.getRunModeParams());
-        this.publishMode = getPublishMode(configParams.getPublishModeParams()   );
+        this.runMode = getRunMode(new HashMap<>(configParams.getRunModeParams()));
+        this.publishMode = getPublishMode(new HashMap<>(configParams.getPublishModeParams()));
         globalSuite = getTestSuite(globalArgsMeta);
 
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
@@ -354,16 +354,16 @@ public class Configuration {
                 items.put(test.getName(), test.getClass());
             }
 
-            if (phaseParams.getRunmode() == null) {
+            if (phaseParams.getRunmode().isEmpty()) {
                 phaseParams.setRunmode(configParams.getRunModeParams());
             }
 
-            if (phaseParams.getPublishmode() == null) {
+            if (phaseParams.getPublishmode().isEmpty()) {
                 phaseParams.setPublishmode(configParams.getPublishModeParams());
             }
 
-            RunMode runMode = getRunMode(phaseParams.getRunmode());
-            PublishMode publishMode = getPublishMode(phaseParams.getPublishmode());
+            RunMode runMode = getRunMode(new HashMap<>(phaseParams.getRunmode()));
+            PublishMode publishMode = getPublishMode(new HashMap<>(phaseParams.getPublishmode()));
 
             suite.setMinTimeout(globalArgs.getTimeout());
             for (AbstractTest test : suite.getTests()) {

@@ -5,6 +5,8 @@ import com.adobe.qe.toughday.internal.core.Timestamp;
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.internal.core.engine.Phase;
+import com.adobe.qe.toughday.internal.core.engine.publishmodes.Intervals;
+import com.adobe.qe.toughday.internal.core.engine.publishmodes.Simple;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.ConstantLoad;
 import com.adobe.qe.toughday.internal.core.engine.runmodes.Normal;
 import com.sun.tools.internal.jxc.ap.Const;
@@ -278,6 +280,40 @@ public class TestConfiguration {
 
         Assert.assertEquals(phases.get(1).getRunMode().getClass(), ConstantLoad.class);
         Assert.assertEquals(((ConstantLoad)phases.get(1).getRunMode()).getLoad(), 20);
+    }
+
+    @Test
+    public void testGlobalRunmode() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList(("--host=localhost --runmode type=constantload load=20 " +
+                "--phase --runmode type=normal --phase").split(" ")));
+        List<Phase> phases = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases();
+
+        Assert.assertEquals(phases.get(0).getRunMode().getClass(), Normal.class);
+        Assert.assertEquals(((Normal)phases.get(0).getRunMode()).getConcurrency(), 200);
+        Assert.assertEquals(phases.get(1).getRunMode().getClass(), ConstantLoad.class);
+        Assert.assertEquals(((ConstantLoad)phases.get(1).getRunMode()).getLoad(), 20);
+    }
+
+    @Test
+    public void testPhasePublishmode() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList(("--host=localhost --phase --publishmode type=simple " +
+                "--phase --publishmode type=intervals interval=3s").split(" ")));
+        List<Phase> phases = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases();
+
+        Assert.assertEquals(phases.get(0).getPublishMode().getClass(), Simple.class);
+        Assert.assertEquals(phases.get(1).getPublishMode().getClass(), Intervals.class);
+        Assert.assertEquals(((Intervals)phases.get(1).getPublishMode()).getInterval(), "3s");
+    }
+
+    @Test
+    public void testGlobalPublishmode() throws Exception {
+        cmdLineArgs.addAll(Arrays.asList(("--host=localhost --publishmode type=intervals interval=3s" +
+                " --phase --publishmode type=simple --phase").split(" ")));
+        List<Phase> phases = new Configuration(cmdLineArgs.toArray(new String[0])).getPhases();
+
+        Assert.assertEquals(phases.get(0).getPublishMode().getClass(), Simple.class);
+        Assert.assertEquals(phases.get(1).getPublishMode().getClass(), Intervals.class);
+        Assert.assertEquals(((Intervals)phases.get(1).getPublishMode()).getInterval(), "3s");
     }
 
     @Test
