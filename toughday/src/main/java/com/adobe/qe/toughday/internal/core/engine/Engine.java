@@ -313,17 +313,13 @@ public class Engine {
         Thread shutdownHook = new Thread() {
             public void run() {
                 try {
+                    currentPhaseLock.readLock().lock();
+
                     boolean wasMeasurable;
-                    try {
-                        currentPhaseLock.readLock().lock();
-                        wasMeasurable = currentPhase.getMeasurable();
-                        currentPhase.setMeasurable("false");
-                    } finally {
-                        currentPhaseLock.readLock().unlock();
-                    }
+                    wasMeasurable = currentPhase.getMeasurable();
+                    currentPhase.setMeasurable("false");
 
                     currentPhase.getRunMode().finishExecutionAndAwait();
-                    String finishTime = Engine.getCurrentDateTime();
 
                     // interrupt extra test threads
                     // TODO: this is suboptimal, replace with a better mechanism for notifications
@@ -346,6 +342,7 @@ public class Engine {
                 } catch (Throwable e) {
                     System.out.println("Exception in shutdown hook!");
                     e.printStackTrace();
+                    currentPhaseLock.readLock().unlock();
                 }
                 Engine.logGlobal("Test execution finished at: " + Engine.getCurrentDateTime());
                 LogManager.shutdown();
@@ -364,10 +361,10 @@ public class Engine {
             testsRunning = true;
 
             try {
-                currentPhaseLock.writeLock().lock();
+                currentPhaseLock.readLock().lock();
                 currentPhase = phase;
             } finally {
-                currentPhaseLock.writeLock().unlock();
+                currentPhaseLock.readLock().unlock();
             }
 
             phasesWithoutDuration.remove(phase);
@@ -397,7 +394,6 @@ public class Engine {
 
             } catch (InterruptedException e) {
                 LOG.info("Phase interrupted.");
-                System.out.println(e.getMessage());
                 long elapsed = System.currentTimeMillis() - start;
 
                 if (!phasesWithoutDuration.isEmpty()) {
