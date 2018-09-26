@@ -258,34 +258,7 @@ public class Configuration {
 
         // if there were no phases configured, create a phase that has the global configuration
         if (configParams.getPhasesParams().isEmpty()) {
-            // here all tests could've been excluded
-            if (globalSuite.getTests().isEmpty()) {
-                globalSuite = predefinedSuites.getDefaultSuite();
-            }
-
-            for (AbstractTest test : globalSuite.getTests()) {
-                test.setGlobalArgs(globalArgs);
-                items.put(test.getName(), test.getClass());
-            }
-            RunMode runMode = getRunMode(configParams.getRunModeParams());
-            PublishMode publishMode = getPublishMode(configParams.getPublishModeParams());
-
-            Phase phase = createObject(Phase.class, new HashMap<>());
-            phase.setRunMode(runMode);
-            phase.setPublishMode(publishMode);
-            phase.setTestSuite(globalSuite);
-
-            phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
-            for (AbstractTest test : phase.getTestSuite().getTests()) {
-                phase.getCounts().put(test, new AtomicLong(0));
-
-                if (test.getTimeout() < 0) {
-                    continue;
-                }
-
-                phase.getTestSuite().setMinTimeout(Math.min(phase.getTestSuite().getMinTimeout(), test.getTimeout()));
-            }
-
+            Phase phase = createPhase(configParams, new ConfigParams.PhaseParams(), globalSuite, items);
             phases.add(phase);
             configureDurationForPhases();
 
@@ -316,27 +289,7 @@ public class Configuration {
 
             convertActionItems(phaseParams.getTests(), items, suite);
 
-            // Add a default suite of tests if no test is added or no predefined suite is chosen.
-            if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
-                // Replace the empty suite with the default predefined suite if no test has been configured,
-                // either by selecting a suite or manually using --add
-                suite = predefinedSuites.getDefaultSuite();
-            }
-
-            for (AbstractTest test : suite.getTests()) {
-                test.setGlobalArgs(globalArgs);
-                items.put(test.getName(), test.getClass());
-            }
-
-            if (phaseParams.getRunmode().isEmpty()) {
-                phaseParams.setRunmode(configParams.getRunModeParams());
-            }
-
-            if (phaseParams.getPublishmode().isEmpty()) {
-                phaseParams.setPublishmode(configParams.getPublishModeParams());
-            }
-
-            Phase phase = createPhase(phaseParams, suite);
+            Phase phase = createPhase(configParams, phaseParams, suite, items);
 
             phases.add(phase);
         }
@@ -344,7 +297,22 @@ public class Configuration {
         configureDurationForPhases();
     }
 
-    private Phase createPhase(ConfigParams.PhaseParams phaseParams, TestSuite suite) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    private Phase createPhase(ConfigParams configParams, ConfigParams.PhaseParams phaseParams, TestSuite suite, Map<String, Class> items) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+        if (phaseParams.getRunmode().isEmpty()) {
+            phaseParams.setRunmode(configParams.getRunModeParams());
+        }
+
+        if (phaseParams.getPublishmode().isEmpty()) {
+            phaseParams.setPublishmode(configParams.getPublishModeParams());
+        }
+
+        // Add a default suite of tests if no test is added or no predefined suite is chosen.
+        if (!defaultSuiteAddedFromConfigExclude && suite.getTests().size() == 0) {
+            // Replace the empty suite with the default predefined suite if no test has been configured,
+            // either by selecting a suite or manually using --add
+            suite = predefinedSuites.getDefaultSuite();
+        }
+
         RunMode runMode = getRunMode(new HashMap<>(phaseParams.getRunmode()));
         PublishMode publishMode = getPublishMode(new HashMap<>(phaseParams.getPublishmode()));
         Phase phase = createObject(Phase.class, phaseParams.getProperties());
@@ -356,6 +324,8 @@ public class Configuration {
         phase.getTestSuite().setMinTimeout(globalArgs.getTimeout());
         for(AbstractTest test : phase.getTestSuite().getTests()) {
             phase.getCounts().put(test, new AtomicLong(0));
+            test.setGlobalArgs(globalArgs);
+            items.put(test.getName(), test.getClass());
 
             if(test.getTimeout() < 0) {
                 continue;

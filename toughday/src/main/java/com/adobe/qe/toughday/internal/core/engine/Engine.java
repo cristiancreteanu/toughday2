@@ -313,6 +313,15 @@ public class Engine {
         Thread shutdownHook = new Thread() {
             public void run() {
                 try {
+                    boolean wasMeasurable;
+                    try {
+                        currentPhaseLock.readLock().lock();
+                        wasMeasurable = currentPhase.getMeasurable();
+                        currentPhase.setMeasurable("false");
+                    } finally {
+                        currentPhaseLock.readLock().unlock();
+                    }
+
                     currentPhase.getRunMode().finishExecutionAndAwait();
                     String finishTime = Engine.getCurrentDateTime();
 
@@ -324,6 +333,7 @@ public class Engine {
                             t.interrupt();
                         }
                     }
+                    System.out.println("altceva");
                     timeoutChecker.finishExecution();
                     resultAggregator.finishExecution();
                     resultAggregator.aggregateResults();
@@ -331,8 +341,9 @@ public class Engine {
                     shutdownAndAwaitTermination(engineExecutorService);
                     currentPhase.getPublishMode().publish(currentPhase.getPublishMode().getRunMap().getCurrentTestResults());
 
-                    //what if it is not runnable? i should be the last measurable context
-                    currentPhase.getPublishMode().publishFinalResults(resultAggregator.filterResults());
+                    if (wasMeasurable) {
+                        currentPhase.getPublishMode().publishFinalResults(resultAggregator.filterResults());
+                    }
                 } catch (Throwable e) {
                     System.out.println("Exception in shutdown hook!");
                     e.printStackTrace();
@@ -344,7 +355,6 @@ public class Engine {
 
         Runtime.getRuntime().addShutdownHook(shutdownHook);
 
-        long timePassed = 0;
         Set<Phase> phasesWithoutDuration = configuration.getPhasesWithoutDuration();
         engineExecutorService.execute(resultAggregator);
         engineExecutorService.execute(timeoutChecker);
@@ -382,19 +392,12 @@ public class Engine {
             long start = System.currentTimeMillis();
 
             try {
-                if (currentDuration < globalArgs.getDuration() - timePassed) {
-                    Thread.sleep(currentDuration * 1000L);
+                Thread.sleep(currentDuration * 1000L);
 
-                    timePassed += currentDuration;
-                } else {
-                    Thread.sleep((globalArgs.getDuration() - timePassed) * 1000L);
-                    phase.getRunMode().finishExecutionAndAwait();
-                    break;
-                }
             } catch (InterruptedException e) {
                 LOG.info("Phase interrupted.");
+                System.out.println(e.getMessage());
                 long elapsed = System.currentTimeMillis() - start;
-                timePassed = timePassed - currentDuration + elapsed;
 
                 if (!phasesWithoutDuration.isEmpty()) {
                 long timeToDistributePerPhase = (currentDuration - elapsed / 1000) / phasesWithoutDuration.size();
@@ -404,17 +407,24 @@ public class Engine {
                 }
             }
 
-            phase.getRunMode().finishExecutionAndAwait();
-            if (currentPhase.getMeasurable()) {
-                shutdownAndAwaitTermination(phase.getRunMode().getExecutorService());
-                resultAggregator.aggregateResults();
-                phase.getPublishMode().publishFinalResults(resultAggregator.filterResults());
+            try {
+                currentPhaseLock.readLock().lock();
+                phase.getRunMode().finishExecutionAndAwait();
+                if (currentPhase.getMeasurable()) {
+                    shutdownAndAwaitTermination(phase.getRunMode().getExecutorService());
+                    resultAggregator.aggregateResults();
+                    System.out.println("ceva");
+                    phase.getPublishMode().publishFinalResults(resultAggregator.filterResults());
+                }
+            } finally {
+                currentPhaseLock.readLock().unlock();
             }
         }
 
         testsRunning = false;
         timeoutChecker.finishExecution();
         resultAggregator.finishExecution();
+        System.out.println("again");
         shutdownAndAwaitTermination(currentPhase.getRunMode().getExecutorService());
         shutdownAndAwaitTermination(engineExecutorService);
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
