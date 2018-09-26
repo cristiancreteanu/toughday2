@@ -11,9 +11,6 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.tests.samplecontent;
 
-/**
- * Created by tuicu on 12/01/17.
- */
 public class SampleContent {
 
     public static final String TOUGHDAY_TEMPLATE = "/conf/toughday-templates/settings/wcm/templates/toughday-template";

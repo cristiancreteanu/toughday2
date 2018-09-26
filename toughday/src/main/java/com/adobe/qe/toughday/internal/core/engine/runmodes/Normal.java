@@ -16,52 +16,57 @@ import com.adobe.qe.toughday.internal.core.*;
 import com.adobe.qe.toughday.api.annotations.Description;
 import com.adobe.qe.toughday.api.annotations.ConfigArgGet;
 import com.adobe.qe.toughday.api.annotations.ConfigArgSet;
-import com.adobe.qe.toughday.internal.core.config.Configuration;
 import com.adobe.qe.toughday.internal.core.config.GlobalArgs;
 import com.adobe.qe.toughday.internal.core.engine.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 @Description(desc = "Runs tests normally.")
 public class Normal implements RunMode {
-
     private static final Logger LOG = LoggerFactory.getLogger(Normal.class);
 
-    public static final String DEFAULT_CONCURRENCY_STRING = "200";
-    public static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
+    private static final int EPS = 1;
 
-    public static final String DEFAULT_WAIT_TIME_STRING = "300";
-    public static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
+    private static final String DEFAULT_CONCURRENCY_STRING = "200";
+    private static final int DEFAULT_CONCURRENCY = Integer.parseInt(DEFAULT_CONCURRENCY_STRING);
+
+    private static final String DEFAULT_WAIT_TIME_STRING = "300";
+    private static final long DEFAULT_WAIT_TIME = Long.parseLong(DEFAULT_WAIT_TIME_STRING);
+
+    private static final String DEFAULT_INTERVAL_STRING = "1s";
+    private static final long DEFAULT_INTERVAL = 1000;
 
     private ExecutorService testsExecutorService;
+    private ScheduledExecutorService addWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
+    private ScheduledExecutorService removeWorkerScheduler = Executors.newSingleThreadScheduledExecutor();
 
-    private final List<AsyncTestWorker> testWorkers = new ArrayList<>();
+    private final List<AsyncTestWorker> testWorkers = Collections.synchronizedList(new LinkedList<>());
     private final List<RunMap> runMaps = new ArrayList<>();
     private Phase phase;
 
+    private int start = DEFAULT_CONCURRENCY;
+    private int end = DEFAULT_CONCURRENCY;
     private int concurrency = DEFAULT_CONCURRENCY;
+    private int rate;
     private long waitTime = DEFAULT_WAIT_TIME;
+    private long interval = DEFAULT_INTERVAL;
+    private int activeThreads = 0;
 
     private RunContext context = null;
-
-    @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use", defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
-    public void setConcurrency(String concurrencyString) {
-        this.concurrency = Integer.parseInt(concurrencyString);
-    }
-
-    @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
-            defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
-    public void setWaitTime(String waitTime) {
-        this.waitTime = Integer.parseInt(waitTime);
-    }
 
     @ConfigArgGet
     public int getConcurrency() {
         return concurrency;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of concurrent threads that Tough Day will use",
+            defaultValue = DEFAULT_CONCURRENCY_STRING, order = 5)
+    public void setConcurrency(String concurrencyString) {
+        checkNotNegative(Long.parseLong(concurrencyString), "concurrency");
+        this.concurrency = Integer.parseInt(concurrencyString);
     }
 
     @ConfigArgGet
@@ -69,27 +74,199 @@ public class Normal implements RunMode {
         return waitTime;
     }
 
+    @ConfigArgSet(required = false, desc = "The wait time between two consecutive test runs for a specific thread. Expressed in milliseconds",
+            defaultValue = DEFAULT_WAIT_TIME_STRING, order = 7)
+    public void setWaitTime(String waitTime) {
+        checkNotNegative(Long.parseLong(waitTime), "waittime");
+        this.waitTime = Integer.parseInt(waitTime);
+    }
+
+    @ConfigArgGet
+    public int getStart() {
+        return start;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of threads to start ramping up from. Will rise to the number specified by \"concurrency\".",
+            defaultValue = "-1")
+    public void setStart(String start) {
+        if (!start.equals("-1")) {
+            checkNotNegative(Long.parseLong(start), "start");
+        }
+        this.start = Integer.valueOf(start);
+    }
+
+    @ConfigArgGet
+    public int getRate() {
+        return rate;
+    }
+
+    @ConfigArgSet(required = false, desc = "The number of threads added per time unit. When it equals -1, it means it is not set.", defaultValue = "-1")
+    public void setRate(String rate) {
+        if (!rate.equals("-1")) {
+            checkNotNegative(Long.parseLong(rate), "rate");
+        }
+        this.rate = Integer.valueOf(rate);
+    }
+
+    @ConfigArgGet
+    public long getInterval() {
+        return interval;
+    }
+
+    @ConfigArgSet(required = false, desc = "Used with rate to specify the time interval to add threads.", defaultValue = DEFAULT_INTERVAL_STRING)
+    public void setInterval(String interval) {
+        this.interval = GlobalArgs.parseDurationToSeconds(interval) * 1000;
+    }
+
+    @ConfigArgGet
+    public int getEnd() {
+        return end;
+    }
+
+    @ConfigArgSet(required = false, desc = "The maximum number of threads the thread pool can reach.", defaultValue = "-1")
+    public void setEnd(String end) {
+        if (!end.equals("-1")) {
+            checkNotNegative(Long.parseLong(end), "end");
+        }
+        this.end = Integer.valueOf(end);
+    }
+
+    public int getActiveThreads() {
+        return activeThreads;
+    }
+
+    private void checkNotNegative(long param, String property) {
+        if (param < 0) {
+            throw new IllegalArgumentException("Property " + property + " incorrectly configured as negative.");
+        }
+    }
+
+    private void checkInvalidArgs() {
+        if ((start != -1 && end == -1) || (start == -1 && end != -1)) {
+            throw new IllegalArgumentException("Cannot configure only one limit (start/end) for Normal mode.");
+        }
+
+        if (isVariableConcurrency() && concurrency != DEFAULT_CONCURRENCY) {
+            throw new IllegalArgumentException("Normal mode cannot be configured with both start/end and concurrency.");
+        }
+    }
+
+    private boolean isVariableConcurrency() {
+        return start != -1 && end != -1;
+    }
+
     @Override
-    public void runTests(Engine engine) throws Exception {
+    public void runTests(Engine engine) {
+        checkInvalidArgs();
+
         this.phase = engine.getCurrentPhase();
         TestSuite testSuite = phase.getTestSuite();
-        testsExecutorService = Executors.newFixedThreadPool(concurrency);
+        testsExecutorService = Executors.newCachedThreadPool();
 
-        // Create the test worker threads
+        // if no rate was provided, we'll create/remove one user at fixed rate,
+        // namely every 'interval' milliseconds
+        // we'll also create all the workers from the beginning
+        if (isVariableConcurrency()) {  // if start and end were provided
+            if (rate == -1) {
+                interval = (long)Math.floor(1000.0 * (phase.getDuration() - EPS)
+                        / (start < end? end - start : start - end));  // to replace with phase duration
+                rate = 1;
+            }
+
+            concurrency = start;
+        }
+
+        // Execute the test worker threads
+        // if start was provided, then it will create 'start' (whose value is
+        // assigned to 'concurrency') workers to begin with
+        // otherwise, it will create 'concurrency' workers
         for (int i = 0; i < concurrency; i++) {
-            AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, phase, testSuite, phase.getPublishMode().getRunMap().newInstance());
-            try {
-                testsExecutorService.execute(testWorker);
-            } catch (OutOfMemoryError e) {
-                LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(i - 1) + ".");
-                break;
-            }
-            synchronized (testWorkers) {
-                testWorkers.add(testWorker);
-            }
-            synchronized (runMaps) {
-                runMaps.add(testWorker.getLocalRunMap());
-            }
+            createAndExecuteWorker(engine, testSuite);
+        }
+
+        // execute 'rate' workers every 'interval'
+        rampUp(engine, testSuite);
+
+        // interrupt 'rate' workers every 'interval'
+        rampDown();
+    }
+
+
+
+    private void createAndExecuteWorker(Engine engine, TestSuite testSuite) {
+        AsyncTestWorkerImpl testWorker = new AsyncTestWorkerImpl(engine, phase, testSuite, phase.getPublishMode().getRunMap().newInstance());
+        synchronized (testWorkers) {
+            testWorkers.add(testWorker);
+            activeThreads++;
+        }
+        synchronized (runMaps) {
+            runMaps.add(testWorker.getLocalRunMap());
+        }
+
+        try {
+            testsExecutorService.execute(testWorker);
+        } catch (OutOfMemoryError e) {
+            LOG.warn("Could not create the required number of threads. Number of created threads : " + String.valueOf(activeThreads) + ".");
+        }
+    }
+
+    private void rampUp(Engine engine, TestSuite testSuite) {
+        // every 'interval' milliseconds, we'll create 'rate' workers
+        if (start < end) {
+            addWorkerScheduler.scheduleAtFixedRate(() -> {
+                for (int i = 0; i < rate; ++i) {
+                    // if all the workers have been created
+                    if (activeThreads >= end) {
+                        addWorkerScheduler.shutdownNow();
+
+                        // mark workers as finished
+                        for(AsyncTestWorker testWorker : testWorkers) {
+                            testWorker.finishExecution();
+                        }
+                        break;
+                    } else {
+                        createAndExecuteWorker(engine, testSuite);
+                    }
+                }
+            }, 0, interval, TimeUnit.MILLISECONDS);
+        }
+    }
+
+    private void rampDown() {
+        // every 'interval' milliseconds, we'll stop 'rate' workers
+        if (end < start) {
+            ThreadPoolExecutor executor = (ThreadPoolExecutor)testsExecutorService;
+
+            removeWorkerScheduler.scheduleAtFixedRate(() -> {
+                Iterator<AsyncTestWorker> testWorkerIterator = testWorkers.iterator();
+                int toRemove = rate;
+
+                while (testWorkerIterator.hasNext()) {
+                    // if all the workers have been removed
+                    if (activeThreads <= end) {
+                        removeWorkerScheduler.shutdownNow();
+
+                        // mark all the workers as finished, so the timeout checker will stop the execution
+                        for(AsyncTestWorker testWorker : testWorkers) {
+                            testWorker.finishExecution();
+                        }
+                        break;
+                    } else {
+                        AsyncTestWorker testWorker = testWorkerIterator.next();
+                        testWorker.finishExecution();
+
+                        // remove the stopped worker
+                        testWorkerIterator.remove();
+                        --toRemove;
+                        --activeThreads;
+
+                        // if rate users have been removed
+                        if (toRemove == 0) {
+                            break;
+                        }
+                    }
+                }
+            }, 0, interval, TimeUnit.MILLISECONDS);
         }
     }
 
@@ -122,8 +299,18 @@ public class Normal implements RunMode {
 
     @Override
     public void finishExecutionAndAwait() {
-        for (AsyncTestWorker testWorker : testWorkers) {
-            testWorker.finishExecution();
+        if (!addWorkerScheduler.isShutdown()) {
+            addWorkerScheduler.shutdownNow();
+        }
+
+        if(!removeWorkerScheduler.isShutdown()) {
+            removeWorkerScheduler.shutdownNow();
+        }
+
+        synchronized (testWorkers) {
+            for (AsyncTestWorker testWorker : testWorkers) {
+                testWorker.finishExecution();
+            }
         }
 
         boolean allExited = false;
@@ -133,18 +320,20 @@ public class Normal implements RunMode {
             } catch (InterruptedException e) {
             }
             allExited = true;
-            for (AsyncTestWorker testWorker : testWorkers) {
-                if (!testWorker.hasExited()) {
-                    if(!testWorker.getMutex().tryLock()) {
-                        continue;
+            synchronized (testWorkers) {
+                for (AsyncTestWorker testWorker : testWorkers) {
+                    if (!testWorker.hasExited()) {
+                        if(!testWorker.getMutex().tryLock()) {
+                            continue;
+                        }
+                        allExited = false;
+
+                        testWorker.getWorkerThread().interrupt();
+                        testWorker.getMutex().unlock();
                     }
-                    allExited = false;
-                    testWorker.getWorkerThread().interrupt();
-                    testWorker.getMutex().unlock();
                 }
             }
         }
-
     }
 
     @Override
@@ -194,6 +383,7 @@ public class Normal implements RunMode {
                     if (null == currentTest) {
                         LOG.info("Thread " + workerThread + " died! :(");
                         this.finishExecution();
+
                         continue;
                     }
 
@@ -235,4 +425,6 @@ public class Normal implements RunMode {
             return exited;
         }
     }
+
+
  }

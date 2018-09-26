@@ -689,6 +689,17 @@ public class Configuration {
             throw new IllegalStateException("The Run mode doesn't have a type");
         }
 
+        if (runModeParams.containsKey("type") && runModeParams.get("type").equals("normal")
+                && runModeParams.containsKey("load")) {
+            throw new IllegalStateException("Cannot configure load for Normal mode.");
+        }
+
+        if (runModeParams.containsKey("type") && runModeParams.get("type").equals("constantload")
+                && runModeParams.containsKey("concurrency")) {
+            throw new IllegalStateException("Cannot configure concurrency for Constant Load mode");
+        }
+
+        // check that all numeric values are positive
 
         String type = runModeParams.size() != 0 ? String.valueOf(runModeParams.get("type")) : DEFAULT_RUN_MODE;
         Class<? extends RunMode> runModeClass = ReflectionsContainer.getInstance().getRunModeClasses().get(type);
@@ -697,7 +708,11 @@ public class Configuration {
             throw new IllegalStateException("A run mode with type \"" + type + "\" does not exist");
         }
 
-        return createObject(runModeClass, runModeParams);
+        runModeParams.remove("type");
+
+        RunMode runMode = createObject(runModeClass, runModeParams);
+
+        return runMode;
     }
 
     private PublishMode getPublishMode(Map<String, Object> publishModeParams)

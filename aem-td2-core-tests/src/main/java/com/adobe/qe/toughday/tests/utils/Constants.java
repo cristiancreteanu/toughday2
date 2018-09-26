@@ -11,9 +11,6 @@ governing permissions and limitations under the License.
 */
 package com.adobe.qe.toughday.tests.utils;
 
-/**
- * Created by tuicu on 23/11/16.
- */
 public class Constants {
     public static final String[] COUNTRIES = {
     "Albania",
