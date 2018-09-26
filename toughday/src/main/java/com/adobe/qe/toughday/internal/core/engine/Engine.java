@@ -333,7 +333,6 @@ public class Engine {
                             t.interrupt();
                         }
                     }
-                    System.out.println("altceva");
                     timeoutChecker.finishExecution();
                     resultAggregator.finishExecution();
                     resultAggregator.aggregateResults();
@@ -359,7 +358,9 @@ public class Engine {
         engineExecutorService.execute(resultAggregator);
         engineExecutorService.execute(timeoutChecker);
 
+        int i = 0;
         for (Phase phase : phases) {
+            ++i;
             testsRunning = true;
 
             try {
@@ -408,25 +409,20 @@ public class Engine {
             }
 
             try {
-                currentPhaseLock.readLock().lock();
+                currentPhaseLock.writeLock().lock();
                 phase.getRunMode().finishExecutionAndAwait();
-                if (currentPhase.getMeasurable()) {
+                if (i < phases.size() && currentPhase.getMeasurable()) {
                     shutdownAndAwaitTermination(phase.getRunMode().getExecutorService());
                     resultAggregator.aggregateResults();
-                    System.out.println("ceva");
                     phase.getPublishMode().publishFinalResults(resultAggregator.filterResults());
                 }
             } finally {
-                currentPhaseLock.readLock().unlock();
+                currentPhaseLock.writeLock().unlock();
             }
         }
 
         testsRunning = false;
-        timeoutChecker.finishExecution();
-        resultAggregator.finishExecution();
-        System.out.println("again");
-        shutdownAndAwaitTermination(currentPhase.getRunMode().getExecutorService());
-        shutdownAndAwaitTermination(engineExecutorService);
+        shutdownHook.run();
         Runtime.getRuntime().removeShutdownHook(shutdownHook);
     }
 
