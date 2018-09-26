@@ -410,7 +410,7 @@ public class Engine {
                 // been printed twice: once in the shutdownhook and the second time here, a few
                 // lines below, so here the write lock is acquired in order to wait for the
                 // read lock previously-mentioned to be released
-                currentPhaseLock.writeLock().lock();
+                currentPhaseLock.writeLock().lock(); // THIS SHOULD BE CHANGED
                 phase.getRunMode().finishExecutionAndAwait();
 
                 // execute this block of code only if the current phase is not the last one

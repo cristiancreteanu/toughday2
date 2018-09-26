@@ -39,6 +39,8 @@ public class TestConfiguration {
 
     @BeforeClass
     public static void onlyOnce() {
+        System.setProperty("logFileName", ".");
+
         reflections.getTestClasses().put("MockTest", MockTest.class);
         reflections.getTestClasses().put("MockTestTwin", MockTestTwin.class);
 

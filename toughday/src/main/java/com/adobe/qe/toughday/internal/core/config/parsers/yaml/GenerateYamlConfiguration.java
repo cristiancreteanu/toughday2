@@ -101,7 +101,7 @@ public class GenerateYamlConfiguration {
         for (Map.Entry<Actions, ConfigParams.MetaObject> item : configParams.getItems()) {
             chooseAction(item, 0);
 
-            if (!configParams.getMetricsOrPublishersIdentifiers().contains(item)) {
+            if (configParams.getTestIdentifiers().contains(item)) {
                 globalTests = true;
             }
         }

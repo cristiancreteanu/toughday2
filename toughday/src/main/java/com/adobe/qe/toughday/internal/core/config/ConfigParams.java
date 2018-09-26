@@ -30,7 +30,7 @@ public class ConfigParams implements Serializable {
     private Map<String, Object> runModeParams = new HashMap<>();
     private List<Map.Entry<Actions, MetaObject>> items = new ArrayList<>();
 
-    private Set<String> metricsOrPublishersIdentifiers = new HashSet<>();
+    private Set<String> testIdentifiers = new HashSet<>();
     private boolean globalLevel = true;
 
     public static class MetaObject  implements Serializable {
@@ -235,7 +235,7 @@ public class ConfigParams implements Serializable {
     }
 
     private void addToItemsOrLastPhase(Map.Entry<Actions, MetaObject> newEntry, String identifier) {
-        if (!metricsOrPublishersIdentifiers.contains(identifier) && !globalLevel) {
+        if (testIdentifiers.contains(identifier) && !globalLevel) {
             phasesParams.get(phasesParams.size() - 1).getTests().add(newEntry);
         } else {
             items.add(newEntry);
@@ -272,8 +272,8 @@ public class ConfigParams implements Serializable {
         return items;
     }
 
-    public Set<String> getMetricsOrPublishersIdentifiers() {
-        return metricsOrPublishersIdentifiers;
+    public Set<String> getTestIdentifiers() {
+        return testIdentifiers;
     }
 
     public boolean isGlobalLevel() {
