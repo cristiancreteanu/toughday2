@@ -13,7 +13,6 @@ package com.adobe.qe.toughday.internal.core.config.parsers.yaml;
 
 import com.adobe.qe.toughday.internal.core.config.ConfigParams;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -74,6 +73,10 @@ public class YamlConfiguration {
 
             if (yamlParsePhase.getUseconfig() != null) {
                 phase.getProperties().put("useconfig", yamlParsePhase.getUseconfig());
+            }
+
+            if (yamlParsePhase.getDuration() != null) {
+                phase.getProperties().put("duration", yamlParsePhase.getDuration());
             }
 
             configParams.getPhasesParams().add(phase);
